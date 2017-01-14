@@ -1,6 +1,6 @@
 var utils = require('utils');
 
-var roleBuilder = {
+var roleLongBuilder = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
@@ -20,19 +20,14 @@ var roleBuilder = {
 	    }
 
 	    if(creep.memory.building) {
-	        var target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
-	        /*
-	        if(!target) {
-	            let builds = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build');
-    	        if(builds.length) {
-    	            for(let buildf in builds) {
-    	                target = buildf.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
-    	                if(target)
-    	                    break;
-    	            }
-    	        }
+            let builds = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build');
+	        if(builds.length) {
+	            for(let buildf of builds) {
+	                target = buildf.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+	                if(target)
+	                    break;
+	            }
 	        }
-	        */
             if(target) {
                 if(creep.build(target) == ERR_NOT_IN_RANGE) {
                     var res = creep.moveTo(target);
@@ -42,7 +37,7 @@ var roleBuilder = {
                     } else if (res == OK) {
                         creep.memory.errors = 0;
                     }
-                    creep.say("bld " +  target.pos.x + "," + target.pos.y);
+                    creep.say((target.pos.roomName == creep.pos.roomName ? "" : "chr:") +  target.pos.x + "," + target.pos.y);
                 }
             }
             
@@ -92,6 +87,10 @@ var roleBuilder = {
 	            total_energy -= 100;
 	        }
 	        if(total_energy >= 50) {
+	            body.push(MOVE);
+	            total_energy -= 50;
+	        }
+	        if(total_energy >= 50) {
 	            body.push(CARRY);
 	            total_energy -= 50;
 	        }
@@ -113,4 +112,4 @@ function reset_rt (creep) {
     return null;
 }
 
-module.exports = roleBuilder;
+module.exports = roleLongBuilder;

@@ -3,9 +3,13 @@ var utils = require('utils');
 var roleUpgrader = {
 
     /** @param {Creep} creep **/
-    run: function(creep, spawn, creepsInRoom) {
+    run: function(creep) {
 	    if(creep.carry.energy == 0 && creep.memory.upgrading) {
 	        creep.memory.upgrading = false;
+	        if(creep.ticksToLive < 70) {
+	            console.log(creep.name + " is going to die!");
+	            creep.suicide();
+	        }
 	    } else if (creep.carry.energy == creep.carryCapacity && !creep.memory.upgrading) {
 	        creep.memory.upgrading = true;
 	        creep.memory.errors = 0;
@@ -14,7 +18,7 @@ var roleUpgrader = {
 	    
 	    if(!creep.memory.upgrading) {
 	        if(!creep.memory.energyID) {
-	            creep.memory.energyID = utils.findSource(creep, spawn, creepsInRoom);
+	            creep.memory.energyID = utils.findSource(creep);
 	        }
             utils.gotoSource(creep);
         } else {
@@ -30,9 +34,30 @@ var roleUpgrader = {
         }
 	},
 	
-	create: function(spawn) {
-	    var newName = spawn.createCreep([WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE], "Upgrader" + "." + Math.random().toFixed(2), {role: 'upgrader'});
-        console.log('Born: ' + newName);
+	create: function(spawnName, role, total_energy) {
+	    let spawn = Game.spawns[spawnName];
+        if(!spawn) {
+            console.log("No spawn with name=" + spawnName);
+            return;
+        }
+        console.log("total_energy:" + total_energy);
+        let body = [];
+	    while (total_energy >= 50) {
+	        if(total_energy >= 50) {
+	            body.push(MOVE);
+	            total_energy -= 50;
+	        }
+	        if(total_energy >= 100) {
+	            body.push(WORK);
+	            total_energy -= 100;
+	        }
+	        if(total_energy >= 50) {
+	            body.push(CARRY);
+	            total_energy -= 50;
+	        }
+	    }
+	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
+        console.log("Born by " + spawnName + " creep " + newName + " (" + body + ")");
 	}
 };
 

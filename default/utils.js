@@ -8,26 +8,39 @@
  */
 
 module.exports = {
-    findSource : function (creep, spawn, creepsInRoom) {
+    findSource : function (creep, storage_priority) {
         //console.log("Searching source for " + creep.name);
+        let resource = creep.pos.findClosestByPath(FIND_DROPPED_ENERGY, { filter: r => r.amount > 100 });
+        if(resource) {
+            console.log(creep.name + " found dropped resource: " + resource.id + " with " + resource.amount + " energy");
+            return resource.id;
+        }
         
-        let containers = spawn.room.find(FIND_STRUCTURES, { filter: 
-            s => s.structureType == STRUCTURE_CONTAINER && 
-            _.sum(creepsInRoom, (c) => c.memory.role == "miner" && c.memory.cID == s.id)
+        let containers = creep.room.find(FIND_STRUCTURES, { filter: 
+            s =>
+            (
+                s.structureType == STRUCTURE_CONTAINER && 
+                _.sum(Game.creeps, (c) => c.memory.role == "miner" && c.memory.cID == s.id)
+            ) ||
+            (
+                s.structureType == STRUCTURE_STORAGE && 
+                s.store[RESOURCE_ENERGY] > creep.carryCapacity
+            )
         });
         if(containers.length) {
             let cont_info = {};
             for(let container of containers) {
                 let cenergy = container.store[RESOURCE_ENERGY];
                 let cpath = Math.pow(Math.pow((container.pos.x - creep.pos.x),2) + Math.pow((container.pos.y - creep.pos.y),2), 0.5);
-                let cminers = _.sum(creepsInRoom, (c) => c.memory.role == "miner" && c.memory.cID == container.id);
-                let cgots = _.sum(creepsInRoom, (c) => c.memory.energyID == container.id);
+                let cminers = _.sum(Game.creeps, (c) => c.memory.role == "miner" && c.memory.cID == container.id);
+                let cgots = _.sum(Game.creeps, (c) => c.memory.energyID == container.id);
+                let cpriority = container.structureType == STRUCTURE_STORAGE && storage_priority ? 1 : 0;
                 //console.log(creep.name + " has container " + container.id + " in " + cpath + " with " + cenergy + " energy and " + cgots + " gots");
-                cont_info[container.id] = {cenergy : cenergy, cpath : cpath, cgots : cgots};
+                cont_info[container.id] = {cenergy : cenergy, cpath : cpath, cgots : cgots, cpriority : cpriority};
             }
             let container = containers.sort( function (a,b) {
-                let suma = cont_info[a.id].cpath + (2000 - cont_info[a.id].cenergy + cont_info[a.id].cgots * 200) / 100;
-                let sumb = cont_info[b.id].cpath + (2000 - cont_info[b.id].cenergy + cont_info[b.id].cgots * 200) / 100;
+                let suma = cont_info[a.id].cpath + (2000 - cont_info[a.id].cenergy + cont_info[a.id].cgots * 200) / 100 - 10000 * cont_info[a.id].cpriority;
+                let sumb = cont_info[b.id].cpath + (2000 - cont_info[b.id].cenergy + cont_info[b.id].cgots * 200) / 100 - 10000 * cont_info[b.id].cpriority;
                 //console.log("a=" + a.id + ",b=" + b.id + ",suma=" + suma + ",sumb=" + sumb);
                 return suma - sumb;
             })[0];
@@ -36,14 +49,14 @@ module.exports = {
             return container.id;
         }
         
-        let sources = spawn.room.find(FIND_SOURCES);
+        let sources = creep.room.find(FIND_SOURCES);
         if(!sources.length) {
             console.log("No sources in room, nothing to do for " + creep.name);
             return;
         }
         let source = sources.sort(function(a,b) { 
-            let suma = _.sum(creepsInRoom, (c) => c.memory.energyID == a.id) * (a.id == "577b929c0f9d51615fa46cfc" ? 2 : 1);
-            let sumb = _.sum(creepsInRoom, (c) => c.memory.energyID == b.id) * (b.id == "577b929c0f9d51615fa46cfc" ? 2 : 1);
+            let suma = _.sum(Game.creeps, (c) => c.memory.energyID == a.id) * (a.id == "577b929c0f9d51615fa46cfc" ? 2 : 1);
+            let sumb = _.sum(Game.creeps, (c) => c.memory.energyID == b.id) * (b.id == "577b929c0f9d51615fa46cfc" ? 2 : 1);
             return suma - sumb;
         })[0];
         console.log("Source for " + creep.name + " is " + source.id);
@@ -56,16 +69,39 @@ module.exports = {
             console.log(creep.name + " can't get source with enegryID=" + creep.memory.energyID);
             creep.memory.energyID = null;
             return;
+        } else if (
+            source.structureType &&
+            source.structureType == STRUCTURE_CONTAINER &&
+            !_.sum(Game.creeps, (c) => c.memory.role == "miner" && c.memory.cID == source.id)
+        ) {
+            console.log(creep.name + " has source=container without miners");
+            creep.memory.energyID = null;
+            return;
+        } else if (
+            source.structureType &&
+            source.structureType == STRUCTURE_STORAGE &&
+            source.store[RESOURCE_ENERGY] < creep.carryCapacity
+        ) {
+            console.log(creep.name + " has source=storage without enough energy");
+            creep.memory.energyID = null;
+            return;
         }
         
-        if(source.structureType && source.structureType == STRUCTURE_CONTAINER) {
+        if(source.structureType && (source.structureType == STRUCTURE_CONTAINER || source.structureType == STRUCTURE_STORAGE || source.structureType == STRUCTURE_LINK)) {
             var res = creep.withdraw(source, RESOURCE_ENERGY);
+        } else if (source.resourceType && source.resourceType == RESOURCE_ENERGY) {
+            var res = creep.pickup(source);
+            if (!res) {
+                console.log(creep.name + " picked up resource");
+                creep.memory.energyID = null;
+                return;
+            }
         } else {
             var res = creep.harvest(source);
         }
         
-        if (res== ERR_NOT_IN_RANGE) {
-            let res = creep.moveTo(source, { ignoreCreeps : false, costCallback : function(name, cm) { cm.set(4, 43, 255) } });
+        if (res == ERR_NOT_IN_RANGE) {
+            let res = creep.moveTo(source, { costCallback : function(name, cm) { cm.set(4, 43, 255); cm.set(4, 42, 255); cm.set(4, 41, 255); } });
             //let res = creep.moveTo(source);
             //creep.say("go " + res);
         } else if (res == ERR_NOT_ENOUGH_ENERGY) {
@@ -74,5 +110,44 @@ module.exports = {
             console.log(creep.name + " tried to get energy with res = " + res);
             creep.memory.energyID = null;
         }
-    }
+    },
+    
+    try_attack : function (creep, all) {
+        let target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {ignoreDestructibleStructures : true});
+        if(!target && all)
+            target = creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS, {ignoreDestructibleStructures : true});
+        if(creep.memory.targetID && Game.getObjectById(creep.memory.targetID))
+            target = Game.getObjectById(creep.memory.targetID);
+        let con_creep = _.filter(Game.creeps, c => c.memory.role == "attacker" && c.room == creep.room && c.memory.targetID && c != creep)[0];
+        if(con_creep && (!creep.memory.targetID || creep.memory.targetID!=con_creep.memory.targetID) && Game.getObjectById(con_creep.memory.targetID)) {
+            target = Game.getObjectById(con_creep.memory.targetID);
+            console.log(creep.name + " found con_creep " + con_creep.name + " with target=" + con_creep.memory.targetID);
+        }
+        if(target) {
+            creep.memory.targetID = target.id;
+            if(!_.some(creep.body, b => b.type == ATTACK && b.hits > 50)) {
+                console.log(creep.name + " has no ATTACK parts, but hostile in room, go away");
+                return 0;
+            }
+            if (Game.time % 10 == 0)
+            console.log(creep.name +
+            " attacks: owner=" + (target.owner ? target.owner.username : 'no owner') +
+            "; ticksToLive=" + target.ticksToLive +
+            "; hits=" + target.hits + 
+            "; structureType=" + target.structureType
+            );
+            let res = creep.attack(target);
+            if(res == ERR_NOT_IN_RANGE) {
+                //let res = creep.moveTo(target, {ignoreDestructibleStructures : true});
+                let res = creep.moveTo(target);
+                if(res < 0) {
+                    console.log(creep.name + " moved in attack with res=" + res);
+                }
+            } else if (res < 0) {
+                console.log(creep.name + " attacked with res=" + res);
+            }
+            return 1;
+        }
+    	return -1;
+    },
 };

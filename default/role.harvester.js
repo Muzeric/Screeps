@@ -3,7 +3,7 @@ var utils = require('utils');
 var roleHarvester = {
 
     /** @param {Creep} creep **/
-    run: function(creep, spawn, creepsInRoom) {
+    run: function(creep) {
         if(creep.carry.energy == 0 && creep.memory.transfering) {
 	        creep.memory.transfering = false;
 	    } else if (creep.carry.energy == creep.carryCapacity && !creep.memory.transfering) {
@@ -14,46 +14,68 @@ var roleHarvester = {
 	    
 	    if(!creep.memory.transfering) {
             if(!creep.memory.energyID) {
-	            creep.memory.energyID = utils.findSource(creep, spawn, creepsInRoom);
+	            creep.memory.energyID = utils.findSource(creep);
 	        }
             utils.gotoSource(creep);
         } else {
             var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
                     filter: (structure) => {
-                        //return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
-                        return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_TOWER) &&
-                            structure.energy < structure.energyCapacity;
+                        return (
+                        ((
+                            (structure.structureType == STRUCTURE_EXTENSION || 
+                            (structure.structureType == STRUCTURE_TOWER && structure.energy < structure.energyCapacity*0.9) || 
+                            structure.structureType == STRUCTURE_SPAWN) &&
+                            structure.energy < structure.energyCapacity
+                        ) && creep.ticksToLive > 500
+                        )
+                        || (creep.ticksToLive < 800 && structure.structureType == STRUCTURE_SPAWN)    
+                        );
                     }
             });
-            if(target) {
-                if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    var res = creep.moveTo(target);
-                    //console.log(creep.name + " go to "+ target.pos.x + "," + target.pos.y +" res=" + res);
-                    if(res == ERR_NO_PATH) {
-                        creep.memory.errors++;
-                    } else if (res == OK) {
-                        creep.memory.errors = 0;
-                    }
+            if(!target) {
+                //console.log(creep.name + " has no target");
+                return;
+            }
+            if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                var res = creep.moveTo(target);
+                //console.log(creep.name + " go to "+ target.pos.x + "," + target.pos.y +" res=" + res);
+                if(res == ERR_NO_PATH) {
+                    creep.memory.errors++;
+                } else if (res == OK) {
+                    creep.memory.errors = 0;
                 }
-            } else {
-                if(creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    let res = creep.moveTo(Game.spawns['Spawn1']);
-                    if(res == ERR_NO_PATH) {
-                        creep.memory.errors++;
-                    } else if (res == OK) {
-                        creep.memory.errors = 0;
-                    }
-                } else if (creep.ticksToLive < 1000 || Game.spawns["Spawn1"].energy == Game.spawns["Spawn1"].energyCapacity) {
-                    var res = Game.spawns["Spawn1"].renewCreep(creep);
-                    console.log(creep.name + " renewed: " + res)
-                }
+            } else if (
+                target.structureType == STRUCTURE_SPAWN &&
+                (creep.ticksToLive < 1000 || target.energy == target.energyCapacity) &&
+                !target.spawning
+                ) {
+                    var res = target.renewCreep(creep);
+                    //console.log(creep.name + " renewed: " + res)
             }
         }
 	},
 	
-	create: function(spawn) {
-	    var newName = spawn.createCreep([WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE], "Harvester" + "." + Math.random().toFixed(2), {role: 'harvester'});
-        console.log('Born: ' + newName);
+	create: function(spawnName, role, total_energy) {
+	    let spawn = Game.spawns[spawnName];
+        if(!spawn) {
+            console.log("No spawn with name=" + spawnName);
+            return;
+        }
+        console.log("total_energy:" + total_energy);
+        total_energy -= 100;
+        let body = [WORK];
+	    while (total_energy >= 50) {
+	        if(total_energy >= 50) {
+	            body.push(MOVE);
+	            total_energy -= 50;
+	        }
+	        if(total_energy >= 50) {
+	            body.push(CARRY);
+	            total_energy -= 50;
+	        }
+	    }
+	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
+	    console.log("Born by " + spawnName + " creep " + newName + " (" + body + ")");
 	}
 };
 

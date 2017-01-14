@@ -1,13 +1,47 @@
-var roleHarvester = require('role.harvester');
-var roleUpgrader = require('role.upgrader');
-var roleBuilder = require('role.builder');
-var roleMiner = require('role.miner');
+var roles = {
+    "harvester" : {},
+    "builder" : {},
+    "upgrader" : {},
+    "miner" : {},
+    "longminer" : {},
+    "claimer" : {},
+    "attacker" : {},
+    "shortminer" : {},
+    "longbuilder" : {},
+};
+for (let role in roles) {
+    roles[role]["obj"] = require('role.' + role);
+}
 var utils = require('utils');
 
+var spawn_config = {
+    "Spawn1" : [
+        ["harvester", 1],
+        ["miner", 1],
+        ["ENERGY", 1500],
+        ["harvester", 3],
+        ["miner", 2],
+        ["upgrader", 1],
+        ["longminer", 3],
+        ["claimer", 1],
+        ["shortminer", 1],
+        ["longminer", 3],
+        ["builder", 1],
+        ["longbuilder", 1],
+        ["upgrader", 4]
+    ],
+    "Spawn2" : [
+        ["harvester", 1],
+        ["miner", 0],
+        ["ENERGY", 300],
+        ["harvester", 1],
+        ["miner", 0],
+        ["upgrader", 2],
+        ["builder", 2],
+    ]
+};
+
 module.exports.loop = function () {
-    let spawn = Game.spawns["Spawn1"];
-    let creepsInRoom = spawn.room.find(FIND_MY_CREEPS);
-    
     var error_count = 0;
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
@@ -18,18 +52,19 @@ module.exports.loop = function () {
             error_count += Game.creeps[name].memory.errors;
         }
     }
-
-    var count = 0;
-    var crs = {
-        "harvester" : 0,
-        "builder" : 0,
-        "upgrader" : 0,
-        "miner" : 0,
-    };
-    var sources = spawn.room.find(FIND_SOURCES);
     
-    for(var creep of creepsInRoom) {
-        crs[creep.memory.role] = (crs[creep.memory.role]||0) + 1;
+    for (let role in roles) {
+        roles[role]["count"] = {};
+        for (let spawnName in spawn_config)
+            roles[role]["count"][spawnName] = 0;
+    }
+    
+    for(let creep_name in Game.creeps) {
+        let creep = Game.creeps[creep_name];
+        if(creep.spawning) {
+            continue;
+        }
+        roles[creep.memory.role]["count"][creep.memory.spawnName]++;
         
         if(error_count) {
             if(creep.moveTo(creep.room.controller) == OK) {
@@ -37,56 +72,93 @@ module.exports.loop = function () {
             }
             continue;
         }
-
-        var sID = creep.name.slice(-1) % sources.length;
-        if(creep.memory.sID != null) {
-            sID = creep.memory.sID;
+        
+        if(roles[creep.memory.role])
+            roles[creep.memory.role].obj.run(creep);
+        else
+            console.log("Uknown role=" + creep.memory.role);
+    }
+    
+    for (let spawnName in spawn_config) {
+        //console.log("Start operations for: " + spawnName);
+        var spawn = Game.spawns[spawnName];
+        if(!spawn) {
+            console.log("No spawn: " + spawnName);
+            continue;
         }
         
-        if (creep.memory.role == 'harvester') {
-            roleHarvester.run(creep, spawn, creepsInRoom);
-        } else if (creep.memory.role == 'upgrader') {
-            roleUpgrader.run(creep, spawn, creepsInRoom);
-        } else if (creep.memory.role == 'builder') {
-            roleBuilder.run(creep, spawn, creepsInRoom);
-        } else if (creep.memory.role == 'miner') {
-            roleMiner.run(creep, spawn, creepsInRoom);
+        if(!spawn.spawning) {
+            let construction_estimate = 0;
+            for(let c of spawn.room.find(FIND_CONSTRUCTION_SITES))
+                construction_estimate += (c.progressTotal - c.progress);
+            let info = {
+                longbuilder : _.some(Game.flags, f => f.name.substring(0, 5) == 'Build'),
+                builder : (roles["builder"].count[spawnName] < construction_estimate / 2000)
+            };
+        
+            let min_energy = 300;
+            for (let arr of spawn_config[spawnName]) {
+                let role = arr[0];
+                let climit = arr[1];
+                if (climit <= 0)
+                    continue;
+                if (role == "ENERGY") {
+                    min_energy = climit;
+                    continue;
+                }
+                if (spawn.room.energyAvailable < spawn.room.energyCapacityAvailable && spawn.room.energyAvailable < min_energy)
+                    continue;
+                if (role in info && !info[role])
+                    continue;
+                if (
+                    roles[role].count[spawnName] < climit || 
+                    (roles[role].count[spawnName] == climit && _.some(Game.creeps, c => 
+                        c.ticksToLive < 200 &&
+                        c.memory.role == role &&
+                        c.memory.spawnName == spawnName
+                    ))
+                ) {
+                    roles[role].obj.create(spawnName, role, spawn.room.energyAvailable);
+                    //console.log(spawnName + " wants to burn " + role);
+                    break;
+                }
+            }
+            //console.log("Enough creeps by " + spawnName);
         }
-        count++;
+
+        let towers = spawn.room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_TOWER });
+        for(let tower of towers) {
+            let hostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+            if(hostile) {
+                tower.attack(hostile);
+                console.log("Tower " + tower.id + " attacked hostile: owner=" + hostile.owner.username + "; hits=" + hostile.hits);
+            } else {
+                let dstructs = tower.room.find(FIND_STRUCTURES, {
+                    filter: (structure) => structure.hits < 0.9*structure.hitsMax && structure.hits < 964000
+                });
+                if(dstructs.length && tower.energy > 500) {
+                    let dstruct = dstructs.sort(function (a,b) {
+                        return a.hits - b.hits;
+                    })[0];
+                    tower.repair(dstruct);
+                }
+                
+                let needheals = tower.room.find(FIND_MY_CREEPS, {filter : c => c.hits < c.hitsMax});
+                if(needheals.length) {
+                    let creep = needheals[0];
+                    let res = tower.heal(creep);
+                    console.log("Tower " + tower.id + " healed " + creep.name + " with res=" + res + " hits: " + creep.hits);
+                }
+            }
+        }
     }
     
-    for (let name in crs) {
-        //console.log(name + ": " + crs[name]);
-    }
-
-    if(spawn.room.energyAvailable < 800) {
-        //console.log("Spawn1 has not enough energy");
-    } else if (crs["harvester"] < 3) {
-        roleHarvester.create(spawn);
-    } else if (crs["miner"] < 4) {
-        roleMiner.create(spawn);
-    } else if (crs["upgrader"] < 5) {
-        roleUpgrader.create(spawn);
-    } else if (crs["builder"] < 4) {
-        roleBuilder.create(spawn);
-    }
-    
-    var tower = Game.getObjectById('587056fcda857f0660495603');
-    if(tower) {
-        /*
-        var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-            filter: (structure) => structure.hits < structure.hitsMax
-        });
-        if(closestDamagedStructure) {
-            tower.repair(closestDamagedStructure);
-        }
-        */
-
-        var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        if(closestHostile) {
-            tower.attack(closestHostile);
-            console.log("Attack!!!");
-        }
+    let link_from = Game.getObjectById('587869503d6c02904166296f');
+    let link_to = Game.getObjectById('58771a999d331a0f7f5ae31a');
+    if(link_from && link_to && !link_from.cooldown && link_from.energy && link_to.energy < link_to.energyCapacity*0.7) {
+        let res = link_from.transferEnergy(link_to);
+        if(res < 0) 
+            console.log("Link transfer energy with res=" + res);
     }
     
     /*
