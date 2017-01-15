@@ -31,14 +31,25 @@ var role = {
 	            } else if (attack_res == 1) {
 	                ;
 	            } else {
-	                let sources = creep.room.lookForAt(LOOK_SOURCES, Game.flags[creep.memory.energyName].pos);
-                    if(!sources.length) {
-                        console.log(creep.name + " can't find source");
-                        return;
+                    let source;
+                    let res;
+                    let containers = Game.flags[creep.memory.energyName].pos.findInRange(FIND_STRUCTURES, 2, {filter : s => 
+                        s.structureType == STRUCTURE_CONTAINER &&
+                        _.sum(Game.creeps, (c) => c.memory.role == "longminer" && c.memory.cID == s.id)
+                    });
+                    if(containers.length) {
+                        source = containers[0];
+                        res = creep.withdraw(source, RESOURCE_ENERGY);
+                    } else {
+	                    let sources = creep.room.lookForAt(LOOK_SOURCES, Game.flags[creep.memory.energyName].pos);
+                        if(!sources.length) {
+                            console.log(creep.name + " can't find source");
+                            return;
+                        }
+                        source = sources[0];
+                        res = creep.harvest(source);
                     }
                     
-                    let source = sources[0]; //creep.pos.findClosestByPath(FIND_SOURCES, {filter : s => s.pos.isEqualTo(Game.flags[creep.memory.energyName].pos)});
-                    let res = creep.harvest(source);
                     if(res == ERR_NOT_IN_RANGE) {
                         creep.moveTo(source);
                     } else if (res < 0) {
