@@ -24,8 +24,6 @@ var roleLongBuilder = {
                 
             let target = Game.getObjectById(creep.memory.targetID);
             if (!target || target.hits && target.hits == target.hitsMax) {
-                    if(target)
-                        console.log(creep.name + " already good target " + creep.memory.targetID);
                     creep.memory.targetID = null;
                     return;
             }

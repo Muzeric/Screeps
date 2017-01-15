@@ -76,8 +76,8 @@ var roleLongMiner = {
             return;
         }
         console.log("total_energy:" + total_energy);
-        total_energy -= 80*3 + 50*3;
-        let body = [MOVE,MOVE,ATTACK,ATTACK,ATTACK];
+        total_energy -= 80*3 + 50*3; // For move-attack parts
+        let body = [];
 	    let cnum = 0;
 	    let fat = -1;
 	    while (total_energy >= 50) {
@@ -103,6 +103,7 @@ var roleLongMiner = {
 	            fat++;
 	        }
 	    }
+        body.push(MOVE,MOVE,ATTACK,ATTACK,ATTACK);
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
 	    //let newName = 'test';
 	    console.log("Born by " + spawnName + " creep " + newName + " (" + body + ")");
