@@ -168,7 +168,7 @@ module.exports = {
             if (creep && creep.room.name == buildf.room.name)
                 object = creep;
                 
-            let target = object.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+            let target = object.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
             if(target)
                 return target.id;
         }

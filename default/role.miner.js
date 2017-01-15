@@ -46,6 +46,7 @@ var role = {
                 creep.transfer(container, RESOURCE_ENERGY);
             } else {
                 creep.moveTo(source);
+                creep.moveTo(container);
             }
         } else {
             if(creep.carry.energy == 0 && creep.memory.transfering) {
