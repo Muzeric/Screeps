@@ -25,11 +25,11 @@ var spawn_config = {
             ["harvester", 3],
             ["miner", 2],
             ["upgrader", 1],
-            ["longminer", 3],
+            ["longharvester", 3],
             ["REPAIR", 1],
             ["claimer", 2],
             ["shortminer", 1],
-            ["longharvester", 3],
+            ["longharvester", 6],
             ["builder", 1],
             ["longbuilder", 1],
             ["upgrader", 4]

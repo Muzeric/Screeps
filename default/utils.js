@@ -1,9 +1,9 @@
 var roomConfig = {
     "W48N4" : {
-        "repairLimit" : 1000000,
+        "repairLimit" : 970000,
     },
     "W49N4" : {
-        "repairLimit" : 200000,
+        "repairLimit" : 135000,
     },
 };
 
