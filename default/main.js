@@ -25,6 +25,7 @@ var spawn_config = {
             ["miner", 2],
             ["upgrader", 1],
             ["longminer", 3],
+            ["REPAIR"],
             ["claimer", 2],
             ["shortminer", 1],
             ["longminer", 6],
@@ -40,6 +41,8 @@ var spawn_config = {
             ["ENERGY", 1500],
             ["harvester", 1],
             ["miner", 2],
+            ["upgrader", 1],
+            ["REPAIR"],
             ["upgrader", 4],
             ["builder", 1],
         ],
@@ -103,7 +106,8 @@ module.exports.loop = function () {
                 builder : (roles["builder"].count[spawnName] < cs.length + (rs ? rs.length : 0))
             };
         
-            let min_energy = 300;
+            let canRepair = 0;
+            let minEnergy = 300;
             for (let arr of spawn_config[spawnName]["creeps"]) {
                 let role = arr[0];
                 let climit = arr[1];
@@ -111,11 +115,14 @@ module.exports.loop = function () {
                 if (climit <= 0)
                     continue;
                 if (role == "ENERGY") {
-                    min_energy = climit;
+                    minEnergy = climit;
+                    continue;
+                } else if (role == "REPAIR") {
+                    canRepair = 1;
                     continue;
                 }
-                if (spawn.room.energyAvailable < spawn.room.energyCapacityAvailable && spawn.room.energyAvailable < min_energy)
-                    continue;
+                if (spawn.room.energyAvailable < spawn.room.energyCapacityAvailable && spawn.room.energyAvailable < minEnergy)
+                    break;
                 if (role in info && !info[role])
                     continue;
                 if (emin && spawn.room.energyAvailable < spawn.room.energyCapacityAvailable && spawn.room.energyAvailable < emin)
@@ -143,15 +150,17 @@ module.exports.loop = function () {
                 tower.attack(hostile);
                 console.log("Tower " + tower.id + " attacked hostile: owner=" + hostile.owner.username + "; hits=" + hostile.hits);
             } else {
-                let repairLimit = utils.roomConfig[tower.room.name].repairLimit || 100000;
-                let dstructs = tower.room.find(FIND_STRUCTURES, {
-                    filter: (structure) => structure.hits < 0.9*structure.hitsMax && structure.hits < repairLimit
-                });
-                if(dstructs.length && tower.energy > 500) {
-                    let dstruct = dstructs.sort(function (a,b) {
-                        return a.hits - b.hits;
-                    })[0];
-                    tower.repair(dstruct);
+                if (canRepair) {
+                    let repairLimit = utils.roomConfig[tower.room.name].repairLimit || 100000;
+                    let dstructs = tower.room.find(FIND_STRUCTURES, {
+                        filter: (structure) => structure.hits < 0.9*structure.hitsMax && structure.hits < repairLimit
+                    });
+                    if(dstructs.length && tower.energy > 500) {
+                        let dstruct = dstructs.sort(function (a,b) {
+                            return a.hits - b.hits;
+                        })[0];
+                        tower.repair(dstruct);
+                    }
                 }
                 
                 let needheals = tower.room.find(FIND_MY_CREEPS, {filter : c => c.hits < c.hitsMax});
