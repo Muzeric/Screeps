@@ -1,8 +1,6 @@
 var utils = require('utils');
 
 var roleBuilder = {
-
-    /** @param {Creep} creep **/
     run: function(creep) {
 	    if(creep.memory.building && creep.carry.energy == 0) {
             creep.memory.building = false;
@@ -16,24 +14,12 @@ var roleBuilder = {
 	        creep.memory.building = true;
 	        creep.memory.errors = 0;
 	        creep.memory.energyID = null;
-	        //reset_rt(creep);
 	    }
 
 	    if(creep.memory.building) {
 	        var target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
-	        /*
-	        if(!target) {
-	            let builds = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build');
-    	        if(builds.length) {
-    	            for(let buildf in builds) {
-    	                target = buildf.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
-    	                if(target)
-    	                    break;
-    	            }
-    	        }
-	        }
-	        */
             if(target) {
+                creep.memory.rt = null;
                 if(creep.build(target) == ERR_NOT_IN_RANGE) {
                     var res = creep.moveTo(target);
                     //console.log(creep.name + " go res=" + res);
@@ -44,9 +30,7 @@ var roleBuilder = {
                     }
                     creep.say("bld " +  target.pos.x + "," + target.pos.y);
                 }
-            }
-            
-            /*else {
+            } else {
                 var rt = Game.getObjectById(creep.memory.rt);
                 if (rt && rt.hits == rt.hitsMax || !rt) {
                         //console.log(creep.name + " repaired rt " + rt.pos.x + "," + rt.pos.y);
@@ -64,7 +48,7 @@ var roleBuilder = {
                         creep.say("rpr " + rt.pos.x + "," + rt.pos.y);
                     }
                 }
-            }*/
+            }
 	    }
 	    else {
 	        if(!creep.memory.energyID) {
@@ -102,10 +86,12 @@ var roleBuilder = {
 };
 
 function reset_rt (creep) {
-    var targets = creep.room.find(FIND_STRUCTURES, { filter: (structure) => structure.hits < structure.hitsMax*0.9 } );
+    if(_.some(creep.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER})))
+        return null;
+    var targets = creep.room.find(FIND_STRUCTURES, { filter: (structure) => structure.hits < structure.hitsMax*0.9 && structure.hits < 900000 } );
     if(targets.length) {
         var rand = Math.floor(Math.random() * 5) % targets.length;
-        var rt = targets.sort(function (a,b) { return (a.hits - b.hits) || (a.hits/a.hitsMax - b.hits/b.hitsMax); })[rand];
+        var rt = targets.sort(function (a,b) { return (a.hits - b.hits) || (a.hits/a.hitsMax - b.hits/b.hitsMax); })[0];
         creep.memory.rt = rt.id;
         return rt;
     }

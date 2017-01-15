@@ -4,17 +4,24 @@ var roleClaimer = {
     run: function(creep) {
         if(!creep.memory.controllerName || !Game.flags[creep.memory.controllerName]) {
             let controllers = _.filter(Game.flags, f => 
-                f.name.substring(0, 10) == 'Controller' && 
-                !_.some(Game.creeps, c => c.memory.role == "claimer" && c.memory.controllerName == f.name)
+                f.name.substring(0, 10) == 'Controller'
             );
 	        if(!controllers.length) {
                 //console.log(creep.name + " found no flags");
                 creep.moveTo(Game.spawns[creep.memory.spawnName].room.controller);
-	            return;
-	        }
-	        console.log(creep.name + " controllers: " + controllers);
-	        
-	        creep.memory.controllerName = controllers[0].name;
+                return;
+            }
+            console.log(creep.name + " controllers: " + controllers);
+            
+            creep.memory.controllerName = controllers.sort( function(a,b) {
+                let suma = 0;
+                let sumb = 0;
+                for (let cr of _.filter(Game.creeps, c => c.memory.role == "claimer" && c.memory.controllerName == a.name))
+                    suma += cr.ticksToLive;
+                for (let cr of _.filter(Game.creeps, c => c.memory.role == "claimer" && c.memory.controllerName == b.name))
+                    sumb += cr.ticksToLive;
+                return suma - sumb;
+            })[0].name;
             console.log("ControllerName for " + creep.name + " is " + creep.memory.controllerName);
         }
         

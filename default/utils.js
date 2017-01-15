@@ -115,9 +115,13 @@ module.exports = {
     try_attack : function (creep, all) {
         let target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {ignoreDestructibleStructures : true});
         if(!target && all)
-            target = creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS, {ignoreDestructibleStructures : true});
-        if(creep.memory.targetID && Game.getObjectById(creep.memory.targetID))
+            target = creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {ignoreDestructibleStructures : true, filter : s => s.structureType == STRUCTURE_TOWER});
+        if(!target && all)
+            target = creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {ignoreDestructibleStructures : true, filter : s => s.structureType != STRUCTURE_CONTROLLER});
+        if(!target && creep.memory.targetID && Game.getObjectById(creep.memory.targetID))
             target = Game.getObjectById(creep.memory.targetID);
+        if(!target && all)
+            target = creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS, {ignoreDestructibleStructures : true});
         let con_creep = _.filter(Game.creeps, c => c.memory.role == "attacker" && c.room == creep.room && c.memory.targetID && c != creep)[0];
         if(con_creep && (!creep.memory.targetID || creep.memory.targetID!=con_creep.memory.targetID) && Game.getObjectById(con_creep.memory.targetID)) {
             target = Game.getObjectById(con_creep.memory.targetID);
@@ -141,7 +145,7 @@ module.exports = {
                 //let res = creep.moveTo(target, {ignoreDestructibleStructures : true});
                 let res = creep.moveTo(target);
                 if(res < 0) {
-                    console.log(creep.name + " moved in attack with res=" + res);
+                    //console.log(creep.name + " moved in attack with res=" + res);
                 }
             } else if (res < 0) {
                 console.log(creep.name + " attacked with res=" + res);
@@ -149,5 +153,31 @@ module.exports = {
             return 1;
         }
     	return -1;
+    },
+    
+    getLongBuilderTargets: function (creep) {
+        let builds = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build');
+        for(let buildf of builds) {
+            if (!Game.rooms[buildf.room.name])
+                continue;
+            let object = buildf;
+            if (creep && creep.room.name == buildf.room.name)
+                object = creep;
+                
+            let target = object.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+            if(target)
+                return target.id;
+                
+            if(_.some(buildf.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER})))
+                continue;
+            var targets = buildf.room.find(FIND_STRUCTURES, { filter: (structure) => structure.hits < structure.hitsMax*0.9 && structure.hits < 900000 } );
+            if(targets.length) {
+                var rand = Math.floor(Math.random() * 5) % targets.length;
+                var rt = targets.sort(function (a,b) { return (a.hits - b.hits) || (a.hits/a.hitsMax - b.hits/b.hitsMax); })[rand];
+                return rt.id;
+            }
+        }
+        
+        return null;
     },
 };

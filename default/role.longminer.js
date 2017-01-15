@@ -110,12 +110,12 @@ var roleLongMiner = {
 };
 
 function set_cid (creep) {
-    console.log("Searching container for " + creep.name);
-    if(creep.memory.energyName && creep.memory.energyName == 'Source.W47N4') {
+    //console.log("Searching container for " + creep.name);
+    if(creep.memory.energyName && (creep.memory.energyName == 'Source.W47N4' || creep.memory.energyName == 'Source.W47N3')) {
         let c = Game.getObjectById('587869503d6c02904166296f');
         if(c && c.energy < c.energyCapacity) {
             creep.memory.cID = '587869503d6c02904166296f';
-            console.log("Link for " + creep.name + " is " + creep.memory.cID);
+            //console.log("Link for " + creep.name + " is " + creep.memory.cID);
             return;
         }
     }

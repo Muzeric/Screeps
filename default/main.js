@@ -19,37 +19,38 @@ var spawn_config = {
         ["harvester", 1],
         ["miner", 1],
         ["ENERGY", 1500],
+        ["attacker", 0],
         ["harvester", 3],
         ["miner", 2],
         ["upgrader", 1],
         ["longminer", 3],
-        ["claimer", 1],
+        ["claimer", 2],
         ["shortminer", 1],
-        ["longminer", 3],
+        ["longminer", 6],
         ["builder", 1],
         ["longbuilder", 1],
         ["upgrader", 4]
     ],
     "Spawn2" : [
         ["harvester", 1],
-        ["miner", 0],
-        ["ENERGY", 300],
+        ["miner", 1],
+        ["ENERGY", 1500],
         ["harvester", 1],
-        ["miner", 0],
-        ["upgrader", 2],
-        ["builder", 2],
+        ["miner", 2],
+        ["upgrader", 4],
+        ["builder", 1],
     ]
 };
 
 module.exports.loop = function () {
-    var error_count = 0;
+    var error_count = {};
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
+            console.log("Died: " + Memory.creeps[name].spawnName + "." + name);
             delete Memory.creeps[name];
-            console.log('Died:', name);
         } else if (Game.creeps[name].memory.errors > 0) {
             console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
-            error_count += Game.creeps[name].memory.errors;
+            error_count[Game.creeps[name].memory.spawnName] = error_count[Game.creeps[name].memory.spawnName] + 1 || 1;
         }
     }
     
@@ -66,7 +67,7 @@ module.exports.loop = function () {
         }
         roles[creep.memory.role]["count"][creep.memory.spawnName]++;
         
-        if(error_count) {
+        if(error_count[creep.memory.spawnName]) {
             if(creep.moveTo(creep.room.controller) == OK) {
                 creep.memory.errors = 0;
             }
@@ -87,13 +88,15 @@ module.exports.loop = function () {
             continue;
         }
         
-        if(!spawn.spawning) {
-            let construction_estimate = 0;
-            for(let c of spawn.room.find(FIND_CONSTRUCTION_SITES))
-                construction_estimate += (c.progressTotal - c.progress);
+        if (!spawn.spawning) {
+            let cs = spawn.room.find(FIND_CONSTRUCTION_SITES);
+            let rs;
+            if (!_.some(spawn.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}))) {
+                rs = spawn.room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.9 } );
+            }
             let info = {
-                longbuilder : _.some(Game.flags, f => f.name.substring(0, 5) == 'Build'),
-                builder : (roles["builder"].count[spawnName] < construction_estimate / 2000)
+                longbuilder : utils.getLongBuilderTargets() ? 1 : 0,
+                builder : (roles["builder"].count[spawnName] < cs.length + (rs ? rs.length : 0))
             };
         
             let min_energy = 300;
@@ -160,25 +163,4 @@ module.exports.loop = function () {
         if(res < 0) 
             console.log("Link transfer energy with res=" + res);
     }
-    
-    /*
-    let containers = spawn.room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_CONTAINER });
-    for(let cont of containers) {
-        if(_.sum(creepsInRoom, (c) => c.memory.role == "miner" && c.memory.cID == cont.id) < 2) {
-            //console.log("Need miner for cont " + cont.id);
-        }
-    }
-    
-    for(let source of sources) {
-        //console.log("source " + source.id + " has " + _.sum(creepsInRoom, (c) => c.memory.energyID == source.id) + " links");
-    }
-    
-    let source = sources.sort(function(a,b) { 
-        let suma = _.sum(creepsInRoom, (c) => c.memory.energyID == a.id);
-        let sumb = _.sum(creepsInRoom, (c) => c.memory.energyID == b.id);
-        //console.log("a=" + a.id + ",b=" + b.id + ",suma=" + suma + ",sumb=" + sumb);
-        return suma - sumb;
-    })[0];
-    console.log("Min source = " + source.id);
-    */
 }

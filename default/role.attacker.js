@@ -3,7 +3,10 @@ var utils = require('utils');
 var roleAttacker = {
 
     run: function(creep) {
-        if((creep.hits <= 200 || creep.hits < creep.hitsMax * 0.4) && creep.memory.attacking) {
+        if (creep.hits < creep.hitsMax)
+            console.log(creep.name + " healed himself (" + creep.hits + "/" + creep.hitsMax + ") with res=" + creep.heal(creep));
+        
+        if ((creep.hits <= 200 || creep.hits < creep.hitsMax * 0.4) && creep.memory.attacking) {
 	        creep.memory.attacking = false;
 	    } else if (creep.hits == creep.hitsMax && !creep.memory.attacking) {
 	        creep.memory.attacking = true;
@@ -50,6 +53,13 @@ var roleAttacker = {
             body.push(TOUGH);
             total_energy -= 10;
         }
+        let hnum = total_energy >= 1500 ? Math.floor((total_energy - 1250)/250) : 0;
+        if (hnum > 4)
+            hnum = 4;
+        while (total_energy >= 250 && hnum-- > 0) {
+            body.push(HEAL);
+            total_energy -= 250;
+        }
         let mnum = Math.floor(total_energy / (50+80));
         while (total_energy >= 50 && mnum-- > 0) {
             body.push(MOVE);
@@ -61,6 +71,7 @@ var roleAttacker = {
         }
 
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
+	    //let newName = 'test';
 	    console.log("Born by " + spawnName + " creep " + newName + " (" + body + ")");
 	}
 };
