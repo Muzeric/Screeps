@@ -15,31 +15,37 @@ for (let role in roles) {
 var utils = require('utils');
 
 var spawn_config = {
-    "Spawn1" : [
-        ["harvester", 1],
-        ["miner", 1],
-        ["ENERGY", 1500],
-        ["attacker", 0],
-        ["harvester", 3],
-        ["miner", 2],
-        ["upgrader", 1],
-        ["longminer", 3],
-        ["claimer", 2],
-        ["shortminer", 1],
-        ["longminer", 6],
-        ["builder", 1],
-        ["longbuilder", 1],
-        ["upgrader", 4]
-    ],
-    "Spawn2" : [
-        ["harvester", 1],
-        ["miner", 1],
-        ["ENERGY", 1500],
-        ["harvester", 1],
-        ["miner", 2],
-        ["upgrader", 4],
-        ["builder", 1],
-    ]
+    "Spawn1" : {
+        "creeps" : [
+            ["harvester", 1],
+            ["miner", 1],
+            ["ENERGY", 1500],
+            ["attacker", 0],
+            ["harvester", 3],
+            ["miner", 2],
+            ["upgrader", 1],
+            ["longminer", 3],
+            ["claimer", 2],
+            ["shortminer", 1],
+            ["longminer", 6],
+            ["builder", 1],
+            ["longbuilder", 1],
+            ["upgrader", 4]
+        ],
+        "repair_limit" : 964000,
+    },
+    "Spawn2" : {
+        "creeps" : [
+            ["harvester", 1],
+            ["miner", 1],
+            ["ENERGY", 1500],
+            ["harvester", 1],
+            ["miner", 2],
+            ["upgrader", 4],
+            ["builder", 1],
+        ],
+        "repair_limit" : 100000,
+    },
 };
 
 module.exports.loop = function () {
@@ -100,7 +106,7 @@ module.exports.loop = function () {
             };
         
             let min_energy = 300;
-            for (let arr of spawn_config[spawnName]) {
+            for (let arr of spawn_config[spawnName]["creeps"]) {
                 let role = arr[0];
                 let climit = arr[1];
                 if (climit <= 0)
@@ -136,8 +142,9 @@ module.exports.loop = function () {
                 tower.attack(hostile);
                 console.log("Tower " + tower.id + " attacked hostile: owner=" + hostile.owner.username + "; hits=" + hostile.hits);
             } else {
+                let repairLimit = utils.roomConfig[tower.room.name].repairLimit || 100000;
                 let dstructs = tower.room.find(FIND_STRUCTURES, {
-                    filter: (structure) => structure.hits < 0.9*structure.hitsMax && structure.hits < 964000
+                    filter: (structure) => structure.hits < 0.9*structure.hitsMax && structure.hits < repairLimit
                 });
                 if(dstructs.length && tower.energy > 500) {
                     let dstruct = dstructs.sort(function (a,b) {

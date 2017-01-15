@@ -90,7 +90,8 @@ var roleBuilder = {
 function reset_rt (creep) {
     if(_.some(creep.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER})))
         return null;
-    var targets = creep.room.find(FIND_STRUCTURES, { filter: (structure) => structure.hits < structure.hitsMax*0.9 && structure.hits < 900000 } );
+    let repairLimit = utils.roomConfig[creep.room.name].repairLimit || 100000;
+    var targets = creep.room.find(FIND_STRUCTURES, { filter: (structure) => structure.hits < structure.hitsMax*0.9 && structure.hits < repairLimit } );
     if(targets.length) {
         var rand = Math.floor(Math.random() * 5) % targets.length;
         var rt = targets.sort(function (a,b) { return (a.hits - b.hits) || (a.hits/a.hitsMax - b.hits/b.hitsMax); })[0];

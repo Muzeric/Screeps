@@ -6,8 +6,18 @@
  * var mod = require('sourceFinder');
  * mod.thing == 'a thing'; // true
  */
+var roomConfig = {
+    "W48N4" : {
+        "repairLimit" : 964000,
+    },
+    "W49N4" : {
+        "repairLimit" : 100000,
+    },
+};
 
 module.exports = {
+    roomConfig : roomConfig,
+
     findSource : function (creep, storage_priority) {
         //console.log("Searching source for " + creep.name);
         let resource = creep.pos.findClosestByPath(FIND_DROPPED_ENERGY, { filter: r => r.amount > 100 });
@@ -170,8 +180,8 @@ module.exports = {
         for(let buildf of builds) {  
             if(_.some(buildf.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER})))
                 continue;
-            
-            var targets = buildf.room.find(FIND_STRUCTURES, { filter: (structure) => structure.hits < structure.hitsMax*0.9 && structure.hits < 900000 } );
+            let repairLimit = roomConfig[buildf.pos.roomName] ? roomConfig[buildf.pos.roomName].repairLimit : 100000;
+            var targets = buildf.room.find(FIND_STRUCTURES, { filter: (structure) => structure.hits < structure.hitsMax*0.9 && structure.hits < repairLimit } );
             if(targets.length) {
                 var rand = Math.floor(Math.random() * 3) % targets.length;
                 var rt = targets.sort(function (a,b) { return (a.hits - b.hits) || (a.hits/a.hitsMax - b.hits/b.hitsMax); })[rand];
