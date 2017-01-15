@@ -42,7 +42,8 @@ var role = {
 
         if(container.pos.inRangeTo(source, 2)) {
             if(creep.pos.isNearTo(source) && creep.pos.isNearTo(container)) {
-                creep.harvest(source);
+                if(creep.carry.energy < creep.carryCapacity)
+                    creep.harvest(source);
                 creep.transfer(container, RESOURCE_ENERGY);
             } else {
                 creep.moveTo(source);
