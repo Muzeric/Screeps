@@ -115,20 +115,24 @@ module.exports = {
     },
     
     try_attack : function (creep, all) {
-        let target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {ignoreDestructibleStructures : true});
+        let target;
         if(!target && all)
             target = creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {ignoreDestructibleStructures : true, filter : s => s.structureType == STRUCTURE_TOWER});
         if(!target && all)
+            target = creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS, {ignoreDestructibleStructures : true});
+        if(!target)
+            target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {ignoreDestructibleStructures : true});
+        if(!target && all)
             target = creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {ignoreDestructibleStructures : true, filter : s => s.structureType != STRUCTURE_CONTROLLER});
+        /*
         if(!target && creep.memory.targetID && Game.getObjectById(creep.memory.targetID))
             target = Game.getObjectById(creep.memory.targetID);
-        if(!target && all)
-            target = creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS, {ignoreDestructibleStructures : true});
         let con_creep = _.filter(Game.creeps, c => c.memory.role == "attacker" && c.room == creep.room && c.memory.targetID && c != creep)[0];
         if(con_creep && (!creep.memory.targetID || creep.memory.targetID!=con_creep.memory.targetID) && Game.getObjectById(con_creep.memory.targetID)) {
             target = Game.getObjectById(con_creep.memory.targetID);
             console.log(creep.name + " found con_creep " + con_creep.name + " with target=" + con_creep.memory.targetID);
         }
+        */
         if(target) {
             creep.memory.targetID = target.id;
             if(!_.some(creep.body, b => b.type == ATTACK && b.hits > 50)) {

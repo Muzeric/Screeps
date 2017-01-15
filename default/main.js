@@ -20,7 +20,7 @@ var spawn_config = {
             ["harvester", 1],
             ["miner", 1],
             ["ENERGY", 1500],
-            ["attacker", 0],
+            ["attacker", 0, 1800],
             ["harvester", 3],
             ["miner", 2],
             ["upgrader", 1],
@@ -32,7 +32,6 @@ var spawn_config = {
             ["longbuilder", 1],
             ["upgrader", 4]
         ],
-        "repair_limit" : 964000,
     },
     "Spawn2" : {
         "creeps" : [
@@ -44,7 +43,6 @@ var spawn_config = {
             ["upgrader", 4],
             ["builder", 1],
         ],
-        "repair_limit" : 100000,
     },
 };
 
@@ -109,6 +107,7 @@ module.exports.loop = function () {
             for (let arr of spawn_config[spawnName]["creeps"]) {
                 let role = arr[0];
                 let climit = arr[1];
+                let emin = arr[2];
                 if (climit <= 0)
                     continue;
                 if (role == "ENERGY") {
@@ -119,6 +118,8 @@ module.exports.loop = function () {
                     continue;
                 if (role in info && !info[role])
                     continue;
+                if (emin && spawn.room.energyAvailable < spawn.room.energyCapacityAvailable && spawn.room.energyAvailable < emin)
+                    break;
                 if (
                     roles[role].count[spawnName] < climit || 
                     (roles[role].count[spawnName] == climit && _.some(Game.creeps, c => 
