@@ -48,15 +48,17 @@ var roleAttacker = {
         }
         console.log("total_energy:" + total_energy);
         let body = [];
-        let tnum = 20;
+        let tnum = 0;
         while(tnum-- > 0) {
             body.push(TOUGH);
             total_energy -= 10;
         }
-        let hnum = total_energy >= 1500 ? Math.floor((total_energy - 1250)/250) : 0;
+        let hnum = Math.floor((total_energy - 1500)/300);
         if (hnum > 4)
             hnum = 4;
-        while (total_energy >= 250 && hnum-- > 0) {
+        while (total_energy >= 300 && hnum-- > 0) {
+            body.push(MOVE);
+            total_energy -= 50;
             body.push(HEAL);
             total_energy -= 250;
         }

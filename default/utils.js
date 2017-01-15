@@ -1,17 +1,9 @@
-/*
- * Module code goes here. Use 'module.exports' to export things:
- * module.exports.thing = 'a thing';
- *
- * You can import it from another modules like this:
- * var mod = require('sourceFinder');
- * mod.thing == 'a thing'; // true
- */
 var roomConfig = {
     "W48N4" : {
-        "repairLimit" : 964000,
+        "repairLimit" : 1000000,
     },
     "W49N4" : {
-        "repairLimit" : 100000,
+        "repairLimit" : 200000,
     },
 };
 
