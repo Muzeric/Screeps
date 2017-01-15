@@ -95,6 +95,8 @@ module.exports.loop = function () {
             continue;
         }
         
+                
+        let canRepair = 0;
         if (!spawn.spawning) {
             let cs = spawn.room.find(FIND_CONSTRUCTION_SITES);
             let rs;
@@ -105,8 +107,7 @@ module.exports.loop = function () {
                 longbuilder : utils.getLongBuilderTargets() ? 1 : 0,
                 builder : (roles["builder"].count[spawnName] < cs.length + (rs ? rs.length : 0))
             };
-        
-            let canRepair = 0;
+
             let minEnergy = 300;
             for (let arr of spawn_config[spawnName]["creeps"]) {
                 let role = arr[0];
