@@ -10,7 +10,8 @@ var role = {
                 return;
             }
 
-            for (let flag of flags.sort( function (a,b) { return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b); })) {
+            let flag;
+            for (flag of flags.sort( function (a,b) { return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b); })) {
                 let containers = flag.pos.findInRange(FIND_STRUCTURES, 2, {filter : s => 
                         s.structureType == STRUCTURE_CONTAINER &&
                         !_.some(Game.creeps, {filter : c => c.memory.role == "longminer" && c.memory.cID == s.id && c.ticksToLive > 200})
