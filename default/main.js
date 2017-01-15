@@ -1,6 +1,3 @@
-//test
-//test 2
-
 var roles = {
     "harvester" : {},
     "builder" : {},

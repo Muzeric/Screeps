@@ -13,20 +13,21 @@ var roleShortMiner = {
             delete creep.memory.cID;
             return;
         }
+
+        let source = Game.getObjectById('58771a999d331a0f7f5ae31a');
+        if(!source) {
+            console.log("Problem getting source for " + creep.name);
+            return;
+        }
         
         if(creep.carry.energy == 0 && creep.memory.transfering) {
 	        creep.memory.transfering = false;
-	    } else if (creep.carry.energy == creep.carryCapacity && !creep.memory.transfering) {
+        } else if ((creep.carry.energy == creep.carryCapacity || creep.carry.energy && !source.energy) && !creep.memory.transfering) {
 	        creep.memory.transfering = true;
 	        creep.memory.errors = 0;
 	    }
 	    
-	    if(!creep.memory.transfering) {
-            let source = Game.getObjectById('58771a999d331a0f7f5ae31a');
-            if(!source) {
-                console.log("Problem getting source for " + creep.name);
-                return;
-            }
+	    if(!creep.memory.transfering) {   
             let res = creep.withdraw(source, RESOURCE_ENERGY);
             if(res == ERR_NOT_IN_RANGE) {
                 let res = creep.moveTo(source);
