@@ -7,7 +7,8 @@ var roleBuilder = {
             creep.memory.rt = null;
             if(creep.ticksToLive < 70) {
 	            console.log(creep.name + " is going to die!");
-	            creep.suicide();
+                if(Game.spawns[creep.memory.spawnName].recycleCreep(creep) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(Game.spawns[creep.memory.spawnName].pos);
 	        }
 	    }
 	    if(!creep.memory.building && creep.carry.energy == creep.carryCapacity) {

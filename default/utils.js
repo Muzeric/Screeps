@@ -156,7 +156,7 @@ module.exports = {
     },
     
     getLongBuilderTargets: function (creep) {
-        let builds = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build' && Game.rooms[f.room.name]);
+        let builds = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build' && Game.rooms[f.pos.roomName]);
         for(let buildf of builds) {
             let object = buildf;
             if (creep && creep.room.name == buildf.room.name)
