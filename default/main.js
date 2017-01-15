@@ -122,12 +122,8 @@ module.exports.loop = function () {
                     canRepair = 1;
                     continue;
                 }
-                if (spawn.room.energyAvailable < spawn.room.energyCapacityAvailable && spawn.room.energyAvailable < minEnergy)
-                    break;
                 if (role in info && !info[role])
                     continue;
-                if (emin && spawn.room.energyAvailable < spawn.room.energyCapacityAvailable && spawn.room.energyAvailable < emin)
-                    break;
                 if (
                     roles[role].count[spawnName] < climit || 
                     (roles[role].count[spawnName] == climit && _.some(Game.creeps, c => 
@@ -136,7 +132,16 @@ module.exports.loop = function () {
                         c.memory.spawnName == spawnName
                     ))
                 ) {
-                    roles[role].obj.create(spawnName, role, spawn.room.energyAvailable);
+                    // Need, but not enough energy, so break & WAIT
+                    if (emin && spawn.room.energyAvailable < spawn.room.energyCapacityAvailable && spawn.room.energyAvailable < emin)
+                        break;
+
+                    // Check, global energy limit
+                    if (
+                        spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable || 
+                        spawn.room.energyAvailable >= minEnergy
+                    )
+                        roles[role].obj.create(spawnName, role, spawn.room.energyAvailable);
                     //console.log(spawnName + " wants to burn " + role);
                     break;
                 }
