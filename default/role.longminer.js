@@ -81,7 +81,7 @@ var roleLongMiner = {
 	    let cnum = 0;
 	    let fat = -1;
 	    while (total_energy >= 50) {
-	        if(fat >= 1 && total_energy >= 50) {
+	        if(fat >= 0 && total_energy >= 50) {
 	            body.push(MOVE);
 	            total_energy -= 50;
 	            fat -= 2;
@@ -92,7 +92,7 @@ var roleLongMiner = {
 	            cnum++;
 	            fat++;
 	        }
-	        if(fat >= 1 && total_energy >= 50) {
+	        if(fat >= 0 && total_energy >= 50) {
 	            body.push(MOVE);
 	            total_energy -= 50;
 	            fat -= 2;
