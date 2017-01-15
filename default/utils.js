@@ -156,10 +156,8 @@ module.exports = {
     },
     
     getLongBuilderTargets: function (creep) {
-        let builds = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build');
+        let builds = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build' && Game.rooms[f.room.name]);
         for(let buildf of builds) {
-            if (!Game.rooms[buildf.room.name])
-                continue;
             let object = buildf;
             if (creep && creep.room.name == buildf.room.name)
                 object = creep;
@@ -167,12 +165,15 @@ module.exports = {
             let target = object.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
             if(target)
                 return target.id;
-                
+        }
+
+        for(let buildf of builds) {  
             if(_.some(buildf.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER})))
                 continue;
+            
             var targets = buildf.room.find(FIND_STRUCTURES, { filter: (structure) => structure.hits < structure.hitsMax*0.9 && structure.hits < 900000 } );
             if(targets.length) {
-                var rand = Math.floor(Math.random() * 5) % targets.length;
+                var rand = Math.floor(Math.random() * 3) % targets.length;
                 var rt = targets.sort(function (a,b) { return (a.hits - b.hits) || (a.hits/a.hitsMax - b.hits/b.hitsMax); })[rand];
                 return rt.id;
             }
