@@ -59,7 +59,7 @@ var role = {
                     creep.moveTo(source);
             else
                 if(creep.transfer(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
-                    let res = creep.moveTo(container);
+                    creep.moveTo(container);
         }
 	},
 	
