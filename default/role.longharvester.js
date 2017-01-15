@@ -1,8 +1,6 @@
 var utils = require('utils');
 
-var roleLongMiner = {
-
-    /** @param {Creep} creep **/
+var role = {
     run: function(creep) {
         if(!creep.memory.energyName || !Game.flags[creep.memory.energyName]) {
             if(!set_energy(creep)) return;
@@ -131,8 +129,8 @@ function set_cid (creep) {
         return;
     }
     creep.memory.cID = containers.sort( function(a,b) { 
-        let suma = _.sum(Game.creeps, function (c) {let sum = 0; if(c.memory.role == "longminer" && c.memory.cID == a.id) {sum += c.ticksToLive} return sum;});
-        let sumb = _.sum(Game.creeps, function (c) {let sum = 0; if(c.memory.role == "longminer" && c.memory.cID == b.id) {sum += c.ticksToLive} return sum;});
+        let suma = _.sum(Game.creeps, function (c) {let sum = 0; if(c.memory.role == "longharvester" && c.memory.cID == a.id) {sum += c.ticksToLive} return sum;});
+        let sumb = _.sum(Game.creeps, function (c) {let sum = 0; if(c.memory.role == "longharvester" && c.memory.cID == b.id) {sum += c.ticksToLive} return sum;});
         return suma - sumb;
     })[0].id;
     console.log("Container for " + creep.name + " is " + creep.memory.cID);
@@ -147,12 +145,12 @@ function set_energy (creep) {
     //console.log(creep.name + " sources: " + sources);
     
     creep.memory.energyName = sources.sort( function(a,b) { 
-        let suma = _.sum(Game.creeps, (c) => c.memory.role == "longminer" && c.memory.energyName == a.name);
-        let sumb = _.sum(Game.creeps, (c) => c.memory.role == "longminer" && c.memory.energyName == b.name);
+        let suma = _.sum(Game.creeps, (c) => c.memory.role == "longharvester" && c.memory.energyName == a.name);
+        let sumb = _.sum(Game.creeps, (c) => c.memory.role == "longharvester" && c.memory.energyName == b.name);
         //console.log("a=" + a.id + ",b=" + b.id + ",suma=" + suma + ",sumb=" + sumb);
         return suma - sumb;
     })[0].name;
     console.log("EnergyName for " + creep.name + " is " + creep.memory.energyName);
 }
 
-module.exports = roleLongMiner;
+module.exports = role;

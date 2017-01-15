@@ -8,6 +8,7 @@ var roles = {
     "attacker" : {},
     "shortminer" : {},
     "longbuilder" : {},
+    "longharvester" : {},
 };
 for (let role in roles) {
     roles[role]["obj"] = require('role.' + role);
@@ -28,7 +29,7 @@ var spawn_config = {
             ["REPAIR", 1],
             ["claimer", 2],
             ["shortminer", 1],
-            ["longminer", 6],
+            ["longharvester", 3],
             ["builder", 1],
             ["longbuilder", 1],
             ["upgrader", 4]
