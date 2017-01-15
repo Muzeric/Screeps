@@ -20,7 +20,7 @@ var roleAttacker = {
 	        } else {
     	        console.log(creep.name + " targets: " + targets);
     	        
-    	        creep.memory.attackName = targets[0].name;
+    	        creep.memory.attackName = targets.sort()[0].name;
                 console.log("AttackName for " + creep.name + " is " + creep.memory.attackName);
 	        }
         }

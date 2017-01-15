@@ -148,8 +148,8 @@ module.exports = {
             );
             let res = creep.attack(target);
             if(res == ERR_NOT_IN_RANGE) {
-                //let res = creep.moveTo(target, {ignoreDestructibleStructures : true});
-                let res = creep.moveTo(target);
+                let res = creep.moveTo(target, {ignoreDestructibleStructures : true});
+                //let res = creep.moveTo(target);
                 if(res < 0) {
                     //console.log(creep.name + " moved in attack with res=" + res);
                 }
