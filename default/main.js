@@ -22,7 +22,7 @@ var spawn_config = {
             ["miner", 1],
             ["ENERGY", 1500],
             ["attacker", 0, 1800],
-            ["harvester", 3],
+            ["harvester", 4],
             ["miner", 2],
             ["upgrader", 1],
             ["longharvester", 3],
@@ -30,9 +30,9 @@ var spawn_config = {
             ["claimer", 3],
             ["longminer", 2],
             ["shortminer", 1],
-            ["longharvester", 8],
-            ["builder", 1],
             ["longbuilder", 1],
+            ["longharvester", 12],
+            ["builder", 1],
             ["upgrader", 4]
         ],
     },
@@ -42,7 +42,7 @@ var spawn_config = {
             ["miner", 1],
             ["ENERGY", 1500],
             ["harvester", 1],
-            ["miner", 2],
+            ["miner", 1],
             ["upgrader", 1],
             ["REPAIR", 1],
             ["builder", 1],
@@ -99,7 +99,7 @@ module.exports.loop = function () {
         
                 
         let canRepair = 0;
-        if (!spawn.spawning) {
+        if (!spawn.spawning && !_.some(Game.creeps, c => c.pos.isNearTo(spawn) && c.ticksToLive < 800) ) {
             let cs = spawn.room.find(FIND_CONSTRUCTION_SITES);
             let rs;
             if (!_.some(spawn.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}))) {

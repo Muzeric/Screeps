@@ -46,11 +46,11 @@ var roleHarvester = {
                 }
             } else if (
                 target.structureType == STRUCTURE_SPAWN &&
-                (creep.ticksToLive < 1000 || target.energy == target.energyCapacity) &&
+                (creep.ticksToLive < 1200 || target.energy == target.energyCapacity) &&
                 !target.spawning
                 ) {
                     var res = target.renewCreep(creep);
-                    //console.log(creep.name + " renewed: " + res)
+                    //console.log(creep.name + " renewed (" + creep.ticksToLive + "): " + res)
             }
         }
 	},
@@ -64,14 +64,17 @@ var roleHarvester = {
         console.log("total_energy:" + total_energy);
         total_energy -= 100;
         let body = [WORK];
+        let fat = 1;
 	    while (total_energy >= 50) {
-	        if(total_energy >= 50) {
+	        if(fat >= 0 && total_energy >= 50) {
 	            body.push(MOVE);
 	            total_energy -= 50;
+	            fat -= 2;
 	        }
 	        if(total_energy >= 50) {
 	            body.push(CARRY);
 	            total_energy -= 50;
+	            fat++;
 	        }
 	    }
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
