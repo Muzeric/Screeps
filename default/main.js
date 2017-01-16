@@ -149,6 +149,8 @@ module.exports.loop = function () {
                 }
             }
             //console.log("Enough creeps by " + spawnName);
+        } else {
+            canRepair = 1;
         }
 
         let towers = spawn.room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_TOWER });
