@@ -31,9 +31,11 @@ var spawn_config = {
             ["longminer", 2],
             ["shortminer", 1],
             ["longbuilder", 1],
-            ["longharvester", 12],
+            ["longharvester", 5],
             ["builder", 1],
-            ["upgrader", 4]
+            ["upgrader", 2],
+            ["longharvester", 12],
+            ["upgrader", 4],
         ],
     },
     "Spawn2" : {
@@ -50,6 +52,9 @@ var spawn_config = {
         ],
     },
 };
+
+var stat = require('stat');
+stat.init();
 
 module.exports.loop = function () {
     var error_count = {};
@@ -68,6 +73,7 @@ module.exports.loop = function () {
         for (let spawnName in spawn_config)
             roles[role]["count"][spawnName] = 0;
     }
+    stat.roles = JSON.parse(JSON.stringify(roles));
     
     for(let creep_name in Game.creeps) {
         let creep = Game.creeps[creep_name];
