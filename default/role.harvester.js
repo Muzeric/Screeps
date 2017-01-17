@@ -61,6 +61,8 @@ var roleHarvester = {
             console.log("No spawn with name=" + spawnName);
             return;
         }
+        if (total_energy > 1300)
+            total_energy = 1300;
         console.log("total_energy:" + total_energy);
         total_energy -= 100;
         let body = [WORK];
