@@ -1,11 +1,11 @@
 var stat = {
     init : function() {
-        if(memory.stat) 
-            return memory.stat;
-        memory.stat = {
+        if(Memory.stat) 
+            return Memory.stat;
+        Memory.stat = {
 
         };
-        return memory.stat;
+        return Memory.stat;
     }, 
 };
 
