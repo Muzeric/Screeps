@@ -33,11 +33,11 @@ module.exports = {
             let cont_info = {};
             for(let container of containers) {
                 let cenergy = container.store[RESOURCE_ENERGY];
-                let cpath = Math.pow(Math.pow((container.pos.x - creep.pos.x),2) + Math.pow((container.pos.y - creep.pos.y),2), 0.5);
+                let cpath = creep.pos.getRangeTo(container);
                 let cminers = _.sum(Game.creeps, (c) => c.memory.role == "miner" && c.memory.cID == container.id);
                 let cgots = _.sum(Game.creeps, (c) => c.memory.energyID == container.id);
-                let cpriority = container.structureType == STRUCTURE_STORAGE && storage_priority ? 1 : 0;
-                //console.log(creep.name + " has container " + container.id + " in " + cpath + " with " + cenergy + " energy and " + cgots + " gots");
+                let cpriority = container.structureType == STRUCTURE_STORAGE && storage_priority || container.structureType == STRUCTURE_CONTAINER && cenergy * 1.5 > creep.carryCapacity ? 1 : 0;
+                //console.log(creep.name + " has container " + container.id + " in " + cpath + " with " + cenergy + " energy and " + cgots + " gots and sum=" + (cpath + (2000 - cenergy + cgots * 200) / 100 - 10000 * cpriority));
                 cont_info[container.id] = {cenergy : cenergy, cpath : cpath, cgots : cgots, cpriority : cpriority};
             }
             let container = containers.sort( function (a,b) {
