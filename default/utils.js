@@ -22,7 +22,7 @@ module.exports = {
             s =>
             (
                 s.structureType == STRUCTURE_CONTAINER && 
-                _.sum(Game.creeps, (c) => c.memory.role == "miner" && c.memory.cID == s.id)
+                _.sum(Game.creeps, (c) => (c.memory.role == "miner" || c.memory.role == "longminer") && c.memory.cID == s.id)
             ) ||
             (
                 s.structureType == STRUCTURE_STORAGE && 
@@ -74,7 +74,7 @@ module.exports = {
         } else if (
             source.structureType &&
             source.structureType == STRUCTURE_CONTAINER &&
-            !_.sum(Game.creeps, (c) => c.memory.role == "miner" && c.memory.cID == source.id)
+            !_.sum(Game.creeps, (c) => (c.memory.role == "miner" || c.memory.role == "longminer") && c.memory.cID == source.id)
         ) {
             console.log(creep.name + " has source=container without miners");
             creep.memory.energyID = null;
@@ -163,6 +163,7 @@ module.exports = {
     
     getLongBuilderTargets: function (creep) {
         let builds = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build' && Game.rooms[f.pos.roomName]);
+        /*
         for(let buildf of builds) {
             let object = buildf;
             if (creep && creep.room.name == buildf.room.name)
@@ -171,18 +172,23 @@ module.exports = {
             let target = object.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
             if(target)
                 return target.id;
-        }
+        }*/
 
+        let targets = Array();
         for(let buildf of builds) {  
             if(_.some(buildf.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER})))
                 continue;
-            let repairLimit = roomConfig[buildf.pos.roomName] ? roomConfig[buildf.pos.roomName].repairLimit : 100000;
-            var targets = buildf.room.find(FIND_STRUCTURES, { filter: (structure) => structure.hits < structure.hitsMax*0.9 && structure.hits < repairLimit } );
-            if(targets.length) {
-                var rand = Math.floor(Math.random() * 3) % targets.length;
-                var rt = targets.sort(function (a,b) { return (a.hits - b.hits) || (a.hits/a.hitsMax - b.hits/b.hitsMax); })[rand];
+            let repairLimit = roomConfig[buildf.pos.roomName] ? roomConfig[buildf.pos.roomName].repairLimit : 250000;
+            targets = targets.concat( buildf.room.find(FIND_STRUCTURES, { filter: (structure) => 
+                structure.hits < structure.hitsMax*0.9 &&
+                structure.hits < repairLimit &&
+                !_.some(Game.creeps, c => c.memory.role == "longbuilder" && c.memory.targetID == structure.id) 
+            } ) );
+        }
+        
+        if(targets.length) {
+                var rt = targets.sort(function (a,b) { return (a.hits/a.hitsMax - b.hits/b.hitsMax) || (a.hits - b.hits); })[0];
                 return rt.id;
-            }
         }
         
         return null;

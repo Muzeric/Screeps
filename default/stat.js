@@ -1,12 +1,15 @@
 var stat = {
-    init : function() {
+    init : function () {
         if(Memory.stat) 
             return Memory.stat;
         Memory.stat = {
-
+            cpu : {
+                run : {},
+                create : {},
+            }
         };
         return Memory.stat;
-    }, 
+    },     
 };
 
 

@@ -66,7 +66,7 @@ var role = {
 	},
 	
     create: function(spawnName, role, total_energy) {
-	    let spawn = Game.spawns[spawnName];
+        let spawn = Game.spawns[spawnName];
         if(!spawn) {
             console.log("No spawn with name=" + spawnName);
             return;
@@ -83,7 +83,7 @@ var role = {
         }
 	    let wnum = 0;
 	    let cnum = 1;
-	    while (total_energy >= 50) {
+	    while (total_energy >= 100) {
 	        if(total_energy >= 100) {
 	            body.push(WORK);
 	            wnum++;
@@ -94,12 +94,13 @@ var role = {
 	            total_energy -= 50;
 	            cnum++;
 	        }
-	        if(total_energy == 50) {
-	            body.push(MOVE);
-	            total_energy -= 50;
-	        }
+	    }
+	    if(total_energy >= 50) {
+	        body.push(MOVE);
+	        total_energy -= 50;
 	    }
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
+	    //let newName = 'test';
         console.log("Born by " + spawnName + " creep " + newName + " (" + body + ")");
 	}
 };

@@ -31,7 +31,7 @@ var spawn_config = {
             ["longminer", 2],
             ["shortminer", 1],
             ["longbuilder", 1],
-            ["longharvester", 5],
+            ["longharvester", 7],
             ["builder", 1],
             ["upgrader", 2],
             ["longharvester", 12],
@@ -48,13 +48,16 @@ var spawn_config = {
             ["upgrader", 1],
             ["REPAIR", 1],
             ["builder", 1],
+            ["upgrader", 2],
+            ["longbuilder", 1],
+            ["longharvester", 3],
             ["upgrader", 4],
         ],
     },
 };
 
-var stat = require('stat');
-stat.init();
+var statClass = require('stat');
+var stat = statClass.init();
 
 module.exports.loop = function () {
     var error_count = {};
@@ -73,7 +76,6 @@ module.exports.loop = function () {
         for (let spawnName in spawn_config)
             roles[role]["count"][spawnName] = 0;
     }
-    stat.roles = JSON.parse(JSON.stringify(roles));
     
     for(let creep_name in Game.creeps) {
         let creep = Game.creeps[creep_name];
@@ -89,11 +91,31 @@ module.exports.loop = function () {
             continue;
         }
         
+        let lastCPU = Game.cpu.getUsed();
+        
         if(roles[creep.memory.role])
             roles[creep.memory.role].obj.run(creep);
         else
             console.log("Uknown role=" + creep.memory.role);
+            
+        let diffCPU = (Game.cpu.getUsed() - lastCPU)
+            
+        if(!stat["cpu"]["run"][creep.memory.role]) {
+            stat["cpu"]["run"][creep.memory.role] = {
+                last: diffCPU,
+                log: diffCPU,
+                max: diffCPU,
+            };
+        } else {
+            stat["cpu"]["run"][creep.memory.role].log = stat["cpu"]["run"][creep.memory.role].log*0.9 + diffCPU*0.1;
+            stat["cpu"]["run"][creep.memory.role].last = diffCPU;
+            if (diffCPU > stat["cpu"]["run"][creep.memory.role].max)
+                stat["cpu"]["run"][creep.memory.role].max = diffCPU;
+        }
     }
+    
+    stat.roles = JSON.parse(JSON.stringify(roles));
+    
     
     for (let spawnName in spawn_config) {
         //console.log("Start operations for: " + spawnName);
@@ -121,6 +143,7 @@ module.exports.loop = function () {
                 let role = arr[0];
                 let climit = arr[1];
                 let emin = arr[2];
+                
                 if (climit <= 0)
                     continue;
                 if (role == "ENERGY") {
@@ -153,6 +176,7 @@ module.exports.loop = function () {
                     //console.log(spawnName + " wants to burn " + role);
                     break;
                 }
+                //console.log("Create " + role + " used " + Math.floor(Game.cpu.getUsed() * 100 / Game.cpu.tickLimit) + "% of CPU" );
             }
             //console.log("Enough creeps by " + spawnName);
         } else {
