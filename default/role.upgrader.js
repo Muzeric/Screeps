@@ -36,7 +36,6 @@ var roleUpgrader = {
             console.log("No spawn with name=" + spawnName);
             return;
         }
-        console.log("total_energy:" + total_energy);
         let body = [];
 	    while (total_energy >= 50) {
 	        if(total_energy >= 50) {
@@ -53,7 +52,7 @@ var roleUpgrader = {
 	        }
 	    }
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-        console.log("Born by " + spawnName + " creep " + newName + " (" + body + ")");
+        return [newName, body, total_energy];
 	}
 };
 

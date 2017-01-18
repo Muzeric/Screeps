@@ -61,9 +61,11 @@ var roleHarvester = {
             console.log("No spawn with name=" + spawnName);
             return;
         }
-        if (total_energy > 1300)
+        let energyDiff = 0;
+        if (total_energy > 1300) {
+            energyDiff = total_energy - 1300;
             total_energy = 1300;
-        console.log("total_energy:" + total_energy);
+        }
         total_energy -= 100;
         let body = [WORK];
         let fat = 1;
@@ -80,7 +82,8 @@ var roleHarvester = {
 	        }
 	    }
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-	    console.log("Born by " + spawnName + " creep " + newName + " (" + body + ")");
+        total_energy += energyDiff;
+	    return [newName, body, total_energy];
 	}
 };
 

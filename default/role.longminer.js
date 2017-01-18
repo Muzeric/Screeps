@@ -84,12 +84,11 @@ var role = {
             console.log("No spawn with name=" + spawnName);
             return;
         }
-        console.log("total_energy:" + total_energy);
         total_energy -= 80*3 + 50*2; // For move-attack parts
         let body = [];
         let wnum = 0;
 	    let fat = -1;
-	    while (total_energy >= 50) {
+	    while (total_energy >= 100) {
 	        if(fat >= 0 && total_energy >= 50) {
 	            body.push(MOVE);
 	            total_energy -= 50;
@@ -112,9 +111,13 @@ var role = {
 	            fat++;
 	        }
 	    }
+        if(total_energy >= 50) {
+            body.push(MOVE);
+            total_energy -= 50;
+	    }
         body.push(MOVE,MOVE,ATTACK,ATTACK,ATTACK);
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-        console.log("Born by " + spawnName + " creep " + newName + " (" + body + ")");
+        return [newName, body, total_energy];
 	}
 };
 

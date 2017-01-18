@@ -46,10 +46,11 @@ var roleClaimer = {
             return;
         }
         console.log("total_energy:" + total_energy);
+        total_energy -= 600*2 + 100;
         let body = [CLAIM,CLAIM,MOVE,MOVE];
 
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-	    console.log("Born by " + spawnName + " creep " + newName + " (" + body + ")");
+	    return [newName, body, total_energy];
 	}
 };
 

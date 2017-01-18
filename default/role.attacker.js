@@ -21,7 +21,7 @@ var roleAttacker = {
     	        console.log(creep.name + " targets: " + targets);
     	        
     	        creep.memory.attackName = targets.sort()[0].name;
-                console.log("AttackName for " + creep.name + " is " + creep.memory.attackName);
+                console.log(creep.name + " attackName=" + creep.memory.attackName);
 	        }
         }
         
@@ -46,7 +46,6 @@ var roleAttacker = {
             console.log("No spawn with name=" + spawnName);
             return;
         }
-        console.log("total_energy:" + total_energy);
         let body = [];
         let tnum = 0;
         while(tnum-- > 0) {
@@ -74,7 +73,7 @@ var roleAttacker = {
 
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
 	    //let newName = 'test';
-	    console.log("Born by " + spawnName + " creep " + newName + " (" + body + ")");
+        return [newName, body, total_energy];
 	}
 };
 

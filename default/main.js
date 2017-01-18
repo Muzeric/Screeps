@@ -63,7 +63,7 @@ module.exports.loop = function () {
     var error_count = {};
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
-            console.log("Died: " + Memory.creeps[name].spawnName + "." + name);
+            console.log(name + " DEAD (" + Memory.creeps[name].spawnName + ")");
             delete Memory.creeps[name];
         } else if (Game.creeps[name].memory.errors > 0) {
             console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
@@ -171,8 +171,12 @@ module.exports.loop = function () {
                     if (
                         spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable || 
                         spawn.room.energyAvailable >= minEnergy
-                    )
-                        roles[role].obj.create(spawnName, role, spawn.room.energyAvailable);
+                    ) {
+                        let energy = spawn.room.energyAvailable;
+                        let res = roles[role].obj.create(spawnName, role, energy);
+
+                        console.log(res[0] + " BORN by " + spawnName + ", energy (" + energy + "->" + res[2] + ") [" + res[1] + "]");
+                    }
                     //console.log(spawnName + " wants to burn " + role);
                     break;
                 }

@@ -11,7 +11,6 @@ module.exports = {
     roomConfig : roomConfig,
 
     findSource : function (creep, storage_priority) {
-        //console.log("Searching source for " + creep.name);
         let resource = creep.pos.findClosestByPath(FIND_DROPPED_ENERGY, { filter: r => r.amount > 100 });
         if(resource) {
             console.log(creep.name + " found dropped resource: " + resource.id + " with " + resource.amount + " energy");
@@ -53,7 +52,7 @@ module.exports = {
         
         let sources = creep.room.find(FIND_SOURCES);
         if(!sources.length) {
-            console.log("No sources in room, nothing to do for " + creep.name);
+            console.log(creep.name + " no sources in room, nothing to do");
             return;
         }
         let source = sources.sort(function(a,b) { 
@@ -61,7 +60,7 @@ module.exports = {
             let sumb = _.sum(Game.creeps, (c) => c.memory.energyID == b.id) * (b.id == "577b929c0f9d51615fa46cfc" ? 2 : 1);
             return suma - sumb;
         })[0];
-        console.log("Source for " + creep.name + " is " + source.id);
+        //console.log("Source for " + creep.name + " is " + source.id);
         return source.id;
     },
     
@@ -76,7 +75,7 @@ module.exports = {
             source.structureType == STRUCTURE_CONTAINER &&
             !_.sum(Game.creeps, (c) => (c.memory.role == "miner" || c.memory.role == "longminer") && c.memory.cID == source.id)
         ) {
-            console.log(creep.name + " has source=container without miners");
+            //console.log(creep.name + " has source=container without miners");
             creep.memory.energyID = null;
             return;
         } else if (
@@ -84,7 +83,7 @@ module.exports = {
             source.structureType == STRUCTURE_STORAGE &&
             source.store[RESOURCE_ENERGY] < creep.carryCapacity
         ) {
-            console.log(creep.name + " has source=storage without enough energy");
+            //console.log(creep.name + " has source=storage without enough energy");
             creep.memory.energyID = null;
             return;
         }
@@ -163,7 +162,7 @@ module.exports = {
     
     getLongBuilderTargets: function (creep) {
         let builds = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build' && Game.rooms[f.pos.roomName]);
-        /*
+        
         for(let buildf of builds) {
             let object = buildf;
             if (creep && creep.room.name == buildf.room.name)
@@ -172,7 +171,7 @@ module.exports = {
             let target = object.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
             if(target)
                 return target.id;
-        }*/
+        }
 
         let targets = Array();
         for(let buildf of builds) {  
