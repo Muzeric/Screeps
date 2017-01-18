@@ -2,9 +2,9 @@ var roleShortMiner = {
     /** @param {Creep} creep **/
     run: function(creep) {
         if(creep.memory.cID === undefined) {
-            console.log("Searching container for " + creep.name);
+            //console.log("Searching container for " + creep.name);
             creep.memory.cID = creep.room.storage.id;
-            console.log("Container for " + creep.name + " is " + creep.memory.cID);
+            //console.log("Container for " + creep.name + " is " + creep.memory.cID);
         }
         
         let container = Game.getObjectById(creep.memory.cID);

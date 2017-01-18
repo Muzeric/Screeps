@@ -66,7 +66,7 @@ var role = {
                 if(res == ERR_NOT_IN_RANGE) {
                     let res = creep.moveTo(container);
                 } else if (res == ERR_FULL) {
-                    console.log(creep.name + " container is full");
+                    //console.log(creep.name + " container is full");
                     set_cid(creep);
                     return;
                 }
@@ -129,12 +129,12 @@ function set_cid (creep) {
     }
     if(Game.spawns[creep.memory.spawnName].room.storage) {
         creep.memory.cID = Game.spawns[creep.memory.spawnName].room.storage.id;
-        console.log("Storage for " + creep.name + " is " + creep.memory.cID);
+        //console.log(creep.name + " storage=" + creep.memory.cID);
         return;
     }
     let containers = Game.spawns[creep.memory.spawnName].room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_CONTAINER });
     if(!containers.length) {
-        console.log("No containers in room, nothing to do for " + creep.name);
+        console.log(creep.name + " no containers in room, nothing to do");
         return;
     }
     creep.memory.cID = containers.sort( function(a,b) { 
@@ -142,7 +142,7 @@ function set_cid (creep) {
         let sumb = _.sum(Game.creeps, function (c) {let sum = 0; if(c.memory.role == "longharvester" && c.memory.cID == b.id) {sum += c.ticksToLive} return sum;});
         return suma - sumb;
     })[0].id;
-    console.log("Container for " + creep.name + " is " + creep.memory.cID);
+    //console.log(creep.name + " container=" + creep.memory.cID);
 }
 
 function set_energy (creep) {
@@ -159,7 +159,7 @@ function set_energy (creep) {
         //console.log("a=" + a.id + ",b=" + b.id + ",suma=" + suma + ",sumb=" + sumb);
         return suma - sumb;
     })[0].name;
-    console.log("EnergyName for " + creep.name + " is " + creep.memory.energyName);
+    //console.log(creep.name + " energyName=" + creep.memory.energyName);
 }
 
 module.exports = role;

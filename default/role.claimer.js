@@ -22,7 +22,7 @@ var roleClaimer = {
                     sumb += cr.ticksToLive;
                 return suma - sumb;
             })[0].name;
-            console.log("ControllerName for " + creep.name + " is " + creep.memory.controllerName);
+            console.log(creep.name + " controllerName=" + creep.memory.controllerName);
         }
         
         if(creep.room.name == Game.flags[creep.memory.controllerName].pos.roomName) {
@@ -45,7 +45,6 @@ var roleClaimer = {
             console.log("No spawn with name=" + spawnName);
             return;
         }
-        console.log("total_energy:" + total_energy);
         total_energy -= 600*2 + 100;
         let body = [CLAIM,CLAIM,MOVE,MOVE];
 
