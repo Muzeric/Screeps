@@ -127,7 +127,7 @@ module.exports.loop = function () {
         
                 
         let canRepair = 0;
-        if (!spawn.spawning && !_.some(Game.creeps, c => c.pos.isNearTo(spawn) && c.ticksToLive < 800) ) {
+        if (!spawn.spawning && !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(spawn) && c.ticksToLive < 800) ) {
             let cs = spawn.room.find(FIND_CONSTRUCTION_SITES);
             let rs;
             if (!_.some(spawn.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}))) {
