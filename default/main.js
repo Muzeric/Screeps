@@ -113,7 +113,7 @@ module.exports.loop = function () {
             }
             let info = {
                 longbuilder : utils.getLongBuilderTargets() ? 1 : 0,
-                builder : (allRoles["builder"].count[spawnName] < cs.length + (rs ? rs.length : 0))
+                builder : ((allRoles["builder"] ? allRoles["builder"].count[spawnName] : 0) < cs.length + (rs ? rs.length : 0))
             };
 
             let minEnergy = 300;
