@@ -48,7 +48,7 @@ var roleBuilder = {
 	    }
 	    else {
 	        if(!creep.memory.energyID) {
-	            creep.memory.energyID = utils.findSource(creep);
+	            creep.memory.energyID = utils.findSource(creep, 1);
 	        }
             utils.gotoSource(creep);
 	    }

@@ -72,9 +72,9 @@ var role = {
             return;
         }
         let energyDiff = 0;
-        if (total_energy > 1300) {
-            energyDiff = total_energy - 1300;
-            total_energy = 1300;
+        if (total_energy > 1000) {
+            energyDiff = total_energy - 1000;
+            total_energy = 1000;
         }
         total_energy -= 300;
         let body = [MOVE,CARRY,WORK,WORK];

@@ -78,6 +78,16 @@ module.exports = {
             //console.log(creep.name + " has source=container without miners");
             creep.memory.energyID = null;
             return;
+        /*
+        } else if (
+            source.structureType &&
+            source.structureType == STRUCTURE_CONTAINER &&
+            source.store[RESOURCE_ENERGY] < creep.carryCapacity
+        ) {
+            console.log(creep.name + " has source=container without energy");
+            creep.memory.energyID = null;
+            return;
+        */
         } else if (
             source.structureType &&
             source.structureType == STRUCTURE_STORAGE &&

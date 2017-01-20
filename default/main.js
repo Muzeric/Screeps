@@ -28,10 +28,10 @@ var spawn_config = {
             ["longharvester", 3],
             ["REPAIR", 1],
             ["claimer", 3],
-            ["longminer", 2],
+            ["longminer", 3],
             ["shortminer", 1],
             ["longbuilder", 1],
-            ["longharvester", 7],
+            ["longharvester", 5],
             ["builder", 1],
             ["upgrader", 2],
             ["longharvester", 12],
@@ -98,8 +98,17 @@ module.exports.loop = function () {
         else
             console.log("Uknown role=" + creep.memory.role);
             
-        let diffCPU = (Game.cpu.getUsed() - lastCPU)
-            
+        let diffCPU = (Game.cpu.getUsed() - lastCPU);
+        let diffEnergy = creep.carry[RESOURCE_ENERGY] - creep.memory.lastEnergy;
+        creep.memory.lastEnergy = creep.carry[RESOURCE_ENERGY];
+        
+        if (diffEnergy < 0)
+            creep.memory.spentEnergy -= diffEnergy;
+        else
+            creep.memory.gotEnergy += diffEnergy;
+        creep.memory.spentCPU += diffCPU;
+        
+        /*    
         if(!stat["cpu"]["run"][creep.memory.role]) {
             stat["cpu"]["run"][creep.memory.role] = {
                 last: diffCPU,
@@ -112,6 +121,7 @@ module.exports.loop = function () {
             if (diffCPU > stat["cpu"]["run"][creep.memory.role].max)
                 stat["cpu"]["run"][creep.memory.role].max = diffCPU;
         }
+        */
     }
     
     stat.roles = JSON.parse(JSON.stringify(roles));
@@ -127,7 +137,7 @@ module.exports.loop = function () {
         
                 
         let canRepair = 0;
-        if (!spawn.spawning && !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(spawn) && c.ticksToLive < 800) ) {
+        if (!spawn.spawning && !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(spawn) && c.ticksToLive < 1000) ) {
             let cs = spawn.room.find(FIND_CONSTRUCTION_SITES);
             let rs;
             if (!_.some(spawn.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}))) {
@@ -174,6 +184,14 @@ module.exports.loop = function () {
                     ) {
                         let energy = spawn.room.energyAvailable;
                         let res = roles[role].obj.create(spawnName, role, energy);
+                        
+                        if(Game.creeps[res[0]]) {
+                            let creep = Game.creeps[res[0]];
+                            creep.memory.body = res[1].join();
+                            creep.memory.spentEnergy = 0;
+                            creep.memory.gotEnergy = 0;
+                            creep.memory.spentCPU = 0;
+                        }
 
                         console.log(res[0] + " BORN by " + spawnName + ", energy (" + energy + "->" + res[2] + ") [" + res[1] + "]");
                     }

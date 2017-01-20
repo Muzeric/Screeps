@@ -23,7 +23,7 @@ var role = {
                 }
             }
             if (!container) {
-                console.log(creep.name + ": no containers in room, nothing to do");
+                //console.log(creep.name + ": no containers in room, nothing to do");
                 return;
             }
             creep.memory.cID = container.id;
@@ -84,6 +84,11 @@ var role = {
             console.log("No spawn with name=" + spawnName);
             return;
         }
+        let energyDiff = 0;
+        if (total_energy > 1000) {
+            energyDiff = total_energy - 1000;
+            total_energy = 1000;
+        }
         total_energy -= 80*3 + 50*2; // For move-attack parts
         let body = [];
         let wnum = 0;
@@ -117,6 +122,7 @@ var role = {
 	    }
         body.push(MOVE,MOVE,ATTACK,ATTACK,ATTACK);
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
+	    total_energy += energyDiff;
         return [newName, body, total_energy];
 	}
 };
