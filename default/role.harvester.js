@@ -28,7 +28,7 @@ var roleHarvester = {
                             structure.energy < structure.energyCapacity
                         ) && creep.ticksToLive > 500
                         )
-                        || (creep.ticksToLive < 800 && structure.structureType == STRUCTURE_SPAWN)    
+                        || (creep.ticksToLive < 1000 && structure.structureType == STRUCTURE_SPAWN)    
                         );
                     }
             });

@@ -50,6 +50,7 @@ module.exports.loop = function () {
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
             console.log(name + " DEAD (" + Memory.creeps[name].spawnName + ")");
+            statClass.die(name);
             delete Memory.creeps[name];
         } else if (Game.creeps[name].memory.errors > 0) {
             console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
@@ -81,17 +82,17 @@ module.exports.loop = function () {
         
         allRoles[creep.memory.role].obj.run(creep);
             
-        creep.memory.spentCPU += (Game.cpu.getUsed() - lastCPU);
+        creep.memory.stat.CPU += (Game.cpu.getUsed() - lastCPU);
 
         let diffEnergy = creep.carry[RESOURCE_ENERGY] - creep.memory.lastEnergy;
         creep.memory.lastEnergy = creep.carry[RESOURCE_ENERGY];
         if (diffEnergy < 0)
-            creep.memory.spentEnergy -= diffEnergy;
+            creep.memory.stat.spentEnergy -= diffEnergy;
         else
-            creep.memory.gotEnergy += diffEnergy;
+            creep.memory.stat.gotEnergy += diffEnergy;
 
         if (creep.pos.toString() != creep.memory.lastPos) {
-            creep.memory.moves++;
+            creep.memory.stat.moves++;
             creep.memory.lastPos = creep.pos.toString();
         }
         
@@ -141,7 +142,7 @@ module.exports.loop = function () {
                 if(!allRoles[role]) {
                     allRoles[role] = {
                         "count" : {},
-                        "obj" : require('role.' + creep.memory.role),
+                        "obj" : require('role.' + role),
                     };
                 }
                 if(!allRoles[role].count[spawnName])
@@ -167,12 +168,15 @@ module.exports.loop = function () {
                         let res = allRoles[role].obj.create(spawnName, role, energy);
                         
                         if(Game.creeps[res[0]]) {
-                            let creep = Game.creeps[res[0]];
-                            creep.memory.body = res[1].join();
-                            creep.memory.spentEnergy = 0;
-                            creep.memory.gotEnergy = 0;
-                            creep.memory.spentCPU = 0;
-                            creep.memory.moves = 0;
+                            let creepm = Game.creeps[res[0]].memory;
+                            creepm.body = res[1].join();
+                            creepm.energy = energy - res[2];
+                            creepm.stat = {
+                                spentEnergy : 0,
+                                gotEnergy : 0,
+                                CPU : 0,
+                                moves : 0,
+                            };
                         }
 
                         console.log(res[0] + " BORN by " + spawnName + ", energy (" + energy + "->" + res[2] + ") [" + res[1] + "]");
