@@ -20,6 +20,7 @@ var stat = {
                 else if (creepm.stat[statName] > statm['max' + statName])
                     statm['max' + statName] = creepm.stat[statName];
         };
+        statm[count] = (statm[count] || 0) + 1;
     },
 };
 
