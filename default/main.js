@@ -81,15 +81,20 @@ module.exports.loop = function () {
         
         allRoles[creep.memory.role].obj.run(creep);
             
-        let diffCPU = (Game.cpu.getUsed() - lastCPU);
+        creep.memory.spentCPU += (Game.cpu.getUsed() - lastCPU);
+
         let diffEnergy = creep.carry[RESOURCE_ENERGY] - creep.memory.lastEnergy;
         creep.memory.lastEnergy = creep.carry[RESOURCE_ENERGY];
-        
         if (diffEnergy < 0)
             creep.memory.spentEnergy -= diffEnergy;
         else
             creep.memory.gotEnergy += diffEnergy;
-        creep.memory.spentCPU += diffCPU;
+
+        if (creep.pos.toString() != creep.memory.lastPos) {
+            creep.memory.moves++;
+            creep.memory.lastPos = creep.pos.toString();
+        }
+        
     }
     
     stat.roles = JSON.parse(JSON.stringify(allRoles));
@@ -167,6 +172,7 @@ module.exports.loop = function () {
                             creep.memory.spentEnergy = 0;
                             creep.memory.gotEnergy = 0;
                             creep.memory.spentCPU = 0;
+                            creep.memory.moves = 0;
                         }
 
                         console.log(res[0] + " BORN by " + spawnName + ", energy (" + energy + "->" + res[2] + ") [" + res[1] + "]");
