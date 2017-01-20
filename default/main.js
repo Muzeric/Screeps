@@ -1,3 +1,5 @@
+var allRoles = {};
+/*
 var roles = {
     "harvester" : {},
     "builder" : {},
@@ -13,6 +15,7 @@ var roles = {
 for (let role in roles) {
     roles[role]["obj"] = require('role.' + role);
 }
+*/
 var utils = require('utils');
 
 var spawn_config = {
@@ -70,19 +73,25 @@ module.exports.loop = function () {
             error_count[Game.creeps[name].memory.spawnName] = error_count[Game.creeps[name].memory.spawnName] + 1 || 1;
         }
     }
-    
+    /*
     for (let role in roles) {
         roles[role]["count"] = {};
         for (let spawnName in spawn_config)
             roles[role]["count"][spawnName] = 0;
     }
-    
+    */
     for(let creep_name in Game.creeps) {
         let creep = Game.creeps[creep_name];
         if(creep.spawning) {
             continue;
         }
-        roles[creep.memory.role]["count"][creep.memory.spawnName]++;
+        if(!allRoles[creep.memory.role]) {
+            allRoles[creep.memory.role] = {
+                "count" : {},
+                "obj" : require('role.' + creep.memory.role),
+            };
+        }
+        allRoles[creep.memory.role]["count"][creep.memory.spawnName] = (allRoles[creep.memory.role]["count"][creep.memory.spawnName] || 0) + 1;
         
         if(error_count[creep.memory.spawnName]) {
             if(creep.moveTo(creep.room.controller) == OK) {
@@ -93,10 +102,7 @@ module.exports.loop = function () {
         
         let lastCPU = Game.cpu.getUsed();
         
-        if(roles[creep.memory.role])
-            roles[creep.memory.role].obj.run(creep);
-        else
-            console.log("Uknown role=" + creep.memory.role);
+        allRoles[creep.memory.role].obj.run(creep);
             
         let diffCPU = (Game.cpu.getUsed() - lastCPU);
         let diffEnergy = creep.carry[RESOURCE_ENERGY] - creep.memory.lastEnergy;
@@ -107,24 +113,9 @@ module.exports.loop = function () {
         else
             creep.memory.gotEnergy += diffEnergy;
         creep.memory.spentCPU += diffCPU;
-        
-        /*    
-        if(!stat["cpu"]["run"][creep.memory.role]) {
-            stat["cpu"]["run"][creep.memory.role] = {
-                last: diffCPU,
-                log: diffCPU,
-                max: diffCPU,
-            };
-        } else {
-            stat["cpu"]["run"][creep.memory.role].log = stat["cpu"]["run"][creep.memory.role].log*0.9 + diffCPU*0.1;
-            stat["cpu"]["run"][creep.memory.role].last = diffCPU;
-            if (diffCPU > stat["cpu"]["run"][creep.memory.role].max)
-                stat["cpu"]["run"][creep.memory.role].max = diffCPU;
-        }
-        */
     }
     
-    stat.roles = JSON.parse(JSON.stringify(roles));
+    stat.roles = JSON.parse(JSON.stringify(allRoles));
     
     
     for (let spawnName in spawn_config) {
@@ -145,7 +136,7 @@ module.exports.loop = function () {
             }
             let info = {
                 longbuilder : utils.getLongBuilderTargets() ? 1 : 0,
-                builder : (roles["builder"].count[spawnName] < cs.length + (rs ? rs.length : 0))
+                builder : (allRoles["builder"].count[spawnName] < cs.length + (rs ? rs.length : 0))
             };
 
             let minEnergy = 300;
@@ -166,8 +157,8 @@ module.exports.loop = function () {
                 if (role in info && !info[role])
                     continue;
                 if (
-                    roles[role].count[spawnName] < climit || 
-                    (roles[role].count[spawnName] == climit && _.some(Game.creeps, c => 
+                    allRoles[role].count[spawnName] < climit || 
+                    (allRoles[role].count[spawnName] == climit && _.some(Game.creeps, c => 
                         c.ticksToLive < 200 &&
                         c.memory.role == role &&
                         c.memory.spawnName == spawnName
@@ -183,7 +174,7 @@ module.exports.loop = function () {
                         spawn.room.energyAvailable >= minEnergy
                     ) {
                         let energy = spawn.room.energyAvailable;
-                        let res = roles[role].obj.create(spawnName, role, energy);
+                        let res = allRoles[role].obj.create(spawnName, role, energy);
                         
                         if(Game.creeps[res[0]]) {
                             let creep = Game.creeps[res[0]];
