@@ -1,21 +1,4 @@
 var allRoles = {};
-/*
-var roles = {
-    "harvester" : {},
-    "builder" : {},
-    "upgrader" : {},
-    "miner" : {},
-    "longminer" : {},
-    "claimer" : {},
-    "attacker" : {},
-    "shortminer" : {},
-    "longbuilder" : {},
-    "longharvester" : {},
-};
-for (let role in roles) {
-    roles[role]["obj"] = require('role.' + role);
-}
-*/
 var utils = require('utils');
 
 var spawn_config = {
@@ -73,13 +56,7 @@ module.exports.loop = function () {
             error_count[Game.creeps[name].memory.spawnName] = error_count[Game.creeps[name].memory.spawnName] + 1 || 1;
         }
     }
-    /*
-    for (let role in roles) {
-        roles[role]["count"] = {};
-        for (let spawnName in spawn_config)
-            roles[role]["count"][spawnName] = 0;
-    }
-    */
+
     for(let creep_name in Game.creeps) {
         let creep = Game.creeps[creep_name];
         if(creep.spawning) {
@@ -156,6 +133,14 @@ module.exports.loop = function () {
                 }
                 if (role in info && !info[role])
                     continue;
+                if(!allRoles[role]) {
+                    allRoles[role] = {
+                        "count" : {},
+                        "obj" : require('role.' + creep.memory.role),
+                    };
+                }
+                if(!allRoles[role].count[spawnName])
+                    allRoles[role].count[spawnName] = 0;
                 if (
                     allRoles[role].count[spawnName] < climit || 
                     (allRoles[role].count[spawnName] == climit && _.some(Game.creeps, c => 
