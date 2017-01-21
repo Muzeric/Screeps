@@ -70,7 +70,9 @@ module.exports.loop = function () {
                 "obj" : require('role.' + creep.memory.role),
             };
         }
-        allRoles[creep.memory.role]["count"][creep.memory.spawnName] = (allRoles[creep.memory.role]["count"][creep.memory.spawnName] || 0) + 1;
+        
+        if (creep.ticksToLive > 200)
+            allRoles[creep.memory.role]["count"][creep.memory.spawnName] = (allRoles[creep.memory.role]["count"][creep.memory.spawnName] || 0) + 1;
         
         if(error_count[creep.memory.spawnName]) {
             if(creep.moveTo(creep.room.controller) == OK) {
@@ -124,7 +126,14 @@ module.exports.loop = function () {
             };
 
             let addCount = {
-                claimer : _.sum(Game.flags, f => f.name.substring(0, 10) == 'Controller' && !_.some(Game.creeps, c => c.memory.role == "claimer" && c.memory.controllerName == f.name && c.ticksToLive > 200) ),
+                claimer : _.sum(Game.flags, f => 
+                    f.name.substring(0, 10) == 'Controller' &&
+                    !_.some(Game.creeps, c => 
+                        c.memory.role == "claimer" && 
+                        c.memory.controllerName == f.name && 
+                        c.ticksToLive > 200
+                    ) 
+                ),
                 longminer :  _.filter(Game.flags, f => 
                     f.name.substring(0, 6) == 'Source' &&
                     f.room && 
@@ -133,7 +142,7 @@ module.exports.loop = function () {
                             !_.some(Game.creeps, c => 
                                 c.memory.role == "longminer" &&
                                 c.memory.cID == s.id && 
-                                c.ticksToLive > 500) 
+                                c.ticksToLive > 200) 
                     }).length 
                 ).length,
             };
@@ -144,14 +153,13 @@ module.exports.loop = function () {
                 let role = arr[0];
                 let climit = arr[1];
                 let emin = arr[2];
-                
+                let count = (allRoles[role] ? allRoles[role].count[spawnName] : 0);
+    
                 //if (spawnName == "Spawn1")
-                //    console.log(spawnName + " check " + role + "; climit=" + climit + "; count=" + (allRoles[role] ? allRoles[role].count[spawnName] : 0) + "; addCount=" + addCount[role]);
+                //    console.log(spawnName + " check " + role + "; climit=" + climit + "; count=" + count + "; addCount=" + addCount[role]);
                 
-                if (climit <= 0)
+                if (climit <= 0 || role in addCount && addCount[role] <= 0)
                     continue;
-                else if (role in addCount)
-                    climit = addCount[role];
 
                 if (role == "ENERGY") {
                     minEnergy = climit;
@@ -168,15 +176,9 @@ module.exports.loop = function () {
                         "obj" : require('role.' + role),
                     };
                 }
-                if(!allRoles[role].count[spawnName])
-                    allRoles[role].count[spawnName] = 0;
                 if (
-                    allRoles[role].count[spawnName] < climit || 
-                    (allRoles[role].count[spawnName] == climit && _.some(Game.creeps, c => 
-                        c.ticksToLive < 200 &&
-                        c.memory.role == role &&
-                        c.memory.spawnName == spawnName
-                    ))
+                    role in addCount && addCount[role] > 0 ||
+                    !(role in addCount) && count < climit
                 ) {
                     // Need, but not enough energy, so break & WAIT
                     if (emin && spawn.room.energyAvailable < spawn.room.energyCapacityAvailable && spawn.room.energyAvailable < emin)
