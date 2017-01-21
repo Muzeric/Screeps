@@ -1,4 +1,3 @@
-var allRoles = {};
 var utils = require('utils');
 
 var spawn_config = {
@@ -14,7 +13,7 @@ var spawn_config = {
             ["longharvester", 3],
             ["REPAIR", 1],
             ["claimer", 3],
-            ["longminer", 3],
+            ["longminer", 2],
             ["shortminer", 1],
             ["longbuilder", 1],
             ["longharvester", 5],
@@ -47,6 +46,8 @@ var stat = statClass.init();
 
 module.exports.loop = function () {
     var error_count = {};
+    var allRoles = {};
+    
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
             console.log(name + " DEAD (" + Memory.creeps[name].spawnName + ")");
@@ -54,7 +55,7 @@ module.exports.loop = function () {
             delete Memory.creeps[name];
         } else if (Game.creeps[name].memory.errors > 0) {
             console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
-            error_count[Game.creeps[name].memory.spawnName] = error_count[Game.creeps[name].memory.spawnName] + 1 || 1;
+            error_count[Game.creeps[name].memory.spawnName] = (error_count[Game.creeps[name].memory.spawnName] || 0) + 1;
         }
     }
 
@@ -128,6 +129,9 @@ module.exports.loop = function () {
                 let climit = arr[1];
                 let emin = arr[2];
                 
+                //if (spawnName == "Spawn1")
+                //    console.log(spawnName + " check " + role + "; climit=" + climit + "; count=" + (allRoles[role] ? allRoles[role].count[spawnName] : 0));
+                
                 if (climit <= 0)
                     continue;
                 if (role == "ENERGY") {
@@ -181,7 +185,6 @@ module.exports.loop = function () {
 
                         console.log(res[0] + " BORN by " + spawnName + ", energy (" + energy + "->" + res[2] + ") [" + res[1] + "]");
                     }
-                    //console.log(spawnName + " wants to burn " + role);
                     break;
                 }
                 //console.log("Create " + role + " used " + Math.floor(Game.cpu.getUsed() * 100 / Game.cpu.tickLimit) + "% of CPU" );
