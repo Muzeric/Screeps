@@ -13,7 +13,7 @@ var spawn_config = {
             ["longharvester", 3],
             ["REPAIR", 1],
             ["claimer", 3],
-            ["longminer", 2],
+            ["longminer", 3],
             ["shortminer", 1],
             ["longbuilder", 1],
             ["longharvester", 5],
@@ -28,7 +28,7 @@ var spawn_config = {
             ["harvester", 1],
             ["miner", 1],
             ["ENERGY", 1500],
-            ["harvester", 1],
+            ["harvester", 2],
             ["miner", 1],
             ["upgrader", 1],
             ["REPAIR", 1],
@@ -153,9 +153,9 @@ module.exports.loop = function () {
                 let role = arr[0];
                 let climit = arr[1];
                 let emin = arr[2];
-                let count = (allRoles[role] ? allRoles[role].count[spawnName] : 0);
+                let count = (allRoles[role] ? (allRoles[role].count[spawnName]||0) : 0);
     
-                //if (spawnName == "Spawn1")
+                //if (spawnName == "Spawn2")
                 //    console.log(spawnName + " check " + role + "; climit=" + climit + "; count=" + count + "; addCount=" + addCount[role]);
                 
                 if (climit <= 0 || role in addCount && addCount[role] <= 0)
