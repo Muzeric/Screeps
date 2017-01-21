@@ -114,14 +114,30 @@ module.exports.loop = function () {
         let canRepair = 0;
         if (!spawn.spawning && !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(spawn) && c.ticksToLive < 1000) ) {
             let cs = spawn.room.find(FIND_CONSTRUCTION_SITES);
-            let rs;
+            let rs = [];
             if (!_.some(spawn.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}))) {
                 rs = spawn.room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.9 } );
             }
-            let info = {
+            let addCheck = {
                 longbuilder : utils.getLongBuilderTargets() ? 1 : 0,
-                builder : ((allRoles["builder"] ? allRoles["builder"].count[spawnName] : 0) < cs.length + (rs ? rs.length : 0))
+                builder : ((allRoles["builder"] ? allRoles["builder"].count[spawnName] : 0) < cs.length + rs.length),
             };
+
+            let addCount = {
+                claimer : _.sum(Game.flags, f => f.name.substring(0, 10) == 'Controller' && !_.some(Game.creeps, c => c.memory.role == "claimer" && c.memory.controllerName == f.name && c.ticksToLive > 200) ),
+                longminer :  _.filter(Game.flags, f => 
+                    f.name.substring(0, 6) == 'Source' &&
+                    f.room && 
+                    f.pos.findInRange(FIND_STRUCTURES, 2, {filter : s => 
+                            s.structureType == STRUCTURE_CONTAINER && 
+                            !_.some(Game.creeps, c => 
+                                c.memory.role == "longminer" &&
+                                c.memory.cID == s.id && 
+                                c.ticksToLive > 500) 
+                    }).length 
+                ).length,
+            };
+
 
             let minEnergy = 300;
             for (let arr of spawn_config[spawnName]["creeps"]) {
@@ -130,10 +146,13 @@ module.exports.loop = function () {
                 let emin = arr[2];
                 
                 //if (spawnName == "Spawn1")
-                //    console.log(spawnName + " check " + role + "; climit=" + climit + "; count=" + (allRoles[role] ? allRoles[role].count[spawnName] : 0));
+                //    console.log(spawnName + " check " + role + "; climit=" + climit + "; count=" + (allRoles[role] ? allRoles[role].count[spawnName] : 0) + "; addCount=" + addCount[role]);
                 
                 if (climit <= 0)
                     continue;
+                else if (role in addCount)
+                    climit = addCount[role];
+
                 if (role == "ENERGY") {
                     minEnergy = climit;
                     continue;
@@ -141,7 +160,7 @@ module.exports.loop = function () {
                     canRepair = 1;
                     continue;
                 }
-                if (role in info && !info[role])
+                if (role in addCheck && !addCheck[role])
                     continue;
                 if(!allRoles[role]) {
                     allRoles[role] = {
