@@ -128,10 +128,10 @@ if(0) {
                 continue;
 
             if (need.role == "ENERGY") {
-                minEnergy = climit;
+                minEnergy = need.limit;
                 continue;
             } else if (need.role == "REPAIR") {
-                canRepair = 1;
+                canRepair = need.limit;
                 continue;
             }
             if(!allRoles[need.role]) {
