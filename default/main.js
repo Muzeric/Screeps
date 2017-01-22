@@ -106,29 +106,31 @@ module.exports.loop = function () {
 if(0) {    
     
     _.forEach(_.filter(Game.rooms, r => r.controller.my), function(room) {
+        let lastCPU = Game.cpu.getUsed();
         console.log(room.name + ": start observing");
         let scount = _.countBy(room.find(FIND_STRUCTURES), 'structureType' );
         scount["source"] = room.find(FIND_SOURCES).length;
         scount["construction"] = room.find(FIND_MY_CONSTRUCTION_SITES).length;
-        let repairLimit = utils.roomConfig[room.name].repairLimit || 100000;
         scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit }).length;
-        let ccount =  _.countBy(_.filter(Game.creeps, c => c.pos.roomName == room.name), 'memory.role'); // TODO: use creep.memory.roomName
+        let repairLimit = utils.roomConfig[room.name].repairLimit || 100000;
+        let ccount =  _.countBy(_.filter(Game.creeps, c => c.pos.roomName == room.name && c.ticksToLive > 200), 'memory.role'); // TODO: use creep.memory.roomName
         let spawns = room.find(FIND_MY_SPAWNS, {filter : s => !s.spawning});
-        if (!spawns.length) {
+        /*if (!spawns.length) {
             console.log(room.name + ": all spawns are spawning");
-            //return true;
-        }
+            return true;
+        }*/
 
         let need = {};
         need["harvester"] = _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3);
         need["miner"] = _.min([scount[STRUCTURE_CONTAINER], scount["source"]]);
         need["upgrader"] = scount["source"];
         need["builder"] = (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 1 : 0;
-        need["shortminer"] = (scount[STRUCTURE_LINK] >= 2 && scount[STRUCTURE_STORAGE]) ? 1 : 0;
+        need["shortminer"] = (scount[STRUCTURE_LINK] >= 2 && scount[STRUCTURE_STORAGE] && ccount["longharvester"]) ? 1 : 0;
 
-        _.forEach(need, function (value, key) {
+        console.log(room.name + ": CPU=" + (Game.cpu.getUsed() - lastCPU) + "; count=" + JSON.stringify(need));
+        /*_.forEach(need, function (value, key) {
             console.log(room.name + ": " + key + "=" + value);
-        })
+        })*/
     });
 
 }

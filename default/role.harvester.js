@@ -22,10 +22,11 @@ var roleHarvester = {
                     filter: (structure) => {
                         return (
                         ((
-                            (structure.structureType == STRUCTURE_EXTENSION || 
-                            (structure.structureType == STRUCTURE_TOWER && structure.energy < structure.energyCapacity*0.9) || 
-                            structure.structureType == STRUCTURE_SPAWN) &&
-                            structure.energy < structure.energyCapacity
+                                (structure.structureType == STRUCTURE_EXTENSION || 
+                                (structure.structureType == STRUCTURE_TOWER && structure.energy < structure.energyCapacity*0.9) || 
+                                structure.structureType == STRUCTURE_SPAWN)
+                            &&
+                                structure.energy < structure.energyCapacity
                         ) && creep.ticksToLive > 500
                         )
                         || (creep.ticksToLive < 1000 && structure.structureType == STRUCTURE_SPAWN)    
@@ -55,29 +56,34 @@ var roleHarvester = {
         }
 	},
 	
-	create: function(spawnName, role, total_energy) {
+	create: function(spawnName, role, total_energy, worker) {
 	    let spawn = Game.spawns[spawnName];
         if(!spawn) {
             console.log("No spawn with name=" + spawnName);
             return;
         }
         let energyDiff = 0;
-        if (total_energy > 1300) {
-            energyDiff = total_energy - 1300;
-            total_energy = 1300;
+        if (total_energy > 1350) {
+            energyDiff = total_energy - 1350;
+            total_energy = 1350;
         }
-        total_energy -= 100;
-        let body = [WORK];
-        let fat = 1;
+        let body = [];
+        let fat = 0;
+        let mnum = 0;
 	    while (total_energy >= 50) {
-	        if(fat >= 0 && total_energy >= 50) {
+	        if((!mnum || fat/(mnum*2) >= 1) && total_energy >= 50) {
 	            body.push(MOVE);
 	            total_energy -= 50;
-	            fat -= 2;
+                mnum++;
 	        }
 	        if(total_energy >= 50) {
 	            body.push(CARRY);
 	            total_energy -= 50;
+	            fat++;
+	        }
+            if(worker && total_energy >= 100) {
+	            body.push(WORK);
+	            total_energy -= 100;
 	            fat++;
 	        }
 	    }
