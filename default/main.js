@@ -108,9 +108,9 @@ if(0) {
     _.forEach(_.filter(Game.rooms, r => r.controller.my), function(room) {
         let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == room.name && c.ticksToLive > 200), 'memory.role'); 
 
-        if (!Memory.needList || !Memory.needTime || (Game.time - Memory.needTime > 10)) {
-            Memory.needList = getNeed(room, creepsCount);
-            Memory.needTime = Game.time;
+        if (!Memory.needList || !Memory.needList[room.name] || !Memory.needTime || !Memory.needTime[room.name] || (Game.time - Memory.needTime[room.name] > 10)) {
+            Memory.needList[room.name] = getNeed(room, creepsCount);
+            Memory.needTime[room.name] = Game.time;
         }
 
         let spawns = room.find(FIND_MY_SPAWNS, {filter : s => !s.spawning});
@@ -121,7 +121,7 @@ if(0) {
 
         let minEnergy = 300;
         let canRepair = 0;
-        for (let need of Memory.needList) {
+        for (let need of Memory.needList[room.name]) {
             if(!spawns.length)
                 break;
             if (need.limit <= 0)
