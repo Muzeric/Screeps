@@ -71,38 +71,26 @@ var role = {
             console.log("No spawn with name=" + spawnName);
             return;
         }
-        let energyDiff = 0;
-        if (total_energy > 1000) {
-            energyDiff = total_energy - 1000;
-            total_energy = 1000;
-        }
-        total_energy -= 300;
-        let body = [MOVE,CARRY,WORK,WORK];
-        let mnum = Math.floor(total_energy / 400);
-        for (let i = 0; i < mnum; i++) {
-            body.push(MOVE);
-            total_energy -= 50;
-        }
-	    let wnum = 0;
-	    let cnum = 1;
-	    while (total_energy >= 100) {
-	        if(total_energy >= 100) {
+
+        total_energy -= 50;
+        let body = [CARRY];
+        let wlim = 5;
+        let fat = 1;
+        while (total_energy >= 100 && wlim) {
+            if (total_energy >= 100) {
 	            body.push(WORK);
-	            wnum++;
+	            wlim--;
+                fat++;
 	            total_energy -= 100;
 	        }
-	        if(wnum % 3 == 0 && total_energy >= 50 && cnum < 3) {
-	            body.push(CARRY);
+            if (fat > 0 && total_energy >= 50) {
+                body.push(MOVE);
 	            total_energy -= 50;
-	            cnum++;
-	        }
-	    }
-	    if(total_energy >= 50) {
-	        body.push(MOVE);
-	        total_energy -= 50;
-	    }
+                fat -= 2;
+            }
+        }
+
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-        total_energy += energyDiff;
 	    return [newName, body, total_energy];
 	}
 };

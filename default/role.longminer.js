@@ -84,45 +84,30 @@ var role = {
             console.log("No spawn with name=" + spawnName);
             return;
         }
-        let energyDiff = 0;
-        if (total_energy > 1000) {
-            energyDiff = total_energy - 1000;
-            total_energy = 1000;
-        }
-        total_energy -= 80*3 + 50*2; // For move-attack parts
-        let body = [];
-        let wnum = 0;
-	    let fat = -1;
-	    while (total_energy >= 100) {
-	        if(fat >= 0 && total_energy >= 50) {
-	            body.push(MOVE);
-	            total_energy -= 50;
-	            fat -= 2;
-	        }
-	        if(wnum % 3 == 0 && total_energy >= 50) {
-	            body.push(CARRY);
-	            total_energy -= 50;
-	            fat++;
-	        }
-	        if(fat >= 0 && total_energy >= 50) {
-	            body.push(MOVE);
-	            total_energy -= 50;
-	            fat -= 2;
-	        }
-	        if(total_energy >= 100) {
+        total_energy -= 80*2 + 50; // For move-attack parts
+        total_energy -= 50;
+        let body = [CARRY];
+        let wlim = 5;
+        let fat = 1;
+        while (total_energy >= 100 && wlim) {
+            if (total_energy >= 100) {
 	            body.push(WORK);
+	            wlim--;
+                fat++;
 	            total_energy -= 100;
-                wnum++;
-	            fat++;
 	        }
-	    }
-        if(total_energy >= 50) {
+            if (fat > 0 && total_energy >= 50) {
+                body.push(MOVE);
+	            total_energy -= 50;
+                fat -= 2;
+            }
+        }
+        if(fat > 0 && total_energy >= 50) {
             body.push(MOVE);
             total_energy -= 50;
 	    }
-        body.push(MOVE,MOVE,ATTACK,ATTACK,ATTACK);
+        body.push(MOVE,ATTACK,ATTACK);
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-	    total_energy += energyDiff;
         return [newName, body, total_energy];
 	}
 };
