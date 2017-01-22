@@ -204,7 +204,7 @@ module.exports.loop = function () {
                             };
                         }
 
-                        console.log(res[0] + " BORN by " + spawnName + ", energy (" + energy + "->" + res[2] + ") [" + res[1] + "]");
+                        console.log(res[0] + " BORN by " + spawnName + ", energy (" + energy + "->" + res[2] + ":" + (energy - res[2]) + ") [" + res[1] + "]");
                     }
                     break;
                 }

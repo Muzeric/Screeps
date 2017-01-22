@@ -33,15 +33,17 @@ module.exports = {
             for(let container of containers) {
                 let cenergy = container.store[RESOURCE_ENERGY];
                 let cpath = creep.pos.getRangeTo(container);
-                let cminers = _.sum(Game.creeps, (c) => c.memory.role == "miner" && c.memory.cID == container.id);
-                let cgots = _.sum(Game.creeps, (c) => c.memory.energyID == container.id);
-                let cpriority = container.structureType == STRUCTURE_STORAGE && storage_priority || container.structureType == STRUCTURE_CONTAINER && cenergy * 1.5 > creep.carryCapacity ? 1 : 0;
+                let wantEnergy = _.reduce(_.filter(Game.creeps, c => c.memory.energyID == container.id), function (sum, value) { return sum + value.carryCapacity; }, 0);
+                let cpriority = container.structureType == STRUCTURE_STORAGE && storage_priority || container.structureType == STRUCTURE_CONTAINER ? 1 : 0;
+                let cenergyTicks = (wantEnergy + creep.carryCapacity - cenergy) / 10;
+                if (cenergyTicks < 0)
+                    cenergyTicks = 0;
                 //console.log(creep.name + " has container " + container.id + " in " + cpath + " with " + cenergy + " energy and " + cgots + " gots and sum=" + (cpath + (2000 - cenergy + cgots * 200) / 100 - 10000 * cpriority));
-                cont_info[container.id] = {cenergy : cenergy, cpath : cpath, cgots : cgots, cpriority : cpriority};
+                cont_info[container.id] = cpath * 1.2 + cenergyTicks - 100 * cpriority;
             }
             let container = containers.sort( function (a,b) {
-                let suma = cont_info[a.id].cpath + (2000 - cont_info[a.id].cenergy + cont_info[a.id].cgots * 200) / 100 - 10000 * cont_info[a.id].cpriority;
-                let sumb = cont_info[b.id].cpath + (2000 - cont_info[b.id].cenergy + cont_info[b.id].cgots * 200) / 100 - 10000 * cont_info[b.id].cpriority;
+                let suma = cont_info[a.id];
+                let sumb = cont_info[b.id];
                 //console.log("a=" + a.id + ",b=" + b.id + ",suma=" + suma + ",sumb=" + sumb);
                 return suma - sumb;
             })[0];
