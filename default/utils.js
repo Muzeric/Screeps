@@ -34,11 +34,11 @@ module.exports = {
                 let cenergy = container.store[RESOURCE_ENERGY];
                 let cpath = creep.pos.getRangeTo(container);
                 let wantEnergy = _.reduce(_.filter(Game.creeps, c => c.memory.energyID == container.id), function (sum, value) { return sum + value.carryCapacity; }, 0);
-                let cpriority = container.structureType == STRUCTURE_STORAGE && storage_priority || container.structureType == STRUCTURE_CONTAINER ? 1 : 0;
+                let cpriority = storage_priority && container.structureType == STRUCTURE_STORAGE || !storage_priority && container.structureType == STRUCTURE_CONTAINER ? 1 : 0;
                 let cenergyTicks = (wantEnergy + creep.carryCapacity - cenergy) / 10;
                 if (cenergyTicks < 0)
                     cenergyTicks = 0;
-                //console.log(creep.name + " has container " + container.id + " in " + cpath + " with " + cenergy + " energy and " + cgots + " gots and sum=" + (cpath + (2000 - cenergy + cgots * 200) / 100 - 10000 * cpriority));
+                //console.log(creep.name + " [" + creep.memory.spawnName + "] has container " + container.id + " in " + cpath + " with " + cenergy + " energy and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + cont_info[container.id]);
                 cont_info[container.id] = cpath * 1.2 + cenergyTicks - 100 * cpriority;
             }
             let container = containers.sort( function (a,b) {
