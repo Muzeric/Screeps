@@ -120,7 +120,7 @@ var role = {
 function set_cid (creep) {
     //console.log("Searching container for " + creep.name);
     if(creep.memory.energyName && (creep.memory.energyName == 'Source.W47N4' || creep.memory.energyName == 'Source.W47N3') && creep.memory.roomName == "W48N4") {
-        let links = _.filter([Game.getObjectById('5885198c52b1ece7377c7f8b'), Game.getObjectById('587869503d6c02904166296f')], l => l.energy + creep.carry <= l.energyCapacity);
+        let links = _.filter([Game.getObjectById('5885198c52b1ece7377c7f8b'), Game.getObjectById('587869503d6c02904166296f')], l => l.energy + creep.carry.energy <= l.energyCapacity);
         if(links.length) {
             creep.memory.cID = links[0].id;
             //console.log("Link for " + creep.name + " is " + creep.memory.cID);

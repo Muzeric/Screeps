@@ -111,8 +111,8 @@ if(0) {
         let scount = _.countBy(room.find(FIND_STRUCTURES), 'structureType' );
         scount["source"] = room.find(FIND_SOURCES).length;
         scount["construction"] = room.find(FIND_MY_CONSTRUCTION_SITES).length;
-        scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit }).length;
         let repairLimit = utils.roomConfig[room.name].repairLimit || 100000;
+        scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit }).length;
         let ccount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == room.name && c.ticksToLive > 200), 'memory.role'); 
         let spawns = room.find(FIND_MY_SPAWNS, {filter : s => !s.spawning});
         /*if (!spawns.length) {
