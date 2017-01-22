@@ -108,9 +108,10 @@ if(0) {
     _.forEach(_.filter(Game.rooms, r => r.controller.my), function(room) {
         let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == room.name && c.ticksToLive > 200), 'memory.role'); 
 
-        if (!Memory.need)
-            Memory.need = getNeed(room, creepsCount);
-        let needList = Memory.need;
+        if (!Memory.needList || !Memory.needTime || (Game.time - Memory.needTime > 10)) {
+            Memory.needList = getNeed(room, creepsCount);
+            Memory.needTime = Game.time;
+        }
 
         let spawns = room.find(FIND_MY_SPAWNS, {filter : s => !s.spawning});
         if (!spawns.length) {
@@ -120,7 +121,7 @@ if(0) {
 
         let minEnergy = 300;
         let canRepair = 0;
-        for (let need of needList) {
+        for (let need of Memory.needList) {
             if(!spawns.length)
                 break;
             if (need.limit <= 0)
@@ -152,7 +153,7 @@ if(0) {
                 ) {
                     let energy = room.energyAvailable;
                     let spawn = spawns.pop();
-                    console.log("autocreate: try to create " + need.role + " with energy=" + energy);
+                    console.log(room.name + ": tries to create " + need.role + " with energy=" + energy);
                     /*
                     let res = allRoles[need.role].obj.create(spawn.name, role, energy);
                     
@@ -172,7 +173,6 @@ if(0) {
                     console.log(res[0] + " BORN by " + spawnName + ", energy (" + energy + "->" + res[2] + ":" + (energy - res[2]) + ") [" + res[1] + "]");
                     */
                 }
-                break;
             }
 
         }
@@ -344,7 +344,7 @@ function getNeed (room, creepsCount) {
     scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit }).length;
     
     let need = [];
-    push(need, {
+    need.push({
             "role" : "harvester",
             "limit" : _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3),
             "args" : [scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1],
@@ -352,8 +352,14 @@ function getNeed (room, creepsCount) {
             "role" : "miner",
             "limit" : _.min([scount[STRUCTURE_CONTAINER], scount["source"]]),
     },{
+            "role" : "ENERGY",
+            "limit" : 1500,
+    },{
             role : "upgrader",
             "limit" : scount["source"],
+    },{
+            "role" : "REPAIR",
+            "limit" : 1,
     },{
             "role" : "builder",
             "limit" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 1 : 0,
@@ -362,7 +368,7 @@ function getNeed (room, creepsCount) {
             "limit" : (scount[STRUCTURE_LINK] >= 2 && scount[STRUCTURE_STORAGE] && creepsCount["longharvester"]) ? 1 : 0,
     });
 
-    console.log(room.name + ": CPU=" + (Game.cpu.getUsed() - lastCPU) + "; count=" + JSON.stringify(need));
+    console.log(room.name + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; count=" + JSON.stringify(need));
 
     return need;
 }
