@@ -6,7 +6,7 @@ var spawn_config = {
             ["harvester", 1],
             ["miner", 1],
             ["ENERGY", 1500],
-            ["attacker", 0, 1800],
+            ["attacker", 0, 2300],
             ["harvester", 4],
             ["miner", 2],
             ["upgrader", 1],
@@ -103,6 +103,36 @@ module.exports.loop = function () {
     
     stat.roles = JSON.parse(JSON.stringify(allRoles));
     
+if(0) {    
+    
+    _.forEach(_.filter(Game.rooms, r => r.controller.my), function(room) {
+        console.log(room.name + ": start observing");
+        let scount = _.countBy(room.find(FIND_STRUCTURES), 'structureType' );
+        scount["source"] = room.find(FIND_SOURCES).length;
+        scount["construction"] = room.find(FIND_MY_CONSTRUCTION_SITES).length;
+        let repairLimit = utils.roomConfig[room.name].repairLimit || 100000;
+        scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit }).length;
+        let ccount =  _.countBy(_.filter(Game.creeps, c => c.pos.roomName == room.name), 'memory.role'); // TODO: use creep.memory.roomName
+        let spawns = room.find(FIND_MY_SPAWNS, {filter : s => !s.spawning});
+        if (!spawns.length) {
+            console.log(room.name + ": all spawns are spawning");
+            //return true;
+        }
+
+        let need = {};
+        need["harvester"] = _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3);
+        need["miner"] = _.min([scount[STRUCTURE_CONTAINER], scount["source"]]);
+        need["upgrader"] = scount["source"];
+        need["builder"] = (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 1 : 0;
+        need["shortminer"] = (scount[STRUCTURE_LINK] >= 2 && scount[STRUCTURE_STORAGE]) ? 1 : 0;
+
+        _.forEach(need, function (value, key) {
+            console.log(room.name + ": " + key + "=" + value);
+        })
+    });
+
+}
+    
     
     for (let spawnName in spawn_config) {
         //console.log("Start operations for: " + spawnName);
@@ -196,6 +226,7 @@ module.exports.loop = function () {
                             let creepm = Game.creeps[res[0]].memory;
                             creepm.body = res[1].join();
                             creepm.energy = energy - res[2];
+                            creepm.roomName = spawn.room.name;
                             creepm.stat = {
                                 spentEnergy : 0,
                                 gotEnergy : 0,
@@ -217,7 +248,7 @@ module.exports.loop = function () {
 
         let towers = spawn.room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_TOWER });
         for(let tower of towers) {
-            let hostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+            let hostile = tower.room.find(FIND_HOSTILE_CREEPS).sort(function (a,b) { return a.hits - b.hits;})[0];
             if(hostile) {
                 tower.attack(hostile);
                 console.log("Tower " + tower.id + " attacked hostile: owner=" + hostile.owner.username + "; hits=" + hostile.hits);
@@ -227,7 +258,7 @@ module.exports.loop = function () {
                     let dstructs = tower.room.find(FIND_STRUCTURES, {
                         filter: (structure) => structure.hits < 0.9*structure.hitsMax && structure.hits < repairLimit
                     });
-                    if(dstructs.length && tower.energy > 500) {
+                    if(dstructs.length && tower.energy > 700) {
                         let dstruct = dstructs.sort(function (a,b) {
                             return a.hits - b.hits;
                         })[0];

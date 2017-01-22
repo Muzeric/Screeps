@@ -3,7 +3,7 @@ var utils = require('utils');
 var roleAttacker = {
 
     run: function(creep) {
-        if (creep.hits < creep.hitsMax)
+        if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL))
             console.log(creep.name + " healed himself (" + creep.hits + "/" + creep.hitsMax + ") with res=" + creep.heal(creep));
         
         if ((creep.hits <= 200 || creep.hits < creep.hitsMax * 0.4) && creep.memory.attacking) {
@@ -12,6 +12,16 @@ var roleAttacker = {
 	        creep.memory.attacking = true;
 	    }
 	    
+        if (creep.pos.roomName == creep.memory.roomName) {
+            let res = utils.try_attack(creep);
+            if (!res) {
+                creep.moveTo(creep.room.controller);
+                return;
+            } else if (res > 1) {
+                return;
+            }
+        }
+
         if(!creep.memory.attackName || !Game.flags[creep.memory.attackName]) {
             let targets = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
 	        if(!targets.length) {
@@ -35,8 +45,8 @@ var roleAttacker = {
                 //console.log(creep.name + " going to " + creep.memory.attackName + " to " + exitDir);
 	        }
         } else {
-            creep.moveTo(Game.spawns[creep.memory.spawnName].pos);
-            Game.spawns[creep.memory.spawnName].recycleCreep(creep);
+            creep.moveTo(Game.rooms[creep.memory.roomName]);
+            //Game.spawns[creep.memory.spawnName].recycleCreep(creep);
         }
 	},
 	
@@ -46,30 +56,28 @@ var roleAttacker = {
             console.log("No spawn with name=" + spawnName);
             return;
         }
+        total_energy -= 300; // MOVE,HEAL at end
         let body = [];
-        let tnum = 0;
-        while(tnum-- > 0) {
+        let tnum = 10;
+        while(tnum-- > 0 && total_energy >= 60) {
             body.push(TOUGH);
             total_energy -= 10;
-        }
-        let hnum = Math.floor((total_energy - 1500)/300);
-        if (hnum > 4)
-            hnum = 4;
-        while (total_energy >= 300 && hnum-- > 0) {
             body.push(MOVE);
             total_energy -= 50;
-            body.push(HEAL);
-            total_energy -= 250;
         }
+        
         let mnum = Math.floor(total_energy / (50+80));
+        let anum = mnum;
         while (total_energy >= 50 && mnum-- > 0) {
             body.push(MOVE);
             total_energy -= 50;
         }
-        while (total_energy >= 80) {
+        while (total_energy >= 80 && anum-- > 0) {
             body.push(ATTACK);
             total_energy -= 80;
         }
+        body.push(MOVE);
+        body.push(HEAL);
 
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
 	    //let newName = 'test';

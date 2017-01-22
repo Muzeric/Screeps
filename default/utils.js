@@ -38,8 +38,8 @@ module.exports = {
                 let cenergyTicks = (wantEnergy + creep.carryCapacity - cenergy) / 10;
                 if (cenergyTicks < 0)
                     cenergyTicks = 0;
-                //console.log(creep.name + " [" + creep.memory.spawnName + "] has container " + container.id + " in " + cpath + " with " + cenergy + " energy and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + cont_info[container.id]);
                 cont_info[container.id] = cpath * 1.2 + cenergyTicks - 100 * cpriority;
+                //console.log(creep.name + " [" + creep.memory.spawnName + "] has container " + container.id + " in " + cpath + " with " + cenergy + " energy and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + cont_info[container.id]);
             }
             let container = containers.sort( function (a,b) {
                 let suma = cont_info[a.id];
@@ -146,17 +146,17 @@ module.exports = {
         */
         if(target) {
             creep.memory.targetID = target.id;
-            if(!_.some(creep.body, b => b.type == ATTACK && b.hits > 50)) {
+            if(!creep.getActiveBodyparts(ATTACK)) {
                 console.log(creep.name + " has no ATTACK parts, but hostile in room, go away");
                 return 0;
             }
             if (Game.time % 10 == 0)
-            console.log(creep.name +
-            " attacks: owner=" + (target.owner ? target.owner.username : 'no owner') +
-            "; ticksToLive=" + target.ticksToLive +
-            "; hits=" + target.hits + 
-            "; structureType=" + target.structureType
-            );
+                console.log(creep.name +
+                    " attacks: owner=" + (target.owner ? target.owner.username : 'no owner') +
+                    "; ticksToLive=" + target.ticksToLive +
+                    "; hits=" + target.hits + 
+                    "; structureType=" + target.structureType
+                );
             let res = creep.attack(target);
             if(res == ERR_NOT_IN_RANGE) {
                 let res = creep.moveTo(target, {ignoreDestructibleStructures : true});
