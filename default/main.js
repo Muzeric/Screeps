@@ -18,7 +18,7 @@ var spawn_config = {
             ["longbuilder", 1],
             ["longharvester", 5],
             ["builder", 1],
-            ["upgrader", 2],
+            ["upgrader", 3],
             ["longharvester", 12],
             ["upgrader", 4],
         ],
@@ -113,7 +113,7 @@ if(0) {
         scount["construction"] = room.find(FIND_MY_CONSTRUCTION_SITES).length;
         scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit }).length;
         let repairLimit = utils.roomConfig[room.name].repairLimit || 100000;
-        let ccount =  _.countBy(_.filter(Game.creeps, c => c.pos.roomName == room.name && c.ticksToLive > 200), 'memory.role'); // TODO: use creep.memory.roomName
+        let ccount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == room.name && c.ticksToLive > 200), 'memory.role'); 
         let spawns = room.find(FIND_MY_SPAWNS, {filter : s => !s.spawning});
         /*if (!spawns.length) {
             console.log(room.name + ": all spawns are spawning");
@@ -121,11 +121,11 @@ if(0) {
         }*/
 
         let need = {};
-        need["harvester"] = _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3);
-        need["miner"] = _.min([scount[STRUCTURE_CONTAINER], scount["source"]]);
-        need["upgrader"] = scount["source"];
-        need["builder"] = (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 1 : 0;
-        need["shortminer"] = (scount[STRUCTURE_LINK] >= 2 && scount[STRUCTURE_STORAGE] && ccount["longharvester"]) ? 1 : 0;
+        need["harvester"] = [_.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3), scount[STRUCTURE_CONTAINER] && ccount["miner"] ? 0 : 1];
+        need["miner"] = [_.min([scount[STRUCTURE_CONTAINER], scount["source"]])];
+        need["upgrader"] = [scount["source"]];
+        need["builder"] = [(scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 1 : 0];
+        need["shortminer"] = [(scount[STRUCTURE_LINK] >= 2 && scount[STRUCTURE_STORAGE] && ccount["longharvester"]) ? 1 : 0];
 
         console.log(room.name + ": CPU=" + (Game.cpu.getUsed() - lastCPU) + "; count=" + JSON.stringify(need));
         /*_.forEach(need, function (value, key) {
