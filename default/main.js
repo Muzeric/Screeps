@@ -105,16 +105,16 @@ module.exports.loop = function () {
     
 if(0) {    
     
-    if (!Memory.needList || !Memory.needTime) {
-        Memory.needList = {};
-        Memory.needTime = {};
+    if (!Memory.limitList || !Memory.limitTime) {
+        Memory.limitList = {};
+        Memory.limitTime = {};
     }
     _.forEach(_.filter(Game.rooms, r => r.controller.my), function(room) {
         let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == room.name && c.ticksToLive > 200), 'memory.role'); 
 
-        if (!Memory.needList[room.name] || !Memory.needTime[room.name] || (Game.time - Memory.needTime[room.name] > 10)) {
-            Memory.needList[room.name] = getNeed(room, creepsCount);
-            Memory.needTime[room.name] = Game.time;
+        if (!Memory.limitList[room.name] || !Memory.limitTime[room.name] || (Game.time - Memory.limitTime[room.name] > 10)) {
+            Memory.limitList[room.name] = getLimits(room, creepsCount);
+            Memory.limitTime[room.name] = Game.time;
         }
 
         let spawns = room.find(FIND_MY_SPAWNS, {filter : s => !s.spawning});
@@ -125,29 +125,29 @@ if(0) {
 
         let minEnergy = 300;
         let canRepair = 0;
-        for (let need of Memory.needList[room.name]) {
+        for (let limit of Memory.limitList[room.name]) {
             if(!spawns.length)
                 break;
-            if (need.limit <= 0)
+            if (limit.count <= 0)
                 continue;
 
-            if (need.role == "ENERGY") {
-                minEnergy = need.limit;
+            if (limit.role == "ENERGY") {
+                minEnergy = limit.count;
                 continue;
-            } else if (need.role == "REPAIR") {
-                canRepair = need.limit;
+            } else if (limit.role == "REPAIR") {
+                canRepair = limit.count;
                 continue;
             }
-            if(!allRoles[need.role]) {
-                allRoles[need.role] = {
+            if(!allRoles[limit.role]) {
+                allRoles[limit.role] = {
                     "count" : {},
-                    "obj" : require('role.' + need.role),
+                    "obj" : require('role.' + limit.role),
                 };
             }
 
-            if ((creepsCount[need.role] || 0) < need.limit) {
+            if ((creepsCount[limit.role] || 0) < limit.count) {
                 // Need, but not enough energy, so break & WAIT
-                if (need.emin && room.energyAvailable < room.energyCapacityAvailable && room.energyAvailable < need.emin)
+                if (limit.emin && room.energyAvailable < room.energyCapacityAvailable && room.energyAvailable < limit.emin)
                     break;
 
                 // Check, global energy limit
@@ -157,9 +157,9 @@ if(0) {
                 ) {
                     let energy = room.energyAvailable;
                     let spawn = spawns.pop();
-                    console.log(room.name + ": tries to create " + need.role + " with energy=" + energy);
+                    console.log(room.name + ": tries to create " + limit.role + " with energy=" + energy);
                     /*
-                    let res = allRoles[need.role].obj.create(spawn.name, role, energy);
+                    let res = allRoles[limit.role].obj.create(spawn.name, role, energy);
                     
                     if(Game.creeps[res[0]]) {
                         let creepm = Game.creeps[res[0]].memory;
@@ -179,7 +179,7 @@ if(0) {
                 }
             }
 
-        } // needList end
+        } // limitList end
         
     });
 
@@ -338,7 +338,7 @@ if(0) {
     }
 };
 
-function getNeed (room, creepsCount) {
+function getLimits (room, creepsCount) {
     let lastCPU = Game.cpu.getUsed();
     console.log(room.name + ": start observing");
     let scount = _.countBy(room.find(FIND_STRUCTURES), 'structureType' );
@@ -347,39 +347,46 @@ function getNeed (room, creepsCount) {
     let repairLimit = utils.roomConfig[room.name].repairLimit || 100000;
     scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit }).length;
     
-    let need = [];
-    need.push({
+    let limit = [];
+    limit.push({
             "role" : "harvester",
-            "limit" : 1,
+            "count" : 1,
             "args" : [scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1],
+            "priority" : 1,
     },{
             "role" : "ENERGY",
-            "limit" : 1500,
+            "count" : 1500,
     },{
             "role" : "miner",
-            "limit" : _.min([scount[STRUCTURE_CONTAINER], scount["source"]], 1),
+            "count" : _.min([scount[STRUCTURE_CONTAINER], scount["source"]], 1),
+            "priority" : 1,
     },{
             "role" : "harvester",
-            "limit" : _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3),
+            "count" : _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3),
             "args" : [scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1],
+            "priority" : 2,
     },{
             "role" : "miner",
-            "limit" : _.min([scount[STRUCTURE_CONTAINER], scount["source"]]),
+            "count" : _.min([scount[STRUCTURE_CONTAINER], scount["source"]]),
+            "priority" : 2,
     },{
             role : "upgrader",
-            "limit" : scount["source"],
+            "count" : scount["source"],
+            "priority" : 3,
     },{
             "role" : "REPAIR",
-            "limit" : 1,
+            "count" : 1,
     },{
             "role" : "builder",
-            "limit" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 1 : 0,
+            "count" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 1 : 0,
+            "priority" : 4,
     },{
             "role" : "shortminer",
-            "limit" : (scount[STRUCTURE_LINK] >= 2 && scount[STRUCTURE_STORAGE] && creepsCount["longharvester"]) ? 1 : 0,
+            "count" : (scount[STRUCTURE_LINK] >= 2 && scount[STRUCTURE_STORAGE] && creepsCount["longharvester"]) ? 1 : 0,
+            "priority" : 5,
     });
 
-    console.log(room.name + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; count=" + JSON.stringify(need));
+    console.log(room.name + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; count=" + JSON.stringify(limit));
 
-    return need;
+    return limit;
 }
