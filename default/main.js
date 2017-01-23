@@ -105,10 +105,14 @@ module.exports.loop = function () {
     
 if(0) {    
     
+    if (!Memory.needList || !Memory.needTime) {
+        Memory.needList = {};
+        Memory.needTime = {};
+    }
     _.forEach(_.filter(Game.rooms, r => r.controller.my), function(room) {
         let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == room.name && c.ticksToLive > 200), 'memory.role'); 
 
-        if (!Memory.needList || !Memory.needList[room.name] || !Memory.needTime || !Memory.needTime[room.name] || (Game.time - Memory.needTime[room.name] > 10)) {
+        if (!Memory.needList[room.name] || !Memory.needTime[room.name] || (Game.time - Memory.needTime[room.name] > 10)) {
             Memory.needList[room.name] = getNeed(room, creepsCount);
             Memory.needTime[room.name] = Game.time;
         }
@@ -175,7 +179,7 @@ if(0) {
                 }
             }
 
-        }
+        } // needList end
         
     });
 
@@ -346,14 +350,21 @@ function getNeed (room, creepsCount) {
     let need = [];
     need.push({
             "role" : "harvester",
+            "limit" : 1,
+            "args" : [scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1],
+    },{
+            "role" : "ENERGY",
+            "limit" : 1500,
+    },{
+            "role" : "miner",
+            "limit" : _.min([scount[STRUCTURE_CONTAINER], scount["source"]], 1),
+    },{
+            "role" : "harvester",
             "limit" : _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3),
             "args" : [scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1],
     },{
             "role" : "miner",
             "limit" : _.min([scount[STRUCTURE_CONTAINER], scount["source"]]),
-    },{
-            "role" : "ENERGY",
-            "limit" : 1500,
     },{
             role : "upgrader",
             "limit" : scount["source"],

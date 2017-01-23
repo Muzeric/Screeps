@@ -154,8 +154,8 @@ function set_energy (creep) {
     //console.log(creep.name + " sources: " + sources);
     
     creep.memory.energyName = sources.sort( function(a,b) { 
-        let suma = _.sum(Game.creeps, (c) => c.memory.role == "longharvester" && c.memory.energyName == a.name);
-        let sumb = _.sum(Game.creeps, (c) => c.memory.role == "longharvester" && c.memory.energyName == b.name);
+        let suma = _.sum(Game.creeps, (c) => c.memory.role == "longharvester" && c.memory.energyName == a.name) + Game.map.getRoomLinearDistance(a.pos.roomName, creep.memory.roomName);
+        let sumb = _.sum(Game.creeps, (c) => c.memory.role == "longharvester" && c.memory.energyName == b.name) + Game.map.getRoomLinearDistance(b.pos.roomName, creep.memory.roomName);
         //console.log("a=" + a.id + ",b=" + b.id + ",suma=" + suma + ",sumb=" + sumb);
         return suma - sumb;
     })[0].name;
