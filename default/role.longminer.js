@@ -1,3 +1,5 @@
+var utils = require('utils');
+
 var role = {
     run: function(creep) {
         let source;
@@ -53,6 +55,7 @@ var role = {
             }
         }
 
+        utils.try_attack(creep);
         if(container.pos.inRangeTo(source, 2)) {
             if(creep.pos.isNearTo(source) && creep.pos.isNearTo(container)) {
                 if(creep.carry.energy < creep.carryCapacity)
