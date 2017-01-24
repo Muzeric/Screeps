@@ -23,6 +23,7 @@ var roleHarvester = {
                         return (
                         ((
                                 (structure.structureType == STRUCTURE_EXTENSION || 
+                                structure.structureType == STRUCTURE_LAB ||
                                 (structure.structureType == STRUCTURE_TOWER && structure.energy < structure.energyCapacity*0.9) || 
                                 structure.structureType == STRUCTURE_SPAWN)
                             &&
