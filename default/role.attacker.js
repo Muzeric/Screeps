@@ -3,10 +3,9 @@ var utils = require('utils');
 var roleAttacker = {
 
     run: function(creep) {
-        if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL))
-            console.log(creep.name + " healed himself (" + creep.hits + "/" + creep.hitsMax + ") with res=" + creep.heal(creep));
-        
         if ((creep.hits <= 200 || creep.hits < creep.hitsMax * 0.4) && creep.memory.attacking) {
+            if (creep.getActiveBodyparts(HEAL))
+                console.log(creep.name + " healed himself (" + creep.hits + "/" + creep.hitsMax + ") with res=" + creep.heal(creep));
 	        creep.memory.attacking = false;
 	    } else if (creep.hits == creep.hitsMax && !creep.memory.attacking) {
 	        creep.memory.attacking = true;
@@ -17,7 +16,7 @@ var roleAttacker = {
             if (!res) {
                 creep.moveTo(creep.room.controller);
                 return;
-            } else if (res > 1) {
+            } else if (res >= 1) {
                 return;
             }
         }
@@ -45,7 +44,7 @@ var roleAttacker = {
                 //console.log(creep.name + " going to " + creep.memory.attackName + " to " + exitDir);
 	        }
         } else {
-            creep.moveTo(Game.rooms[creep.memory.roomName]);
+            creep.moveTo(Game.rooms[creep.memory.roomName].controller);
             //Game.spawns[creep.memory.spawnName].recycleCreep(creep);
         }
 	},

@@ -1,4 +1,3 @@
-
 var utils = require('utils');
 
 var spawn_config = {
@@ -7,7 +6,7 @@ var spawn_config = {
             ["harvester", 1],
             ["miner", 1],
             ["ENERGY", 1500],
-            ["attacker", 0, 2300],
+            ["attacker", 0, 1300],
             ["harvester", 4],
             ["miner", 2],
             ["upgrader", 1],
@@ -67,13 +66,13 @@ module.exports.loop = function () {
             continue;
         }
         let role = creep.memory.role;
-        if(!role in rolesCount)
+        if(!(role in rolesCount))
             rolesCount[role] = {};
-        if(!role in objectCache)
+        if(!(role in objectCache))
             objectCache[role] = require('role.' + role);
         
         if (creep.ticksToLive > 200)
-            rolesCount[role][creep.memory.spawnName] = (rolesCount[role][creep.memory.spawnName] || 0) + 1;
+            rolesCount[role][creep.memory.roomName] = (rolesCount[role][creep.memory.roomName] || 0) + 1;
         
         if(moveErrors[creep.memory.roomName]) {
             if(creep.moveTo(creep.room.controller) == OK)
@@ -208,7 +207,7 @@ if(0) {
             }
             let addCheck = {
                 longbuilder : utils.getLongBuilderTargets() ? 1 : 0,
-                builder : ((rolesCount["builder"] ? rolesCount["builder"][spawnName] : 0) < cs.length + rs.length),
+                builder : ((rolesCount["builder"] ? rolesCount["builder"][spawn.room.name] : 0) < cs.length + rs.length),
             };
 
             let addCount = {
@@ -239,7 +238,7 @@ if(0) {
                 let role = arr[0];
                 let climit = arr[1];
                 let emin = arr[2];
-                let count = (rolesCount[role] ? (rolesCount[role][spawnName]||0) : 0);
+                let count = (rolesCount[role] ? (rolesCount[role][spawn.room.name]||0) : 0);
     
                 //if (spawnName == "Spawn2")
                 //    console.log(spawnName + " check " + role + "; climit=" + climit + "; count=" + count + "; addCount=" + addCount[role]);
@@ -256,7 +255,7 @@ if(0) {
                 }
                 if (role in addCheck && !addCheck[role])
                     continue;
-                if(!role in objectCache)
+                if(!(role in objectCache))
                     objectCache[role] = require('role.' + role);
 
                 if (
@@ -357,7 +356,7 @@ function getLimits (room, creepsCount) {
             "wishEnergy" : 300,
     },{
             "role" : "miner",
-            "count" : _.min([scount[STRUCTURE_CONTAINER], scount["source"]], 1),
+            "count" : _.min([scount[STRUCTURE_CONTAINER], scount["source"], 1]),
             "priority" : 1,
             "wishEnergy" : 650,
     },{
