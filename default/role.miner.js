@@ -93,7 +93,30 @@ var role = {
 
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
 	    return [newName, body, total_energy];
-	}
+	},
+	
+    create2: function(energy) {
+        energy -= 50;
+        let body = [CARRY];
+        let wlim = 5;
+        let fat = 1;
+        let mnum = 0;
+        while (energy >= 100 && wlim) {
+            if (energy >= 100) {
+	            body.push(WORK);
+	            wlim--;
+                fat++;
+	            energy -= 100;
+	        }
+            if ((!mnum || fat/(mnum*2) >= 2) && energy >= 50) {
+                body.push(MOVE);
+	            energy -= 50;
+                mnum++;
+            }
+        }
+
+	    return [body, energy];
+	},
 };
 
 module.exports = role;

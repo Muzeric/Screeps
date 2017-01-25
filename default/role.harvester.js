@@ -91,7 +91,37 @@ var roleHarvester = {
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
         total_energy += energyDiff;
 	    return [newName, body, total_energy];
-	}
+	},
+
+	create2: function(energy, worker) {
+	    let energyDiff = 0;
+        if (energy > 1350) {
+            energyDiff = energy - 1350;
+            energy = 1350;
+        }
+        let body = [];
+        let fat = 0;
+        let mnum = 0;
+	    while (energy >= 50) {
+	        if((!mnum || fat/(mnum*2) >= 1) && energy >= 50) {
+	            body.push(MOVE);
+	            energy -= 50;
+                mnum++;
+	        }
+	        if(energy >= 50) {
+	            body.push(CARRY);
+	            energy -= 50;
+	            fat++;
+	        }
+            if(worker && energy >= 100) {
+	            body.push(WORK);
+	            energy -= 100;
+	            fat++;
+	        }
+	    }
+	    energy += energyDiff;
+	    return [body, energy];
+	},
 };
 
 module.exports = roleHarvester;

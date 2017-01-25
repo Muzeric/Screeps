@@ -67,7 +67,30 @@ var roleLongBuilder = {
 	    }
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
         return [newName, body, total_energy];
-	}
+	},
+	
+	create2: function(energy) {
+	    let body = [];
+	    while (energy >= 50) {
+	        if(energy >= 50) {
+	            body.push(MOVE);
+	            energy -= 50;
+	        }
+	        if(energy >= 100) {
+	            body.push(WORK);
+	            energy -= 100;
+	        }
+	        if(energy >= 50) {
+	            body.push(MOVE);
+	            energy -= 50;
+	        }
+	        if(energy >= 50) {
+	            body.push(CARRY);
+	            energy -= 50;
+	        }
+	    }
+	    return [body, energy];
+	},
 };
 
 module.exports = roleLongBuilder;

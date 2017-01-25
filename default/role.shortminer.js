@@ -59,7 +59,14 @@ var roleShortMiner = {
         
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
         return [newName, body, total_energy];
-	}
+	},
+	
+    create2: function(energy) {
+	    energy -= 50*6;
+        let body = [MOVE,MOVE,CARRY,CARRY,CARRY,CARRY];
+        
+	    return [body, energy];
+	},
 };
 
 module.exports = roleShortMiner;

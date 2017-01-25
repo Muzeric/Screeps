@@ -81,7 +81,34 @@ var roleAttacker = {
 	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
 	    //let newName = 'test';
         return [newName, body, total_energy];
-	}
+	},
+	
+    create2: function(energy) {
+        energy -= 300; // MOVE,HEAL at end
+        let body = [];
+        let tnum = 10;
+        while(tnum-- > 0 && energy >= 60) {
+            body.push(TOUGH);
+            energy -= 10;
+            body.push(MOVE);
+            energy -= 50;
+        }
+        
+        let mnum = Math.floor(energy / (50+80));
+        let anum = mnum;
+        while (energy >= 50 && mnum-- > 0) {
+            body.push(MOVE);
+            energy -= 50;
+        }
+        while (energy >= 80 && anum-- > 0) {
+            body.push(ATTACK);
+            energy -= 80;
+        }
+        body.push(MOVE);
+        body.push(HEAL);
+
+        return [body, energy];
+	},
 };
 
 module.exports = roleAttacker;
