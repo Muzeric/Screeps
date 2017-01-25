@@ -349,7 +349,6 @@ if(0) {
 
 function getNotMyRoomLimits (roomName, creepsCount) {
     let lastCPU = Game.cpu.getUsed();
-    let roomName = flag.pos.roomName;
     let room = Game.rooms[roomName];
     console.log(roomName + ": start observing");
 
@@ -369,27 +368,32 @@ function getNotMyRoomLimits (roomName, creepsCount) {
         "args" : [containers && creepsCount["longminer"] ? 0 : 1],
         "priority" : 10,
         "wishEnergy" : 1500,
+        "range" : 1,
     },{
         "role" : "claimer",
         "count" : fcount["Controller"],
         "priority" : 11,
         "minEnergy" : 1300,
         "wishEnergy" : 1300,
+        "range" : 2,
     },{
         "role" : "longminer",
         "count" : containers,
         "priority" : 12,
         "wishEnergy" : 910,
+        "range" : 3,
     },{
         "role" : "longbuilder",
         "count" : (builds ? 1 : 0) + (repairs ? 1 : 0),
         "priority" : 13,
         "wishEnergy" : 1500,
+        "range" : 2,
     },{
         "role" : "longharvester",
         "count" : fcount["Source"] * 3,
         "priority" : 14,
         "wishEnergy" : 1500,
+        "range" : 1,
     });
 
     for (let limit of limits) {
