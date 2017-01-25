@@ -56,7 +56,7 @@ module.exports.loop = function () {
             delete Memory.creeps[name];
         } else if (Game.creeps[name].memory.errors > 0) {
             console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
-            moveErrors[Game.creeps[name].memory.roomName] = 1;
+            moveErrors[Game.creeps[name].room.name] = 1;
         }
     }
 
@@ -74,7 +74,7 @@ module.exports.loop = function () {
         if (creep.ticksToLive > 200)
             rolesCount[role][creep.memory.roomName] = (rolesCount[role][creep.memory.roomName] || 0) + 1;
         
-        if(moveErrors[creep.memory.roomName]) {
+        if(moveErrors[creep.room.name]) {
             if(creep.moveTo(creep.room.controller) == OK)
                 creep.memory.errors = 0;
             continue;
@@ -113,7 +113,7 @@ if(0) {
         let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == room.name && c.ticksToLive > 200), 'memory.role'); 
 
         if (!Memory.limitList[room.name] || !Memory.limitTime[room.name] || (Game.time - Memory.limitTime[room.name] > 10)) {
-            Memory.limitList[room.name] = getLimits(room, creepsCount);
+            Memory.limitList[room.name] = getRoomLimits(room, creepsCount);
             Memory.limitTime[room.name] = Game.time;
         }
 
@@ -125,6 +125,26 @@ if(0) {
         let canRepair = creepsCount["upgrader"] ? 1 : 0;
         // TODO tower actions
     }); // each room end
+
+    _.forEach(
+        _.uniq(
+        _.map (
+        _.filter(
+            Game.flags, f => f.name.substring(0, 6) == 'Source' || f.name.substring(0, 10) == 'Controller' || f.name.substring(0, 5) == 'Build'), 'pos.roomName' 
+    ) ),
+    function(roomName) {
+        let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && c.ticksToLive > 200), 'memory.role'); 
+
+        if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
+            Memory.limitList[roomName] = getNotMyRoomLimits(roomName, creepsCount);
+            Memory.limitTime[roomName] = Game.time;
+        }
+
+        for (let limit of Memory.limitList[roomName]) {
+            if ((creepsCount[limit.role] || 0) < limit.count)
+                needList.push(limit);
+        }
+    }); // each flag end
     
     console.log("needList: CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; list=" + JSON.stringify(needList));
     lastCPU = Game.cpu.getUsed();
@@ -151,17 +171,6 @@ if(0) {
         }
     }
 /*
-                // Need, but not enough energy, so break & WAIT
-                if (limit.emin && room.energyAvailable < room.energyCapacityAvailable && room.energyAvailable < limit.emin)
-                    break;
-
-                // Check, global energy limit
-                if (
-                    room.energyAvailable >= room.energyCapacityAvailable || 
-                    room.energyAvailable >= minEnergy
-                ) {
-                    let energy = room.energyAvailable;
-                    let spawn = spawns.pop();
                     console.log(room.name + ": tries to create " + limit.role + " with energy=" + energy);
 
                     if(!role in objectCache)
@@ -338,7 +347,64 @@ if(0) {
     }
 };
 
-function getLimits (room, creepsCount) {
+function getNotMyRoomLimits (roomName, creepsCount) {
+    let lastCPU = Game.cpu.getUsed();
+    let roomName = flag.pos.roomName;
+    let room = Game.rooms[roomName];
+    console.log(roomName + ": start observing");
+
+    let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
+    let containers = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && f.pos.roomName == roomName && f.room && 
+        f.pos.findInRange(FIND_STRUCTURES, 2, {filter : s => s.structureType == STRUCTURE_CONTAINER }).length 
+    ).length;
+
+    let repairLimit = utils.roomConfig[roomName] ? utils.roomConfig[roomName].repairLimit : 250000;
+    let builds = room ? room.find(FIND_MY_CONSTRUCTION_SITES).length : 0;
+    let repairs = room ? room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit } ).length : 0;
+
+    let limits = [];
+    limits.push({
+        "role" : "longharvester",
+        "count" : fcount["Source"],
+        "args" : [containers && creepsCount["longminer"] ? 0 : 1],
+        "priority" : 10,
+        "wishEnergy" : 1500,
+    },{
+        "role" : "claimer",
+        "count" : fcount["Controller"],
+        "priority" : 11,
+        "minEnergy" : 1300,
+        "wishEnergy" : 1300,
+    },{
+        "role" : "longminer",
+        "count" : containers,
+        "priority" : 12,
+        "wishEnergy" : 910,
+    },{
+        "role" : "longbuilder",
+        "count" : (builds ? 1 : 0) + (repairs ? 1 : 0),
+        "priority" : 13,
+        "wishEnergy" : 1500,
+    },{
+        "role" : "longharvester",
+        "count" : fcount["Source"] * 3,
+        "priority" : 14,
+        "wishEnergy" : 1500,
+    });
+
+    for (let limit of limits) {
+        limit["roomName"] = roomName;
+        limit["originalEnergyCapacity"] = 0;
+        if (!"minEnergy" in limit)
+            limit["minEnergy"] = 0;
+    }
+
+    console.log(roomName + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; limits=" + JSON.stringify(limits));
+
+    return limits;
+}
+
+function getRoomLimits (room, creepsCount) {
     let lastCPU = Game.cpu.getUsed();
     console.log(room.name + ": start observing");
     let scount = _.countBy(room.find(FIND_STRUCTURES), 'structureType' );
