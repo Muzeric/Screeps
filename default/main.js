@@ -141,6 +141,9 @@ if(utils.autoconfig) {
         towerAction(room, canRepair);
     }); // each room end
 
+    let longbuilders = _.filter(Game.creeps, c => c.memory.role == "longbuilder" && (c.ticksToLive > 200 || c.spawning)).length;
+    let buildFlags = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build').length;
+    let stopLongBuilders = longbuilders * 1.5 >= buildFlags;
     _.forEach(
         _.uniq(
         _.map (
@@ -151,7 +154,7 @@ if(utils.autoconfig) {
         let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), 'memory.role'); 
 
         if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
-            Memory.limitList[roomName] = getNotMyRoomLimits(roomName, creepsCount);
+            Memory.limitList[roomName] = getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders);
             Memory.limitTime[roomName] = Game.time;
         }
 
@@ -162,7 +165,8 @@ if(utils.autoconfig) {
         }
     }); // each flag end
     
-    console.log("needList: CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; list=" + JSON.stringify(needList));
+    if (Game.time % 20 == 0)
+        console.log("needList: CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; list=" + JSON.stringify(_.countBy(needList, 'need.role')));
     lastCPU = Game.cpu.getUsed();
 
     let skipSpawnNames = {};
@@ -182,7 +186,7 @@ if(utils.autoconfig) {
         } else if (res[0] == -1) {
             if (res[1])
                 skipSpawnNames[res[1]] = 1;
-            console.log("needList: " + need.role + " for " + need.roomName + " return waitSpawnName=" + res[1]);
+            //console.log("needList: " + need.role + " for " + need.roomName + " return waitSpawnName=" + res[1]);
         } else if (res[0] == -3) {
             console.log("needList: " + need.role + " for " + need.roomName + " has no spawns with enough energyCapacity");
         } else if (res[0] == 0) {
@@ -362,7 +366,7 @@ if(utils.autoconfig) {
     }
 };
 
-function getNotMyRoomLimits (roomName, creepsCount) {
+function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let lastCPU = Game.cpu.getUsed();
     let room = Game.rooms[roomName];
     //console.log(roomName + ": start observing");
@@ -399,7 +403,7 @@ function getNotMyRoomLimits (roomName, creepsCount) {
         "range" : 3,
     },{
         "role" : "longbuilder",
-        "count" : (builds ? 1 : 0) + (repairs ? 1 : 0),
+        "count" : stopLongBuilders ? 0 : (builds ? 1 : 0) + (repairs ? 1 : 0),
         "priority" : 13,
         "wishEnergy" : 1500,
         "range" : 2,

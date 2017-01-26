@@ -8,7 +8,7 @@ var roomConfig = {
 };
 
 module.exports = {
-    autoconfig : 0,
+    autoconfig : 1,
     roomConfig : roomConfig,
 
     findSource : function (creep, storage_priority) {
