@@ -170,9 +170,9 @@ if(0) {
         } else if (res[0] == 0) {
             let spawn = res[1];
             let energy = spawn.room.energyAvailable;
-            if(!role in objectCache)
+            if(!(need.role in objectCache))
                 objectCache[need.role] = require('role.' + need.role);
-            let [body, leftEnergy] = objectCache[role].create2(energy);
+            let [body, leftEnergy] = objectCache[need.role].create2(energy);
             /*
             let newName = spawn.createCreep(body, need.role + "." + Math.random().toFixed(2), {
                 "role": need.role,
@@ -190,7 +190,7 @@ if(0) {
             */
             let newName = need.role;
             //console.log("needList: " + need.role + " for room " + need.roomName + " creation by " + spawn.name + " with energy " + spawn.room.energyAvailable);
-            console.log(newName + " BURNING by " + spawn.room.name + '.' + spwan.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") [" + body + "]");
+            console.log(newName + " BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") [" + body + "]");
         }
     }
 } else {
@@ -472,6 +472,8 @@ function getSpawnForCreate (need, skipSpawnNames) {
     
     if (!spawnsInRange.length)
         return [-2];
+
+    console.log("getSpawnForCreate: " + need.roomName + " wants " + need.role + ", skipSpawnNames=" + JSON.stringify(skipSpawnNames) + ", spawnsInRange=" + JSON.stringify(spawnsInRange));
     
     //if (need.minEnergy && _.maxBy(spawnsInRange, function(s) {return s.room.energyCapacityAvailable} ).room.energyCapacityAvailable < need.minEnergy)
     //    return [-3];

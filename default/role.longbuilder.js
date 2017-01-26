@@ -20,7 +20,9 @@ var roleLongBuilder = {
             if (!target || target.hits && target.hits == target.hitsMax) {
                     creep.memory.targetID = null;
                     return;
-            }
+            } else {
+				creep.memory.roomName = target.pos.roomName;
+			}
             let res;
             if (target.hits === undefined) {
                 res = creep.build(target);
