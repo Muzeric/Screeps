@@ -102,7 +102,21 @@ module.exports.loop = function () {
     
     stat.roles = JSON.parse(JSON.stringify(rolesCount));
     
-if(0) {    
+if(utils.autoconfig) {
+    _.forEach(Game.creeps, function(creep) { if(creep.memory.controllerName && creep.memory.roomName != Game.flags[creep.memory.controllerName].pos.roomName) { 
+        console.log(creep.name + ": " + creep.memory.roomName + " -> " + Game.flags[creep.memory.controllerName].pos.roomName); 
+        creep.memory.roomName=Game.flags[creep.memory.controllerName].pos.roomName; 
+    }});
+    _.forEach(Game.creeps, function(creep) { if(creep.memory.energyName && creep.memory.roomName != Game.flags[creep.memory.energyName].pos.roomName) { 
+        console.log(creep.name + ": " + creep.memory.roomName + " -> " + Game.flags[creep.memory.energyName].pos.roomName); 
+        creep.memory.roomName=Game.flags[creep.memory.energyName].pos.roomName; 
+    }});
+    _.forEach(Game.creeps, function(creep) { if(creep.memory.role == "longminer" && creep.memory.energyID && creep.memory.roomName != Game.getObjectById(creep.memory.energyID).pos.roomName) { 
+        console.log(creep.name + ": " + creep.memory.roomName + " -> " + Game.getObjectById(creep.memory.energyID).pos.roomName); 
+        creep.memory.roomName=Game.getObjectById(creep.memory.energyID).pos.roomName;
+    }});
+
+
     if (!Memory.limitList || !Memory.limitTime) {
         Memory.limitList = {};
         Memory.limitTime = {};
@@ -154,7 +168,7 @@ if(0) {
     let skipSpawnNames = {};
     for (let need of needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } )) {
         if (!_.filter(Game.spawns, s => !s.spawning && !(s.name in skipSpawnNames)).length) {
-            console.log("All spawns are spawning");
+            //console.log("All spawns are spawning");
             break;
         }
         
@@ -173,7 +187,7 @@ if(0) {
             if(!(need.role in objectCache))
                 objectCache[need.role] = require('role.' + need.role);
             let [body, leftEnergy] = objectCache[need.role].create2(energy);
-            /*
+            
             let newName = spawn.createCreep(body, need.role + "." + Math.random().toFixed(2), {
                 "role": need.role,
                 "spawnName": spawn.name,
@@ -187,9 +201,8 @@ if(0) {
                     moves : 0,
                 },
             });
-            */
-            let newName = need.role;
-            //console.log("needList: " + need.role + " for room " + need.roomName + " creation by " + spawn.name + " with energy " + spawn.room.energyAvailable);
+            
+            //let newName = need.role;
             console.log(newName + " BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") [" + body + "]");
         }
     }
@@ -347,7 +360,7 @@ if(0) {
 function getNotMyRoomLimits (roomName, creepsCount) {
     let lastCPU = Game.cpu.getUsed();
     let room = Game.rooms[roomName];
-    console.log(roomName + ": start observing");
+    //console.log(roomName + ": start observing");
 
     let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
     let containers = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && f.pos.roomName == roomName && f.room && 
@@ -407,7 +420,7 @@ function getNotMyRoomLimits (roomName, creepsCount) {
 
 function getRoomLimits (room, creepsCount) {
     let lastCPU = Game.cpu.getUsed();
-    console.log(room.name + ": start observing");
+    //console.log(room.name + ": start observing");
     let scount = _.countBy(room.find(FIND_STRUCTURES), 'structureType' );
     scount["source"] = room.find(FIND_SOURCES).length;
     scount["construction"] = room.find(FIND_MY_CONSTRUCTION_SITES).length;
@@ -480,7 +493,7 @@ function getSpawnForCreate (need, skipSpawnNames) {
     for (let spawn of spawnsInRange.sort( function(a,b) { 
         return (Game.map.getRoomLinearDistance(a.room.name, need.roomName) - Game.map.getRoomLinearDistance(b.room.name, need.roomName)) || (b.room.energyAvailable - a.room.energyAvailable); 
     } )) {
-        console.log("getSpawnForCreate: " + need.roomName + " wants " + need.role + ", skipSpawnNames=" + JSON.stringify(skipSpawnNames) + ":" + spawn.name + " minEnergy=" + need.minEnergy + ", energyAvailable=" + spawn.room.energyAvailable);
+        //console.log("getSpawnForCreate: " + need.roomName + " wants " + need.role + ", skipSpawnNames=" + JSON.stringify(skipSpawnNames) + ":" + spawn.name + " minEnergy=" + need.minEnergy + ", energyAvailable=" + spawn.room.energyAvailable);
         if (
             spawn.room.energyAvailable >= need.minEnergy &&
             (

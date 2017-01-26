@@ -178,7 +178,7 @@ function set_cid (creep) {
 }
 
 function set_energy (creep) {
-    let sources = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' );
+    let sources = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && (!utils.autoconfig || f.pos.roomName == creep.memory.roomName));
     if(!sources.length) {
         console.log(creep.name + " found no flags");
         return;

@@ -6,7 +6,8 @@ var roleClaimer = {
     run: function(creep) {
         if(!creep.memory.controllerName || !Game.flags[creep.memory.controllerName]) {
             let controllers = _.filter(Game.flags, f => 
-                f.name.substring(0, 10) == 'Controller'
+                f.name.substring(0, 10) == 'Controller' &&
+                (!utils.autoconfig || f.pos.roomName == creep.memory.roomName)
             );
 	        if(!controllers.length) {
                 //console.log(creep.name + " found no flags");

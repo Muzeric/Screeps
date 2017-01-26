@@ -6,7 +6,7 @@ var role = {
         let container;
 
         if(creep.memory.cID === undefined || !creep.memory.energyID) {
-            let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && f.room);
+            let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && f.room && (!utils.autoconfig || f.pos.roomName == creep.memory.roomName));
             if (!flags.length) {
                 console.log(creep.name + " found no Source.flags with known rooms");
                 return;
