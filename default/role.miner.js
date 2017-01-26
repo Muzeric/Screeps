@@ -1,5 +1,10 @@
+var utils = require('utils');
+
 var role = {
     run: function(creep) {
+        if (!utils.checkInRoomAndGo(creep))
+            return;
+
         let source;
         let container;
 

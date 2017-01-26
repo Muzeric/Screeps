@@ -1,9 +1,10 @@
 var utils = require('utils');
 
 var roleUpgrader = {
-
-    /** @param {Creep} creep **/
     run: function(creep) {
+		if (!utils.checkInRoomAndGo(creep))
+            return;
+
 	    if(creep.carry.energy == 0 && creep.memory.upgrading) {
 			creep.memory.upgrading = false;
 	    } else if (creep.carry.energy == creep.carryCapacity && !creep.memory.upgrading) {

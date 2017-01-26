@@ -1,6 +1,11 @@
+var utils = require('utils');
+
 var roleShortMiner = {
     /** @param {Creep} creep **/
     run: function(creep) {
+        if (!utils.checkInRoomAndGo(creep))
+            return;
+
         if(creep.memory.cID === undefined) {
             //console.log("Searching container for " + creep.name);
             creep.memory.cID = creep.room.storage.id;

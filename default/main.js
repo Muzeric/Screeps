@@ -123,7 +123,7 @@ if(0) {
         }
 
         let canRepair = creepsCount["upgrader"] ? 1 : 0;
-        // TODO tower actions
+        towerAction(room, canRepair);
     }); // each room end
 
     _.forEach(
@@ -151,7 +151,7 @@ if(0) {
 
     let skipSpawnNames = {};
     for (let need of needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } )) {
-        if (!_.filter(Game.spawns, s => !s.spawning && !s.name in skipSpawnNames).length) {
+        if (!_.filter(Game.spawns, s => !s.spawning && !(s.name in skipSpawnNames)).length) {
             console.log("All spawns are spawning");
             break;
         }
@@ -167,37 +167,28 @@ if(0) {
             console.log("needList: " + need.role + " has no spawns with enough energyCapacity");
         } else if (res[0] == 0) {
             let spawn = res[1];
-            console.log("needList: " + need.role + " for room " + need.roomName + " creation by " + spawn.name + " with energy " + spawn.room.energyAvailable);
+            let energy = spawn.room.energyAvailable;
+            if(!role in objectCache)
+                objectCache[need.role] = require('role.' + need.role);
+            let [body, leftEnergy] = objectCache[role].create2(energy);
+            let newName = spawn.createCreep(body, need.role + "." + Math.random().toFixed(2), {
+                "role": need.role,
+                "spawnName": spawn.name,
+                "roomName" : need.roomName,
+                "energy" : energy - leftEnergy,
+                "body" : body,
+                "stat" : {
+                    spentEnergy : 0,
+                    gotEnergy : 0,
+                    CPU : 0,
+                    moves : 0,
+                },
+            });
+            //console.log("needList: " + need.role + " for room " + need.roomName + " creation by " + spawn.name + " with energy " + spawn.room.energyAvailable);
+            console.log(newName + " BURNING by " + spawn.room.name + '.' + spwan.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") [" + body + "]");
         }
     }
-/*
-                    console.log(room.name + ": tries to create " + limit.role + " with energy=" + energy);
-
-                    if(!role in objectCache)
-                        objectCache[role] = require('role.' + role);
-
-                    let res = objectCache[role].create(spawn.name, role, energy);
-                    
-                    if(Game.creeps[res[0]]) {
-                        let creepm = Game.creeps[res[0]].memory;
-                        creepm.body = res[1].join();
-                        creepm.energy = energy - res[2];
-                        creepm.roomName = spawn.room.name;
-                        creepm.stat = {
-                            spentEnergy : 0,
-                            gotEnergy : 0,
-                            CPU : 0,
-                            moves : 0,
-                        };
-                    }
-
-                    console.log(res[0] + " BORN by " + spawnName + ", energy (" + energy + "->" + res[2] + ":" + (energy - res[2]) + ") [" + res[1] + "]");
-                }
-*/
-
-}
-    
-    
+} else {
     for (let spawnName in spawn_config) {
         //console.log("Start operations for: " + spawnName);
         var spawn = Game.spawns[spawnName];
@@ -337,6 +328,7 @@ if(0) {
         }
     }
     
+}
     let link_to = Game.getObjectById('58771a999d331a0f7f5ae31a');
     for(let link_from of [Game.getObjectById('587869503d6c02904166296f'), Game.getObjectById('5885198c52b1ece7377c7f8b')]) {
         if(link_from && link_to && !link_from.cooldown && link_from.energy && link_to.energy < link_to.energyCapacity*0.7) {
@@ -496,4 +488,36 @@ function getSpawnForCreate (need, skipSpawnNames) {
     }
 
     return [-1, waitSpawnName];
+}
+
+function towerAction (room, canRepair) {
+    let towers = room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_TOWER });
+    for(let tower of towers) {
+        let hostile = room.find(FIND_HOSTILE_CREEPS).sort(function (a,b) { return a.hits - b.hits;})[0];
+        if(hostile) {
+            tower.attack(hostile);
+            console.log("Tower " + tower.id + " attacked hostile: owner=" + hostile.owner.username + "; hits=" + hostile.hits);
+        } else {
+            let needheals = room.find(FIND_MY_CREEPS, {filter : c => c.hits < c.hitsMax});
+            if(needheals.length) {
+                let creep = needheals[0];
+                let res = tower.heal(creep);
+                console.log("Tower " + tower.id + " healed " + creep.name + " with res=" + res + " hits: " + creep.hits);
+            }
+
+            if (!canRepair)
+                continue;
+
+            let repairLimit = utils.roomConfig[room.name].repairLimit || 100000;
+            let dstructs = room.find(FIND_STRUCTURES, {
+                filter: (structure) => structure.hits < 0.9*structure.hitsMax && structure.hits < repairLimit
+            });
+            if(dstructs.length && tower.energy > 700) {
+                let dstruct = dstructs.sort(function (a,b) {
+                    return a.hits - b.hits;
+                })[0];
+                tower.repair(dstruct);
+            }
+        }
+    }
 }

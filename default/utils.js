@@ -209,6 +209,18 @@ module.exports = {
         return null;
     },
 
+    checkInRoomAndGo : function (creep) {
+        if (creep.pos.roomName == creep.memory.roomName)
+            return 1;
+
+        if(!Game.rooms[creep.memory.roomName])
+            console.log(creep.name + ": no room " + creep.memory.roomName);
+        else 
+            creep.moveTo(Game.rooms[creep.memory.roomName].controller);
+
+        return 0;
+    },
+
     test : function (total_energy) {
         let inEnergy = total_energy;
 

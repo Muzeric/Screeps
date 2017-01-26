@@ -2,6 +2,9 @@ var utils = require('utils');
 
 var roleBuilder = {
     run: function(creep) {
+        if (!utils.checkInRoomAndGo(creep))
+            return;
+
 	    if(creep.memory.building && creep.carry.energy == 0) {
             creep.memory.building = false;
             creep.memory.rt = null;
