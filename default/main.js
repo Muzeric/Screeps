@@ -118,7 +118,8 @@ if(0) {
         }
 
         for (let limit of Memory.limitList[room.name]) {
-            if ((creepsCount[limit.role] || 0) < limit.count)
+            let added = 0;
+            while ((creepsCount[limit.role] || 0) + added++ < limit.count)
                 needList.push(limit);
         }
 
@@ -141,7 +142,8 @@ if(0) {
         }
 
         for (let limit of Memory.limitList[roomName]) {
-            if ((creepsCount[limit.role] || 0) < limit.count)
+            let added = 0;
+            if ((creepsCount[limit.role] || 0) + added++ < limit.count)
                 needList.push(limit);
         }
     }); // each flag end
@@ -158,19 +160,20 @@ if(0) {
         
         let res = getSpawnForCreate(need, skipSpawnNames);
         if (res[0] == -2) {
-            console.log("needList: " + need.role + " has no spawns in range");
+            console.log("needList: " + need.role + " for " + need.roomName + " has no spawns in range");
         } else if (res[0] == -1) {
             if (res[1])
                 skipSpawnNames[res[1]] = 1;
-            console.log("needList: " + need.role + " return waitSpawnName=" + res[1]);
+            console.log("needList: " + need.role + " for " + need.roomName + " return waitSpawnName=" + res[1]);
         } else if (res[0] == -3) {
-            console.log("needList: " + need.role + " has no spawns with enough energyCapacity");
+            console.log("needList: " + need.role + " for " + need.roomName + " has no spawns with enough energyCapacity");
         } else if (res[0] == 0) {
             let spawn = res[1];
             let energy = spawn.room.energyAvailable;
             if(!role in objectCache)
                 objectCache[need.role] = require('role.' + need.role);
             let [body, leftEnergy] = objectCache[role].create2(energy);
+            /*
             let newName = spawn.createCreep(body, need.role + "." + Math.random().toFixed(2), {
                 "role": need.role,
                 "spawnName": spawn.name,
@@ -184,6 +187,8 @@ if(0) {
                     moves : 0,
                 },
             });
+            */
+            let newName = need.role;
             //console.log("needList: " + need.role + " for room " + need.roomName + " creation by " + spawn.name + " with energy " + spawn.room.energyAvailable);
             console.log(newName + " BURNING by " + spawn.room.name + '.' + spwan.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") [" + body + "]");
         }
@@ -463,7 +468,7 @@ function getRoomLimits (room, creepsCount) {
 }
 
 function getSpawnForCreate (need, skipSpawnNames) {
-    let spawnsInRange = _.filter(Game.spawns, s => Game.map.getRoomLinearDistance(s.room.name, need.roomName) <= need.range && !s.spawning && !s.name in skipSpawnNames);
+    let spawnsInRange = _.filter(Game.spawns, s => Game.map.getRoomLinearDistance(s.room.name, need.roomName) <= need.range && !s.spawning && !(s.name in skipSpawnNames));
     
     if (!spawnsInRange.length)
         return [-2];
