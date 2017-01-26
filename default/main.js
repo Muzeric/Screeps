@@ -167,7 +167,11 @@ if(utils.autoconfig) {
 
     let skipSpawnNames = {};
     for (let need of needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } )) {
-        if (!_.filter(Game.spawns, s => !s.spawning && !(s.name in skipSpawnNames)).length) {
+        if (!_.filter(Game.spawns, s => 
+                !s.spawning && 
+                !(s.name in skipSpawnNames) && 
+                !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(s) && c.ticksToLive < 1000)  
+        ).length) {
             //console.log("All spawns are spawning");
             break;
         }
@@ -182,8 +186,6 @@ if(utils.autoconfig) {
         } else if (res[0] == -3) {
             console.log("needList: " + need.role + " for " + need.roomName + " has no spawns with enough energyCapacity");
         } else if (res[0] == 0) {
-            console.log("debug: spawns = " + _.filter(Game.spawns, s => !s.spawning && !(s.name in skipSpawnNames)) );
-
             let spawn = res[1];
             let energy = spawn.room.energyAvailable;
             if(!(need.role in objectCache))
@@ -203,10 +205,10 @@ if(utils.autoconfig) {
                     moves : 0,
                 },
             });
-            skipSpawnNames[spawn.spawnName] = 1;
+            skipSpawnNames[spawn.name] = 1;
             
             //let newName = need.role;
-            console.log(newName + " skipSpawnNames=" + JSON.stringify(skipSpawnNames) + " BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") [" + body + "]");
+            console.log(newName + " BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") [" + body + "]");
         }
     }
 } else {
@@ -484,7 +486,12 @@ function getRoomLimits (room, creepsCount) {
 }
 
 function getSpawnForCreate (need, skipSpawnNames) {
-    let spawnsInRange = _.filter(Game.spawns, s => Game.map.getRoomLinearDistance(s.room.name, need.roomName) <= need.range && !s.spawning && !(s.name in skipSpawnNames));
+    let spawnsInRange = _.filter(Game.spawns, s => 
+        Game.map.getRoomLinearDistance(s.room.name, need.roomName) <= need.range &&
+        !s.spawning && 
+        !(s.name in skipSpawnNames) && 
+        !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(s) && c.ticksToLive < 1000)  
+    );
     
     if (!spawnsInRange.length)
         return [-2];
