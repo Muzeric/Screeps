@@ -182,6 +182,8 @@ if(utils.autoconfig) {
         } else if (res[0] == -3) {
             console.log("needList: " + need.role + " for " + need.roomName + " has no spawns with enough energyCapacity");
         } else if (res[0] == 0) {
+            console.log("debug: spawns = " + _.filter(Game.spawns, s => !s.spawning && !(s.name in skipSpawnNames)) );
+
             let spawn = res[1];
             let energy = spawn.room.energyAvailable;
             if(!(need.role in objectCache))
@@ -204,7 +206,7 @@ if(utils.autoconfig) {
             skipSpawnNames[spawn.spawnName] = 1;
             
             //let newName = need.role;
-            console.log(newName + " BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") [" + body + "]");
+            console.log(newName + " skipSpawnNames=" + JSON.stringify(skipSpawnNames) + " BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") [" + body + "]");
         }
     }
 } else {
