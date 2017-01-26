@@ -201,6 +201,7 @@ if(utils.autoconfig) {
                     moves : 0,
                 },
             });
+            skipSpawnNames[spawn.spawnName] = 1;
             
             //let newName = need.role;
             console.log(newName + " BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") [" + body + "]");
