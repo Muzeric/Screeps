@@ -124,7 +124,7 @@ if(utils.autoconfig) {
     let needList = [];
     let lastCPU = Game.cpu.getUsed();
     _.forEach(_.filter(Game.rooms, r => r.controller.my), function(room) {
-        let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == room.name && c.ticksToLive > 200), 'memory.role'); 
+        let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == room.name && (c.ticksToLive > 200 || c.spawning) ), 'memory.role'); 
 
         if (!Memory.limitList[room.name] || !Memory.limitTime[room.name] || (Game.time - Memory.limitTime[room.name] > 10)) {
             Memory.limitList[room.name] = getRoomLimits(room, creepsCount);
@@ -148,7 +148,7 @@ if(utils.autoconfig) {
             Game.flags, f => f.name.substring(0, 6) == 'Source' || f.name.substring(0, 10) == 'Controller' || f.name.substring(0, 5) == 'Build'), 'pos.roomName' 
     ) ),
     function(roomName) {
-        let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && c.ticksToLive > 200), 'memory.role'); 
+        let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), 'memory.role'); 
 
         if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
             Memory.limitList[roomName] = getNotMyRoomLimits(roomName, creepsCount);
