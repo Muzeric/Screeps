@@ -166,7 +166,7 @@ if(utils.autoconfig) {
     }); // each flag end
     
     if (Game.time % 20 == 0)
-        console.log("needList: CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; list=" + JSON.stringify(_.countBy(needList, 'need.role')));
+        console.log("needList: CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; list=" + JSON.stringify(_.countBy(needList, 'role')));
     lastCPU = Game.cpu.getUsed();
 
     let skipSpawnNames = {};
@@ -422,7 +422,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
             limit["minEnergy"] = 0;
     }
 
-    console.log(roomName + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; limits=" + JSON.stringify(limits));
+    //console.log(roomName + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; limits=" + JSON.stringify(limits));
 
     return limits;
 }
@@ -484,7 +484,7 @@ function getRoomLimits (room, creepsCount) {
             limit["minEnergy"] = 0;
     }
 
-    console.log(room.name + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; limits=" + JSON.stringify(limits));
+    //console.log(room.name + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; limits=" + JSON.stringify(limits));
 
     return limits;
 }

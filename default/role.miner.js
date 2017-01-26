@@ -9,7 +9,7 @@ var role = {
         let container;
 
         if(creep.memory.cID === undefined || !creep.memory.energyID) {
-            let containers = Game.spawns[creep.memory.spawnName].room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_CONTAINER });
+            let containers = creep.room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_CONTAINER });
             if(!containers.length) {
                 console.log(creep.name + ": no containers in room, nothing to do");
                 return;
