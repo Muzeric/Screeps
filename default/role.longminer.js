@@ -6,7 +6,7 @@ var role = {
         let container;
 
         if(creep.memory.cID === undefined || !creep.memory.energyID) {
-            let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && f.room && (!utils.autoconfig || f.pos.roomName == creep.memory.roomName));
+            let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && f.room && f.pos.roomName == creep.memory.roomName);
             if (!flags.length) {
                 console.log(creep.name + " found no Source.flags with known rooms");
                 return;
@@ -81,40 +81,7 @@ var role = {
         }
 	},
 	
-    create: function(spawnName, role, total_energy) {
-	    let spawn = Game.spawns[spawnName];
-        if(!spawn) {
-            console.log("No spawn with name=" + spawnName);
-            return;
-        }
-        total_energy -= 80*2 + 50; // For move-attack parts
-        total_energy -= 50;
-        let body = [CARRY];
-        let wlim = 5;
-        let fat = 1;
-        while (total_energy >= 100 && wlim) {
-            if (total_energy >= 100) {
-	            body.push(WORK);
-	            wlim--;
-                fat++;
-	            total_energy -= 100;
-	        }
-            if (fat > 0 && total_energy >= 50) {
-                body.push(MOVE);
-	            total_energy -= 50;
-                fat -= 2;
-            }
-        }
-        if(fat > 0 && total_energy >= 50) {
-            body.push(MOVE);
-            total_energy -= 50;
-	    }
-        body.push(MOVE,ATTACK,ATTACK);
-	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-        return [newName, body, total_energy];
-	},
-	
-    create2: function(energy) {
+    create: function(energy) {
 	    energy -= 80*2 + 50; // For move-attack parts
         energy -= 50;
         let body = [CARRY];

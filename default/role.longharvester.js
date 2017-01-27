@@ -78,45 +78,7 @@ var role = {
         }
 	},
 	
-    create: function(spawnName, role, total_energy) {
-	    let spawn = Game.spawns[spawnName];
-        if(!spawn) {
-            console.log("No spawn with name=" + spawnName);
-            return;
-        }
-        total_energy -= 80*3 + 50*2; // For move-attack parts
-        let body = [];
-	    let cnum = 0;
-	    let fat = -1;
-	    while (total_energy >= 50) {
-	        if(fat >= 0 && total_energy >= 50) {
-	            body.push(MOVE);
-	            total_energy -= 50;
-	            fat -= 2;
-	        }
-	        if(total_energy >= 50) {
-	            body.push(CARRY);
-	            total_energy -= 50;
-	            cnum++;
-	            fat++;
-	        }
-	        if(fat >= 0 && total_energy >= 50) {
-	            body.push(MOVE);
-	            total_energy -= 50;
-	            fat -= 2;
-	        }
-	        if(cnum % 2 == 0 && total_energy >= 100) {
-	            body.push(WORK);
-	            total_energy -= 100;
-	            fat++;
-	        }
-	    }
-        body.push(MOVE,MOVE,ATTACK,ATTACK,ATTACK);
-	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-	    return [newName, body, total_energy];
-	},
-	
-    create2: function(energy) {
+    create: function(energy) {
 	    energy -= 80*3 + 50*2; // For move-attack parts
         let body = [];
 	    let cnum = 0;
@@ -151,7 +113,7 @@ var role = {
 
 function set_cid (creep) {
     //console.log("Searching container for " + creep.name);
-    if(creep.memory.energyName && (creep.memory.energyName == 'Source.W47N4' || creep.memory.energyName == 'Source.W47N3') && creep.memory.roomName == "W48N4") {
+    if(creep.memory.energyName && (creep.memory.energyName == 'Source.W47N4' || creep.memory.energyName == 'Source.W47N3') && creep.memory.spawnName == "Spawn1") {
         let links = _.filter([Game.getObjectById('5885198c52b1ece7377c7f8b'), Game.getObjectById('587869503d6c02904166296f')], l => l.energy + creep.carry.energy <= l.energyCapacity);
         if(links.length) {
             creep.memory.cID = links[0].id;
@@ -178,7 +140,7 @@ function set_cid (creep) {
 }
 
 function set_energy (creep) {
-    let sources = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && (!utils.autoconfig || f.pos.roomName == creep.memory.roomName));
+    let sources = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && f.pos.roomName == creep.memory.roomName);
     if(!sources.length) {
         console.log(creep.name + " found no flags");
         return;

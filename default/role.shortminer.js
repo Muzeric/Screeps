@@ -53,20 +53,7 @@ var roleShortMiner = {
         }
 	},
 	
-    create: function(spawnName, role, total_energy) {
-	    let spawn = Game.spawns[spawnName];
-        if(!spawn) {
-            console.log("No spawn with name=" + spawnName);
-            return;
-        }
-        total_energy -= 50*6;
-        let body = [MOVE,MOVE,CARRY,CARRY,CARRY,CARRY];
-        
-	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-        return [newName, body, total_energy];
-	},
-	
-    create2: function(energy) {
+    create: function(energy) {
 	    energy -= 50*6;
         let body = [MOVE,MOVE,CARRY,CARRY,CARRY,CARRY];
         

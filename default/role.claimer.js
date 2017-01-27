@@ -7,7 +7,7 @@ var roleClaimer = {
         if(!creep.memory.controllerName || !Game.flags[creep.memory.controllerName]) {
             let controllers = _.filter(Game.flags, f => 
                 f.name.substring(0, 10) == 'Controller' &&
-                (!utils.autoconfig || f.pos.roomName == creep.memory.roomName)
+                f.pos.roomName == creep.memory.roomName
             );
 	        if(!controllers.length) {
                 //console.log(creep.name + " found no flags");
@@ -42,20 +42,7 @@ var roleClaimer = {
         }
 	},
 	
-    create: function(spawnName, role, total_energy) {
-	    let spawn = Game.spawns[spawnName];
-        if(!spawn) {
-            console.log("No spawn with name=" + spawnName);
-            return;
-        }
-        total_energy -= 600*2 + 100;
-        let body = [CLAIM,CLAIM,MOVE,MOVE];
-
-	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-	    return [newName, body, total_energy];
-	},
-
-    create2: function(energy) {
+    create: function(energy) {
 	    energy -= 600*2 + 100;
         let body = [CLAIM,CLAIM,MOVE,MOVE];
 

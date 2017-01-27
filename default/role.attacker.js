@@ -49,41 +49,7 @@ var roleAttacker = {
         }
 	},
 	
-    create: function(spawnName, role, total_energy) {
-        let spawn = Game.spawns[spawnName];
-        if(!spawn) {
-            console.log("No spawn with name=" + spawnName);
-            return;
-        }
-        total_energy -= 300; // MOVE,HEAL at end
-        let body = [];
-        let tnum = 10;
-        while(tnum-- > 0 && total_energy >= 60) {
-            body.push(TOUGH);
-            total_energy -= 10;
-            body.push(MOVE);
-            total_energy -= 50;
-        }
-        
-        let mnum = Math.floor(total_energy / (50+80));
-        let anum = mnum;
-        while (total_energy >= 50 && mnum-- > 0) {
-            body.push(MOVE);
-            total_energy -= 50;
-        }
-        while (total_energy >= 80 && anum-- > 0) {
-            body.push(ATTACK);
-            total_energy -= 80;
-        }
-        body.push(MOVE);
-        body.push(HEAL);
-
-	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-	    //let newName = 'test';
-        return [newName, body, total_energy];
-	},
-	
-    create2: function(energy) {
+    create: function(energy) {
         energy -= 300; // MOVE,HEAL at end
         let body = [];
         let tnum = 10;

@@ -60,43 +60,7 @@ var roleHarvester = {
         }
 	},
 	
-	create: function(spawnName, role, total_energy, worker) {
-	    let spawn = Game.spawns[spawnName];
-        if(!spawn) {
-            console.log("No spawn with name=" + spawnName);
-            return;
-        }
-        let energyDiff = 0;
-        if (total_energy > 1350) {
-            energyDiff = total_energy - 1350;
-            total_energy = 1350;
-        }
-        let body = [];
-        let fat = 0;
-        let mnum = 0;
-	    while (total_energy >= 50) {
-	        if((!mnum || fat/(mnum*2) >= 1) && total_energy >= 50) {
-	            body.push(MOVE);
-	            total_energy -= 50;
-                mnum++;
-	        }
-	        if(total_energy >= 50) {
-	            body.push(CARRY);
-	            total_energy -= 50;
-	            fat++;
-	        }
-            if(worker && total_energy >= 100) {
-	            body.push(WORK);
-	            total_energy -= 100;
-	            fat++;
-	        }
-	    }
-	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-        total_energy += energyDiff;
-	    return [newName, body, total_energy];
-	},
-
-	create2: function(energy, worker) {
+	create: function(energy, worker) {
 	    let energyDiff = 0;
         if (energy > 1350) {
             energyDiff = energy - 1350;

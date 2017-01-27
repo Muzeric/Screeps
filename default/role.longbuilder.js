@@ -42,36 +42,7 @@ var roleLongBuilder = {
 	    }
 	},
 	
-	create: function(spawnName, role, total_energy) {
-	    let spawn = Game.spawns[spawnName];
-        if(!spawn) {
-            console.log("No spawn with name=" + spawnName);
-            return;
-        }
-        let body = [];
-	    while (total_energy >= 50) {
-	        if(total_energy >= 50) {
-	            body.push(MOVE);
-	            total_energy -= 50;
-	        }
-	        if(total_energy >= 100) {
-	            body.push(WORK);
-	            total_energy -= 100;
-	        }
-	        if(total_energy >= 50) {
-	            body.push(MOVE);
-	            total_energy -= 50;
-	        }
-	        if(total_energy >= 50) {
-	            body.push(CARRY);
-	            total_energy -= 50;
-	        }
-	    }
-	    let newName = spawn.createCreep(body, role + "." + Math.random().toFixed(2), {role: role, spawnName: spawnName});
-        return [newName, body, total_energy];
-	},
-	
-	create2: function(energy) {
+	create: function(energy) {
 	    let body = [];
 	    while (energy >= 50) {
 	        if(energy >= 50) {
