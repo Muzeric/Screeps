@@ -124,7 +124,7 @@ module.exports.loop = function () {
     }); // each flag end
     
     if (Game.time % 20 == 0)
-        console.log("needList: CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; list=" + JSON.stringify(_.countBy(needList, 'role')));
+        console.log("needList: CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; list=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), 'role')));
     lastCPU = Game.cpu.getUsed();
 
     let skipSpawnNames = {};

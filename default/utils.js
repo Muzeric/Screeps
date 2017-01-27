@@ -11,14 +11,9 @@ module.exports = {
     roomConfig : roomConfig,
 
     findSource : function (creep, storage_priority) {
-        let resource = creep.pos.findClosestByPath(FIND_DROPPED_ENERGY, { filter: r => r.amount > 100 });
-        if(resource) {
-            console.log(creep.name + " found dropped resource: " + resource.id + " with " + resource.amount + " energy");
-            return resource.id;
-        }
+        let targets = creep.room.fine(FIND_DROPPED_ENERGY, { filter: r => r.amount > 50 });
         
-        let containers = creep.room.find(FIND_STRUCTURES, { filter: 
-            s =>
+        targets = targets.concat( creep.room.find(FIND_STRUCTURES, { filter: s =>
             (
                 s.structureType == STRUCTURE_CONTAINER && 
                 _.sum(Game.creeps, (c) => (c.memory.role == "miner" || c.memory.role == "longminer") && c.memory.cID == s.id)
@@ -27,43 +22,44 @@ module.exports = {
                 s.structureType == STRUCTURE_STORAGE && 
                 s.store[RESOURCE_ENERGY] > creep.carryCapacity
             )
-        });
-        if(containers.length) {
-            let cont_info = {};
-            for(let container of containers) {
-                let cenergy = container.store[RESOURCE_ENERGY];
-                let cpath = creep.pos.getRangeTo(container);
-                let wantEnergy = _.reduce(_.filter(Game.creeps, c => c.memory.energyID == container.id), function (sum, value) { return sum + value.carryCapacity; }, 0);
-                let cpriority = storage_priority && container.structureType == STRUCTURE_STORAGE || !storage_priority && container.structureType == STRUCTURE_CONTAINER ? 1 : 0;
-                let cenergyTicks = (wantEnergy + creep.carryCapacity - cenergy) / 10;
-                if (cenergyTicks < 0)
-                    cenergyTicks = 0;
-                cont_info[container.id] = cpath * 1.2 + cenergyTicks - 100 * cpriority;
-                //console.log(creep.name + " [" + creep.memory.spawnName + "] has container " + container.id + " in " + cpath + " with " + cenergy + " energy and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + cont_info[container.id]);
-            }
-            let container = containers.sort( function (a,b) {
-                let suma = cont_info[a.id];
-                let sumb = cont_info[b.id];
-                //console.log("a=" + a.id + ",b=" + b.id + ",suma=" + suma + ",sumb=" + sumb);
-                return suma - sumb;
-            })[0];
-            
-            //console.log(creep.name + " got container " + container.id + " in " + cont_info[container.id].cpath + " with " + cont_info[container.id].cenergy + " energy");
-            return container.id;
-        }
-        
-        let sources = creep.room.find(FIND_SOURCES);
-        if(!sources.length) {
-            console.log(creep.name + " no sources in room, nothing to do");
+        }));
+
+        targets = targets.concat(creep.room.find(FIND_SOURCES));
+
+        if(!targets.length) {
+            console.log(creep.name + " no any source in room " + creep.room.name);
             return;
         }
-        let source = sources.sort(function(a,b) { 
-            let suma = _.sum(Game.creeps, (c) => c.memory.energyID == a.id) * (a.id == "577b929c0f9d51615fa46cfc" ? 2 : 1);
-            let sumb = _.sum(Game.creeps, (c) => c.memory.energyID == b.id) * (b.id == "577b929c0f9d51615fa46cfc" ? 2 : 1);
+
+        let targetInfo = {};
+        for(let target of targets) {
+            let cenergy = target.resourceType ? target.amount : (target.structureType ? target.store[RESOURCE_ENERGY] : target.energy);
+            let cpath = creep.pos.getRangeTo(target);
+            let wantEnergy = _.reduce(_.filter(Game.creeps, c => c.memory.energyID == target.id), function (sum, value) { return sum + value.carryCapacity; }, 0);
+            let cpriority = 0;
+            if (target.resourceType) {
+                cpriority = 1.5;
+            } else if (storage_priority && target.structureType == STRUCTURE_STORAGE || !storage_priority && target.structureType == STRUCTURE_CONTAINER) {
+                cpriority = 1; 
+            } else if (target.energy) {
+                cpriority = -10;
+            }
+
+            let cenergyTicks = (wantEnergy + creep.carryCapacity - cenergy) / 10;
+            if (cenergyTicks < 0)
+                cenergyTicks = 0;
+            targetInfo[target.id] = cpath * 1.2 + cenergyTicks - 100 * cpriority;
+            console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + cenergy + " energy and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + targetInfo[target.id]);
+        }
+        let target = targets.sort( function (a,b) {
+            let suma = targetInfo[a.id];
+            let sumb = targetInfo[b.id];
+            //console.log("a=" + a.id + ",b=" + b.id + ",suma=" + suma + ",sumb=" + sumb);
             return suma - sumb;
         })[0];
-        //console.log("Source for " + creep.name + " is " + source.id);
-        return source.id;
+        
+        //console.log(creep.name + " got target " + target.id + " in " + cont_info[target.id].cpath + " with " + cont_info[target.id].cenergy + " energy");
+        return target.id;
     },
     
     gotoSource : function(creep) {

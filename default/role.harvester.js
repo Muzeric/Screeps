@@ -1,8 +1,6 @@
 var utils = require('utils');
 
 var roleHarvester = {
-
-    /** @param {Creep} creep **/
     run: function(creep) {
         if (!utils.checkInRoomAndGo(creep))
             return;
@@ -16,9 +14,8 @@ var roleHarvester = {
 	    }
 	    
 	    if(!creep.memory.transfering) {
-            if(!creep.memory.energyID) {
+            if(!creep.memory.energyID)
 	            creep.memory.energyID = utils.findSource(creep);
-	        }
             utils.gotoSource(creep);
         } else {
             var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
