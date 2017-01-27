@@ -49,7 +49,7 @@ module.exports = {
             if (cenergyTicks < 0)
                 cenergyTicks = 0;
             targetInfo[target.id] = cpath * 1.2 + cenergyTicks - 100 * cpriority;
-            console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + cenergy + " energy and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + targetInfo[target.id]);
+            //console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + cenergy + " energy and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + targetInfo[target.id]);
         }
         let target = targets.sort( function (a,b) {
             let suma = targetInfo[a.id];
