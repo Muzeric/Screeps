@@ -152,7 +152,7 @@ module.exports.loop = function () {
             let energy = spawn.room.energyAvailable;
             if(!(need.role in objectCache))
                 objectCache[need.role] = require('role.' + need.role);
-            let [body, leftEnergy] = objectCache[need.role].create2(energy);
+            let [body, leftEnergy] = objectCache[need.role].create(energy);
             
             let newName = spawn.createCreep(body, need.role + "." + Math.random().toFixed(2), {
                 "role": need.role,
