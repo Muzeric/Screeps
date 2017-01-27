@@ -61,20 +61,6 @@ module.exports.loop = function () {
     
     stat.roles = JSON.parse(JSON.stringify(rolesCount));
     
-    _.forEach(Game.creeps, function(creep) { if(creep.memory.controllerName && creep.memory.roomName != Game.flags[creep.memory.controllerName].pos.roomName) { 
-        console.log(creep.name + ": " + creep.memory.roomName + " -> " + Game.flags[creep.memory.controllerName].pos.roomName); 
-        creep.memory.roomName=Game.flags[creep.memory.controllerName].pos.roomName; 
-    }});
-    _.forEach(Game.creeps, function(creep) { if(creep.memory.energyName && creep.memory.roomName != Game.flags[creep.memory.energyName].pos.roomName) { 
-        console.log(creep.name + ": " + creep.memory.roomName + " -> " + Game.flags[creep.memory.energyName].pos.roomName); 
-        creep.memory.roomName=Game.flags[creep.memory.energyName].pos.roomName; 
-    }});
-    _.forEach(Game.creeps, function(creep) { if(creep.memory.role == "longminer" && creep.memory.energyID && creep.memory.roomName != Game.getObjectById(creep.memory.energyID).pos.roomName) { 
-        console.log(creep.name + ": " + creep.memory.roomName + " -> " + Game.getObjectById(creep.memory.energyID).pos.roomName); 
-        creep.memory.roomName=Game.getObjectById(creep.memory.energyID).pos.roomName;
-    }});
-
-
     if (!Memory.limitList || !Memory.limitTime) {
         Memory.limitList = {};
         Memory.limitTime = {};
@@ -152,7 +138,7 @@ module.exports.loop = function () {
             let energy = spawn.room.energyAvailable;
             if(!(need.role in objectCache))
                 objectCache[need.role] = require('role.' + need.role);
-            let [body, leftEnergy] = objectCache[need.role].create(energy);
+            let [body, leftEnergy] = objectCache[need.role].create(energy, need.arg);
             
             let newName = spawn.createCreep(body, need.role + "." + Math.random().toFixed(2), {
                 "role": need.role,
@@ -202,7 +188,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     limits.push({
         "role" : "longharvester",
         "count" : fcount["Source"],
-        "args" : [containers && creepsCount["longminer"] ? 0 : 1],
+        "arg" : containers && containers >= fcount["Source"] && creepsCount["longminer"] >= containers ? 0 : 1,
         "priority" : 10,
         "wishEnergy" : 1500,
         "range" : 1,
@@ -228,6 +214,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     },{
         "role" : "longharvester",
         "count" : fcount["Source"] * 3,
+        "arg" : containers && containers >= fcount["Source"] && creepsCount["longminer"] >= containers ? 0 : 1,
         "priority" : 14,
         "wishEnergy" : 1500,
         "range" : 1,
@@ -258,7 +245,7 @@ function getRoomLimits (room, creepsCount) {
     limits.push({
             "role" : "harvester",
             "count" : 1,
-            "args" : [scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1],
+            "arg" : scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1,
             "priority" : 1,
             "wishEnergy" : 300,
     },{
@@ -269,7 +256,7 @@ function getRoomLimits (room, creepsCount) {
     },{
             "role" : "harvester",
             "count" : _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3),
-            "args" : [scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1],
+            "arg" : scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1,
             "priority" : 2,
             "wishEnergy" : 1350,
     },{
