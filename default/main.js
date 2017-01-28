@@ -218,7 +218,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 2,
     },{
         "role" : "longharvester",
-        "count" : fcount["Source"] * 3,
+        "count" : fcount["Source"] * (2 + workerHarvester),
         "arg" : workerHarvester,
         "priority" : 14,
         "minEnergy" : 550,
