@@ -184,12 +184,14 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let builds = room ? room.find(FIND_MY_CONSTRUCTION_SITES).length : 0;
     let repairs = room ? room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit } ).length : 0;
     let reservation = room ? room.controller.reservation.ticksToEnd : 0;
+    let liteClaimer = reservation > 3000 ? 1 : 0;
+    let workerHarvester = containers && containers >= fcount["Source"] && creepsCount["longminer"] >= containers ? 0 : 1;
 
     let limits = [];
     limits.push({
         "role" : "longharvester",
         "count" : fcount["Source"],
-        "arg" : containers && containers >= fcount["Source"] && creepsCount["longminer"] >= containers ? 0 : 1,
+        "arg" : workerHarvester,
         "priority" : 10,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
@@ -197,9 +199,9 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     },{
         "role" : "claimer",
         "count" : fcount["Controller"],
-        "arg" : reservation > 3000 ? 1 : 0,
+        "arg" : liteClaimer,
         "priority" : 11,
-        "minEnergy" : 1300,
+        "minEnergy" : liteClaimer ? 650 : 1300,
         "wishEnergy" : 1300,
         "range" : 2,
     },{
@@ -217,7 +219,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     },{
         "role" : "longharvester",
         "count" : fcount["Source"] * 3,
-        "arg" : containers && containers >= fcount["Source"] && creepsCount["longminer"] >= containers ? 0 : 1,
+        "arg" : workerHarvester,
         "priority" : 14,
         "minEnergy" : 550,
         "wishEnergy" : 1500,

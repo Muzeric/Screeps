@@ -42,9 +42,15 @@ var roleClaimer = {
         }
 	},
 	
-    create: function(energy) {
-	    energy -= 600*2 + 100;
-        let body = [CLAIM,CLAIM,MOVE,MOVE];
+    create: function(energy, lite) {
+        let cnum = 2 - lite;
+        let body = [];
+        while(cnum-- && energy >= 650) {
+            body.push(MOVE);
+	        energy -= 50;
+            body.push(CLAIM);
+	        energy -= 600;
+	    }
 
 	    return [body, energy];
 	}
