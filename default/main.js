@@ -104,7 +104,7 @@ module.exports.loop = function () {
 
         for (let limit of Memory.limitList[roomName]) {
             let added = 0;
-            if ((creepsCount[limit.role] || 0) + added++ < limit.count)
+            while ((creepsCount[limit.role] || 0) + added++ < limit.count)
                 needList.push(limit);
         }
     }); // each flag end
