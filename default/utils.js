@@ -5,6 +5,9 @@ var roomConfig = {
     "W49N4" : {
         "repairLimit" : 135000,
     },
+    "W48N5" : {
+        "repairLimit" : 1000000,
+    },
 };
 
 module.exports = {
@@ -195,8 +198,8 @@ module.exports = {
         
         if(targets.length) {
                 var rt = targets.sort(function (a,b) { 
-                    let suma = (a.hits*100/a.hitsMax < 25 ? -1000 : a.hits*100/a.hitsMax) + (creep && creep.room.name == a.room.name ? -30 : 30) + (creep ? creep.pos.getRangeTo(a) : 0);
-                    let sumb = (b.hits*100/b.hitsMax < 25 ? -1000 : b.hits*100/b.hitsMax) + (creep && creep.room.name == b.room.name ? -30 : 30) + (creep ? creep.pos.getRangeTo(b) : 0);
+                    let suma = (a.hits*100/a.hitsMax < 25 ? -1000 : a.hits*100/a.hitsMax) + (creep ? Game.map.getRoomLinearDistance(a.pos.roomName, creep.room.name) : 0) + (creep ? creep.pos.getRangeTo(a) || 0 : 0);
+                    let sumb = (b.hits*100/b.hitsMax < 25 ? -1000 : b.hits*100/b.hitsMax) + (creep ? Game.map.getRoomLinearDistance(a.pos.roomName, creep.room.name) : 0) + (creep ? creep.pos.getRangeTo(b) || 0 : 0);
                     return (suma - sumb) || (a.hits - b.hits); 
                 })[0];
                 return rt.id;
