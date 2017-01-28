@@ -183,6 +183,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let repairLimit = utils.roomConfig[roomName] ? utils.roomConfig[roomName].repairLimit : 250000;
     let builds = room ? room.find(FIND_MY_CONSTRUCTION_SITES).length : 0;
     let repairs = room ? room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit } ).length : 0;
+    let reservation = room ? room.controller.reservation.ticksToEnd : 0;
 
     let limits = [];
     limits.push({
@@ -195,6 +196,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     },{
         "role" : "claimer",
         "count" : fcount["Controller"],
+        "arg" : reservation > 3000 ? 1 : 0,
         "priority" : 11,
         "minEnergy" : 1300,
         "wishEnergy" : 1300,
@@ -238,7 +240,7 @@ function getRoomLimits (room, creepsCount) {
     let scount = _.countBy(room.find(FIND_STRUCTURES), 'structureType' );
     scount["source"] = room.find(FIND_SOURCES).length;
     scount["construction"] = room.find(FIND_MY_CONSTRUCTION_SITES).length;
-    let repairLimit = utils.roomConfig[room.name].repairLimit || 100000;
+    let repairLimit = utils.roomConfig[room.name] ? utils.roomConfig[room.name].repairLimit : 100000;
     scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit }).length;
     
     let limits = [];
@@ -351,7 +353,7 @@ function towerAction (room, canRepair) {
             if (!canRepair)
                 continue;
 
-            let repairLimit = utils.roomConfig[room.name].repairLimit || 100000;
+            let repairLimit = utils.roomConfig[room.name] ? utils.roomConfig[room.name].repairLimit : 100000;
             let dstructs = room.find(FIND_STRUCTURES, {
                 filter: (structure) => structure.hits < 0.9*structure.hitsMax && structure.hits < repairLimit
             });
