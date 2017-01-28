@@ -191,6 +191,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "count" : fcount["Source"],
         "arg" : containers && containers >= fcount["Source"] && creepsCount["longminer"] >= containers ? 0 : 1,
         "priority" : 10,
+        "minEnergy" : 550,
         "wishEnergy" : 1500,
         "range" : 1,
     },{
@@ -218,6 +219,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "count" : fcount["Source"] * 3,
         "arg" : containers && containers >= fcount["Source"] && creepsCount["longminer"] >= containers ? 0 : 1,
         "priority" : 14,
+        "minEnergy" : 550,
         "wishEnergy" : 1500,
         "range" : 1,
     });

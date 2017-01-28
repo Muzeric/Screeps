@@ -79,11 +79,21 @@ var role = {
 	},
 	
     create: function(energy, worker) {
-	    energy -= 80*3 + 50*2; // For move-attack parts
+	    energy -= 80*2 + 50*1; // For move-attack parts
         let body = [];
 	    let cnum = 0;
-	    let fat = -1;
+	    let fat = 0;
 	    while (energy >= 50) {
+            if(fat >= 0 && energy >= 50) {
+	            body.push(MOVE);
+	            energy -= 50;
+	            fat -= 2;
+	        }
+	        if(cnum % 2 == 0 && energy >= 100 && worker) {
+	            body.push(WORK);
+	            energy -= 100;
+	            fat++;
+	        }
 	        if(fat >= 0 && energy >= 50) {
 	            body.push(MOVE);
 	            energy -= 50;
@@ -95,18 +105,8 @@ var role = {
 	            cnum++;
 	            fat++;
 	        }
-	        if(fat >= 0 && energy >= 50) {
-	            body.push(MOVE);
-	            energy -= 50;
-	            fat -= 2;
-	        }
-	        if(cnum % 2 == 0 && energy >= 100 && worker) {
-	            body.push(WORK);
-	            energy -= 100;
-	            fat++;
-	        }
 	    }
-        body.push(MOVE,MOVE,ATTACK,ATTACK,ATTACK);
+        body.push(MOVE,ATTACK,ATTACK);
 	    return [body, energy];
 	},
 };
