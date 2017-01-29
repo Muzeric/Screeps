@@ -114,7 +114,7 @@ module.exports.loop = function () {
     }); // each flag end
     
     if (Game.time % 20 == 0)
-        console.log("needList: CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; list=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), 'role')));
+        console.log("main: nl.CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.role})));
     lastCPU = Game.cpu.getUsed();
 
     let skipSpawnNames = {};
@@ -164,6 +164,10 @@ module.exports.loop = function () {
         }
     }
 
+    if (Game.time % 20 == 0)   
+        console.log("main: cr.CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2));
+    lastCPU = Game.cpu.getUsed();
+
     let link_to = Game.getObjectById('58771a999d331a0f7f5ae31a');
     for(let link_from of [Game.getObjectById('587869503d6c02904166296f'), Game.getObjectById('5885198c52b1ece7377c7f8b')]) {
         if(link_from && link_to && !link_from.cooldown && link_from.energy && link_to.energy < link_to.energyCapacity*0.7) {
@@ -189,7 +193,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let repairs = room ? room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit } ).length : 0;
     let reservation = room ? room.controller.reservation.ticksToEnd : 0;
     let liteClaimer = reservation > 3000 ? 1 : 0;
-    let workerHarvester = containers && containers >= fcount["Source"] && creepsCount["longminer"] >= containers ? 0 : 1;
+    let allMiners = _.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.roomName == roomName).length;
+    let workerHarvester = containers && containers >= fcount["Source"] && allMiners >= containers ? 0 : 1;
     
     let limits = [];
     limits.push({
