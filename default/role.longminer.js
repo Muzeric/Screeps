@@ -82,7 +82,6 @@ var role = {
 	},
 	
     create: function(energy) {
-	    energy -= 80*2 + 50; // For move-attack parts
         energy -= 50;
         let body = [CARRY];
         let wlim = 5;
@@ -104,7 +103,10 @@ var role = {
             body.push(MOVE);
             energy -= 50;
 	    }
-        body.push(MOVE,ATTACK,ATTACK);
+        if(energy >= 80*2 + 50) {
+            body.push(MOVE,ATTACK,ATTACK);
+            energy -= 80*2 + 50;
+        }
 	    return [body, energy];
 	},
 };
