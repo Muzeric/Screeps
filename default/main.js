@@ -95,7 +95,8 @@ module.exports.loop = function () {
             Game.flags, f => f.name.substring(0, 6) == 'Source' || f.name.substring(0, 10) == 'Controller' || f.name.substring(0, 5) == 'Build'), 'pos.roomName' 
     ) ),
     function(roomName) {
-        let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), 'memory.role'); 
+        let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), 'memory.role');
+        let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
 
         if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
             Memory.limitList[roomName] = getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders);
@@ -104,8 +105,20 @@ module.exports.loop = function () {
 
         for (let limit of Memory.limitList[roomName]) {
             let added = 0;
-            while ((creepsCount[limit.role] || 0) + added++ < limit.count)
+            let notEnoughBody = 0;
+            if (limit["body"]) {
+                for (let part in limit["body"]) {
+                    if (!bodyCount[limit.role + "," + part] || bodyCount[limit.role + "," + part] < limit["body"][part])
+                        //console.log("debug: " + limit.role + "," + part + "(" + bodyCount[limit.role + "," + part] + ") <" + limit["body"][part]);
+                }
+            }
+            while (
+                (creepsCount[limit.role] || 0) + added < limit.count ||
+                notEnoughBody && !added
+            ) {
                 needList.push(limit);
+                added++;
+            }
         }
     }); // each flag end
     
@@ -186,7 +199,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let reservation = room ? room.controller.reservation.ticksToEnd : 0;
     let liteClaimer = reservation > 3000 ? 1 : 0;
     let workerHarvester = containers && containers >= fcount["Source"] && creepsCount["longminer"] >= containers ? 0 : 1;
-
+    
     let limits = [];
     limits.push({
         "role" : "longharvester",

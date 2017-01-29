@@ -83,7 +83,7 @@ function getLongBuilderTargets(creep) {
 	for(let buildf of builds) {  
 		if(_.some(buildf.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER})))
 			continue;
-		let repairLimit = roomConfig[buildf.pos.roomName] ? roomConfig[buildf.pos.roomName].repairLimit : 250000;
+		let repairLimit = utils.roomConfig[buildf.pos.roomName] ? utils.roomConfig[buildf.pos.roomName].repairLimit : 250000;
 		targets = targets.concat( buildf.room.find(FIND_STRUCTURES, { filter: (structure) => 
 			structure.hits < structure.hitsMax*0.9 &&
 			structure.hits < repairLimit &&
