@@ -69,6 +69,7 @@ module.exports.loop = function () {
     let lastCPU = Game.cpu.getUsed();
     _.forEach(_.filter(Game.rooms, r => r.controller.my), function(room) {
         let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == room.name && (c.ticksToLive > 200 || c.spawning) ), 'memory.role'); 
+        let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == room.name && (c.ticksToLive > 200 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
 
         if (!Memory.limitList[room.name] || !Memory.limitTime[room.name] || (Game.time - Memory.limitTime[room.name] > 10)) {
             Memory.limitList[room.name] = getRoomLimits(room, creepsCount);
@@ -77,8 +78,22 @@ module.exports.loop = function () {
 
         for (let limit of Memory.limitList[room.name]) {
             let added = 0;
-            while ((creepsCount[limit.role] || 0) + added++ < limit.count)
+            let notEnoughBody = 0;
+            if (limit["body"]) {
+                for (let part in limit["body"]) {
+                    if (limit["body"][part] && (bodyCount[limit.role + "," + part] || 0) < limit["body"][part]) {
+                        //console.log("debug " + room.name + ": " + limit.role + ", " + part + "=" + bodyCount[limit.role + "," + part] + " < " + limit["body"][part]);
+                        notEnoughBody = 1;
+                    }
+                }
+            }
+            while (
+                (creepsCount[limit.role] || 0) + added < limit.count ||
+                notEnoughBody && !added
+            ) {
                 needList.push(limit);
+                added++;
+            }
         }
 
         let canRepair = creepsCount["upgrader"] ? 1 : 0;
@@ -108,8 +123,10 @@ module.exports.loop = function () {
             let notEnoughBody = 0;
             if (limit["body"]) {
                 for (let part in limit["body"]) {
-                    if (!bodyCount[limit.role + "," + part] || bodyCount[limit.role + "," + part] < limit["body"][part])
-                        //console.log("debug: " + limit.role + "," + part + "(" + bodyCount[limit.role + "," + part] + ") <" + limit["body"][part]);
+                    if (limit["body"][part] && (bodyCount[limit.role + "," + part] || 0) < limit["body"][part]) {
+                        //console.log("debug " + roomName + ": " + limit.role + ", " + part + "=" + bodyCount[limit.role + "," + part] + " < " + limit["body"][part]);
+                        notEnoughBody = 1;
+                    }
                 }
             }
             while (
@@ -209,6 +226,10 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "minEnergy" : 550,
         "wishEnergy" : 1500,
         "range" : 1,
+        "body" : {
+            "work" : workerHarvester ? 10*fcount["Source"] : 0,
+            "carry" : 30,
+        },
     },{
         "role" : "claimer",
         "count" : fcount["Controller"],
@@ -223,6 +244,9 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "priority" : 12,
         "wishEnergy" : 910,
         "range" : 3,
+        "body" : {
+            "work" : 5 * containers,
+        },
     },{
         "role" : "longbuilder",
         "count" : stopLongBuilders ? 0 : (builds ? 1 : 0) + (repairs ? 1 : 0),
@@ -237,6 +261,10 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "minEnergy" : 550,
         "wishEnergy" : 1500,
         "range" : 1,
+        "body" : {
+            "work" : workerHarvester ? 20*fcount["Source"] : 0,
+            "carry" : 30,
+        },
     });
 
     for (let limit of limits) {
@@ -259,12 +287,15 @@ function getRoomLimits (room, creepsCount) {
     scount["construction"] = room.find(FIND_MY_CONSTRUCTION_SITES).length;
     let repairLimit = utils.roomConfig[room.name] ? utils.roomConfig[room.name].repairLimit : 100000;
     scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit }).length;
+
+    let workerHarvester = scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1;
+    let countHarvester = _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3);
     
     let limits = [];
     limits.push({
             "role" : "harvester",
             "count" : 1,
-            "arg" : scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1,
+            "arg" : workerHarvester,
             "priority" : 1,
             "wishEnergy" : 300,
     },{
@@ -272,17 +303,27 @@ function getRoomLimits (room, creepsCount) {
             "count" : _.min([scount[STRUCTURE_CONTAINER], scount["source"], 1]),
             "priority" : 1,
             "wishEnergy" : 650,
+            "body" : {
+                "work" : 5 * _.min([scount[STRUCTURE_CONTAINER], scount["source"], 1]),
+            },
     },{
             "role" : "harvester",
-            "count" : _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3),
-            "arg" : scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1,
+            "count" : countHarvester,
+            "arg" : workerHarvester,
             "priority" : 2,
             "wishEnergy" : 1350,
+            "body" : {
+                "work" : workerHarvester ? 10*fcount["Source"] : 0,
+                "carry" : 15*countHarvester,
+            },
     },{
             "role" : "miner",
             "count" : _.min([scount[STRUCTURE_CONTAINER], scount["source"]]),
             "priority" : 2,
             "wishEnergy" : 650,
+            "body" : {
+                "work" : 5 * _.min([scount[STRUCTURE_CONTAINER], scount["source"]]),
+            },
     },{
             role : "upgrader",
             "count" : scount["source"],
