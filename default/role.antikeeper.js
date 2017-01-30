@@ -16,8 +16,6 @@ var role = {
                 return;
             }
             creep.moveTo(Game.flags["Antikeeper." + creep.memory.roomName]);
-            if (testmode)
-                console.log(creep.name + " goto " + creep.memory.roomName);
             return;
         }
 
@@ -28,6 +26,8 @@ var role = {
             if (testmode)
                 console.log(creep.name + " attacked " + target.id + " ("+ target.hits +"/" + target.hitsMax + ") res=" + res);
             creep.moveTo(safePlace ? safePlace : target);
+            if (testmode)
+                console.log(creep.name + " go to " + (safePlace ? safePlace : target).pos.x + "," + (safePlace ? safePlace : target).pos.y);
         } else {
             let lairs = creep.pos.find(FIND_STRUCTURES, { filter : s => s.structureType == STRUCTURE_KEEPER_LAIR});
             if (!lairs.length) {
@@ -38,7 +38,7 @@ var role = {
                 return a.ticksToSpawn - b.ticksToSpawn;
             })[0];
 
-            if (creep.pos.getRangeTo(lair) <= 3) {
+            if (creep.pos.getRangeTo(lair) > 3) {
                 creep.moveTo(lair);
                 if (testmode)
                     console.log(creep.name + " go to lair " + lair.id);
@@ -67,6 +67,7 @@ var role = {
         fat -= mnum * 2;
         energy -= 50 * mnum;
         let tnum = Math.floor(energy / 70);
+        energy -= 70 * tnum;
 
         while (tnum-- > 0)
             body.push(TOUGH, TOUGH, MOVE);
