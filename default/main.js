@@ -255,6 +255,13 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
             "work" : workerHarvester ? 20*fcount["Source"] : 0,
             "carry" : 20,
         },
+    },{
+        "role" : "antikeeper",
+        "count" : fcount["Antikeeper"],
+        "priority" : 1,
+        "wishEnergy" : 2300,
+        "minEnergy" : 2300,
+        "range" : 3,
     });
 
     for (let limit of limits) {
