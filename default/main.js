@@ -280,7 +280,7 @@ function getRoomLimits (room, creepsCount) {
     scount["construction"] = room.find(FIND_MY_CONSTRUCTION_SITES).length;
     let repairLimit = utils.roomConfig[room.name] ? utils.roomConfig[room.name].repairLimit : 100000;
     scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit }).length;
-    let hostiles = room.find(FIND_HOSTILE_CREEPSб {filter: h => h.getActiveBodyparts(HEAL)}).length;
+    let hostiles = room.find(FIND_HOSTILE_CREEPS, {filter: h => h.getActiveBodyparts(HEAL)}).length;
 
     let workerHarvester = scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1;
     let countHarvester = _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3);
