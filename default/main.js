@@ -19,6 +19,8 @@ module.exports.loop = function () {
         }
     }
 
+    let lastCPU = Game.cpu.getUsed();
+    let cpuStat = {};
     for(let creep_name in Game.creeps) {
         let creep = Game.creeps[creep_name];
         if(creep.spawning) {
@@ -44,6 +46,11 @@ module.exports.loop = function () {
         objectCache[role].run(creep);
             
         creep.memory.stat.CPU += (Game.cpu.getUsed() - lastCPU);
+        if (!cpuStat[creep.memory.role])
+            cpuStat[creep.memory.role] = {"cpu" : 0, "count" : 0};
+        
+        cpuStat[creep.memory.role]["cpu"] += (Game.cpu.getUsed() - lastCPU);
+        cpuStat[creep.memory.role]["count"]++;
 
         let diffEnergy = creep.carry[RESOURCE_ENERGY] - creep.memory.lastEnergy;
         creep.memory.lastEnergy = creep.carry[RESOURCE_ENERGY];
@@ -59,6 +66,11 @@ module.exports.loop = function () {
         
     }
     
+    //console.log(JSON.stringify(_.map(cpuStat, function(v, k) { return k + "=" + _.floor(v.cpu/v.count, 2);})));
+    if (Game.time % 20 == 0)   
+        console.log("main: rn.CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2));
+    lastCPU = Game.cpu.getUsed();
+    
     stat.roles = JSON.parse(JSON.stringify(rolesCount));
     
     if (!Memory.limitList || !Memory.limitTime) {
@@ -66,7 +78,6 @@ module.exports.loop = function () {
         Memory.limitTime = {};
     }
     let needList = [];
-    let lastCPU = Game.cpu.getUsed();
 
     let longbuilders = _.filter(Game.creeps, c => c.memory.role == "longbuilder" && (c.ticksToLive > 200 || c.spawning)).length;
     let buildFlags = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build').length;
@@ -191,7 +202,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let repairLimit = utils.roomConfig[roomName] ? utils.roomConfig[roomName].repairLimit : 250000;
     let builds = room ? room.find(FIND_MY_CONSTRUCTION_SITES).length : 0;
     let repairs = room ? room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit } ).length : 0;
-    let reservation = room ? room.controller.reservation.ticksToEnd : 0;
+    let reservation = room && room.controller.reservation ? room.controller.reservation.ticksToEnd : 0;
     let liteClaimer = reservation > 3000 ? 1 : 0;
     let allMiners = _.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.roomName == roomName).length;
     let workerHarvester = containers && containers >= fcount["Source"] && allMiners >= containers ? 0 : 1;
@@ -292,7 +303,7 @@ function getRoomLimits (room, creepsCount) {
             "priority" : 2,
             "wishEnergy" : 1350,
             "body" : {
-                "work" : workerHarvester ? 10*fcount["Source"] : 0,
+                "work" : workerHarvester ? 10*scount["source"] : 0,
                 "carry" : 10*countHarvester,
             },
     },{
