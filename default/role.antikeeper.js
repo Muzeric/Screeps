@@ -52,9 +52,9 @@ var role = {
             return [[TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE], energy - 180];
         }
 
-        let anum = 11;
+        let anum = 17;
         let fat = anum + 1;
-        energy -= 150 * anum; // ranged_attack
+        energy -= 80 * anum; // ranged_attack
         energy -= 250; // heal
 
         let body = [];
@@ -69,7 +69,7 @@ var role = {
         while (mnum-- > 0)
             body.push(MOVE);
         while (anum-- > 0)
-            body.push(RANGED_ATTACK);
+            body.push(ATTACK);
         body.push(HEAL);
         
         return [body, energy];

@@ -29,7 +29,7 @@ var role = {
             if (testmode)
                 console.log(creep.name + " go to " + (safePlace ? safePlace : target).pos.x + "," + (safePlace ? safePlace : target).pos.y);
         } else {
-            let lairs = creep.pos.find(FIND_STRUCTURES, { filter : s => s.structureType == STRUCTURE_KEEPER_LAIR});
+            let lairs = creep.room.find(FIND_STRUCTURES, { filter : s => s.structureType == STRUCTURE_KEEPER_LAIR});
             if (!lairs.length) {
                 console.log(creep.name + " no lairs in " + creep.room.name);
                 return;
@@ -82,19 +82,3 @@ var role = {
 };
 
 module.exports = role;
-
-function getRangedPlaces (pos) {
-    let res = [];
-    for (let x = -3; x <= 3; x++) {
-        for (let y in [-3,3]) {
-            res.push(new RoomPosition(pos.x + x, pos.y + y, pos.roomName));
-        }
-    }
-    for (let y = -2; y <= 2; y++) {
-        for (let x in [-3,3]) {
-            res.push(new RoomPosition(pos.x + x, pos.y + y, pos.roomName));
-        }
-    }
-
-    return res;
-}
