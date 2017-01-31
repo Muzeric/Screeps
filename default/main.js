@@ -276,6 +276,7 @@ function getRoomLimits (room, creepsCount) {
     let repairLimit = utils.roomConfig[room.name] ? utils.roomConfig[room.name].repairLimit : 100000;
     scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit }).length;
     let hostiles = room.find(FIND_HOSTILE_CREEPS, {filter: h => h.getActiveBodyparts(HEAL)}).length;
+    scount["sourceLink"] = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK && _.some(s.pos.findInRange(FIND_SOURCES, 2)) }).length;
 
     let workerHarvester = scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1;
     let countHarvester = _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3);
@@ -293,7 +294,7 @@ function getRoomLimits (room, creepsCount) {
             "priority" : 1,
             "wishEnergy" : 650,
             "body" : {
-                "work" : 5 * _.min([scount[STRUCTURE_CONTAINER], scount["source"], 1]),
+                "work" : 5 * _.min([_.max([scount[STRUCTURE_CONTAINER], scount["sourceLink"]]), scount["source"], 1]),
             },
     },{
             "role" : "harvester",
@@ -311,7 +312,7 @@ function getRoomLimits (room, creepsCount) {
             "priority" : 2,
             "wishEnergy" : 650,
             "body" : {
-                "work" : 5 * _.min([scount[STRUCTURE_CONTAINER], scount["source"]]),
+                "work" : 5 * _.min([_.max([scount[STRUCTURE_CONTAINER], scount["sourceLink"]]), scount["source"]]),
             },
     },{
             role : "upgrader",
