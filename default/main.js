@@ -144,8 +144,8 @@ module.exports.loop = function () {
             console.log("needList: " + need.role + " for " + need.roomName + " has no spawns with enough energyCapacity");
         } else if (res[0] == 0) {
             let spawn = res[1];
-            let energy = spawn.room.energyAvailable - (reservedEnergy[room.name] || 0);
-            reservedEnergy[room.name] = (reservedEnergy[room.name] || 0) + energy;
+            let energy = spawn.room.energyAvailable - (reservedEnergy[spawn.room.name] || 0);
+            reservedEnergy[spawn.room.name] = (reservedEnergy[spawn.room.name] || 0) + energy;
             if(!(need.role in objectCache))
                 objectCache[need.role] = require('role.' + need.role);
             let [body, leftEnergy] = objectCache[need.role].create(energy, need.arg);
