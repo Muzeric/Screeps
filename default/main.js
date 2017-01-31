@@ -122,6 +122,7 @@ module.exports.loop = function () {
     lastCPU = Game.cpu.getUsed();
 
     let skipSpawnNames = {};
+    let reservedEnergy = {};
     for (let need of needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } )) {
         if (!_.filter(Game.spawns, s => 
                 !s.spawning && 
@@ -143,7 +144,8 @@ module.exports.loop = function () {
             console.log("needList: " + need.role + " for " + need.roomName + " has no spawns with enough energyCapacity");
         } else if (res[0] == 0) {
             let spawn = res[1];
-            let energy = spawn.room.energyAvailable;
+            let energy = spawn.room.energyAvailable - (reservedEnergy[room.name] || 0);
+            reservedEnergy[room.name] = (reservedEnergy[room.name] || 0) + energy;
             if(!(need.role in objectCache))
                 objectCache[need.role] = require('role.' + need.role);
             let [body, leftEnergy] = objectCache[need.role].create(energy, need.arg);
