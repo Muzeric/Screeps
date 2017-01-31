@@ -4,6 +4,21 @@ var testmode = 1;
 var role = {
 
     run: function(creep) {   
+        if (!creep.memory.needHealer)
+            creep.memory.needHealer = 1;
+
+        let healers = _.filter(Game.creeps, c => c.memory.role == "healer" && c.memory.pairCreepID == c.id);
+        
+        if (!healer.length) {
+            console.log(creep.name + " has no pair healer");
+            return;
+        }
+/*
+        if (creep.pos.getRangeTo(healer) > 2) {
+            console.log(creep.name + " too far from healer");
+            return;
+        }
+*/
         if (creep.room.name != creep.memory.roomName) {
             if (!Game.flags["Antikeeper." + creep.memory.roomName]) {
                 console.log(creep.name + " no flag in " + creep.memory.roomName);
