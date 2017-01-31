@@ -47,25 +47,22 @@ var role = {
 	},
 	
     create: function(energy) {
-        //10 × 2 + 50 + 150 × 11 + 250 + 50 × 6
+        //17 * 80 + 250 + 9 * 50
         if (testmode) {
             return [[TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE], energy - 180];
         }
 
-        let anum = 17;
-        let fat = anum + 1;
-        energy -= 80 * anum; // ranged_attack
         energy -= 250; // heal
-
         let body = [];
-        let mnum = Math.ceil(fat / 2);
-        fat -= mnum * 2;
-        energy -= 50 * mnum;
-        let tnum = Math.floor(energy / 70);
-        energy -= 70 * tnum;
+        let mnum = Math.floor(energy / 210);
+        let anum = mnum * 2;
+        energy -= mnum * 210;
+        if (energy >= 130) {
+            mnum++;
+            anum++;
+            energy -= 130;
+        }
 
-        while (tnum-- > 0)
-            body.push(TOUGH, TOUGH, MOVE);
         while (mnum-- > 0)
             body.push(MOVE);
         while (anum-- > 0)
