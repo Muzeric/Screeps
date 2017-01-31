@@ -16,8 +16,10 @@ var role = {
         let targets = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 3);
         if (targets.length) {
             let target = targets[0];
-            if (creep.attack(target) == ERR_NOT_IN_RANGE)
+            if (creep.attack(target) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
+                creep.memory.protectedLairID = null;
+            }
             if (testmode)
                 console.log(creep.name + " attacked " + target.id + " ("+ target.hits +"/" + target.hitsMax + ")");
         } else {
@@ -42,6 +44,8 @@ var role = {
 
             if(!creep.pos.isNearTo(lair))
                 creep.moveTo(lair);
+            else
+                creep.memory.protectedLairID = lair.id;
         }
 
 	},
