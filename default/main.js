@@ -107,7 +107,7 @@ module.exports.loop = function () {
                         notEnoughBody = 1;
                 }
             }
-            while ( (creepsCount[limit.role] || 0) < limit.count && (!hasBodyLimits || notEnoughBody) )
+            if ( (creepsCount[limit.role] || 0) < limit.count && (!hasBodyLimits || notEnoughBody) )
                 needList.push(limit);
         }
 

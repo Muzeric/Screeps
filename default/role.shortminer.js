@@ -19,11 +19,12 @@ var roleShortMiner = {
             return;
         }
 
-        let source = Game.getObjectById('58771a999d331a0f7f5ae31a');
-        if(!source) {
+        let sources = container.pos.findInRange(FIND_STRUCTURES, 2, {filter: s => s.structureType == STRUCTURE_LINK});
+        if(!sources.length) {
             console.log("Problem getting source for " + creep.name);
             return;
         }
+        let source = sources[0];
         
         if(creep.carry.energy == 0 && creep.memory.transfering) {
 	        creep.memory.transfering = false;
