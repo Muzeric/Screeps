@@ -299,11 +299,11 @@ function getRoomLimits (room, creepsCount) {
             "wishEnergy" : 300,
     },{
             "role" : "miner",
-            "count" : _.min([scount[STRUCTURE_CONTAINER], scount["source"], 1]),
+            "count" : _.min([scount[STRUCTURE_CONTAINER] + scount["sourceLink"], scount["source"], 1]),
             "priority" : 1,
             "wishEnergy" : 650,
             "body" : {
-                "work" : 5 * _.min([_.max([scount[STRUCTURE_CONTAINER], scount["sourceLink"]]), scount["source"], 1]),
+                "work" : 5 * _.min([scount[STRUCTURE_CONTAINER] + scount["sourceLink"], scount["source"], 1]),
             },
     },{
             "role" : "harvester",
@@ -317,11 +317,11 @@ function getRoomLimits (room, creepsCount) {
             },
     },{
             "role" : "miner",
-            "count" : _.min([scount[STRUCTURE_CONTAINER], scount["source"]]),
+            "count" : _.min([scount[STRUCTURE_CONTAINER] + scount["sourceLink"], scount["source"]]),
             "priority" : 2,
             "wishEnergy" : 650,
             "body" : {
-                "work" : 5 * _.min([_.max([scount[STRUCTURE_CONTAINER], scount["sourceLink"]]), scount["source"]]),
+                "work" : 5 * _.min([scount[STRUCTURE_CONTAINER] + scount["sourceLink"], scount["source"]]),
             },
     },{
             role : "upgrader",
