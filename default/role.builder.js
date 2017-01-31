@@ -20,13 +20,7 @@ var roleBuilder = {
             if(target) {
                 creep.memory.rt = null;
                 if(creep.build(target) == ERR_NOT_IN_RANGE) {
-                    var res = creep.moveTo(target);
-                    //console.log(creep.name + " go res=" + res);
-                    if(res == ERR_NO_PATH) {
-                        creep.memory.errors++;
-                    } else if (res == OK) {
-                        creep.memory.errors = 0;
-                    }
+                    creep.moveTo(target);
                     creep.say("bld " +  target.pos.x + "," + target.pos.y);
                 }
             } else {
@@ -37,13 +31,7 @@ var roleBuilder = {
                 }
                 if(rt) {
                     if(creep.repair(rt) == ERR_NOT_IN_RANGE) {
-                        var res = creep.moveTo(rt);
-                        //console.log(creep.name + " go res=" + res);
-                        if(res == ERR_NO_PATH) {
-                            creep.memory.errors++;
-                        } else if (res == OK) {
-                            creep.memory.errors = 0;
-                        }
+                        creep.moveTo(rt);
                         creep.say("rpr " + rt.pos.x + "," + rt.pos.y);
                     }
                 }
