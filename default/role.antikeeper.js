@@ -74,13 +74,10 @@ var role = {
         energy -= 250; // heal
         let body = [];
         let mnum = Math.floor(energy / 210);
+        if (mnum * 3 + 1 > 50)
+            mnum = Math.floor((50 - 1) / 3);
         let anum = mnum * 2;
         energy -= mnum * 210;
-        if (energy >= 130) {
-            mnum++;
-            anum++;
-            energy -= 130;
-        }
 
         while (mnum-- > 0)
             body.push(MOVE);

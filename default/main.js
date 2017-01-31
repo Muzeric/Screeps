@@ -144,7 +144,7 @@ module.exports.loop = function () {
             console.log("needList: " + need.role + " for " + need.roomName + " has no spawns with enough energyCapacity");
         } else if (res[0] == 0) {
             let spawn = res[1];
-            let spawnEnergy = _.sum(spawn.room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_SPAWN && s.spawning}), 'energy');
+            let spawnEnergy = _.sum(spawn.room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_SPAWN && s.name != spawn.name}), 'energy');
             let energy = spawn.room.energyAvailable - (reservedEnergy[spawn.room.name] || 0) - spawnEnergy;
             if(!(need.role in objectCache))
                 objectCache[need.role] = require('role.' + need.role);
@@ -168,7 +168,7 @@ module.exports.loop = function () {
             skipSpawnNames[spawn.name] = 1;
             
             //let newName = need.role;
-            console.log(newName + " BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") [" + body + "]");
+            console.log(newName + " BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") " + body.length + ":[" + body + "]");
         }
     }
 

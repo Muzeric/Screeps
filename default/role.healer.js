@@ -44,6 +44,8 @@ var role = {
         let hnum = 5;
         energy -= 300 * hnum;
         let tnum = Math.floor(energy / 60);
+        if (tnum * 2 + hnum * 2 > 50) // Body parts limit
+            tnum = Math.floor((50 - hnum * 2) / 2);
         energy -= 60 * tnum;
         mnum = hnum + tnum;
         
