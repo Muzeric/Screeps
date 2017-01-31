@@ -18,9 +18,9 @@ var role = {
                 return;
             }
             container = containers.sort( function(a,b) { 
-                let suma = _.sum(Game.creeps, function (c) {let sum = 0; if(c.memory.role == "miner" && c.memory.cID == a.id) {sum += c.ticksToLive} return sum;});
-                let sumb = _.sum(Game.creeps, function (c) {let sum = 0; if(c.memory.role == "miner" && c.memory.cID == b.id) {sum += c.ticksToLive} return sum;});
-                return suma - sumb;
+                let suma = _.sum(_.filter(Game.creeps, c => c.memory.role == "miner" && c.memory.cID == a.id), function(c) {return c.ticksToLive});
+                let sumb = _.sum(_.filter(Game.creeps, c => c.memory.role == "miner" && c.memory.cID == b.id), function(c) {return c.ticksToLive});
+                return suma - sumb || (a.structureType == STRUCTURE_LINK ? -1 : 1);
             })[0];
             creep.memory.cID = container.id;
             console.log(creep.name + " found container " + creep.memory.cID);
