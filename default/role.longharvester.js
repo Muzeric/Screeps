@@ -83,23 +83,23 @@ var role = {
         let body = [];
 	    let cnum = 0;
 	    let fat = 0;
-	    while (energy >= 50) {
+	    while (energy >= 50 && body.length < 47) {
             if(fat >= 0 && energy >= 50) {
 	            body.push(MOVE);
 	            energy -= 50;
 	            fat -= 2;
 	        }
-	        if(cnum % 2 == 0 && energy >= 100 && worker) {
+	        if(cnum % 2 == 0 && energy >= 100 && worker && body.length < 47) {
 	            body.push(WORK);
 	            energy -= 100;
 	            fat++;
 	        }
-	        if(fat >= 0 && energy >= 50) {
+	        if(fat >= 0 && energy >= 50 && body.length < 47) {
 	            body.push(MOVE);
 	            energy -= 50;
 	            fat -= 2;
 	        }
-	        if(energy >= 50) {
+	        if(energy >= 50 && body.length < 47) {
 	            body.push(CARRY);
 	            energy -= 50;
 	            cnum++;

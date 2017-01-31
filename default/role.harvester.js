@@ -66,18 +66,18 @@ var roleHarvester = {
         let body = [];
         let fat = 0;
         let mnum = 0;
-	    while (energy >= 50) {
+	    while (energy >= 50 && body.length < 50) {
 	        if((!mnum || fat/(mnum*2) >= 1) && energy >= 50) {
 	            body.push(MOVE);
 	            energy -= 50;
                 mnum++;
 	        }
-	        if(energy >= 50) {
+	        if(energy >= 50 && body.length < 50) {
 	            body.push(CARRY);
 	            energy -= 50;
 	            fat++;
 	        }
-            if(worker && energy >= 100) {
+            if(worker && energy >= 100 && body.length < 50) {
 	            body.push(WORK);
 	            energy -= 100;
 	            fat++;
