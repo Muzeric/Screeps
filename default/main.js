@@ -98,13 +98,16 @@ module.exports.loop = function () {
 
         for (let limit of Memory.limitList[roomName]) {
             let notEnoughBody = 0;
+            let hasBodyLimits = 0;
             if (limit["body"]) {
                 for (let part in limit["body"]) {
-                    if (limit["body"][part] && (bodyCount[limit.role + "," + part] || 0) < limit["body"][part])
+                    if (limit["body"][part])
+                        hasBodyLimits = 1;
+                    if ((bodyCount[limit.role + "," + part] || 0) < limit["body"][part])
                         notEnoughBody = 1;
                 }
             }
-            while ( (creepsCount[limit.role] || 0) < limit.count && notEnoughBody )
+            while ( (creepsCount[limit.role] || 0) < limit.count && (!hasBodyLimits || notEnoughBody) )
                 needList.push(limit);
         }
 
