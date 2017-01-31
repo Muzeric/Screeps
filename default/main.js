@@ -97,23 +97,15 @@ module.exports.loop = function () {
         }
 
         for (let limit of Memory.limitList[roomName]) {
-            let added = 0;
             let notEnoughBody = 0;
             if (limit["body"]) {
                 for (let part in limit["body"]) {
-                    if (limit["body"][part] && (bodyCount[limit.role + "," + part] || 0) < limit["body"][part]) {
-                        //console.log("debug " + roomName + ": " + limit.role + ", " + part + "=" + bodyCount[limit.role + "," + part] + " < " + limit["body"][part]);
+                    if (limit["body"][part] && (bodyCount[limit.role + "," + part] || 0) < limit["body"][part])
                         notEnoughBody = 1;
-                    }
                 }
             }
-            while (
-                (creepsCount[limit.role] || 0) + added < limit.count ||
-                notEnoughBody && !added
-            ) {
+            while ( (creepsCount[limit.role] || 0) < limit.count && notEnoughBody )
                 needList.push(limit);
-                added++;
-            }
         }
 
         if (room)
@@ -214,7 +206,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 1,
         "body" : {
             "work" : workerHarvester ? 10*fcount["Source"] : 0,
-            "carry" : 20,
+            "carry" : 20*fcount["Source"],
         },
     },{
         "role" : "claimer",
@@ -249,7 +241,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 1,
         "body" : {
             "work" : workerHarvester ? 20*fcount["Source"] : 0,
-            "carry" : 20,
+            "carry" : 20*fcount["Source"],
         },
     },{
         "role" : "antikeeper",
