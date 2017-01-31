@@ -111,8 +111,10 @@ module.exports.loop = function () {
                 needList.push(limit);
         }
 
-        if (room)
+        if (room) {
             towerAction(room, creepsCount["upgrader"] ? 1 : 0);
+            linkAction(room);
+        }
     }); // each flag end
     
     if (Game.time % 20 == 0)
@@ -168,17 +170,24 @@ module.exports.loop = function () {
 
     if (Game.time % 20 == 0)   
         console.log("main: cr.CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2));
-    lastCPU = Game.cpu.getUsed();
-
-    let link_to = Game.getObjectById('58771a999d331a0f7f5ae31a');
-    for(let link_from of [Game.getObjectById('587869503d6c02904166296f'), Game.getObjectById('5885198c52b1ece7377c7f8b')]) {
-        if(link_from && link_to && !link_from.cooldown && link_from.energy && link_to.energy < link_to.energyCapacity*0.7) {
-            let res = link_from.transferEnergy(link_to);
-            if(res < 0) 
-                console.log("Link transfer energy with res=" + res);
-        }
-    }
 };
+
+function linkAction (room) {
+    if (!room.storage)
+        return;
+    let links_to = room.storage.pos.findInRange(FIND_STRUCTURES, 2, {filter: s => s.structureType == STRUCTURE_LINK});
+    if (!links_to.length)
+        return;
+    let link_to = links_to[0];
+
+    for (let link_from of room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK})) {
+        //console.log("linkAction: in " + room.name + " " + link_from.id + " -> " + link_to.id);
+        if (link_from.id == link_to.id)
+            continue;
+        if (!link_from.cooldown && link_from.energy && link_to.energy < link_to.energyCapacity*0.7)
+            link_from.transferEnergy(link_to);
+    }
+}
 
 function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let lastCPU = Game.cpu.getUsed();
