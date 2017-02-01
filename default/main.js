@@ -354,9 +354,10 @@ function getRoomLimits (room, creepsCount) {
             "wishEnergy" : 1500,
     },{
             "role" : "attacker",
-            "count" : hostiles ? 1 : 0,
+            "count" : hostiles,
             "priority" : 1,
             "wishEnergy" : 1500,
+            "minEnergy" : 1500,
     });
 
     for (let limit of limits) {

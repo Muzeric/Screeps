@@ -5,8 +5,14 @@ var roleHarvester = {
         if (!utils.checkInRoomAndGo(creep))
             return;
 
+        if (creep.ticksToLive < 500)
+            creep.memory.needRepair = 1;
+        else if (creep.ticksToLive > 1200)
+            creep.memory.needRepair = 0;
+
         if(creep.carry.energy == 0 && creep.memory.transfering) {
 	        creep.memory.transfering = false;
+            creep.memory.targetID = null;
 	    } else if (creep.carry.energy == creep.carryCapacity && !creep.memory.transfering) {
 	        creep.memory.transfering = true;
 	        creep.memory.errors = 0;
@@ -18,26 +24,70 @@ var roleHarvester = {
 	            creep.memory.energyID = utils.findSource(creep);
             utils.gotoSource(creep);
         } else {
-            var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return (
-                        ((
-                                (structure.structureType == STRUCTURE_EXTENSION || 
-                                structure.structureType == STRUCTURE_LAB ||
-                                (structure.structureType == STRUCTURE_TOWER && structure.energy < structure.energyCapacity*0.9) || 
-                                structure.structureType == STRUCTURE_SPAWN)
-                            &&
-                                structure.energy < structure.energyCapacity
-                        ) && creep.ticksToLive > 500
-                        )
-                        || (creep.ticksToLive < 1000 && structure.structureType == STRUCTURE_SPAWN)    
-                        );
-                    }
-            });
-            if(!target) {
-                //console.log(creep.name + " has no target");
+            if (creep.memory.needRepair) {
+                let spawns = creep.room.find(FIND_MY_SPAWNS);
+                if (!spawns.length) {
+                    console.log(creep.name + ": needRepair, but no spawns in room");
+                    return;
+                }
+                let spawn = spawns.sort(function(a,b) {return a.spawning - b.spawning;})[0];
+                if(spawn.renewCreep(creep) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(spawn);
                 return;
             }
+            let target;
+            if(!creep.memory.targetID) {
+                let targets = creep.room.find(FIND_STRUCTURES, {filter: s => 
+                    (
+                        s.structureType == STRUCTURE_EXTENSION ||
+                        s.structureType == STRUCTURE_LAB ||
+                        s.structureType == STRUCTURE_TOWER ||
+                        s.structureType == STRUCTURE_SPAWN ||
+                        s.structureType == STRUCTURE_STORAGE
+                    ) && (
+                        (s.energyCapacity && s.energy < s.energyCapacity) ||
+                        (s.storeCapacity && s.store[RESOURCE_ENERGY] < s.storeCapacity)
+                    )
+                });
+
+                if (!targets.length) {
+                    console.log(creep.name + ": no any container for energy");
+                    return;
+                }
+
+                let targetInfo = {};
+                for(let target of targets) {
+                    let wantEnergy = target.storeCapacity ? target.storeCapacity - target.store[RESOURCE_ENERGY] : s.energyCapacity - target.energy;
+                    let cpath = creep.pos.getRangeTo(target);
+                    let wantCarry = _.reduce(_.filter(Game.creeps, c => c.memory.role == "harvester" && c.memory.targetID == target.id), function (sum, value) { return sum + value.carry; }, 0);
+                    let cpriority = 0;
+                    if (wantCarry >= wantEnergy)
+                        cpriority = -100;
+                    else if (target.structureType == STRUCTURE_STORAGE)
+                        cpriority = -50;
+                    else if (target.structureType == STRUCTURE_TOWER && s.energy < s.energyCapacity * 0.9)
+                        cpriority = 100;
+
+                    targetInfo[target.id] = cpath * 1.2 - cpriority;
+                    //console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + wantCarry + " wantCarry and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + targetInfo[target.id]);
+                }
+                target = targets.sort( function (a,b) {
+                    let suma = targetInfo[a.id];
+                    let sumb = targetInfo[b.id];
+                    //console.log("a=" + a.id + ",b=" + b.id + ",suma=" + suma + ",sumb=" + sumb);
+                    return suma - sumb;
+                })[0];
+                creep.memory.targetID = target.id;
+            } else {
+                target = Game.getObjectById(creep.memory.targetID);
+            }
+
+            if(!target) {
+                console.log(creep.name + ": target "+ creep.memory.targetID +" dead");
+                creep.memory.targetID = null;
+                return;
+            }
+
             if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 var res = creep.moveTo(target);
                 //console.log(creep.name + " go to "+ target.pos.x + "," + target.pos.y +" res=" + res);
@@ -46,13 +96,6 @@ var roleHarvester = {
                 } else if (res == OK) {
                     creep.memory.errors = 0;
                 }
-            } else if (
-                target.structureType == STRUCTURE_SPAWN &&
-                (creep.ticksToLive < 1200 || target.energy == target.energyCapacity) &&
-                !target.spawning
-                ) {
-                    var res = target.renewCreep(creep);
-                    //console.log(creep.name + " renewed (" + creep.ticksToLive + "): " + res)
             }
         }
 	},

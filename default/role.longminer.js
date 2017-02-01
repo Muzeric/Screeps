@@ -31,12 +31,11 @@ var role = {
             creep.memory.cID = container.id;
             console.log(creep.name + " found container " + creep.memory.cID);
 
-            let sources = container.room.lookForAt(LOOK_SOURCES, flag);
-            if(!sources.length) {
-                console.log(creep.name + " problem getting sources");
+            source = container.pos.findClosestByPath(FIND_SOURCES, {ignoreCreeps : true});
+            if(!source) {
+                console.log(creep.name + " problem getting source");
                 return;
             }
-            source = sources[0];
             creep.memory.energyID = source.id;
             console.log(creep.name + " found source " + creep.memory.energyID);
         } else {
@@ -62,8 +61,10 @@ var role = {
                     creep.harvest(source);
                 creep.transfer(container, RESOURCE_ENERGY);
             } else {
-                creep.moveTo(source);
-                creep.moveTo(container);
+                if (creep.pos.isNearTo(container))
+                    creep.moveTo(source);
+                else
+                    creep.moveTo(container);
             }
         } else {
             if(creep.carry.energy == 0 && creep.memory.transfering) {
