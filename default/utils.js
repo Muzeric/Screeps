@@ -139,7 +139,7 @@ module.exports = {
         /*
         if(!target && creep.memory.targetID && Game.getObjectById(creep.memory.targetID))
             target = Game.getObjectById(creep.memory.targetID);
-        let con_creep = _.filter(Game.creeps, c => c.memory.role == "attacker" && c.room == creep.room && c.memory.targetID && c != creep)[0];
+        let con_creep = _.filter(Game.creeps, c => c.memory.role == "defender" && c.room == creep.room && c.memory.targetID && c != creep)[0];
         if(con_creep && (!creep.memory.targetID || creep.memory.targetID!=con_creep.memory.targetID) && Game.getObjectById(con_creep.memory.targetID)) {
             target = Game.getObjectById(con_creep.memory.targetID);
             console.log(creep.name + " found con_creep " + con_creep.name + " with target=" + con_creep.memory.targetID);

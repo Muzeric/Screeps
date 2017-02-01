@@ -1,6 +1,6 @@
 var utils = require('utils');
 
-var roleAttacker = {
+var role = {
 
     run: function(creep) {
         if ((creep.hits <= 200 || creep.hits < creep.hitsMax * 0.4) && creep.memory.attacking) {
@@ -79,4 +79,4 @@ var roleAttacker = {
 	},
 };
 
-module.exports = roleAttacker;
+module.exports = role;

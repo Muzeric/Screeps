@@ -31,6 +31,8 @@ var roleHarvester = {
                     return;
                 }
                 let spawn = spawns.sort(function(a,b) {return a.spawning - b.spawning;})[0];
+                if (spawn.energy < spawn.energyCapacity)
+                    creep.transfer(spawn, RESOURCE_ENERGY);
                 if(spawn.renewCreep(creep) == ERR_NOT_IN_RANGE)
                     creep.moveTo(spawn);
                 return;
@@ -113,6 +115,7 @@ var roleHarvester = {
         let body = [];
         let fat = 0;
         let mnum = 0;
+        let wnum = 0;
 	    while (energy >= 50 && body.length < 50) {
 	        if((!mnum || fat/(mnum*2) >= 1) && energy >= 50) {
 	            body.push(MOVE);
@@ -124,10 +127,11 @@ var roleHarvester = {
 	            energy -= 50;
 	            fat++;
 	        }
-            if(worker && energy >= 100 && body.length < 50) {
+            if((worker || !wnum) && energy >= 100 && body.length < 50) {
 	            body.push(WORK);
 	            energy -= 100;
 	            fat++;
+                wnum++;
 	        }
 	    }
 	    energy += energyDiff;
