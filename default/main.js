@@ -340,9 +340,12 @@ function getRoomLimits (room, creepsCount) {
             "wishEnergy" : 1500,
     },{
             "role" : "builder",
-            "count" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 1 : 0,
+            "count" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 3 : 0,
             "priority" : 4,
             "wishEnergy" : 1500,
+            "body" : {
+                "carry" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 10 : 0,
+            },
     },{
             role : "upgrader",
             "count" : scount["source"],
@@ -384,7 +387,7 @@ function getSpawnForCreate (need, skipSpawnNames) {
         Game.map.getRoomLinearDistance(s.room.name, need.roomName) <= need.range &&
         !s.spawning && 
         !(s.name in skipSpawnNames) && 
-        !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(s) && c.ticksToLive < 1000)  
+        !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(s) && c.memory.needRepair)  
     );
     
     if (!spawnsInRange.length)

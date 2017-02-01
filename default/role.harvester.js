@@ -57,7 +57,7 @@ var roleHarvester = {
                 });
 
                 if (!targets.length) {
-                    console.log(creep.name + ": no any container for energy");
+                    //console.log(creep.name + ": no any container for energy");
                     return;
                 }
 
