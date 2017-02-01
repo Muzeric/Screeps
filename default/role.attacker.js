@@ -52,7 +52,7 @@ var roleAttacker = {
     create: function(energy) {
         energy -= 300; // MOVE,HEAL at end
         let body = [];
-        let tnum = 10;
+        let tnum = 0;
         while(tnum-- > 0 && energy >= 60) {
             body.push(TOUGH);
             energy -= 10;
