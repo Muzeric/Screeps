@@ -3,7 +3,8 @@ var utils = require('utils');
 var role = {
     run: function(creep) {
         if(!creep.memory.energyName || !Game.flags[creep.memory.energyName]) {
-            if(!set_energy(creep)) return;
+            if(!set_energy(creep)) 
+                return;
         }
         
         if(creep.carry.energy == 0 && creep.memory.transfering) {
@@ -11,6 +12,7 @@ var role = {
 	    } else if (creep.carry.energy == creep.carryCapacity && !creep.memory.transfering) {
 	        creep.memory.transfering = true;
 	        delete creep.memory.cID;
+            creep.memory.energyID = null;
 	    }
 	    
 	    if(!creep.memory.transfering) {
@@ -21,30 +23,9 @@ var role = {
 	            } else if (attack_res == 1) {
 	                ;
 	            } else {
-                    let source;
-                    let res;
-                    let containers = Game.flags[creep.memory.energyName].pos.findInRange(FIND_STRUCTURES, 2, {filter : s => 
-                        s.structureType == STRUCTURE_CONTAINER &&
-                        _.sum(Game.creeps, (c) => c.memory.role == "longminer" && c.memory.cID == s.id)
-                    });
-                    if(containers.length) {
-                        source = containers[0];
-                        res = creep.withdraw(source, RESOURCE_ENERGY);
-                    } else {
-	                    let sources = creep.room.lookForAt(LOOK_SOURCES, Game.flags[creep.memory.energyName].pos);
-                        if(!sources.length) {
-                            console.log(creep.name + " can't find source");
-                            return;
-                        }
-                        source = sources[0];
-                        res = creep.harvest(source);
-                    }
-                    
-                    if(res == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(source);
-                    } else if (res < 0) {
-                        //console.log(creep.name + " tried harvest: " + res);
-                    }
+                    if(!creep.memory.energyID)
+                        creep.memory.energyID = utils.findSource(creep);
+                    utils.gotoSource(creep);
 	            }
 	        } else {
                 creep.moveTo(Game.flags[creep.memory.energyName].pos);
