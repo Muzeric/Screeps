@@ -334,7 +334,7 @@ function getRoomLimits (room, creepsCount) {
             },
     },{
             role : "upgrader",
-            "count" : scount["source"],
+            "count" : 1,
             "priority" : 3,
             "wishEnergy" : 1500,
     },{
@@ -343,9 +343,14 @@ function getRoomLimits (room, creepsCount) {
             "priority" : 4,
             "wishEnergy" : 1500,
     },{
+            role : "upgrader",
+            "count" : scount["source"],
+            "priority" : 5,
+            "wishEnergy" : 1500,
+    },{
             "role" : "shortminer",
             "count" : (scount[STRUCTURE_LINK] >= 2 && scount[STRUCTURE_STORAGE]) ? 1 : 0, // TODO: harvester count
-            "priority" : 5,
+            "priority" : 6,
             "wishEnergy" : 300,
     },{
             "role" : "upgrader",
@@ -354,7 +359,7 @@ function getRoomLimits (room, creepsCount) {
             "wishEnergy" : 1500,
     },{
             "role" : "attacker",
-            "count" : hostiles,
+            "count" : hostiles * 2,
             "priority" : 1,
             "wishEnergy" : 1500,
             "minEnergy" : 1500,
