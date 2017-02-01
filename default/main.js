@@ -1,26 +1,25 @@
 var utils = require('utils');
-
-var statClass = require('stat');
-var stat = statClass.init();
+var statObject = require('stat');
 
 module.exports.loop = function () {
+    var stat = statObject.init();
     var moveErrors = {};
     var rolesCount = {};
     var objectCache = {};
-    
+
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
             console.log(name + " DEAD (" + Memory.creeps[name].roomName + ")");
-            statClass.die(name);
+            statObject.die(name);
             delete Memory.creeps[name];
         } else if (Game.creeps[name].memory.errors > 0) {
             console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
             moveErrors[Game.creeps[name].room.name] = 1;
         }
     }
+    statObject.addCPU("memory");
 
-    let lastCPU = Game.cpu.getUsed();
-    let cpuStat = {};
+    let creepsCPUStat = {};
     for(let creep_name in Game.creeps) {
         let creep = Game.creeps[creep_name];
         if(creep.spawning) {
@@ -46,11 +45,11 @@ module.exports.loop = function () {
         objectCache[role].run(creep);
             
         creep.memory.stat.CPU += (Game.cpu.getUsed() - lastCPU);
-        if (!cpuStat[creep.memory.role])
-            cpuStat[creep.memory.role] = {"cpu" : 0, "count" : 0};
+        if (!creepsCPUStat[creep.memory.role])
+            creepsCPUStat[creep.memory.role] = {"cpu" : 0, "count" : 0};
         
-        cpuStat[creep.memory.role]["cpu"] += (Game.cpu.getUsed() - lastCPU);
-        cpuStat[creep.memory.role]["count"]++;
+        creepsCPUStat[creep.memory.role]["cpu"] += (Game.cpu.getUsed() - lastCPU);
+        creepsCPUStat[creep.memory.role]["count"]++;
 
         let diffEnergy = creep.carry[RESOURCE_ENERGY] - creep.memory.lastEnergy;
         creep.memory.lastEnergy = creep.carry[RESOURCE_ENERGY];
@@ -65,11 +64,7 @@ module.exports.loop = function () {
         }
         
     }
-    
-    //console.log(JSON.stringify(_.map(cpuStat, function(v, k) { return k + "=" + _.floor(v.cpu/v.count, 2);})));
-    if (Game.time % 20 == 0)   
-        console.log("main: rn.CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2));
-    lastCPU = Game.cpu.getUsed();
+    statObject.addCPU("run", creepsCPUStat);
     
     stat.roles = JSON.parse(JSON.stringify(rolesCount));
     
@@ -82,11 +77,18 @@ module.exports.loop = function () {
     let longbuilders = _.filter(Game.creeps, c => c.memory.role == "longbuilder" && (c.ticksToLive > 200 || c.spawning)).length;
     let buildFlags = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build').length;
     let stopLongBuilders = longbuilders * 1.5 >= buildFlags;
+    let roomsCPUStat = {};
     _.forEach(
         _.uniq(_.map (Game.flags, 'pos.roomName') ).concat( 
         _.map( _.filter(Game.rooms, r => r.controller && r.controller.my), 'name' ) 
     ),
     function(roomName) {
+        let lastCPU = Game.cpu.getUsed();
+        roomsCPUStat[roomName] = {
+            cpu: 0,
+            towers: 0,
+            links: 0,
+        };
         let room = Game.rooms[roomName];
         let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), 'memory.role');
         let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
@@ -112,15 +114,19 @@ module.exports.loop = function () {
         }
 
         if (room) {
+            let localCPU = Game.cpu.getUsed();
             towerAction(room, creepsCount["upgrader"] ? 1 : 0);
+            roomsCPUStat[roomName].towers = Game.cpu.getUsed() - localCPU;
+            localCPU = Game.cpu.getUsed();
             linkAction(room);
+            roomsCPUStat[roomName].links = Game.cpu.getUsed() - localCPU;
         }
+        roomsCPUStat[roomName].cpu = Game.cpu.getUsed() - lastCPU;
     }); // each flag end
-    
+    statObject.addCPU("needList", roomsCPUStat);
     if (Game.time % 20 == 0)
-        console.log("main: nl.CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.role})));
-    lastCPU = Game.cpu.getUsed();
-
+        console.log("needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.role})));
+    
     let skipSpawnNames = {};
     let reservedEnergy = {};
     for (let need of needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } )) {
@@ -171,9 +177,8 @@ module.exports.loop = function () {
             console.log(newName + " BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") " + body.length + ":[" + body + "]");
         }
     }
-
-    if (Game.time % 20 == 0)   
-        console.log("main: cr.CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2));
+    statObject.addCPU("create");
+    statObject.addCPU("finish");
 };
 
 function linkAction (room) {
