@@ -49,7 +49,7 @@ module.exports.loop = function () {
             creepsCPUStat[creep.memory.role] = {"cpu" : 0, "count" : 0};
         
         creepsCPUStat[creep.memory.role]["cpu"] += (Game.cpu.getUsed() - lastCPU);
-        creepsCPUStat[creep.memory.role]["count"]++;
+        creepsCPUStat[creep.memory.role]["sum"]++;
 
         let diffEnergy = creep.carry[RESOURCE_ENERGY] - creep.memory.lastEnergy;
         creep.memory.lastEnergy = creep.carry[RESOURCE_ENERGY];

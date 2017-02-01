@@ -1,38 +1,44 @@
 var stat = {
     lastCPU : 0,
-    currentRow : {},
 
     init : function () {
         if (!Memory.stat) 
             Memory.stat = {};
-        if (!Memory.stat.CPUHistory) {
-            Memory.stat.CPUHistory = [];
-            Memory.stat.CPUHistoryIndex = 0;
-        }
-        this.currentRow = {
-            tick: Game.time,
-        };
+        if (!Memory.stat.CPUHistory)
+            Memory.stat.CPUHistory = {};
+        this.lastCPU = 0;
         return Memory.stat;
     },
 
     addCPU : function (marker, info) {
-        if (this.currentRow[marker])
-            console.log("addCPU: duplicate marker=" + marker);
+        if(!Memory.stat.CPUHistory[marker])
+            Memory.stat.CPUHistory[marker] = { cpu: 0, count: 0, info: {}};
+        let mem = Memory.stat.CPUHistory[marker];
 
-        this.currentRow[marker] = {
-            cpu: Game.cpu.getUsed() - this.lastCPU,
-            info: info,
-        };
-        if (marker == "finish") {
-            this.currentRow["_total"] = {
-                cpu: Game.cpu.getUsed(),
-            };
-            Memory.stat.CPUHistoryIndex++;
-            if (Memory.stat.CPUHistoryIndex > 1000) {
-                Memory.stat.CPUHistoryIndex = 0;
-                Game.notify(JSON.stringify(Memory.stat.CPUHistory));
+        mem.cpu += Game.cpu.getUsed() - this.lastCPU;
+        mem.count++;
+
+        if (info) {
+            for (let key in info) {
+                if (!mem.info[key])
+                    mem.info[key] = {count: 0};
+                let imem = mem.info.key;
+                for (let ikey in info[key])
+                    imem[ikey] = (imem[ikey] || 0) + info.key.ikey;
+                imem.count++;
             }
-            Memory.stat.CPUHistory[Memory.stat.CPUHistoryIndex] = this.currentRow;
+        }
+        
+        if (marker == "finish") {
+            if(!Memory.stat.CPUHistory["_total"])
+                Memory.stat.CPUHistory["_total"] = {cpu: 0, count: 0};
+            
+            Memory.stat.CPUHistory["_total"].cpu += Game.cpu.getUsed();
+            Memory.stat.CPUHistory["_total"].count++;
+            if (Memory.stat.CPUHistory["_total"].count >= 100) {
+                Game.notify(JSON.stringify(Memory.stat.CPUHistory));
+                delete Memory.stat.CPUHistory;
+            }
         } else {
             this.lastCPU = Game.cpu.getUsed();
         }
