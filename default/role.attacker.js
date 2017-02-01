@@ -49,10 +49,16 @@ var role = {
         }
 	},
 	
-    create: function(energy, tower) {
-        if (!tower)
-            energy -= 300; // MOVE,HEAL at end
+    create: function(energy) {
+        energy -= 300; // MOVE,HEAL at end
         let body = [];
+        let tnum = 0;
+        while(tnum-- > 0 && energy >= 60) {
+            body.push(TOUGH);
+            energy -= 10;
+            body.push(MOVE);
+            energy -= 50;
+        }
         
         let mnum = Math.floor(energy / (50+80));
         if (mnum * 2 + 2 + body.length > 50) // Body parts limit
@@ -66,10 +72,8 @@ var role = {
             body.push(ATTACK);
             energy -= 80;
         }
-        if (!tower) {
-            body.push(MOVE);
-            body.push(HEAL);
-        }
+        body.push(MOVE);
+        body.push(HEAL);
 
         return [body, energy];
 	},

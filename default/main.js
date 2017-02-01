@@ -316,6 +316,13 @@ function getRoomLimits (room, creepsCount) {
                 "work" : 5 * _.min([scount[STRUCTURE_CONTAINER] + scount["sourceLink"], scount["source"], 1]),
             },
     },{
+            "role" : "defender",
+            "count" : hostiles * 2,
+            "arg" : scount[STRUCTURE_TOWER] ? 1 : 0,
+            "priority" : 1,
+            "wishEnergy" : 1500,
+            "minEnergy" : 1500,
+    },{
             "role" : "harvester",
             "count" : countHarvester,
             "arg" : workerHarvester,
@@ -361,13 +368,7 @@ function getRoomLimits (room, creepsCount) {
             "count" : scount["source"] + 1,
             "priority" : 20,
             "wishEnergy" : 1500,
-    },{
-            "role" : "defender",
-            "count" : hostiles * 2,
-            "priority" : 1,
-            "wishEnergy" : 1500,
-            "minEnergy" : 1500,
-    });
+    },);
 
     for (let limit of limits) {
         limit["roomName"] = room.name;
