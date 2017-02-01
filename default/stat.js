@@ -15,7 +15,7 @@ var stat = {
             Memory.stat.CPUHistory[marker] = { cpu: 0, count: 0};
         let mem = Memory.stat.CPUHistory[marker];
 
-        mem.cpu += _.floor(Game.cpu.getUsed() - this.lastCPU, 1);
+        mem.cpu += Game.cpu.getUsed() - this.lastCPU;
         mem.count++;
 
         if (info) {
@@ -26,7 +26,7 @@ var stat = {
                     mem.info[key] = {count: 0};
                 let imem = mem.info[key];
                 for (let ikey in info[key]) {
-                    imem[ikey] = _.floor((imem[ikey] || 0) + info[key][ikey], 1);
+                    imem[ikey] = (imem[ikey] || 0) + info[key][ikey];
                 }
                 imem.count++;
             }
@@ -36,10 +36,10 @@ var stat = {
             if(!Memory.stat.CPUHistory["_total"])
                 Memory.stat.CPUHistory["_total"] = {cpu: 0, count: 0};
             
-            Memory.stat.CPUHistory["_total"].cpu += _.floor(Game.cpu.getUsed(), 1);
+            Memory.stat.CPUHistory["_total"].cpu += Game.cpu.getUsed();
             Memory.stat.CPUHistory["_total"].count++;
             if (Memory.stat.CPUHistory["_total"].count >= 100) {
-                Game.notify(JSON.stringify(Memory.stat.CPUHistory));
+                Game.notify(Game.time + ":" + JSON.stringify(Memory.stat.CPUHistory, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} ));
                 delete Memory.stat.CPUHistory;
             }
         } else {
