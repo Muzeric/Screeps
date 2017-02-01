@@ -12,19 +12,22 @@ var stat = {
 
     addCPU : function (marker, info) {
         if(!Memory.stat.CPUHistory[marker])
-            Memory.stat.CPUHistory[marker] = { cpu: 0, count: 0, info: {}};
+            Memory.stat.CPUHistory[marker] = { cpu: 0, count: 0};
         let mem = Memory.stat.CPUHistory[marker];
 
         mem.cpu += Game.cpu.getUsed() - this.lastCPU;
         mem.count++;
 
         if (info) {
+            if(!mem.info)
+                mem.info = {};
             for (let key in info) {
                 if (!mem.info[key])
                     mem.info[key] = {count: 0};
-                let imem = mem.info.key;
-                for (let ikey in info[key])
-                    imem[ikey] = (imem[ikey] || 0) + info.key.ikey;
+                let imem = mem.info[key];
+                for (let ikey in info[key]) {
+                    imem[ikey] = (imem[ikey] || 0) + info[key][ikey];
+                }
                 imem.count++;
             }
         }

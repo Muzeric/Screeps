@@ -46,7 +46,7 @@ module.exports.loop = function () {
             
         creep.memory.stat.CPU += (Game.cpu.getUsed() - lastCPU);
         if (!creepsCPUStat[creep.memory.role])
-            creepsCPUStat[creep.memory.role] = {"cpu" : 0, "count" : 0};
+            creepsCPUStat[creep.memory.role] = {"cpu" : 0, "sum" : 0};
         
         creepsCPUStat[creep.memory.role]["cpu"] += (Game.cpu.getUsed() - lastCPU);
         creepsCPUStat[creep.memory.role]["sum"]++;
