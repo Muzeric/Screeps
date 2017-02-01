@@ -36,7 +36,13 @@ var roleHarvester = {
                 return;
             }
             let target;
-            if(!creep.memory.targetID) {
+            if (creep.memory.targetID)
+                target = Game.getObjectById(creep.memory.targetID);
+            if( !target ||
+                (target.energyCapacity && target.energy == target.energyCapacity) ||
+                (target.storeCapacity && target.store[RESOURCE_ENERGY] == target.storeCapacity)
+             ) {
+                creep.memory.targetID = null;
                 let targets = creep.room.find(FIND_STRUCTURES, {filter: s => 
                     (
                         s.structureType == STRUCTURE_EXTENSION ||
@@ -78,8 +84,6 @@ var roleHarvester = {
                     return suma - sumb;
                 })[0];
                 creep.memory.targetID = target.id;
-            } else {
-                target = Game.getObjectById(creep.memory.targetID);
             }
 
             if(!target) {
