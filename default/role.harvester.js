@@ -57,7 +57,7 @@ var roleHarvester = {
 
                 let targetInfo = {};
                 for(let target of targets) {
-                    let wantEnergy = target.storeCapacity ? target.storeCapacity - target.store[RESOURCE_ENERGY] : s.energyCapacity - target.energy;
+                    let wantEnergy = target.storeCapacity ? target.storeCapacity - target.store[RESOURCE_ENERGY] : target.energyCapacity - target.energy;
                     let cpath = creep.pos.getRangeTo(target);
                     let wantCarry = _.reduce(_.filter(Game.creeps, c => c.memory.role == "harvester" && c.memory.targetID == target.id), function (sum, value) { return sum + value.carry; }, 0);
                     let cpriority = 0;
@@ -65,7 +65,7 @@ var roleHarvester = {
                         cpriority = -100;
                     else if (target.structureType == STRUCTURE_STORAGE)
                         cpriority = -50;
-                    else if (target.structureType == STRUCTURE_TOWER && s.energy < s.energyCapacity * 0.9)
+                    else if (target.structureType == STRUCTURE_TOWER && target.energy < target.energyCapacity * 0.9)
                         cpriority = 100;
 
                     targetInfo[target.id] = cpath * 1.2 - cpriority;
