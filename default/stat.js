@@ -28,8 +28,10 @@ var stat = {
                 cpu: Game.cpu.getUsed(),
             };
             Memory.stat.CPUHistoryIndex++;
-            if (Memory.stat.CPUHistoryIndex > 10000)
+            if (Memory.stat.CPUHistoryIndex > 1000) {
                 Memory.stat.CPUHistoryIndex = 0;
+                Game.notify(JSON.stringify(Memory.stat.CPUHistory));
+            }
             Memory.stat.CPUHistory[Memory.stat.CPUHistoryIndex] = this.currentRow;
         } else {
             this.lastCPU = Game.cpu.getUsed();
