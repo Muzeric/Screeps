@@ -1,3 +1,5 @@
+var utils = require('utils');
+
 var stat = {
     lastCPU : 0,
 
@@ -39,7 +41,7 @@ var stat = {
             Memory.stat.CPUHistory["_total"].cpu += Game.cpu.getUsed();
             Memory.stat.CPUHistory["_total"].count++;
             if (Memory.stat.CPUHistory["_total"].count >= 100) {
-                Game.notify(Game.time + ":" + JSON.stringify(Memory.stat.CPUHistory, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} ));
+                Game.notify(utils.lzw_encode(Game.time + ":" + JSON.stringify(Memory.stat.CPUHistory, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} )));
                 delete Memory.stat.CPUHistory;
             }
         } else {
