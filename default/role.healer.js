@@ -35,10 +35,12 @@ var role = {
         if (targetPos) {
             if (targetPos.roomName == creep.room.name) {
                 let seeked = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.hits < c.hitsMax});
-                if (seeked && !healed && creep.heal(seeked) == ERR_NOT_IN_RANGE)
-                    creep.moveTo(seeked);
-                else
+                if (seeked && !healed) {
+                    if (creep.heal(seeked) == ERR_NOT_IN_RANGE)
+                        creep.moveTo(seeked);
+                } else {
                     creep.moveTo(targetPos);
+                }
             } else {
                 creep.moveTo(targetPos);
             }
