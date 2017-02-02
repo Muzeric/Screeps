@@ -32,6 +32,8 @@ var role = {
                 let targets = flag.pos.lookFor(LOOK_STRUCTURES);
                 if (targets.length)
                     target = targets[0];
+                else
+                    creep.moveTo(flag);
 	        }
         }
 
