@@ -15,8 +15,8 @@ module.exports = {
 
     findSourceAndGo : function (creep, storage_priority) {
         if(!creep.memory.energyID)
-            creep.memory.energyID = findSource(creep, storage_priority);
-        gotoSource(creep);
+            creep.memory.energyID = this.findSource(creep, storage_priority);
+        this.gotoSource(creep);
     },
 
     findSource : function (creep, storage_priority) {
