@@ -50,16 +50,10 @@ var role = {
     create: function(energy) {
         let body = [];
 
-        let hnum = 5;
+        let hnum = Math.floor(energy / 300);
         energy -= 300 * hnum;
-        let tnum = Math.floor(energy / 60);
-        if (tnum * 2 + hnum * 2 > 50) // Body parts limit
-            tnum = Math.floor((50 - hnum * 2) / 2);
-        energy -= 60 * tnum;
-        mnum = hnum + tnum;
+        mnum = hnum * 2;
         
-        while (tnum-- > 0)
-            body.push(TOUGH);
         while (mnum-- > 0)
             body.push(MOVE);
         while (hnum-- > 0)
