@@ -29,7 +29,7 @@ var role = {
             let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
 	        if(flags.length) {
                 let flag = flags.sort(function(a,b) {return a.pos.x - b.pos.x;})[0];
-                let targets = flag.pos.lookFor(LOOK_STRUCTURES);
+                let targets = flag.room ? flag.pos.lookFor(LOOK_STRUCTURES) : [];
                 if (targets.length)
                     target = targets[0];
                 else

@@ -274,14 +274,14 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 3,
     },{
         "role" : "attacker",
-        "count" : fcount["War"] ? 1 : 0,
+        "count" : fcount["War"] ? 3 : 0,
         "priority" : 1,
         "wishEnergy" : 1800,
         "minEnergy" : 1800,
         "range" : 5,
     },{
         "role" : "healer",
-        "count" : fcount["War"] ? 1 : 0,
+        "count" : fcount["War"] ? 3 : 0,
         "priority" : 1,
         "wishEnergy" : 1800,
         "minEnergy" : 1800,
