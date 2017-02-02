@@ -23,9 +23,7 @@ var role = {
 	            } else if (attack_res == 1) {
 	                ;
 	            } else {
-                    if(!creep.memory.energyID)
-                        creep.memory.energyID = utils.findSource(creep);
-                    utils.gotoSource(creep);
+                    utils.findSourceAndGo(creep);
 	            }
 	        } else {
                 creep.moveTo(Game.flags[creep.memory.energyName].pos);

@@ -36,9 +36,7 @@ var roleLongBuilder = {
                 creep.moveTo(target, {ignoreRoads : true});
 	    }
 	    else {
-	        if(!creep.memory.energyID)
-	            creep.memory.energyID = utils.findSource(creep);
-            utils.gotoSource(creep);
+	        utils.findSourceAndGo(creep);
 	    }
 	},
 	

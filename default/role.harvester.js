@@ -20,9 +20,7 @@ var roleHarvester = {
 	    }
 	    
 	    if(!creep.memory.transfering) {
-            if(!creep.memory.energyID)
-	            creep.memory.energyID = utils.findSource(creep);
-            utils.gotoSource(creep);
+            utils.findSourceAndGo(creep);
         } else {
             if (creep.memory.needRepair) {
                 let spawns = creep.room.find(FIND_MY_SPAWNS);

@@ -14,10 +14,7 @@ var roleUpgrader = {
 	    }
 	    
 	    if(!creep.memory.upgrading) {
-	        if(!creep.memory.energyID) {
-	            creep.memory.energyID = utils.findSource(creep, 1);
-	        }
-            utils.gotoSource(creep);
+	        utils.findSourceAndGo(creep, 1);
         } else {
             if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
                 var res = creep.moveTo(creep.room.controller);

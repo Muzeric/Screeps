@@ -13,6 +13,12 @@ var roomConfig = {
 module.exports = {
     roomConfig : roomConfig,
 
+    findSourceAndGo : function (creep, storage_priority) {
+        if(!creep.memory.energyID)
+            creep.memory.energyID = findSource(creep, storage_priority);
+        gotoSource(creep);
+    },
+
     findSource : function (creep, storage_priority) {
         let targets = [];
         if (!creep.room.find(FIND_HOSTILE_CREEPS).length)

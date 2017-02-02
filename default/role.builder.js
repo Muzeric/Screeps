@@ -38,10 +38,7 @@ var roleBuilder = {
             }
 	    }
 	    else {
-	        if(!creep.memory.energyID) {
-	            creep.memory.energyID = utils.findSource(creep, 1);
-	        }
-            utils.gotoSource(creep);
+	        utils.findSourceAndGo(creep, 1);
 	    }
 	},
 	
