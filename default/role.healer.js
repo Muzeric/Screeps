@@ -8,7 +8,7 @@ var role = {
 
         let stopPoint;
         if (Memory.stopPoint)
-            stopPoint = Memory.stopPoint;
+            stopPoint = new RoomPosition(Memory.stopPoint.x, Memory.stopPoint.y, Memory.stopPoint.roomName);
         if (stopPoint) {
             //console.log(creep.name + ": go to stopPoint " + stopPoint.roomName + ":" + stopPoint.x + "," + stopPoint.y);
             targetPos = stopPoint;
