@@ -35,6 +35,9 @@ var role = {
 	        }
         }
         
+        if (!target)
+            target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
+        
         if (target) {
             //console.log(creep.name + ": go to attackTarget " + Memory.attackTargetID);
             if (creep.attack(target) == ERR_NOT_IN_RANGE)
