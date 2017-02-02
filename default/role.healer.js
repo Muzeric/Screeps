@@ -26,25 +26,21 @@ var role = {
                 targetPos = target.pos;
         }
 
-        let healed = 0;
+        let moved = 0;
         if (creep.hits < creep.hitsMax) {
             creep.heal(creep);
-            healed = 1;
-        }
-
-        if (targetPos) {
-            if (targetPos.roomName == creep.room.name) {
-                let seeked = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.hits < c.hitsMax});
-                if (seeked && !healed) {
-                    if (creep.heal(seeked) == ERR_NOT_IN_RANGE)
-                        creep.moveTo(seeked);
-                } else {
-                    creep.moveTo(targetPos);
+        } else {
+            let seeked = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.hits < c.hitsMax});
+            if (seeked) {
+                if (creep.heal(seeked) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(seeked);
+                    moved = 1;
                 }
-            } else {
-                creep.moveTo(targetPos);
             }
         }
+
+        if (targetPos && !moved)
+            creep.moveTo(targetPos);
 	},
 	
     create: function(energy) {
