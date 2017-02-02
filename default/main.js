@@ -368,7 +368,7 @@ function getRoomLimits (room, creepsCount) {
             "count" : scount["source"] + 1,
             "priority" : 20,
             "wishEnergy" : 1500,
-    },);
+    });
 
     for (let limit of limits) {
         limit["roomName"] = room.name;

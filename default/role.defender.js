@@ -3,49 +3,13 @@ var utils = require('utils');
 var role = {
 
     run: function(creep) {
-        if ((creep.hits <= 200 || creep.hits < creep.hitsMax * 0.4) && creep.memory.attacking) {
-            if (creep.getActiveBodyparts(HEAL))
-                console.log(creep.name + " healed himself (" + creep.hits + "/" + creep.hitsMax + ") with res=" + creep.heal(creep));
-	        creep.memory.attacking = false;
-	    } else if (creep.hits == creep.hitsMax && !creep.memory.attacking) {
-	        creep.memory.attacking = true;
-	    }
+        if (!utils.checkInRoomAndGo(creep))
+            return;
 	    
-        if (creep.pos.roomName == creep.memory.roomName) {
-            let res = utils.try_attack(creep);
-            if (!res) {
-                creep.moveTo(creep.room.controller);
-                return;
-            } else if (res >= 1) {
-                return;
-            }
-        }
-
-        if(!creep.memory.attackName || !Game.flags[creep.memory.attackName]) {
-            let targets = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
-	        if(!targets.length) {
-	            //console.log(creep.name + " found no flags");
-	            creep.memory.attacking = false;
-	        } else {
-    	        console.log(creep.name + " targets: " + targets);
-    	        
-    	        creep.memory.attackName = targets.sort()[0].name;
-                console.log(creep.name + " attackName=" + creep.memory.attackName);
-	        }
-        }
-        
-	    if(creep.memory.attacking) {
-            if(creep.room.name == Game.flags[creep.memory.attackName].pos.roomName) {
-                if(!utils.try_attack(creep,1)) {
-                    creep.memory.attacking = false;
-                } 
-            } else {
-                creep.moveTo(Game.flags[creep.memory.attackName].pos);
-                //console.log(creep.name + " going to " + creep.memory.attackName + " to " + exitDir);
-	        }
-        } else {
-            creep.moveTo(Game.rooms[creep.memory.roomName].controller);
-            //Game.spawns[creep.memory.spawnName].recycleCreep(creep);
+        if (utils.try_attack(creep) <= 0) {
+            creep.moveTo(creep.room.controller);
+            if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL))
+                    creep.heal(creep);
         }
 	},
 	
