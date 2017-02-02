@@ -11,10 +11,10 @@ $| = 1;
 my $password = _get_passwd();
 
 my $imap = new Mail::IMAPClient(
-	Server => 'imap.mail.ru',
+	Server => 'imap.gmail.com',
 	Ssl => 1,
 	Uid => 1,
-	User => 'muzer@mail.ru',
+	User => 'yamuzer@gmail.com',
 	Password => $password,
 	Port => 993,
 )
@@ -36,7 +36,7 @@ foreach my $folder ('Inbox') {
 	#my $hash = $imap->fetch_hash("BODY[HEADER.FIELDS (Subject)]");
 	#print "Got ".scalar(keys %$hash)."\n";
 
-	my @msgids = $imap->search('UNSEEN')
+	my @msgids = $imap->search('SUBJECT screeps')
 	or print STDERR "search in '$folder': ".$imap->LastError."\n"
 	and die;
 	print "Searching in '$folder'\n";
@@ -142,7 +142,6 @@ print "\n";
 =cut
 
 sub _get_passwd {
-return 'razhtsujgpiebwzj';
 	print "Password: ";
 	ReadMode('noecho');
 	my $password = ReadLine(0);
