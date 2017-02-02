@@ -272,6 +272,20 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "wishEnergy" : 2300,
         "minEnergy" : 2300,
         "range" : 3,
+    },{
+        "role" : "attacker",
+        "count" : fcount["War"] ? 1 : 0,
+        "priority" : 1,
+        "wishEnergy" : 1800,
+        "minEnergy" : 1800,
+        "range" : 5,
+    },{
+        "role" : "healer",
+        "count" : fcount["War"] ? 1 : 0,
+        "priority" : 1,
+        "wishEnergy" : 1800,
+        "minEnergy" : 1800,
+        "range" : 5,
     });
 
     for (let limit of limits) {

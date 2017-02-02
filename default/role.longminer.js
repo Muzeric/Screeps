@@ -83,8 +83,8 @@ var role = {
 	},
 	
     create: function(energy) {
-        energy -= 50;
-        let body = [CARRY];
+        energy -= 50; // CARRY
+        let body = [];
         let wlim = 5;
         let fat = 1;
         while (energy >= 100 && wlim) {
@@ -108,6 +108,7 @@ var role = {
             body.push(MOVE,ATTACK,ATTACK);
             energy -= 80*2 + 50;
         }
+        body.push(CARRY);
 	    return [body, energy];
 	},
 };

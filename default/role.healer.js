@@ -4,38 +4,47 @@ var testmode = 1;
 var role = {
 
     run: function(creep) {
-        if (!creep.memory.pairCreepID) {
-            let creeps = _.filter(Game.creeps, c => c.memory.needHealer && !_.some(Game.creeps, c => c.memory.role == "healer" && c.memory.pairCreepID == c.id && c.ticksToLive > 200));
-            if (!creeps.length) {
-                console.log(creep.name + " no creep wants healer");
-                return;
-            }
-            creep.memory.pairCreepID = creeps[0].id;
-        }
+        let targetPos;
 
-        let pairCreep = Game.getObjectById(creep.memory.pairCreepID);
-        if (!pairCreep) {
-            console.log(creep.name + " no alive pairCreep");
-            return;
-        }
-
-        let healObj = null;
-        if (pairCreep.hits < pairCreep.hitsMax) {
-            healObj = pairCreep;
+        let stopPoint;
+        if (Memory.stopPoint)
+            stopPoint = Memory.stopPoint;
+        if (stopPoint) {
+            //console.log(creep.name + ": go to stopPoint " + stopPoint.roomName + ":" + stopPoint.x + "," + stopPoint.y);
+            targetPos = stopPoint;
         } else {
-            let creepsForHeal = creep.pos.findInRange(FIND_MY_CREEPS, 5, {filter: c => c.hits < c.hitsMax});
-            if (creepsForHeal.length)
-                healObj = targets[0];
+            let target;
+            if (Memory.attackTargetID) {
+                target = Game.getObjectById(Memory.attackTargetID);
+            } else {
+                let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
+                if(flags.length) {
+                    let flag = flags.sort(function(a,b) {return a.pos.x - b.pos.x;})[0];
+                    let targets = flag.pos.lookFor(LOOK_STRUCTURES);
+                    if (targets.length)
+                        target = targets[0];
+                }
+            }
+            
+            if (target)
+                targetPos = target.pos;
         }
 
-        if (healObj) {
-            console.log(creep.name + " has object for heal ("+ healObj.hits +"/" + healObj.hitsMax + ")");
-            if (creep.heal(pairCreep) == ERR_NOT_IN_RANGE)
-                    creep.moveTo(pairCreep);
-        } else if (!creep.pos.isNearTo(pairCreep)) {
-            creep.moveTo(pairCreep);
+        let healed = 0;
+        if (creep.hits < creep.hitsMax) {
+            creep.heal(creep);
+            healed = 1;
         }
 
+        if (targetPos) {
+            if (targetPos.roomName == creep.room.name) {
+                let seeked = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.hits < c.hitsMax});
+                if (seeked && !healed && creep.heal(seeked) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(seeked);
+            } else {
+                creep.moveTo(targetPos);
+            }
+        }
 	},
 	
     create: function(energy) {
