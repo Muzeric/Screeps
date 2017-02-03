@@ -5,26 +5,17 @@ var role = {
 
     run: function(creep) {
         let targetPos;
-
-        let stopPoint;
-        if (Memory.stopPoint)
-            stopPoint = new RoomPosition(Memory.stopPoint.x, Memory.stopPoint.y, Memory.stopPoint.roomName);
-        if (stopPoint) {
-            //console.log(creep.name + ": go to stopPoint " + stopPoint.roomName + ":" + stopPoint.x + "," + stopPoint.y);
-            targetPos = stopPoint;
+        let target;
+        if (Memory.attackTargetID) {
+            target = Game.getObjectById(Memory.attackTargetID);
         } else {
-            let target;
-            if (Memory.attackTargetID) {
-                target = Game.getObjectById(Memory.attackTargetID);
-            } else {
-                let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
-                if(flags.length)
-                    target = flags.sort(function(a,b) {return a.pos.x - b.pos.x;})[0];
-            }
-            
-            if (target)
-                targetPos = target.pos;
+            let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
+            if(flags.length)
+                target = flags.sort(function(a,b) {return a.pos.x - b.pos.x;})[0];
         }
+        
+        if (target)
+            targetPos = target.pos;
 
         let moved = 0;
         if (creep.hits < creep.hitsMax) {

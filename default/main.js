@@ -364,7 +364,7 @@ function getRoomLimits (room, creepsCount) {
             "priority" : 4,
             "wishEnergy" : 1500,
             "body" : {
-                "carry" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 10 : 0,
+                "carry" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 9 : 0,
             },
     },{
             role : "upgrader",

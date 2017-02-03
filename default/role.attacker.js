@@ -3,15 +3,10 @@ var utils = require('utils');
 var role = {
 
     run: function(creep) {
-        let stopPoint;
-        if (Memory.stopPoint)
-            stopPoint = new RoomPosition(Memory.stopPoint.x, Memory.stopPoint.y, Memory.stopPoint.roomName);
-        
-        if (stopPoint) {
-            //console.log(creep.name + ": go to stopPoint " + stopPoint.roomName + ":" + stopPoint.x + "," + stopPoint.y);
-            creep.moveTo(stopPoint);
-            return;
-        }
+        if (!("lastHits" in creep.memory))
+            creep.memory["lastHits"] = creep.hits;
+        let diffHits = creep.hits - creep.memory["lastHits"];
+        creep.memory["lastHits"] = creep.hits;
 
         if (!creep.getActiveBodyparts(ATTACK)) {
             let healer = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.memory.role == "healer"});
@@ -22,13 +17,53 @@ var role = {
             return;
         }
 
+        if (diffHits < 0) {
+            console.log(creep.name + ": is under attack (" + creep.hits + "/" + creep.hitsMax + ")");
+            creep.say("WTF!");
+
+            let target;
+            let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 4, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK)});
+            if (hostiles.length) {
+                target = hostiles.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
+            } else {
+                let towers = creep.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER && s.energy});
+                if (towers.length)
+                    target = towers.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
+            }
+
+            if (target) {
+                if (creep.attack(target) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target);
+                return;
+            }
+
+            console.log(creep.name + ": attack from uknown object");
+        }
+
+        let flag;
+        let target;
+        let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
+	    if(flags.length) {
+            let flag = flags.sort()[0];
+            if (creep.room.roomName != flag.pos.roomName) {
+                creep.moveTo(flag);
+                return;
+            } else {
+                let targets = flag.pos.lookFor(LOOK_STRUCTURES);
+                if (targets.length)
+                    target = targets[0];
+            }
+        }
+
+
+/*
         let target;
         if (Memory.attackTargetID) {
             target = Game.getObjectById(Memory.attackTargetID);
         } else {
             let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
 	        if(flags.length) {
-                let flag = flags.sort(function(a,b) {return a.pos.x - b.pos.x;})[0];
+                let flag = flags.sort()[0];
                 let targets = flag.room ? flag.pos.lookFor(LOOK_STRUCTURES) : [];
                 if (targets.length)
                     target = targets[0];
@@ -46,7 +81,7 @@ var role = {
                 creep.moveTo(target);
             return;
         }
-
+*/
 	},
 	
     create: function(energy) {

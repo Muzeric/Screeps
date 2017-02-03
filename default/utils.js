@@ -48,12 +48,12 @@ module.exports = {
             let cpath = creep.pos.getRangeTo(target);
             let wantEnergy = _.reduce(_.filter(Game.creeps, c => c.memory.energyID == target.id), function (sum, value) { return sum + value.carryCapacity; }, 0);
             let cpriority = 0;
-            if (target.resourceType) {
+            if (target.resourceType) { // Dropped
                 cpriority = 1.5;
             } else if (storage_priority && target.structureType == STRUCTURE_STORAGE || !storage_priority && target.structureType == STRUCTURE_CONTAINER) {
                 cpriority = 1; 
-            } else if (target.energy) {
-                cpriority = -10;
+            } else if (target.energy) { // Source
+                cpriority = -100;
             }
 
             let cenergyTicks = (wantEnergy + creep.carryCapacity - cenergy) / 10;
