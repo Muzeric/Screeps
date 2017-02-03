@@ -73,6 +73,8 @@ var roleHarvester = {
                         cpriority = -50;
                     else if (target.structureType == STRUCTURE_TOWER && target.energy < target.energyCapacity * 0.9)
                         cpriority = 100;
+                    else if (target.structureType == STRUCTURE_TOWER && target.energy > target.energyCapacity * 0.9)
+                        cpriority = -30;
 
                     targetInfo[target.id] = cpath * 1.2 - cpriority;
                     //console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + wantCarry + " wantCarry and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + targetInfo[target.id]);

@@ -40,48 +40,29 @@ var role = {
             console.log(creep.name + ": attack from uknown object");
         }
 
-        let flag;
-        let target;
         let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
 	    if(flags.length) {
             let flag = flags.sort()[0];
-            if (creep.room.roomName != flag.pos.roomName) {
+            if (creep.room.name != flag.pos.roomName) {
                 creep.moveTo(flag);
                 return;
             } else {
-                let targets = flag.pos.lookFor(LOOK_STRUCTURES);
-                if (targets.length)
-                    target = targets[0];
+                let target = 
+                    Game.getObjectById(Memory.targets[creep.room.name]) ||
+                    _.filter(flag.pos.lookFor(LOOK_STRUCTURES), s => s.structureType != "road")[0] ||
+                    creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}) ||
+                    creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK)}) ||
+                    creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS) ||
+                    creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS) ||
+                    creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType != STRUCTURE_CONTROLLER})
+                ;
+                if (target) {
+                    Memory.targets[creep.room.name] = target.id;
+                    if (creep.attack(target) == ERR_NOT_IN_RANGE)
+                        creep.moveTo(target);
+                }
             }
         }
-
-
-/*
-        let target;
-        if (Memory.attackTargetID) {
-            target = Game.getObjectById(Memory.attackTargetID);
-        } else {
-            let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
-	        if(flags.length) {
-                let flag = flags.sort()[0];
-                let targets = flag.room ? flag.pos.lookFor(LOOK_STRUCTURES) : [];
-                if (targets.length)
-                    target = targets[0];
-                else
-                    creep.moveTo(flag);
-	        }
-        }
-
-        if (!target)
-            target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
-        
-        if (target) {
-            //console.log(creep.name + ": go to attackTarget " + Memory.attackTargetID);
-            if (creep.attack(target) == ERR_NOT_IN_RANGE)
-                creep.moveTo(target);
-            return;
-        }
-*/
 	},
 	
     create: function(energy) {

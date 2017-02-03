@@ -10,8 +10,8 @@ var role = {
 
         if(creep.memory.cID === undefined || !creep.memory.energyID) {
             let containers = creep.room.find(FIND_STRUCTURES, { filter: s => 
-                s.structureType == STRUCTURE_CONTAINER ||
-                (s.structureType == STRUCTURE_LINK && _.some(s.pos.findInRange(FIND_SOURCES, 2)) )
+                (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_LINK) &&
+                _.some(s.pos.findInRange(FIND_SOURCES, 2, {filter: r => r.pos.findPathTo(s).length <= 2})) 
             });
             if(!containers.length) {
                 console.log(creep.name + ": no containers in room, nothing to do");

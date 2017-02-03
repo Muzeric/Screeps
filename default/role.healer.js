@@ -5,33 +5,26 @@ var role = {
 
     run: function(creep) {
         let targetPos;
-        let target;
-        if (Memory.attackTargetID) {
-            target = Game.getObjectById(Memory.attackTargetID);
-        } else {
-            let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
-            if(flags.length)
-                target = flags.sort(function(a,b) {return a.pos.x - b.pos.x;})[0];
-        }
-        
-        if (target)
-            targetPos = target.pos;
 
         let moved = 0;
+        let seeked;
+        let flag;
         if (creep.hits < creep.hitsMax) {
             creep.heal(creep);
-        } else {
-            let seeked = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.hits < c.hitsMax});
-            if (seeked) {
-                if (creep.heal(seeked) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(seeked);
-                    moved = 1;
-                }
+        } else if (seeked = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.hits < c.hitsMax}) ) {
+            if (creep.heal(seeked) == ERR_NOT_IN_RANGE)
+                creep.moveTo(seeked);
+        } else if (flag = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack').sort()[0] ) {
+            if (creep.room.name != flag.pos.roomName) {
+                creep.moveTo(flag);
+            } else {
+                let target = creep.pos.findClosestByPath(FIND_MY_CREEPS);
+                if (target)
+                    creep.moveTo(target);
             }
+        } else {
+            creep.moveTo(Game.spawns[creep.memory.spawnName]);
         }
-
-        if (targetPos && !moved)
-            creep.moveTo(targetPos);
 	},
 	
     create: function(energy) {
