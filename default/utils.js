@@ -127,7 +127,7 @@ module.exports = {
         } else if (res == ERR_NOT_ENOUGH_ENERGY) {
             return;
         } else if (res < 0) {
-            console.log(creep.name + " tried to get energy with res = " + res);
+            console.log(creep.name + " tried to get energy from " + creep.memory.energyID + " with res = " + res);
             creep.memory.energyID = null;
         }
     },
