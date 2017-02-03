@@ -35,7 +35,8 @@ module.exports = {
             )
         }));
 
-        targets = targets.concat(creep.room.find(FIND_SOURCES));
+        if (creep.getActiveBodyparts(WORK))
+            targets = targets.concat(creep.room.find(FIND_SOURCES));
 
         if(!targets.length) {
             console.log(creep.name + " no any source in room " + creep.room.name);
