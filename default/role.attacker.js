@@ -9,11 +9,8 @@ var role = {
         creep.memory["lastHits"] = creep.hits;
 
         let healer = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.memory.role == "healer"});
-        if (!creep.getActiveBodyparts(ATTACK)) {
-            if (!healer)
-                creep.moveTo(Game.spawns[creep.memory.spawnName]);
-            else
-                creep.moveTo(healer);
+        if (!creep.getActiveBodyparts(ATTACK) && !healer) {
+            creep.moveTo(Game.spawns[creep.memory.spawnName]);
             return;
         }
 
@@ -42,9 +39,14 @@ var role = {
 
         let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
 	    if(flags.length) {
+            if (creep.hits < creep.hitsMax) {
+                if (healer)
+                    creep.moveTo(healer);
+                return;
+            }
             let flag = flags.sort()[0];
             if (creep.room.name != flag.pos.roomName) {
-                if (!healer || creep.pos.getRangeTo(healer) < 3)
+                if (healer && creep.pos.getRangeTo(healer) < 3)
                     creep.moveTo(flag);
                 return;
             } else {

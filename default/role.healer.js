@@ -6,22 +6,24 @@ var role = {
     run: function(creep) {
         let targetPos;
 
-        let moved = 0;
+        let healed = 0;
         let seeked;
-        let flag;
+        let attacker;
         if (creep.hits < creep.hitsMax) {
             creep.heal(creep);
-        } else if (seeked = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.hits < c.hitsMax}) ) {
-            if (creep.heal(seeked) == ERR_NOT_IN_RANGE)
-                creep.moveTo(seeked);
-        } else if (flag = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack').sort()[0] ) {
-            if (creep.room.name != flag.pos.roomName) {
-                creep.moveTo(flag);
+            healed = 1;
+        }
+
+        if (seeked = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.hits < c.hitsMax}) ) {
+            if (creep.pos.isNearTo(seeked)) {
+                if (!healed)
+                    creep.heal(seeked);
             } else {
-                let target = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.getActiveBodyparts(ATTACK)});
-                if (target)
-                    creep.moveTo(target);
+                creep.moveTo(seeked);
+                creep.rangedHeal(seeked);
             }
+        } else if (attacker = _.filter(Game.creeps, c => c.memory.role == 'attacker').sort()[0] ) {
+            creep.moveTo(attacker);
         } else {
             creep.moveTo(Game.spawns[creep.memory.spawnName]);
         }

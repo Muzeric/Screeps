@@ -112,8 +112,10 @@ module.exports.loop = function () {
                         notEnoughBody = 1;
                 }
             }
-            if ( (creepsCount[limit.role] || 0) < limit.count && (!hasBodyLimits || notEnoughBody) )
+            if ( (creepsCount[limit.role] || 0) < limit.count && (!hasBodyLimits || notEnoughBody) ) {
                 needList.push(limit);
+                creepsCount[limit.role] = (creepsCount[limit.role] || 0) + 1;
+            }
         }
 
         if (room) {

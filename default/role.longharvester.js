@@ -99,7 +99,7 @@ function set_cid (creep) {
     //console.log("Searching container for " + creep.name);
     if(creep.room.storage) {
         let links = creep.room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK && s.pos.getRangeTo(creep.room.storage) > 3});
-        creep.memory.cID = creep.pos.findClosestByPath(links.concat(creep.room.storage)).id;
+        creep.memory.cID = creep.pos.findClosestByPath(links.concat(creep.room.storage, {ignoreCreeps : true})).id;
         return;
     }
     let containers = creep.room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_CONTAINER });
