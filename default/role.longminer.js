@@ -68,6 +68,8 @@ var role = {
             if(creep.pos.isNearTo(source) && creep.pos.isNearTo(container)) {
                 if(creep.carry.energy < creep.carryCapacity)
                     creep.harvest(source);
+                if (container.hits < container.hitsMax * 0.95)
+                    creep.repair(container);
                 creep.transfer(container, RESOURCE_ENERGY);
             } else {
                 if (creep.pos.isNearTo(container))
@@ -86,6 +88,8 @@ var role = {
                 if(creep.harvest(source) == ERR_NOT_IN_RANGE)
                     creep.moveTo(source);
             else
+                if (container.hits < container.hitsMax * 0.95)
+                    creep.repair(container);
                 if(creep.transfer(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
                     creep.moveTo(container);
         }
