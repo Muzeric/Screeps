@@ -5,7 +5,14 @@ var role = {
     run: function(creep) {
         if (!("lastHits" in creep.memory))
             creep.memory["lastHits"] = creep.hits;
-        let diffHits = creep.hits - creep.memory["lastHits"];
+        let underAttack = creep.memory["lastUnderAttack"] ? 1 : 0;
+        if (creep.hits - creep.memory["lastHits"] < 0) {
+            creep.say("WTF!");
+            underAttack = 1;
+            creep.memory["lastUnderAttack"] = 1;
+        } else {
+            creep.memory["lastUnderAttack"] = 0;
+        }
         creep.memory["lastHits"] = creep.hits;
 
         let healer = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.memory.role == "healer"});
@@ -14,9 +21,8 @@ var role = {
             return;
         }
 
-        if (diffHits < 0) {
+        if (underAttack) {
             console.log(creep.name + ": is under attack (" + creep.hits + "/" + creep.hitsMax + ")");
-            creep.say("WTF!");
 
             let target;
             let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 4, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK)});
