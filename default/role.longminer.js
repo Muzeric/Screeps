@@ -6,13 +6,18 @@ var role = {
         let container;
 
         if(creep.memory.cID === undefined || !creep.memory.energyID) {
-            let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && f.room && f.pos.roomName == creep.memory.roomName);
+            let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && f.pos.roomName == creep.memory.roomName);
             if (!flags.length) {
                 console.log(creep.name + " found no Source.flags with known rooms");
                 return;
             }
 
-            let flag;
+            if (creep.room.name != creep.memory.roomName) {
+                creep.moveTo(flags[0]);
+                return;
+            }
+
+            let flag;    
             for (flag of flags.sort( function (a,b) { return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b); })) {
                 let containers = flag.pos.findInRange(FIND_STRUCTURES, 2, {filter : s => 
                         s.structureType == STRUCTURE_CONTAINER &&
