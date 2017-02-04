@@ -49,6 +49,8 @@ var role = {
             if (creep.room.name != flag.pos.roomName) {
                 if (healer && creep.pos.getRangeTo(healer) < 3 || creep.pos.x == 0 || creep.pos.y == 0)
                     creep.moveTo(flag);
+                else if (healer)
+                    creep.moveTo(healer);
                 return;
             } else {
                 let target = 

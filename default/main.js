@@ -119,7 +119,7 @@ module.exports.loop = function () {
 
         if (room) {
             let localCPU = Game.cpu.getUsed();
-            towerAction(room, creepsCount["upgrader"] && creepsCount["longharvester"] >= 2 ? 1 : 0);
+            towerAction(room, creepsCount["upgrader"] ? 1 : 0);
             roomsCPUStat[roomName].towers = Game.cpu.getUsed() - localCPU;
             localCPU = Game.cpu.getUsed();
             linkAction(room);
@@ -441,32 +441,26 @@ function getSpawnForCreate (need, skipSpawnNames, reservedEnergy) {
 
 function towerAction (room, canRepair) {
     let towers = room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_TOWER });
+    if (!towers.length)
+        return;
+    
+    let energy = _.sum(room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE}), 'store.energy');
+    if (energy < room.energyCapacityAvailable)
+        canRepair = 0;
+    let repairLimit = canRepair ? (utils.roomConfig[room.name] ? utils.roomConfig[room.name].repairLimit : 100000) : 10000;
+    let dstructs = room.find(FIND_STRUCTURES, {filter: s => s.hits < 0.9*s.hitsMax && s.hits < repairLimit});
+    
     for(let tower of towers) {
-        let hostile = room.find(FIND_HOSTILE_CREEPS).sort(function (a,b) { return a.hits - b.hits;})[0];
-        if(hostile) {
-            tower.attack(hostile);
-            console.log("Tower " + tower.id + " attacked hostile: owner=" + hostile.owner.username + "; hits=" + hostile.hits);
-        } else {
-            let needheals = room.find(FIND_MY_CREEPS, {filter : c => c.hits < c.hitsMax});
-            if(needheals.length) {
-                let creep = needheals[0];
-                let res = tower.heal(creep);
-                console.log("Tower " + tower.id + " healed " + creep.name + " with res=" + res + " hits: " + creep.hits);
-            }
-
-            if (!canRepair)
-                continue;
-
-            let repairLimit = utils.roomConfig[room.name] ? utils.roomConfig[room.name].repairLimit : 100000;
-            let dstructs = room.find(FIND_STRUCTURES, {
-                filter: (structure) => structure.hits < 0.9*structure.hitsMax && structure.hits < repairLimit
-            });
-            if(dstructs.length && tower.energy > 700) {
-                let dstruct = dstructs.sort(function (a,b) {
-                    return a.hits - b.hits;
-                })[0];
-                tower.repair(dstruct);
-            }
+        let target;
+        if(target = room.find(FIND_HOSTILE_CREEPS).sort(function (a,b) { return a.hits - b.hits;})[0]) {
+            tower.attack(target);
+            console.log("Tower " + tower.id + " attacked hostile: owner=" + target.owner.username + "; hits=" + target.hits);
+        } else if (target = room.find(FIND_MY_CREEPS, {filter : c => c.hits < c.hitsMax})[0]) {
+            tower.heal(target);
+            console.log("Tower " + tower.id + " healed " + target.name + " (" + target.hits + "/" + target.hitsMax + ")");
+        } else if(dstructs.length && tower.energy > 700) {
+            let dstruct = dstructs.sort(function (a,b) {return a.hits - b.hits;})[0];
+            tower.repair(dstruct);
         }
     }
 }
