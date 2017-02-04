@@ -18,7 +18,7 @@ var role = {
             if (creep.room.name != flag.pos.roomName) {
                 creep.moveTo(flag);
             } else {
-                let target = creep.pos.findClosestByPath(FIND_MY_CREEPS);
+                let target = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.getActiveBodyparts(ATTACK)});
                 if (target)
                     creep.moveTo(target);
             }

@@ -7,6 +7,8 @@ module.exports.loop = function () {
     var moveErrors = {};
     var rolesCount = {};
     var objectCache = {};
+    if(!Memory.targets)
+        Memory.targets = {};
 
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
