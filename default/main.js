@@ -1,4 +1,3 @@
-
 var utils = require('utils');
 var statObject = require('stat');
 
