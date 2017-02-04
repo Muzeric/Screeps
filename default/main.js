@@ -139,7 +139,7 @@ module.exports.loop = function () {
             break;
         }
         
-        let res = getSpawnForCreate(need, skipSpawnNames);
+        let res = getSpawnForCreate(need, skipSpawnNames, reservedEnergy);
         if (res[0] == -2) {
             //console.log("needList: " + need.role + " for " + need.roomName + " has no spawns in range");
         } else if (res[0] == -1) {
@@ -155,8 +155,6 @@ module.exports.loop = function () {
             if(!(need.role in objectCache))
                 objectCache[need.role] = require('role.' + need.role);
             let [body, leftEnergy] = objectCache[need.role].create(energy, need.arg);
-            if(body)
-                reservedEnergy[spawn.room.name] = (reservedEnergy[spawn.room.name] || 0) + (energy - leftEnergy);
             
             let newName = spawn.createCreep(body, need.role + "." + Math.random().toFixed(2), {
                 "role": need.role,
@@ -171,6 +169,8 @@ module.exports.loop = function () {
                     moves : 0,
                 },
             });
+            if(newName)
+                reservedEnergy[spawn.room.name] = (reservedEnergy[spawn.room.name] || 0) + (energy - leftEnergy);
             skipSpawnNames[spawn.name] = 1;
             
             //let newName = need.role;
@@ -396,7 +396,7 @@ function getRoomLimits (room, creepsCount) {
     return limits;
 }
 
-function getSpawnForCreate (need, skipSpawnNames) {
+function getSpawnForCreate (need, skipSpawnNames, reservedEnergy) {
     let spawnsInRange = _.filter(Game.spawns, s => 
         Game.map.getRoomLinearDistance(s.room.name, need.roomName) <= need.range &&
         !s.spawning && 
@@ -414,12 +414,13 @@ function getSpawnForCreate (need, skipSpawnNames) {
     for (let spawn of spawnsInRange.sort( function(a,b) { 
         return (Game.map.getRoomLinearDistance(a.room.name, need.roomName) - Game.map.getRoomLinearDistance(b.room.name, need.roomName)) || (b.room.energyAvailable - a.room.energyAvailable); 
     } )) {
+        let energy = spawn.room.energyAvailable - (reservedEnergy[spawn.room.name] || 0);
         //console.log("getSpawnForCreate: " + need.roomName + " wants " + need.role + ", skipSpawnNames=" + JSON.stringify(skipSpawnNames) + ":" + spawn.name + " minEnergy=" + need.minEnergy + ", energyAvailable=" + spawn.room.energyAvailable);
         if (
-            spawn.room.energyAvailable >= need.minEnergy &&
+            energy >= need.minEnergy &&
             (
-                spawn.room.energyAvailable >= need.wishEnergy ||
-                spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable && spawn.room.energyAvailable >= need.originalEnergyCapacity
+                energy >= need.wishEnergy ||
+                energy >= spawn.room.energyCapacityAvailable && energy >= need.originalEnergyCapacity
             )
         )
             return [0, spawn];
