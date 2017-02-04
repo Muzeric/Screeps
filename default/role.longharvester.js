@@ -24,19 +24,10 @@ var role = {
         }
         
         if(!creep.memory.transfering) {
-	        if(creep.room.name == Game.flags[creep.memory.energyName].pos.roomName) {
-	            let attack_res = utils.try_attack(creep);
-	            if(!attack_res) {
-	                creep.memory.transfering = true;
-	            } else if (attack_res == 1) {
-	                ;
-	            } else {
-                    utils.findSourceAndGo(creep);
-	            }
-	        } else {
+	        if(creep.room.name == Game.flags[creep.memory.energyName].pos.roomName)
+                utils.findSourceAndGo(creep);
+	        else
                 creep.moveTo(Game.flags[creep.memory.energyName].pos);
-                //console.log(creep.name + " going to " + creep.memory.energyName + " to " + exitDir);
-	        }
         } else {
             if (creep.room.name != Game.spawns[creep.memory.spawnName].room.name) {
                 creep.moveTo(Game.spawns[creep.memory.spawnName]);
@@ -53,18 +44,11 @@ var role = {
                 return;
             }
 
-            if(creep.room.name == container.pos.roomName) {
-                let res = creep.transfer(container, RESOURCE_ENERGY);
-                if(res == ERR_NOT_IN_RANGE) {
-                    let res = creep.moveTo(container);
-                } else if (res == ERR_FULL) {
-                    //console.log(creep.name + " container is full");
-                    set_cid(creep);
-                    return;
-                }
-            } else {
-                creep.moveTo(container.pos);
-            }
+            let res = creep.transfer(container, RESOURCE_ENERGY);
+            if(res == ERR_NOT_IN_RANGE)
+                creep.moveTo(container);
+            else if (res == ERR_FULL)
+                set_cid(creep);
         }
 	},
 	
@@ -103,11 +87,9 @@ var role = {
 
 function set_cid (creep) {
     //console.log("Searching container for " + creep.name);
-    if(creep.room.storage) {
-        let links = creep.room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK && s.pos.getRangeTo(creep.room.storage) > 3});
-        creep.memory.cID = creep.pos.findClosestByPath(links.concat(creep.room.storage), {ignoreCreeps: true, filter: s => 
-            (s.storeCapacity ? s.storeCapacity - s.store[RESOURCE_ENERGY] : s.energyCapacity - s.energy) > 0
-        }).id;
+    if(creep.room.storage && s.storeCapacity - s.store[RESOURCE_ENERGY] > 0) {
+        let links = creep.room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK && s.pos.getRangeTo(creep.room.storage) > 3 && s.energyCapacity - s.energy > 0});
+        creep.memory.cID = creep.pos.findClosestByPath(links.concat(creep.room.storage), {ignoreCreeps: true}).id;
         return;
     }
     let containers = creep.room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_CONTAINER });
