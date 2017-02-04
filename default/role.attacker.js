@@ -45,22 +45,17 @@ var role = {
 
         let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
 	    if(flags.length) {
-            if (creep.hits < creep.hitsMax) {
-                if (healer)
-                    creep.moveTo(healer);
-                return;
-            }
             let flag = flags.sort()[0];
             if (creep.room.name != flag.pos.roomName) {
-                if (healer && creep.pos.getRangeTo(healer) < 3)
+                if (healer && creep.pos.getRangeTo(healer) < 3 || creep.pos.x == 0 || creep.pos.y == 0)
                     creep.moveTo(flag);
                 return;
             } else {
                 let target = 
                     Game.getObjectById(Memory.targets[creep.room.name]) ||
                     _.filter(flag.pos.lookFor(LOOK_STRUCTURES), s => s.structureType != "road")[0] ||
-                    creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}) ||
                     creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK)}) ||
+                    creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}) ||
                     creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS) ||
                     creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS) ||
                     creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType != STRUCTURE_CONTROLLER})
@@ -89,7 +84,7 @@ var role = {
         }
         
         let mnum = Math.floor(energy / (50+80));
-        if (mnum * 2 + 2 + body.length > 50) // Body parts limit
+        if (mnum * 2 + body.length > 50) // Body parts limit
             mnum = Math.floor((50 - body.length - 2) / 2);
         let anum = mnum;
         while (energy >= 50 && mnum-- > 0) {
