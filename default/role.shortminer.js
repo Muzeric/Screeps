@@ -6,51 +6,43 @@ var roleShortMiner = {
         if (!utils.checkInRoomAndGo(creep))
             return;
 
-        if(creep.memory.cID === undefined) {
-            //console.log("Searching container for " + creep.name);
+        if (creep.memory.cID === undefined) {
             creep.memory.cID = creep.room.storage.id;
-            //console.log("Container for " + creep.name + " is " + creep.memory.cID);
         }
-        
         let container = Game.getObjectById(creep.memory.cID);
         if(!container) {
-            console.log("Problem getting container for " + creep.name);
+            console.log(creep.name + " has problem with getting container " + creep.memory.cID);
             delete creep.memory.cID;
             return;
         }
 
-        let sources = container.pos.findInRange(FIND_STRUCTURES, 2, {filter: s => s.structureType == STRUCTURE_LINK});
-        if(!sources.length) {
-            console.log("Problem getting source for " + creep.name);
+        if (creep.memory.energyID === undefined) {
+            let sources = container.pos.findInRange(FIND_STRUCTURES, 2, {filter: s => s.structureType == STRUCTURE_LINK});
+            if(!sources.length) {
+                console.log("Problem getting source for " + creep.name);
+                return;
+            }
+            creep.memory.energyID = sources[0].id;
+        }
+        let source = Game.getObjectById(creep.memory.energyID);
+        if (!source) {
+            console.log(creep.name + " has problem with getting source " + creep.memory.energyID);
+            delete creep.memory.energyID;
             return;
         }
-        let source = sources[0];
         
         if(creep.carry.energy == 0 && creep.memory.transfering) {
-	        creep.memory.transfering = false;
+            creep.memory.transfering = false;
         } else if ((creep.carry.energy == creep.carryCapacity || creep.carry.energy && !source.energy) && !creep.memory.transfering) {
-	        creep.memory.transfering = true;
-	        creep.memory.errors = 0;
-	    }
-	    
-	    if(!creep.memory.transfering) {   
-            let res = creep.withdraw(source, RESOURCE_ENERGY);
-            if(res == ERR_NOT_IN_RANGE) {
-                let res = creep.moveTo(source);
-                if(res < 0)
-                    console.log(creep.name + " moved to energy with res=" + res);
-            } else if (res < 0) {
-                //console.log(creep.name + " got energy with res=" + res);
-            }
+            creep.memory.transfering = true;
+        }
+        
+        if(!creep.memory.transfering) {   
+            if(creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                creep.moveTo(source)
         } else {
-            if(creep.transfer(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                let res = creep.moveTo(container);
-                if(res == ERR_NO_PATH) {
-                    creep.memory.errors++;
-                } else if (res == OK) {
-                    creep.memory.errors = 0;
-                }
-            }
+            if(creep.transfer(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                creep.moveTo(container);
         }
 	},
 	
