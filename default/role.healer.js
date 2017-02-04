@@ -32,7 +32,7 @@ var role = {
 
         let hnum = Math.floor(energy / 300);
         energy -= 300 * hnum;
-        mnum = hnum * 2;
+        mnum = hnum;
         
         while (mnum-- > 0)
             body.push(MOVE);
