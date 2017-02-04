@@ -6,16 +6,24 @@ var role = {
             if(!set_energy(creep)) 
                 return;
         }
+
+        let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 4, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK)});
+        if (hostiles.length) {
+            let target = hostiles.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
+            if (creep.attack(target) == ERR_NOT_IN_RANGE)
+                creep.moveTo(target);
+            return;
+        } else {
+            if(creep.carry.energy == 0 && creep.memory.transfering) {
+                creep.memory.transfering = false;
+            } else if (creep.carry.energy == creep.carryCapacity && !creep.memory.transfering) {
+                creep.memory.transfering = true;
+                delete creep.memory.cID;
+                creep.memory.energyID = null;
+            }
+        }
         
-        if(creep.carry.energy == 0 && creep.memory.transfering) {
-	        creep.memory.transfering = false;
-	    } else if (creep.carry.energy == creep.carryCapacity && !creep.memory.transfering) {
-	        creep.memory.transfering = true;
-	        delete creep.memory.cID;
-            creep.memory.energyID = null;
-	    }
-	    
-	    if(!creep.memory.transfering) {
+        if(!creep.memory.transfering) {
 	        if(creep.room.name == Game.flags[creep.memory.energyName].pos.roomName) {
 	            let attack_res = utils.try_attack(creep);
 	            if(!attack_res) {
@@ -55,15 +63,7 @@ var role = {
                     return;
                 }
             } else {
-                let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 4, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK)});
-                if (hostiles.length) {
-                    let target = hostiles.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
-                    if (creep.attack(target) == ERR_NOT_IN_RANGE)
-                        creep.moveTo(target);
-                } else {
-                    creep.moveTo(container.pos);
-                }
-                //console.log(creep.name + " going to " + container.pos.roomName + " to " + exitDir);
+                creep.moveTo(container.pos);
             }
         }
 	},
