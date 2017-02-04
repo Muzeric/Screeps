@@ -151,8 +151,7 @@ module.exports.loop = function () {
             console.log("needList: " + need.role + " for " + need.roomName + " has no spawns with enough energyCapacity");
         } else if (res[0] == 0) {
             let spawn = res[1];
-            let spawnEnergy = _.sum(spawn.room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_SPAWN && s.name != spawn.name}), 'energy');
-            let energy = spawn.room.energyAvailable - (reservedEnergy[spawn.room.name] || 0) - spawnEnergy;
+            let energy = res[2];
             if(!(need.role in objectCache))
                 objectCache[need.role] = require('role.' + need.role);
             let [body, leftEnergy] = objectCache[need.role].create(energy, need.arg);
@@ -274,17 +273,19 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 3,
     },{
         "role" : "attacker",
-        "count" : fcount["War"] ? 3 : 0,
+        "count" : Memory.attackerCount || 0,
         "priority" : 1,
-        "wishEnergy" : 1800,
-        "minEnergy" : 1800,
+        "wishEnergy" : 1300,
+        "minEnergy" : 1300,
+        "maxEnergy" : 1300,
         "range" : 5,
     },{
         "role" : "healer",
-        "count" : fcount["War"] ? 3 : 0,
+        "count" : Memory.healerCount || 0,
         "priority" : 1,
-        "wishEnergy" : 1800,
-        "minEnergy" : 1800,
+        "wishEnergy" : 1500,
+        "minEnergy" : 1500,
+        "maxEnergy" : 1500,
         "range" : 5,
     });
 
@@ -423,10 +424,13 @@ function getSpawnForCreate (need, skipSpawnNames, reservedEnergy) {
                 energy >= need.wishEnergy ||
                 energy >= spawn.room.energyCapacityAvailable && energy >= need.originalEnergyCapacity
             )
-        )
-            return [0, spawn];
-        else if (!waitSpawnName && spawn.room.energyCapacityAvailable >= need.minEnergy)
+        ) {
+            if (need.maxEnergy && energy > need.maxEnergy)
+                energy = need.maxEnergy;
+            return [0, spawn, energy];
+        } else if (!waitSpawnName && spawn.room.energyCapacityAvailable >= need.minEnergy) {
             waitSpawnName = spawn.name;
+        }
     }
 
     return [-1, waitSpawnName];

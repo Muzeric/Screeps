@@ -60,8 +60,12 @@ var role = {
                     Memory.targets[creep.room.name] = target.id;
                     if (creep.attack(target) == ERR_NOT_IN_RANGE)
                         creep.moveTo(target);
+                } else {
+                    creep.moveTo(flag);
                 }
             }
+        } else {
+            creep.moveTo(Game.spawns[creep.memory.spawnName]);
         }
 	},
 	

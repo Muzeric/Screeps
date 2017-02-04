@@ -67,7 +67,10 @@ var roleLongBuilder = {
 function getLongBuilderTargets(creep) {
 	let builds = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build' && Game.rooms[f.pos.roomName]);
 	
-	for(let buildf of builds) {
+	for(let buildf of builds.sort(function(a,b){ return 
+		a.pos.roomName == creep.room.name ? -1 :
+		(Game.map.getRoomLinearDistance(a.pos.roomName, creep.room.name) - Game.map.getRoomLinearDistance(b.pos.roomName, creep.room.name))
+	;})) {
 		let object = buildf;
 		if (creep.room.name == buildf.room.name)
 			object = creep;
