@@ -273,7 +273,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 3,
     },{
         "role" : "attacker",
-        "count" : Memory.attackerCount || 0,
+        "count" : fcount["War"] ? (Memory.attackerCount || 0) : 0,
         "priority" : 1,
         "wishEnergy" : 1300,
         "minEnergy" : 1300,
@@ -281,7 +281,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 5,
     },{
         "role" : "healer",
-        "count" : Memory.healerCount || 0,
+        "count" : fcount["War"] ? (Memory.healerCount || 0) : 0,
         "priority" : 1,
         "wishEnergy" : 1500,
         "minEnergy" : 1500,
