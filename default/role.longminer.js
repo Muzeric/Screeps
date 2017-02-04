@@ -59,8 +59,12 @@ var role = {
             }
         }
 
-        utils.try_attack(creep);
-        if(container.pos.inRangeTo(source, 2)) {
+        let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 4, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK)});
+        if (hostiles.length) {
+            let target = hostiles.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
+            if (creep.attack(target) == ERR_NOT_IN_RANGE)
+                creep.moveTo(target);
+        } else if(container.pos.inRangeTo(source, 2)) {
             if(creep.pos.isNearTo(source) && creep.pos.isNearTo(container)) {
                 if(creep.carry.energy < creep.carryCapacity)
                     creep.harvest(source);
