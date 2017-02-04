@@ -87,7 +87,7 @@ var role = {
 
 function set_cid (creep) {
     //console.log("Searching container for " + creep.name);
-    if(creep.room.storage && s.storeCapacity - s.store[RESOURCE_ENERGY] > 0) {
+    if(creep.room.storage && creep.room.storage.storeCapacity - creep.room.storage.store[RESOURCE_ENERGY] > 0) {
         let links = creep.room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK && s.pos.getRangeTo(creep.room.storage) > 3 && s.energyCapacity - s.energy > 0});
         creep.memory.cID = creep.pos.findClosestByPath(links.concat(creep.room.storage), {ignoreCreeps: true}).id;
         return;
