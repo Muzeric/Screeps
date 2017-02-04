@@ -270,9 +270,9 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     },{
         "role" : "antikeeper",
         "count" : fcount["Antikeeper"],
-        "priority" : 1,
-        "wishEnergy" : 2300,
-        "minEnergy" : 2300,
+        "priority" : 15,
+        "wishEnergy" : 5200,
+        "minEnergy" : 5200,
         "range" : 3,
     },{
         "role" : "attacker",
@@ -449,7 +449,7 @@ function towerAction (room, canRepair) {
         canRepair = 0;
     let repairLimit = canRepair ? (utils.roomConfig[room.name] ? utils.roomConfig[room.name].repairLimit : 100000) : 10000;
     let dstructs = room.find(FIND_STRUCTURES, {filter: s => s.hits < 0.9*s.hitsMax && s.hits < repairLimit});
-    
+
     for(let tower of towers) {
         let target;
         if(target = room.find(FIND_HOSTILE_CREEPS).sort(function (a,b) { return a.hits - b.hits;})[0]) {
