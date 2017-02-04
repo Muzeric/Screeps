@@ -5,10 +5,6 @@ var roleHarvester = {
         if (!utils.checkInRoomAndGo(creep))
             return;
 
-        if (creep.ticksToLive < 500)
-            creep.memory.needRepair = 1;
-        else if (creep.ticksToLive > 1200)
-            creep.memory.needRepair = 0;
 
         if(creep.carry.energy == 0 && creep.memory.transfering) {
 	        creep.memory.transfering = false;
@@ -20,8 +16,13 @@ var roleHarvester = {
 	    }
 	    
 	    if(!creep.memory.transfering) {
+            creep.memory.needRepair = 0;
             utils.findSourceAndGo(creep);
         } else {
+            if (creep.ticksToLive < 500)
+                creep.memory.needRepair = 1;
+            else if (creep.ticksToLive > 1200)
+                creep.memory.needRepair = 0;
             if (creep.memory.needRepair) {
                 let spawns = creep.room.find(FIND_MY_SPAWNS);
                 if (!spawns.length) {

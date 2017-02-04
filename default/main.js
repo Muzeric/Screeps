@@ -115,7 +115,7 @@ module.exports.loop = function () {
 
         if (room) {
             let localCPU = Game.cpu.getUsed();
-            towerAction(room, creepsCount["upgrader"] && creepsCount["longharvester"] > 2 ? 1 : 0);
+            towerAction(room, creepsCount["upgrader"] && creepsCount["longharvester"] >= 2 ? 1 : 0);
             roomsCPUStat[roomName].towers = Game.cpu.getUsed() - localCPU;
             localCPU = Game.cpu.getUsed();
             linkAction(room);
