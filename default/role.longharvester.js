@@ -30,6 +30,11 @@ var role = {
                 //console.log(creep.name + " going to " + creep.memory.energyName + " to " + exitDir);
 	        }
         } else {
+            if (creep.room.name != Game.spawns[creep.memory.spawnName].room.name) {
+                creep.moveTo(Game.spawns[creep.memory.spawnName]);
+                return;
+            }
+
             if(creep.memory.cID === undefined)
                 set_cid(creep);
         
@@ -92,12 +97,12 @@ var role = {
 
 function set_cid (creep) {
     //console.log("Searching container for " + creep.name);
-    if(Game.spawns[creep.memory.spawnName].room.storage) {
-        creep.memory.cID = Game.spawns[creep.memory.spawnName].room.storage.id;
-        //console.log(creep.name + " storage=" + creep.memory.cID);
+    if(creep.room.storage) {
+        let links = creep.room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK && s.pos.getRangeTo(creep.room.storage) > 3});
+        creep.memory.cID = creep.pos.findClosestByPath(links.concat(creep.room.storage)).id;
         return;
     }
-    let containers = Game.spawns[creep.memory.spawnName].room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_CONTAINER });
+    let containers = creep.room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_CONTAINER });
     if(!containers.length) {
         console.log(creep.name + " no containers in room, nothing to do");
         return;
