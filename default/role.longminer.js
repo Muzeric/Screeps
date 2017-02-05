@@ -66,9 +66,15 @@ var role = {
                 creep.moveTo(target);
         } else if(container.pos.inRangeTo(source, 2)) {
             if(creep.pos.isNearTo(source) && creep.pos.isNearTo(container)) {
-                if (container.hits < container.hitsMax * 0.95 && creep.carry.energy)
+                if (creep.carry.energy && 
+                    (
+                         container.hits < container.hitsMax * 0.5 && Game.time - (creep.memory.lastRepair || 0) > 2 ||
+                         container.hits < container.hitsMax * 0.95 && Game.time - (creep.memory.lastRepair || 0) > 10
+                    )
+                ) {
                     creep.repair(container);
-                else {
+                    creep.memory.lastRepair = Game.time;
+                } else {
                     if(creep.carry.energy < creep.carryCapacity)
                         creep.harvest(source);
                     creep.transfer(container, RESOURCE_ENERGY);
@@ -98,7 +104,7 @@ var role = {
     create: function(energy) {
         energy -= 50; // CARRY
         let body = [];
-        let wlim = 5;
+        let wlim = 6;
         let fat = 1;
         while (energy >= 100 && wlim) {
             if (energy >= 100) {
@@ -113,10 +119,6 @@ var role = {
                 fat -= 2;
             }
         }
-        if(fat > 0 && energy >= 50) {
-            body.push(MOVE);
-            energy -= 50;
-	    }
         if(energy >= 80*2 + 50) {
             body.push(MOVE,ATTACK,ATTACK);
             energy -= 80*2 + 50;
