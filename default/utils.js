@@ -141,6 +141,13 @@ module.exports = {
             creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
             return;
         }
+
+        let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 10, {filter: c => c.owner.username == "Source Keeper" && (c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK))});
+        if (hostiles.length) {
+            let safePlace = creep.pos.findClosestByPath(this.getRangedPlaces(hostiles[0].pos, 6));
+            creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
+            return;
+        }
         
         let res;
         if(source.structureType && (source.structureType == STRUCTURE_CONTAINER || source.structureType == STRUCTURE_STORAGE || source.structureType == STRUCTURE_LINK)) {

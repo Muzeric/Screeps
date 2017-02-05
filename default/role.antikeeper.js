@@ -19,6 +19,7 @@ var role = {
         }
 
         let target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
+        let seeked;
         if (target) {
             let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(target.pos, 3));
             let hitsBefore = target.hits;
