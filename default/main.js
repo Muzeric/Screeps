@@ -232,6 +232,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
             "work" : workerHarvester ? 10*fcount["Source"] : 0,
             "carry" : 20*fcount["Source"],
         },
+        "maxEnergy" : 2000,
     },{
         "role" : "claimer",
         "count" : fcount["Controller"],
@@ -255,6 +256,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "priority" : 13,
         "wishEnergy" : 1500,
         "range" : 2,
+        "maxEnergy" : 2000,
     },{
         "role" : "longharvester",
         "count" : fcount["Source"] * (2 + workerHarvester),
@@ -267,6 +269,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
             "work" : workerHarvester ? 20 * 3 * fcount["Source"] : 0,
             "carry" : 20 * 2 * fcount["Source"],
         },
+        "maxEnergy" : 2000,
     },{
         "role" : "antikeeper",
         "count" : fcount["Antikeeper"],
@@ -363,6 +366,7 @@ function getRoomLimits (room, creepsCount) {
             "count" : 1,
             "priority" : 3,
             "wishEnergy" : 1500,
+            "maxEnergy" : 2000,
     },{
             "role" : "builder",
             "count" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 3 : 0,
@@ -376,6 +380,7 @@ function getRoomLimits (room, creepsCount) {
             "count" : scount["construction"] ? 1 : scount["source"],
             "priority" : 5,
             "wishEnergy" : 1500,
+            "maxEnergy" : 2000,
     },{
             "role" : "shortminer",
             "count" : (scount[STRUCTURE_LINK] >= 2 && scount[STRUCTURE_STORAGE]) ? 1 : 0, // TODO: harvester count
@@ -386,6 +391,7 @@ function getRoomLimits (room, creepsCount) {
             "count" : scount["construction"] ? 1 : scount["source"],
             "priority" : 20,
             "wishEnergy" : 1500,
+            "maxEnergy" : 2000,
     });
 
     for (let limit of limits) {
