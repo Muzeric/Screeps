@@ -217,19 +217,20 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let liteClaimer = reservation > 3000 ? 1 : 0;
     let allMiners = _.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.roomName == roomName).length;
     let workerHarvester = scount[STRUCTURE_CONTAINER] && scount["source"] && scount[STRUCTURE_CONTAINER] >= scount["source"] && allMiners >= scount[STRUCTURE_CONTAINER] ? 0 : 1;
+    let sourcesForWork = fcount["Source"] ? _.max([fcount["Source"], scount["source"]]) : 0;
     
     let limits = [];
     limits.push({
         "role" : "longharvester",
-        "count" : fcount["Antikeeper"] ? 0 : fcount["Source"],
+        "count" : fcount["Antikeeper"] ? 0 : sourcesForWork,
         "arg" : workerHarvester,
         "priority" : 10,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
         "range" : 1,
         "body" : {
-            "work" : workerHarvester ? 10*fcount["Source"] : 0,
-            "carry" : 20*fcount["Source"],
+            "work" : workerHarvester ? 10*sourcesForWork : 0,
+            "carry" : 20*sourcesForWork,
         },
         "maxEnergy" : 2000,
     },{
@@ -258,15 +259,15 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "maxEnergy" : 2000,
     },{
         "role" : "longharvester",
-        "count" : fcount["Antikeeper"] ? 0 : fcount["Source"] * (2 + workerHarvester),
+        "count" : fcount["Antikeeper"] ? 0 : sourcesForWork * (2 + workerHarvester),
         "arg" : workerHarvester,
         "priority" : 14,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
         "range" : 1,
         "body" : {
-            "work" : workerHarvester ? 20 * 3 * fcount["Source"] : 0,
-            "carry" : 20 * 2 * fcount["Source"],
+            "work" : workerHarvester ? 20 * 3 * sourcesForWork : 0,
+            "carry" : 20 * 2 * sourcesForWork,
         },
         "maxEnergy" : 2000,
     },{
@@ -278,15 +279,15 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 3,
     },{
         "role" : "longharvester",
-        "count" : creepsCount["antikeeper"] ? fcount["Source"] * (2 + workerHarvester) : 0,
+        "count" : creepsCount["antikeeper"] ? sourcesForWork * (2 + workerHarvester) : 0,
         "arg" : workerHarvester,
         "priority" : 16,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
         "range" : 5,
         "body" : {
-            "work" : workerHarvester ? 20 * 3 * fcount["Source"] : 0,
-            "carry" : 20 * 2 * fcount["Source"],
+            "work" : workerHarvester ? 20 * 3 * sourcesForWork : 0,
+            "carry" : 20 * 2 * sourcesForWork,
         },
         "maxEnergy" : 2000,
     },{
