@@ -13,16 +13,20 @@ var roomConfig = {
 module.exports = {
     roomConfig : roomConfig,
 
+    clamp : function (n, min, max) {
+        return n < min ? min : (n > max ? max : n);
+    },
+
     getRangedPlaces : function (pos, range) {
         let res = [];
         for (let x = -1 * range; x <= range; x++) {
             for (let y in [-1 * range,range]) {
-                res.push(new RoomPosition(pos.x + x, pos.y + y, pos.roomName));
+                res.push(new RoomPosition(this.clamp(pos.x + x, 0, 49), this.clamp(pos.y + y, 0, 49), pos.roomName));
             }
         }
         for (let y = -1 * range + 1; y <= range - 1; y++) {
             for (let x in [-1 * range,range]) {
-                res.push(new RoomPosition(pos.x + x, pos.y + y, pos.roomName));
+                res.push(new RoomPosition(this.clamp(pos.x + x, 0, 49), this.clamp(pos.y + y, 0, 49), pos.roomName));
             }
         }
 
@@ -123,24 +127,30 @@ module.exports = {
             creep.memory.energyID = null;
             return;
         }
+
+        let lair;
+        if (lair = creep.pos.findInRange(FIND_STRUCTURES, 6, { filter : s => s.structureType == STRUCTURE_KEEPER_LAIR && s.ticksToSpawn < 10}) ) {
+            let safePlace = creep.pos.findClosestByPath(this.getRangedPlaces(lair.pos, 10));
+            creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
+            return;
+        }
         
+        let res;
         if(source.structureType && (source.structureType == STRUCTURE_CONTAINER || source.structureType == STRUCTURE_STORAGE || source.structureType == STRUCTURE_LINK)) {
-            var res = creep.withdraw(source, RESOURCE_ENERGY);
+            res = creep.withdraw(source, RESOURCE_ENERGY);
         } else if (source.resourceType && source.resourceType == RESOURCE_ENERGY) {
-            var res = creep.pickup(source);
+            res = creep.pickup(source);
             if (!res) {
                 console.log(creep.name + " picked up resource");
                 creep.memory.energyID = null;
                 return;
             }
         } else {
-            var res = creep.harvest(source);
+            res = creep.harvest(source);
         }
         
         if (res == ERR_NOT_IN_RANGE) {
-            let res = creep.moveTo(source, { costCallback : function(name, cm) { cm.set(4, 43, 255); cm.set(4, 42, 255); cm.set(4, 41, 255); } });
-            //let res = creep.moveTo(source);
-            //creep.say("go " + res);
+            creep.moveTo(source, { costCallback : function(name, cm) { cm.set(4, 43, 255); cm.set(4, 42, 255); cm.set(4, 41, 255); } });
         } else if (res == ERR_NOT_ENOUGH_ENERGY) {
             return;
         } else if (res < 0) {
