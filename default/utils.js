@@ -87,14 +87,18 @@ module.exports = {
             } else if (storage_priority && target.structureType == STRUCTURE_STORAGE || !storage_priority && target.structureType == STRUCTURE_CONTAINER) {
                 cpriority = 1; 
             } else if (target.energy) { // Source
-                cpriority = -100;
+                if (_.filter(Game.creeps, c => c.memory.energyID == target.id && (c.memory.role == "longminer" || c.memory.role == "miner")).length)
+                    cpriority = -100;
+                else
+                    cpriority = -2;
             }
 
             let cenergyTicks = (wantEnergy + creep.carryCapacity - cenergy) / 10;
-            if (cenergyTicks < 0 && !target.resourceType)
-                cenergyTicks = 0;
+            //if (cenergyTicks < 0 && !target.resourceType)
+            //    cenergyTicks = 0;
             targetInfo[target.id] = cpath * 1.2 + cenergyTicks - 100 * cpriority;
-            //console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + cenergy + " energy and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + targetInfo[target.id]);
+            //if (creep.room.name == "W46N4")
+            //    console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + cenergy + " energy and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + targetInfo[target.id]);
         }
         let target = targets.sort( function (a,b) {
             let suma = targetInfo[a.id];
