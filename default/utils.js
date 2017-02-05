@@ -85,7 +85,7 @@ module.exports = {
             if (target.resourceType) { // Dropped
                 cpriority = 1.5;
             } else if (storage_priority && target.structureType == STRUCTURE_STORAGE || !storage_priority && target.structureType == STRUCTURE_CONTAINER) {
-                cpriority = 1; 
+                cpriority = 2; 
             } else if (target.energy) { // Source
                 if (_.filter(Game.creeps, c => c.memory.energyID == target.id && (c.memory.role == "longminer" || c.memory.role == "miner")).length)
                     cpriority = -100;

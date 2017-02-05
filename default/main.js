@@ -288,9 +288,9 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 5,
         "body" : {
             "work" : workerHarvester ? 20 * 4 * sourcesForWork : 0,
-            "carry" : 20 * 3 * sourcesForWork,
+            "carry" : 30 * 3 * sourcesForWork,
         },
-        "maxEnergy" : 2000,
+        "maxEnergy" : 3000,
     },{
         "role" : "longminer",
         "count" : creepsCount["antikeeper"] ? scount[STRUCTURE_CONTAINER] : 0,
