@@ -17,22 +17,19 @@ var role = {
                 return;
             }
 
-            let flag;    
-            for (flag of flags.sort( function (a,b) { return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b); })) {
-                let containers = flag.pos.findInRange(FIND_STRUCTURES, 2, {filter : s => 
-                        s.structureType == STRUCTURE_CONTAINER &&
-                        _.sum(_.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.cID == s.id && c.ticksToLive > 200), function(c) {return c.getActiveBodyparts(WORK);} ) < 5
-                });
-
-                if(containers.length) {
-                    container = containers[0];
-                    break;
-                }
-            }
-            if (!container) {
-                //console.log(creep.name + ": no containers in room, nothing to do");
+            let containers = creep.room.find(FIND_STRUCTURES, { filter: s => 
+                (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_LINK) &&
+                _.some(s.pos.findInRange(FIND_SOURCES, 2, {filter: r => r.pos.findPathTo(s, {ignoreCreeps : true}).length <= 2})) 
+            });
+            if(!containers.length) {
+                console.log(creep.name + ": no containers in room, nothing to do");
                 return;
             }
+            container = containers.sort( function(a,b) { 
+                let suma = _.sum(_.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.cID == a.id), function(c) {return c.ticksToLive});
+                let sumb = _.sum(_.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.cID == b.id), function(c) {return c.ticksToLive});
+                return suma - sumb || (a.structureType == STRUCTURE_LINK ? -1 : 1);
+            })[0];
             creep.memory.cID = container.id;
             console.log(creep.name + " found container " + creep.memory.cID);
 
@@ -57,6 +54,20 @@ var role = {
                 delete creep.memory.cID;
                 return;
             }
+        }
+
+        let lair;
+        if (lair = creep.pos.findInRange(FIND_STRUCTURES, 10, { filter : s => s.structureType == STRUCTURE_KEEPER_LAIR && s.ticksToSpawn < 10})[0] ) {
+            let safePlace = creep.pos.findClosestByPath(this.getRangedPlaces(lair.pos, 6));
+            creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
+            return;
+        }
+
+        let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 10, {filter: c => c.owner.username == "Source Keeper" && (c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK))});
+        if (hostiles.length) {
+            let safePlace = creep.pos.findClosestByPath(this.getRangedPlaces(hostiles[0].pos, 6));
+            creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
+            return;
         }
 
         let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 4, {filter: c => c.owner.username != "Source Keeper" && (c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK))});
