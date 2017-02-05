@@ -8,6 +8,8 @@ module.exports.loop = function () {
     var objectCache = {};
     if(!Memory.targets)
         Memory.targets = {};
+    if(!Memory.warning)
+        Memory.warning = {};
 
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
@@ -94,9 +96,12 @@ module.exports.loop = function () {
         let room = Game.rooms[roomName];
         let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), 'memory.role');
         let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
+        let hostiles = room ? room.find(FIND_HOSTILE_CREEPS, {filter: c => c.owner.username != "Source Keeper"}).length : 0;
+
+        Memory.warning[roomName] = hostiles;
 
         if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
-            Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders);
+            Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders, hostiles);
             Memory.limitTime[roomName] = Game.time;
         }
 
@@ -201,7 +206,7 @@ function linkAction (room) {
     }
 }
 
-function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
+function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) {
     let lastCPU = Game.cpu.getUsed();
     let room = Game.rooms[roomName];
     //console.log(roomName + ": start observing");
@@ -218,7 +223,6 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let allMiners = _.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.roomName == roomName).length;
     let workerHarvester = scount[STRUCTURE_CONTAINER] && scount["source"] && scount[STRUCTURE_CONTAINER] >= scount["source"] && allMiners >= scount[STRUCTURE_CONTAINER] ? 0 : 1;
     let sourcesForWork = fcount["Source"] ? _.max([fcount["Source"], scount["source"]]) : 0;
-    let hostiles = room ? room.find(FIND_HOSTILE_CREEPS, {filter: c => c.owner.username != "Source Keeper"}).length : 0;
     
     let limits = [];
     limits.push({

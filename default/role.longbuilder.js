@@ -2,6 +2,12 @@ var utils = require('utils');
 
 var roleLongBuilder = {
     run: function(creep) {
+		if (Memory.warning[creep.room.name] > 1) {
+			creep.say("AAA");
+			creep.moveTo(Game.rooms[creep.memory.roomName].controller);
+			return;
+		}
+
 	    if(creep.memory.building && creep.carry.energy == 0) {
         	creep.memory.building = false;
             creep.memory.targetID = null;

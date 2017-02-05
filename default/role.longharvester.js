@@ -2,6 +2,12 @@ var utils = require('utils');
 
 var role = {
     run: function(creep) {
+        if (Memory.warning[creep.room.name] > 1) {
+			creep.say("AAA");
+			creep.moveTo(Game.rooms[creep.memory.roomName].controller);
+			return;
+		}
+
         if(!creep.memory.energyName || !Game.flags[creep.memory.energyName]) {
             if(!set_energy(creep)) 
                 return;
