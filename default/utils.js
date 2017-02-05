@@ -15,7 +15,13 @@ function _clamp (n, min, max) {
 }
 
 function _addPosition (res, pos, x, y) {
-    let npos = new RoomPosition(_clamp(parseInt(pos.x) + parseInt(x), 0, 49), _clamp(parseInt(pos.y) + parseInt(y), 0, 49), pos.roomName);
+    let newx = parseInt(pos.x) + parseInt(x);
+    if (newx < 0 || newx > 49)
+        return;
+    let newy = parseInt(pos.y) + parseInt(y);
+    if (newy < 0 || newy > 49)
+        return;
+    let npos = new RoomPosition(newx, newy, pos.roomName);
     let passing = 1;
     for(let t of npos.lookFor(LOOK_TERRAIN)) {
         if (t == "wall")
