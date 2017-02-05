@@ -85,7 +85,7 @@ module.exports = {
             }
 
             let cenergyTicks = (wantEnergy + creep.carryCapacity - cenergy) / 10;
-            if (cenergyTicks < 0)
+            if (cenergyTicks < 0 && !target.resourceType)
                 cenergyTicks = 0;
             targetInfo[target.id] = cpath * 1.2 + cenergyTicks - 100 * cpriority;
             //console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + cenergy + " energy and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + targetInfo[target.id]);

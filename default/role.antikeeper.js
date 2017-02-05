@@ -3,8 +3,11 @@ var utils = require('utils');
 var role = {
 
     run: function(creep) {
-        if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL))
+        let healed = 0;
+        if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL)) {
             creep.heal(creep);
+            healed = 1;
+        }
 	    
         if (creep.room.name != creep.memory.roomName) {
             if (!Game.flags["Antikeeper." + creep.memory.roomName]) {
@@ -23,6 +26,14 @@ var role = {
             //console.log(creep.name + " attacked " + target.id + " ("+ target.hits +"/" + target.hitsMax + ") res=" + res);
             creep.moveTo(safePlace ? safePlace : target);
             //console.log(creep.name + " go to " + (safePlace ? safePlace : target));
+        } else if (seeked = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.hits < c.hitsMax}) ) {
+            if (creep.pos.isNearTo(seeked)) {
+                if (!healed)
+                    creep.heal(seeked);
+            } else {
+                creep.moveTo(seeked);
+                creep.rangedHeal(seeked);
+            }
         } else {
             let lairs = creep.room.find(FIND_STRUCTURES, { filter : s => s.structureType == STRUCTURE_KEEPER_LAIR});
             if (!lairs.length) {

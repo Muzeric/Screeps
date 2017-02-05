@@ -5,6 +5,7 @@ use Term::ReadKey;
 use Mail::IMAPClient;
 use MIME::Parser;
 use Data::Dumper;
+use Compress::LZW;
 use Encode;
 use utf8;
 
@@ -49,8 +50,10 @@ foreach my $msg (@msgs) {
 
   my $entity = $parser->parse_data($string);
   my $content = split_entity($entity);
+  next unless $content =~ /5 notification/;
   print "Before: ".$content."\n";
-  print "After:  ".lzw_decode($content)."\n";
+  my $comp = $content =~ /\d+ notification received:/;
+  print "After:  ".decompress($content)."\n";
   #print "$msg: ".Dumper($string).":QUOTED\n";
   last;
 }
