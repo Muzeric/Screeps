@@ -294,7 +294,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "role" : "longminer",
         "count" : creepsCount["antikeeper"] ? scount[STRUCTURE_CONTAINER] : 0,
         "arg" : 1,
-        "priority" : 12,
+        "priority" : 17,
         "wishEnergy" : 1560,
         "range" : 3,
         "body" : {
