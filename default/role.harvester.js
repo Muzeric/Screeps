@@ -41,7 +41,8 @@ var roleHarvester = {
                 target = Game.getObjectById(creep.memory.targetID);
             if( !target ||
                 (target.energyCapacity && target.energy == target.energyCapacity) ||
-                (target.storeCapacity && target.store[RESOURCE_ENERGY] == target.storeCapacity)
+                (target.storeCapacity && target.store[RESOURCE_ENERGY] == target.storeCapacity) ||
+                (target.structureType == STRUCTURE_TOWER && target.energy > target.energyCapacity * 0.9)
              ) {
                 creep.memory.targetID = null;
                 let targets = creep.room.find(FIND_STRUCTURES, {filter: s => 

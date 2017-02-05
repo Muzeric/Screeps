@@ -218,6 +218,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let allMiners = _.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.roomName == roomName).length;
     let workerHarvester = scount[STRUCTURE_CONTAINER] && scount["source"] && scount[STRUCTURE_CONTAINER] >= scount["source"] && allMiners >= scount[STRUCTURE_CONTAINER] ? 0 : 1;
     let sourcesForWork = fcount["Source"] ? _.max([fcount["Source"], scount["source"]]) : 0;
+    let hostiles = room ? room.find(FIND_HOSTILE_CREEPS, {filter: c => c.owner.username != "Source Keeper"}).length : 0;
     
     let limits = [];
     limits.push({
@@ -272,7 +273,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "maxEnergy" : 2000,
     },{
         "role" : "antikeeper",
-        "count" : fcount["Antikeeper"],
+        "count" : fcount["Antikeeper"] ? (hostiles ? 2 : 1) : 0,
         "priority" : 15,
         "wishEnergy" : 4900,
         "minEnergy" : 4900,
