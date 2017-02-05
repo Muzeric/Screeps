@@ -17,9 +17,10 @@ var role = {
 
         let target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
         if (target) {
-            let safePlace = creep.pos.findClosestByPath(getRangedPlaces(target.pos));
+            let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(target.pos, 3));
+            let hitsBefore = target.hits;
             let res = creep.rangedAttack(target);
-            //console.log(creep.name + " attacked " + target.id + " ("+ target.hits +"/" + target.hitsMax + ") res=" + res);
+            //console.log(creep.name + " attacked " + target.id + " ("+ hitsBefore + "->" + target.hits +"/" + target.hitsMax + ") res=" + res);
             creep.moveTo(safePlace ? safePlace : target);
             //console.log(creep.name + " go to " + (safePlace ? safePlace : target).pos.x + "," + (safePlace ? safePlace : target).pos.y);
         } else {
@@ -42,13 +43,10 @@ var role = {
 	
     create: function(energy) {
         let anum = 20;
-        let tnum = 10;
-        let hnum = 2;
-        let mnum = anum + tnum + hnum;
-        energy -= 150 * anum + 10 * tnum + 50 * mnum + 250 * hnum;
+        let hnum = 5;
+        let mnum = anum + hnum;
+        energy -= 150 * anum + 50 * mnum + 250 * hnum;
         
-        while (tnum-- > 0)
-            body.push(TOUGH);
         while (mnum-- > 0)
             body.push(MOVE);
         while (anum-- > 0)
@@ -60,19 +58,3 @@ var role = {
 };
 
 module.exports = role;
-
-function getRangedPlaces (pos) {
-    let res = [];
-    for (let x = -3; x <= 3; x++) {
-        for (let y in [-3,3]) {
-            res.push(RoomPosition(pos.x + x, pos.y + y, pos.roomName));
-        }
-    }
-    for (let y = -2; y <= 2; y++) {
-        for (let x in [-3,3]) {
-            res.push(RoomPosition(pos.x + x, pos.y + y, pos.roomName));
-        }
-    }
-
-    return res;
-} 

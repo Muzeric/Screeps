@@ -13,6 +13,22 @@ var roomConfig = {
 module.exports = {
     roomConfig : roomConfig,
 
+    getRangedPlaces : function (pos, range) {
+        let res = [];
+        for (let x = -1 * range; x <= range; x++) {
+            for (let y in [-1 * range,range]) {
+                res.push(new RoomPosition(pos.x + x, pos.y + y, pos.roomName));
+            }
+        }
+        for (let y = -1 * range + 1; y <= range - 1; y++) {
+            for (let x in [-1 * range,range]) {
+                res.push(new RoomPosition(pos.x + x, pos.y + y, pos.roomName));
+            }
+        }
+
+        return res;
+    },
+
     findSourceAndGo : function (creep, storage_priority) {
         if(!creep.memory.energyID)
             creep.memory.energyID = this.findSource(creep, storage_priority);
