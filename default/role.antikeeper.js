@@ -47,11 +47,14 @@ var role = {
         let mnum = anum + hnum;
         energy -= 150 * anum + 50 * mnum + 250 * hnum;
         
+        let body = [];
+        
         while (mnum-- > 0)
             body.push(MOVE);
         while (anum-- > 0)
             body.push(RANGED_ATTACK);
-        body.push(HEAL, HEAL);
+        while (hnum-- > 0)
+            body.push(HEAL);
         
         return [body, energy];
 	},
