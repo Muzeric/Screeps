@@ -8,7 +8,7 @@ var role = {
         }
 
         let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 4, {filter: c => c.owner.username != "Source Keeper" && (c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK))});
-        if (hostiles.length) {
+        if (hostiles.length == 1) {
             let target = hostiles.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
             if (creep.attack(target) == ERR_NOT_IN_RANGE)
                 creep.moveTo(target);
