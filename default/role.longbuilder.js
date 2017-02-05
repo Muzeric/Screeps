@@ -13,6 +13,13 @@ var roleLongBuilder = {
 	    }
 
 	    if(creep.memory.building) {
+			let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 10, {filter: c => (c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK))});
+			if (hostiles.length) {
+				let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(hostiles[0].pos, 6));
+				creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
+				return;
+			}
+
             if(!creep.memory.targetID)
                 creep.memory.targetID = getLongBuilderTargets(creep);
                 
