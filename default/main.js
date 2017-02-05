@@ -286,8 +286,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "wishEnergy" : 1500,
         "range" : 5,
         "body" : {
-            "work" : workerHarvester ? 20 * 3 * sourcesForWork : 0,
-            "carry" : 20 * 2 * sourcesForWork,
+            "work" : workerHarvester ? 20 * 4 * sourcesForWork : 0,
+            "carry" : 20 * 3 * sourcesForWork,
         },
         "maxEnergy" : 2000,
     },{
