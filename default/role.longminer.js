@@ -19,7 +19,8 @@ var role = {
             }
 
             if (creep.room.name != creep.memory.roomName) {
-                creep.moveTo(flags[0]);
+                if (!(Memory.warning[creep.memory.roomName] > 1))
+                    creep.moveTo(flags[0]);
                 return;
             }
 
