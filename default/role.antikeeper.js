@@ -43,7 +43,7 @@ var role = {
 	
     create: function(energy) {
         let anum = 20;
-        let hnum = 5;
+        let hnum = 3;
         let mnum = anum + hnum;
         energy -= 150 * anum + 50 * mnum + 250 * hnum;
         
