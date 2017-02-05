@@ -222,7 +222,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let limits = [];
     limits.push({
         "role" : "longharvester",
-        "count" : fcount["Source"],
+        "count" : fcount["Antikeeper"] ? 0 : fcount["Source"],
         "arg" : workerHarvester,
         "priority" : 10,
         "minEnergy" : 550,
@@ -243,7 +243,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 2,
     },{
         "role" : "longminer",
-        "count" : containers,
+        "count" : fcount["Antikeeper"] ? 0 : containers,
         "priority" : 12,
         "wishEnergy" : 1060,
         "range" : 3,
@@ -252,14 +252,14 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         },
     },{
         "role" : "longbuilder",
-        "count" : stopLongBuilders ? 0 : (builds ? 1 : 0) + (repairs ? 1 : 0),
+        "count" : fcount["Antikeeper"] ? 0 : (stopLongBuilders ? 0 : (builds ? 1 : 0) + (repairs ? 1 : 0)),
         "priority" : 13,
         "wishEnergy" : 1500,
         "range" : 2,
         "maxEnergy" : 2000,
     },{
         "role" : "longharvester",
-        "count" : fcount["Source"] * (2 + workerHarvester),
+        "count" : fcount["Antikeeper"] ? 0 : fcount["Source"] * (2 + workerHarvester),
         "arg" : workerHarvester,
         "priority" : 14,
         "minEnergy" : 550,
@@ -274,9 +274,22 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "role" : "antikeeper",
         "count" : fcount["Antikeeper"],
         "priority" : 15,
-        "wishEnergy" : 5200,
-        "minEnergy" : 5200,
+        "wishEnergy" : 5500,
+        "minEnergy" : 5500,
         "range" : 3,
+    },{
+        "role" : "longharvester",
+        "count" : creepsCount["antikeeper"] ? fcount["Source"] * (2 + workerHarvester) : 0,
+        "arg" : workerHarvester,
+        "priority" : 16,
+        "minEnergy" : 550,
+        "wishEnergy" : 1500,
+        "range" : 1,
+        "body" : {
+            "work" : workerHarvester ? 20 * 3 * fcount["Source"] : 0,
+            "carry" : 20 * 2 * fcount["Source"],
+        },
+        "maxEnergy" : 2000,
     },{
         "role" : "attacker",
         "count" : fcount["War"] ? (Memory.attackerCount || 0) : 0,

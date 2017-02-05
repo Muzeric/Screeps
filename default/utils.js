@@ -21,12 +21,12 @@ module.exports = {
         let res = [];
         for (let x = -1 * range; x <= range; x++) {
             for (let y in [-1 * range,range]) {
-                res.push(new RoomPosition(this.clamp(pos.x + x, 0, 49), this.clamp(pos.y + y, 0, 49), pos.roomName));
+                res.push(new RoomPosition(this.clamp(parseInt(pos.x) + parseInt(x), 0, 49), this.clamp(parseInt(pos.y) + parseInt(y), 0, 49), pos.roomName));
             }
         }
         for (let y = -1 * range + 1; y <= range - 1; y++) {
             for (let x in [-1 * range,range]) {
-                res.push(new RoomPosition(this.clamp(pos.x + x, 0, 49), this.clamp(pos.y + y, 0, 49), pos.roomName));
+                res.push(new RoomPosition(this.clamp(parseInt(pos.x) + parseInt(x), 0, 49), this.clamp(parseInt(pos.y) + parseInt(y), 0, 49), pos.roomName));
             }
         }
 

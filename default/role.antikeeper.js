@@ -20,9 +20,9 @@ var role = {
             let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(target.pos, 3));
             let hitsBefore = target.hits;
             let res = creep.rangedAttack(target);
-            //console.log(creep.name + " attacked " + target.id + " ("+ hitsBefore + "->" + target.hits +"/" + target.hitsMax + ") res=" + res);
+            //console.log(creep.name + " attacked " + target.id + " ("+ target.hits +"/" + target.hitsMax + ") res=" + res);
             creep.moveTo(safePlace ? safePlace : target);
-            //console.log(creep.name + " go to " + (safePlace ? safePlace : target).pos.x + "," + (safePlace ? safePlace : target).pos.y);
+            //console.log(creep.name + " go to " + (safePlace ? safePlace : target));
         } else {
             let lairs = creep.room.find(FIND_STRUCTURES, { filter : s => s.structureType == STRUCTURE_KEEPER_LAIR});
             if (!lairs.length) {
