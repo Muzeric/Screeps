@@ -284,7 +284,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "priority" : 16,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
-        "range" : 1,
+        "range" : 5,
         "body" : {
             "work" : workerHarvester ? 20 * 3 * fcount["Source"] : 0,
             "carry" : 20 * 2 * fcount["Source"],
@@ -436,7 +436,7 @@ function getSpawnForCreate (need, skipSpawnNames, reservedEnergy) {
 
     let waitSpawnName = null;
     for (let spawn of spawnsInRange.sort( function(a,b) { 
-        return (Game.map.getRoomLinearDistance(a.room.name, need.roomName) - Game.map.getRoomLinearDistance(b.room.name, need.roomName)) || (b.room.energyAvailable - a.room.energyAvailable); 
+        return (Game.map.getRoomLinearDistance(a.room.name, need.roomName) - Game.map.getRoomLinearDistance(b.room.name, need.roomName)) || (a.room.energyAvailable - b.room.energyAvailable); 
     } )) {
         let energy = spawn.room.energyAvailable - (reservedEnergy[spawn.room.name] || 0);
         //console.log("getSpawnForCreate: " + need.roomName + " wants " + need.role + ", skipSpawnNames=" + JSON.stringify(skipSpawnNames) + ":" + spawn.name + " minEnergy=" + need.minEnergy + ", energyAvailable=" + spawn.room.energyAvailable);
