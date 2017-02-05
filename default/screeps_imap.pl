@@ -50,10 +50,10 @@ foreach my $msg (@msgs) {
 
   my $entity = $parser->parse_data($string);
   my $content = split_entity($entity);
-  next unless $content =~ /5 notification/;
   print "Before: ".$content."\n";
-  my $comp = $content =~ /\d+ notification received:/;
-  print "After:  ".decompress($content)."\n";
+  my ($comp) = $content =~ /\d+ notification received:\s*(\d+\:\{"memory.+)\s*\[msg\]/sg;
+  print "Message: ".$comp."\n";
+  print "After:  ".decompress("\037\235".$comp)."\n";
   #print "$msg: ".Dumper($string).":QUOTED\n";
   last;
 }
