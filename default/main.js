@@ -96,7 +96,7 @@ module.exports.loop = function () {
         let room = Game.rooms[roomName];
         let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), 'memory.role');
         let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
-        let hostiles = room ? room.find(FIND_HOSTILE_CREEPS, {filter: c => c.owner.username != "Source Keeper"}).length : 0;
+        let hostiles = room ? room.find(FIND_HOSTILE_CREEPS, {filter: c => c.owner.username != "Source Keeper"}).length : -1;
 
         Memory.warning[roomName] = hostiles;
 

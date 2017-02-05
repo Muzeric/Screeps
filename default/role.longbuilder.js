@@ -2,7 +2,7 @@ var utils = require('utils');
 
 var roleLongBuilder = {
     run: function(creep) {
-		if (Memory.warning[creep.room.name] > 1) {
+		if (Memory.warning[creep.room.name] > 1 || Memory.warning[creep.memory.roomName] > 1) {
 			creep.say("AAA");
 			creep.moveTo(Game.spawns[creep.memory.spawnName]);
 			return;
@@ -19,7 +19,7 @@ var roleLongBuilder = {
 	    }
 
 	    if(creep.memory.building) {
-			let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 10, {filter: c => (c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK))});
+			let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 10);
 			if (hostiles.length) {
 				let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(hostiles[0].pos, 6));
 				creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);

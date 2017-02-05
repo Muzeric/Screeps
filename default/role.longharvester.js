@@ -2,7 +2,7 @@ var utils = require('utils');
 
 var role = {
     run: function(creep) {
-        if (Memory.warning[creep.room.name] > 1) {
+        if (Memory.warning[creep.room.name] > 1 || Memory.warning[creep.memory.roomName] > 1) {
 			creep.say("AAA");
 			creep.moveTo(Game.spawns[creep.memory.spawnName]);
 			return;
@@ -13,8 +13,8 @@ var role = {
                 return;
         }
 
-        let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 4, {filter: c => c.owner.username != "Source Keeper" && (c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK))});
-        if (hostiles.length == 1) {
+        let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 5, {filter: c => c.owner.username != "Source Keeper"});
+        if (hostiles.length) {
             let target = hostiles.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
             if (creep.attack(target) == ERR_NOT_IN_RANGE)
                 creep.moveTo(target);
@@ -32,7 +32,7 @@ var role = {
         if(!creep.memory.transfering) {
 	        if(creep.room.name == Game.flags[creep.memory.energyName].pos.roomName)
                 utils.findSourceAndGo(creep);
-            else if (!(Memory.warning[Game.flags[creep.memory.energyName].pos.roomName] > 1))
+            else
                 creep.moveTo(Game.flags[creep.memory.energyName].pos);
         } else {
             if (creep.room.name != Game.spawns[creep.memory.spawnName].room.name) {
