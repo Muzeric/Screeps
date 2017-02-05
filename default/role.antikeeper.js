@@ -27,7 +27,7 @@ var role = {
             //console.log(creep.name + " attacked " + target.id + " ("+ target.hits +"/" + target.hitsMax + ") res=" + res);
             creep.moveTo(safePlace ? safePlace : target);
             //console.log(creep.name + " go to " + (safePlace ? safePlace : target));
-        } else if (seeked = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.hits < c.hitsMax}) ) {
+        } else if (seeked = creep.pos.findInRange(FIND_MY_CREEPS, 10, {filter: c => c.hits < c.hitsMax && c != creep})[0] ) {
             if (creep.pos.isNearTo(seeked)) {
                 if (!healed)
                     creep.heal(seeked);

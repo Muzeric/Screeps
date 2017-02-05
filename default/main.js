@@ -207,9 +207,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     //console.log(roomName + ": start observing");
 
     let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
-    let containers = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && f.pos.roomName == roomName && f.room && 
-        f.pos.findInRange(FIND_STRUCTURES, 2, {filter : s => s.structureType == STRUCTURE_CONTAINER }).length 
-    ).length;
+    let scount = room ? _.countBy(room.find(FIND_STRUCTURES), 'structureType' ) : {};
+    scount["source"] = room ? room.find(FIND_SOURCES).length : 0;
 
     let repairLimit = utils.roomConfig[roomName] ? utils.roomConfig[roomName].repairLimit : 250000;
     let builds = room ? room.find(FIND_MY_CONSTRUCTION_SITES).length : 0;
@@ -217,7 +216,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let reservation = room && room.controller && room.controller.reservation ? room.controller.reservation.ticksToEnd : 0;
     let liteClaimer = reservation > 3000 ? 1 : 0;
     let allMiners = _.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.roomName == roomName).length;
-    let workerHarvester = containers && containers >= fcount["Source"] && allMiners >= containers ? 0 : 1;
+    let workerHarvester = scount[STRUCTURE_CONTAINER] && scount["source"] && scount[STRUCTURE_CONTAINER] >= scount["source"] && allMiners >= scount[STRUCTURE_CONTAINER] ? 0 : 1;
     
     let limits = [];
     limits.push({
@@ -243,12 +242,12 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 2,
     },{
         "role" : "longminer",
-        "count" : fcount["Antikeeper"] ? 0 : containers,
+        "count" : fcount["Antikeeper"] ? 0 : scount[STRUCTURE_CONTAINER],
         "priority" : 12,
         "wishEnergy" : 1060,
         "range" : 3,
         "body" : {
-            "work" : 5 * containers,
+            "work" : 5 * scount[STRUCTURE_CONTAINER],
         },
     },{
         "role" : "longbuilder",
@@ -290,6 +289,15 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
             "carry" : 20 * 2 * fcount["Source"],
         },
         "maxEnergy" : 2000,
+    },{
+        "role" : "longminer",
+        "count" : creepsCount["antikeeper"] ? scount[STRUCTURE_CONTAINER] : 0,
+        "priority" : 12,
+        "wishEnergy" : 1060,
+        "range" : 3,
+        "body" : {
+            "work" : 5 * scount[STRUCTURE_CONTAINER],
+        },
     },{
         "role" : "attacker",
         "count" : fcount["War"] ? (Memory.attackerCount || 0) : 0,
