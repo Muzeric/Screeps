@@ -10,25 +10,32 @@ var roomConfig = {
     },
 };
 
+function _clamp (n, min, max) {
+    return n < min ? min : (n > max ? max : n);
+}
+
+function _addPosition (res, pos, x, y) {
+    let npos = new RoomPosition(_clamp(parseInt(pos.x) + parseInt(x), 0, 49), _clamp(parseInt(pos.y) + parseInt(y), 0, 49), pos.roomName);
+    let passing = 1;
+    for(let t of npos.lookFor(LOOK_TERRAIN)) {
+        if (t == "wall")
+            passing = 0;
+    }
+    if (passing)
+        res.push(npos);
+}
+
 module.exports = {
     roomConfig : roomConfig,
 
-    clamp : function (n, min, max) {
-        return n < min ? min : (n > max ? max : n);
-    },
-
     getRangedPlaces : function (pos, range) {
         let res = [];
-        for (let x = -1 * range; x <= range; x++) {
-            for (let y in [-1 * range,range]) {
-                res.push(new RoomPosition(this.clamp(parseInt(pos.x) + parseInt(x), 0, 49), this.clamp(parseInt(pos.y) + parseInt(y), 0, 49), pos.roomName));
-            }
-        }
-        for (let y = -1 * range + 1; y <= range - 1; y++) {
-            for (let x in [-1 * range,range]) {
-                res.push(new RoomPosition(this.clamp(parseInt(pos.x) + parseInt(x), 0, 49), this.clamp(parseInt(pos.y) + parseInt(y), 0, 49), pos.roomName));
-            }
-        }
+        for (let x = -1 * range; x <= range; x++)
+            for (let y of [-1 * range,range])
+                _addPosition(res, pos, x, y);
+        for (let y = -1 * range + 1; y <= range - 1; y++)
+            for (let x of [-1 * range,range])
+                _addPosition(res, pos, x, y);
 
         return res;
     },
