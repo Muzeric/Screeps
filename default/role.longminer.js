@@ -4,10 +4,10 @@ var role = {
     run: function(creep) {
         if (Memory.warning[creep.room.name] > 1) {
 			creep.say("AAA");
-			creep.moveTo(Game.rooms[creep.memory.roomName].controller);
+			creep.moveTo(Game.spawns[creep.memory.spawnName]);
 			return;
 		}
-        
+
         let source;
         let container;
 
