@@ -5,7 +5,6 @@ use Term::ReadKey;
 use Mail::IMAPClient;
 use MIME::Parser;
 use Data::Dumper;
-use Compress::LZW;
 use Encode;
 use utf8;
 
@@ -25,6 +24,9 @@ my $imap = new Mail::IMAPClient(
 )
 or die "Couldn't connect: $@\n";
 print "Connected\n";
+
+my $output = $imap->tag_and_run("ENABLE UTF8=ACCEPT")
+or die "Could not tag_and_run: $@\n";
 
 my $folder = 'Inbox';
 $imap->select($folder)
@@ -46,16 +48,22 @@ foreach my $msg (@msgs) {
   or print STDERR "getting meassage: ".$imap->LastError."\n"
   and die;
 
-  #print "$msg: ".lzw_decode($string)."\n";
+  #print "String: $string\n";
 
   my $entity = $parser->parse_data($string);
+  #$entity->dump_skeleton(\*STDERR);
   my $content = split_entity($entity);
-  print "Before: ".$content."\n";
-  my ($comp) = $content =~ /\d+ notification received:\s*(\d+\:\{"memory.+)\s*\[msg\]/sg;
-  print "Message: ".$comp."\n";
-  print "After:  ".decompress("\037\235".$comp)."\n";
-  #print "$msg: ".Dumper($string).":QUOTED\n";
-  last;
+  #print "Before: ".$content."\n";
+  #$content = decode_base64($content);
+  $content = decode("utf8", $content);
+  #print "Unbased: ".$content."\n";
+  my ($comp) = $content =~ /\d+ notification received:\s*(.+\:\{"memory.+)\s*\[msg\]/sg;
+  
+  if (!$comp) {
+    print "Before: $content\n";
+  } else {
+    print "After:  ".lzw_decode($comp)."\n";
+  }
 }
 
 sub lzw_decode {
@@ -73,7 +81,6 @@ sub lzw_decode {
         } else {
             $phrase = $dict->{$currCode} ? $dict->{$currCode} : $oldPhrase.$currChar;
         }
-        print "$i. phrase=$phrase\n";
         $out .= $phrase;
         $currChar = substr($phrase, 0, 1);
         $dict->{$code} = $oldPhrase.$currChar;
@@ -94,6 +101,7 @@ sub split_entity {
   } else { # we have a single mime message/part
     if ($entity->effective_type =~ /^text\/plain$/) { # text message
       $res .= $entity->bodyhandle->as_string;
+      #$res .= $entity->stringify_body;
     }
   }
 
