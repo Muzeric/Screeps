@@ -29,8 +29,8 @@ my $imap = new Mail::IMAPClient(
 or die "Couldn't connect: $@\n";
 print "Connected\n";
 
-my $output = $imap->tag_and_run("ENABLE UTF8=ACCEPT")
-or die "Could not tag_and_run: $@\n";
+#my $output = $imap->tag_and_run("ENABLE UTF8=ACCEPT")
+#or die "Could not tag_and_run: $@\n";
 
 my $folder = 'Inbox';
 $imap->select($folder)
