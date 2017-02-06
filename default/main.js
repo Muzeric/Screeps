@@ -98,7 +98,10 @@ module.exports.loop = function () {
         let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
         let hostiles = room ? room.find(FIND_HOSTILE_CREEPS, {filter: c => c.owner.username != "Source Keeper"}).length : -1;
 
-        Memory.warning[roomName] = hostiles;
+        if (hostiles == -1 && Memory.warning[roomName] > 0)
+            ; // TODO: can leave room forever
+        else
+            Memory.warning[roomName] = hostiles;
 
         if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
             Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders, hostiles);
