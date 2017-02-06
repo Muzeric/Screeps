@@ -8,6 +8,10 @@ use Data::Dumper;
 use Encode;
 use utf8;
 
+use POSIX;
+use locale; 
+setlocale LC_NUMERIC, "fr_FR";
+
 binmode STDOUT, ':utf8';
 
 $| = 1;
@@ -43,7 +47,11 @@ print "Got ".scalar(@msgs)." emailes\n";
 my $parser = MIME::Parser->new;
 $parser->tmp_to_core(1);
 $parser->output_to_core(1);
+my $count = 0;
+my $info = {};
 foreach my $msg (@msgs) {
+  print "\r".$count++." ($msg)           ";
+
   my $string = $imap->message_string($msg) 
   or print STDERR "getting meassage: ".$imap->LastError."\n"
   and die;
@@ -60,11 +68,56 @@ foreach my $msg (@msgs) {
   my ($comp) = $content =~ /\d+ notification received:\s*(.+\:\{"memory.+)\s*\[msg\]/sg;
   
   if (!$comp) {
-    print "Before: $content\n";
+    print "Not parsed: ".substr($content, 0, 20)."\n";
   } else {
-    print "After:  ".lzw_decode($comp)."\n";
+    my $eh = lzw_decode($comp);
+    #print "After:  ".$eh."\n";
+    my ($tick, $jshash) = $eh =~ /^(\d+):(.+)$/;
+    $jshash =~ s/:/=>/g;
+    if (my $hash = eval($jshash) ) {
+      $info->{$tick} = $hash;
+    } else {
+      print "Can't eval: $jshash\n";
+    }
   }
 }
+print "\n";
+
+open(STAT, ">stat.csv")
+or die $@;
+
+my $runkeys = {};
+my $first = 0;
+foreach my $tick (sort {$a <=> $b} keys %$info) {
+  my $hash = $info->{$tick};
+  print STAT "tick\t".join("\t", sort keys %$hash)."\n" if !$first++;
+  print STAT $tick;
+  foreach my $key (sort keys %$hash) {
+    print STAT "\t$hash->{$key}->{cpu}";
+  }
+  print STAT "\n";
+
+  my $run = $hash->{"run"}->{"info"};
+  foreach my $key (keys %$run) {
+    $runkeys->{$key} = 1;
+  }
+}
+close(STAT);
+
+open(RUN, ">stat_run.csv")
+or die $@;
+print RUN "tick\t".join("\t", sort keys %$runkeys)."\n";
+foreach my $tick (sort {$a <=> $b} keys %$info) {
+  my $hash = $info->{$tick};
+  my $run = $hash->{"run"}->{"info"};
+  print RUN $tick;
+  foreach my $key (sort keys %$runkeys) {
+    my $value = exists $run->{$key} ? sprintf("%0.2f", $run->{$key}->{"cpu"} / $run->{$key}->{"sum"}) : 0;
+    print RUN "\t$value";
+  }
+  print RUN "\n";
+}
+close(RUN);
 
 sub lzw_decode {
     my $s = shift;
