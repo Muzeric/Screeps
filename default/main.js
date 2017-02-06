@@ -217,7 +217,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
 
     let repairLimit = utils.roomConfig[roomName] ? utils.roomConfig[roomName].repairLimit : 250000;
     let builds = room ? room.find(FIND_MY_CONSTRUCTION_SITES).length : 0;
-    let repairs = room ? room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit } ).length : 0;
+    let repairs = room ? room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.8 && s.hits < repairLimit } ).length : 0;
     let reservation = room && room.controller && room.controller.reservation ? room.controller.reservation.ticksToEnd : 0;
     let liteClaimer = reservation > 3000 ? 1 : 0;
     let allMiners = _.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.roomName == roomName).length;
@@ -481,8 +481,7 @@ function towerAction (room, canRepair) {
     let energy = _.sum(room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE}), 'store.energy');
     if (energy < room.energyCapacityAvailable)
         canRepair = 0;
-    let repairLimit = canRepair ? (utils.roomConfig[room.name] ? utils.roomConfig[room.name].repairLimit : 100000) : 10000;
-    let dstructs = room.find(FIND_STRUCTURES, {filter: s => s.hits < 0.9*s.hitsMax && s.hits < repairLimit});
+    let dstructs = room.find(FIND_STRUCTURES, {filter: s => s.hits < 0.9*s.hitsMax && (canRepair || s.hits < 10000)});
 
     for(let tower of towers) {
         let target;
