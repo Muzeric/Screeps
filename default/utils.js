@@ -14,7 +14,7 @@ function _clamp (n, min, max) {
     return n < min ? min : (n > max ? max : n);
 }
 
-function _addPosition (res, pos, x, y) {
+function _addPosition (creep, res, pos, x, y) {
     let newx = parseInt(pos.x) + parseInt(x);
     if (newx < 0 || newx > 49)
         return;
