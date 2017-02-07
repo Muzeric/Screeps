@@ -20,6 +20,7 @@ var role = {
 
         let target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
         let moved = 0;
+        let seeked;
         if (target) {
             let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(creep, target.pos, 3));
             let hitsBefore = target.hits;
@@ -28,10 +29,7 @@ var role = {
             if (creep.moveTo(safePlace ? safePlace : target) == OK)
                 moved = 1;
             //console.log(creep.name + " go to " + (safePlace ? safePlace : target));
-        }
-        
-        let seeked;
-        if (seeked = creep.pos.findInRange(FIND_MY_CREEPS, 11, {filter: c => c.hits < c.hitsMax && c != creep})[0] ) {
+        } else if (seeked = creep.pos.findInRange(FIND_MY_CREEPS, 11, {filter: c => c.hits < c.hitsMax && c != creep})[0] ) {
             if (creep.pos.isNearTo(seeked)) {
                 if (!healed)
                     creep.heal(seeked);
