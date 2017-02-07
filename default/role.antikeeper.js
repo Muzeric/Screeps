@@ -19,20 +19,25 @@ var role = {
         }
 
         let target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
-        let seeked;
+        let moved = 0;
         if (target) {
-            let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(target.pos, 3));
+            let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(creep, target.pos, 3));
             let hitsBefore = target.hits;
             let res = creep.rangedAttack(target);
             //console.log(creep.name + " attacked " + target.id + " ("+ target.hits +"/" + target.hitsMax + ") res=" + res);
-            creep.moveTo(safePlace ? safePlace : target);
+            if (creep.moveTo(safePlace ? safePlace : target) == OK)
+                moved = 1;
             //console.log(creep.name + " go to " + (safePlace ? safePlace : target));
-        } else if (seeked = creep.pos.findInRange(FIND_MY_CREEPS, 11, {filter: c => c.hits < c.hitsMax && c != creep})[0] ) {
+        }
+        
+        let seeked;
+        if (seeked = creep.pos.findInRange(FIND_MY_CREEPS, 11, {filter: c => c.hits < c.hitsMax && c != creep})[0] ) {
             if (creep.pos.isNearTo(seeked)) {
                 if (!healed)
                     creep.heal(seeked);
             } else {
-                creep.moveTo(seeked);
+                if (!moved)
+                    creep.moveTo(seeked);
                 creep.rangedHeal(seeked);
             }
         } else {
@@ -46,7 +51,8 @@ var role = {
             })[0];
 
             if (creep.pos.getRangeTo(lair) > 3) {
-                creep.moveTo(lair);
+                if (!moved)
+                    creep.moveTo(lair);
                 //console.log(creep.name + " go to lair " + lair.id);
             }
         }

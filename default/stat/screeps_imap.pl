@@ -2,7 +2,8 @@
 
 use strict;
 use Term::ReadKey;
-use Mail::IMAPClient;
+#use Mail::IMAPClient;
+use Net::IMAP::Simple::Gmail;
 use MIME::Parser;
 use Data::Dumper;
 use Encode;
@@ -18,7 +19,7 @@ $| = 1;
 
 my $password = _get_passwd();
 
-my $imap = new Mail::IMAPClient(
+my $imap = new Net::IMAP::Simple::Gmail(
 	Server => 'imap.gmail.com',
 	Ssl => 1,
 	Uid => 1,
@@ -29,10 +30,7 @@ my $imap = new Mail::IMAPClient(
 or die "Couldn't connect: $@\n";
 print "Connected\n";
 
-#my $output = $imap->tag_and_run("ENABLE UTF8=ACCEPT")
-#or die "Could not tag_and_run: $@\n";
-
-my $folder = 'Inbox';
+my $folder = 'ScreepsInput';
 $imap->select($folder)
 or print STDERR "select '$folder': ".$imap->LastError."\n"
 and die;
@@ -40,17 +38,20 @@ print "Selected '$folder'\n";
 
 my @msgs = $imap->search('SUBJECT screeps')
 or print STDERR "Search in '$folder': ".$imap->LastError."\n"
-and die;
+;#and die;
 print "Searching in '$folder'\n";
 
 print "Got ".scalar(@msgs)." emailes\n";
+exit if scalar(@msgs) == 0;
 my $parser = MIME::Parser->new;
 $parser->tmp_to_core(1);
 $parser->output_to_core(1);
-my $count = 0;
+my $count = 1;
 my $info = {};
+my $max_tick = 0;
+my @msgs_done = ();
 foreach my $msg (@msgs) {
-  print "\r".$count++." ($msg)           ";
+  print "\r$count ($msg)           ";
 
   my $string = $imap->message_string($msg) 
   or print STDERR "getting meassage: ".$imap->LastError."\n"
@@ -64,11 +65,18 @@ foreach my $msg (@msgs) {
   #print "Before: ".$content."\n";
   #$content = decode_base64($content);
   $content = decode("utf8", $content);
-  #print "Unbased: ".$content."\n";
-  my ($comp) = $content =~ /\d+ notification received:\s*(.+\:\{"memory.+)\s*\[msg\]/sg;
+  #print "Unbased: ".$conte:qnt."\n";
+  print Dumper($imap->get_labels($msg));
+  my $comp;
+  if ($content =~ /CPUHistory/) {
+    ($comp) = $content =~ /\d+ notification received:\s*CPUHistory:(\d+:.+)#END#/sg;
+    print "\r$count ($msg) NEW!         ";
+  } else {
+    ($comp) = $content =~ /\d+ notification received:\s*(.+\:\{"memory.+)\s*\[msg\]/sg;
+  }
   
   if (!$comp) {
-    print "Not parsed: ".substr($content, 0, 20)."\n";
+    print "not parsed: ".substr($content, 0, 100)."\n";
   } else {
     my $eh = lzw_decode($comp);
     #print "After:  ".$eh."\n";
@@ -76,14 +84,17 @@ foreach my $msg (@msgs) {
     $jshash =~ s/:/=>/g;
     if (my $hash = eval($jshash) ) {
       $info->{$tick} = $hash;
+      $max_tick = $tick if ($tick > $max_tick);
+      push(@msgs_done, $msg);
     } else {
-      print "Can't eval: $jshash\n";
+      print "can't eval: $jshash\n";
     }
   }
+  $count++;
 }
 print "\n";
 
-open(STAT, ">stat.csv")
+open(STAT, ">stat_cpu_total.$max_tick.csv")
 or die $@;
 
 my $runkeys = {};
@@ -104,7 +115,7 @@ foreach my $tick (sort {$a <=> $b} keys %$info) {
 }
 close(STAT);
 
-open(RUN, ">stat_run.csv")
+open(RUN, ">stat_cpu_run.$max_tick.csv")
 or die $@;
 print RUN "tick\t".join("\t", sort keys %$runkeys)."\n";
 foreach my $tick (sort {$a <=> $b} keys %$info) {
@@ -118,6 +129,12 @@ foreach my $tick (sort {$a <=> $b} keys %$info) {
   print RUN "\n";
 }
 close(RUN);
+
+foreach my $msg (@msgs_done) {
+  my $newUid = $imap->move("ScreepsArchive" , $msg )
+  or die "Could not move: $@\n";
+}
+$imap->expunge;
 
 sub lzw_decode {
     my $s = shift;

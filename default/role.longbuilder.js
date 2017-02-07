@@ -21,7 +21,7 @@ var roleLongBuilder = {
 	    if(creep.memory.building) {
 			let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 10);
 			if (hostiles.length) {
-				let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(hostiles[0].pos, 6));
+				let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(creep, hostiles[0].pos, 6));
 				creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
 				return;
 			}

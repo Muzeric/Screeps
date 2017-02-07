@@ -23,8 +23,12 @@ function _addPosition (res, pos, x, y) {
         return;
     let npos = new RoomPosition(newx, newy, pos.roomName);
     let passing = 1;
-    for(let t of npos.lookFor(LOOK_TERRAIN)) {
+    for (let t of npos.lookFor(LOOK_TERRAIN)) {
         if (t == "wall")
+            passing = 0;
+    }
+    for (let c of npos.lookFor(LOOK_CREEPS)) {
+        if (c != creep)
             passing = 0;
     }
     if (passing)
@@ -34,14 +38,14 @@ function _addPosition (res, pos, x, y) {
 module.exports = {
     roomConfig : roomConfig,
 
-    getRangedPlaces : function (pos, range) {
+    getRangedPlaces : function (creep, pos, range) {
         let res = [];
         for (let x = -1 * range; x <= range; x++)
             for (let y of [-1 * range,range])
-                _addPosition(res, pos, x, y);
+                _addPosition(creep, res, pos, x, y);
         for (let y = -1 * range + 1; y <= range - 1; y++)
             for (let x of [-1 * range,range])
-                _addPosition(res, pos, x, y);
+                _addPosition(creep, res, pos, x, y);
 
         return res;
     },
@@ -147,14 +151,14 @@ module.exports = {
 
         let lair;
         if (lair = creep.pos.findInRange(FIND_STRUCTURES, 10, { filter : s => s.structureType == STRUCTURE_KEEPER_LAIR && s.ticksToSpawn < 10})[0] ) {
-            let safePlace = creep.pos.findClosestByPath(this.getRangedPlaces(lair.pos, 6));
+            let safePlace = creep.pos.findClosestByPath(this.getRangedPlaces(creep, lair.pos, 6));
             creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
             return;
         }
 
         let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 10, {filter: c => c.owner.username == "Source Keeper"});
         if (hostiles.length) {
-            let safePlace = creep.pos.findClosestByPath(this.getRangedPlaces(hostiles[0].pos, 6));
+            let safePlace = creep.pos.findClosestByPath(this.getRangedPlaces(creep, hostiles[0].pos, 6));
             creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
             return;
         }
