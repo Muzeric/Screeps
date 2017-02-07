@@ -174,7 +174,7 @@ module.exports = {
         }
         
         if (res == ERR_NOT_IN_RANGE) {
-            creep.moveTo(source, { costCallback : function(name, cm) { cm.set(4, 43, 255); cm.set(4, 42, 255); cm.set(4, 41, 255); } });
+            creep.moveTo(source, { visualizePathStyle : {lineStyle: "dotted", stroke : "#"+creep.name.slice(-2)+creep.name.slice(-2)+creep.name.slice(-2) , opacity : 0.5}, costCallback : function(name, cm) { cm.set(4, 43, 255); cm.set(4, 42, 255); cm.set(4, 41, 255); } });
         } else if (res == ERR_NOT_ENOUGH_ENERGY) {
             return;
         } else if (res < 0) {
