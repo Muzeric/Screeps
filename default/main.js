@@ -283,8 +283,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "role" : "antikeeper",
         "count" : fcount["Antikeeper"] ? (hostiles ? 2 : 1) : 0,
         "priority" : 15,
-        "wishEnergy" : hostiles ? 4210 : 4850,
-        "minEnergy" : hostiles ? 4210 : 4850,
+        "wishEnergy" : hostiles ? 4420 : 4810,
+        "minEnergy" : hostiles ? 4420 : 4810,
         "range" : 3,
         "arg" : hostiles,
     },{
