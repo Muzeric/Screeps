@@ -173,6 +173,7 @@ module.exports.loop = function () {
                 "roomName" : need.roomName,
                 "energy" : energy - leftEnergy,
                 "body" : body,
+                "arg" : need.arg,
                 "stat" : {
                     spentEnergy : 0,
                     gotEnergy : 0,
@@ -280,11 +281,12 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "maxEnergy" : 2000,
     },{
         "role" : "antikeeper",
-        "count" : fcount["Antikeeper"] ? 2 : 0,
+        "count" : fcount["Antikeeper"] ? (hostiles ? 2 : 1) : 0,
         "priority" : 15,
-        "wishEnergy" : 4900,
-        "minEnergy" : 4900,
+        "wishEnergy" : hostiles ? 4210 : 4850,
+        "minEnergy" : hostiles ? 4210 : 4850,
         "range" : 3,
+        "arg" : hostiles,
     },{
         "role" : "longharvester",
         "count" : creepsCount["antikeeper"] ? sourcesForWork * (3 + workerHarvester) : 0,

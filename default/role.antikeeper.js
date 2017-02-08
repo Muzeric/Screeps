@@ -19,16 +19,16 @@ var role = {
         }
 
         let target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
-        let moved = 0;
         let seeked;
         if (target) {
-            let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(creep, target.pos, 3));
-            let hitsBefore = target.hits;
-            let res = creep.rangedAttack(target);
-            //console.log(creep.name + " attacked " + target.id + " ("+ target.hits +"/" + target.hitsMax + ") res=" + res);
-            if (creep.moveTo(safePlace ? safePlace : target) == OK)
-                moved = 1;
-            //console.log(creep.name + " go to " + (safePlace ? safePlace : target));
+            let safePlace;
+            if (creep.memory.arg) {
+                safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(creep, target.pos, 3));
+                creep.rangedAttack(target);
+            } else {
+                creep.attack(target);
+            }
+            creep.moveTo(safePlace ? safePlace : target)
         } else if (seeked = creep.pos.findInRange(FIND_MY_CREEPS, 11, {filter: c => c.hits < c.hitsMax && c != creep})[0] ) {
             if (creep.pos.isNearTo(seeked)) {
                 if (!healed)
@@ -48,26 +48,31 @@ var role = {
                 return a.ticksToSpawn - b.ticksToSpawn;
             })[0];
 
-            if (creep.pos.getRangeTo(lair) > 3) {
-                if (!moved)
-                    creep.moveTo(lair);
-                //console.log(creep.name + " go to lair " + lair.id);
-            }
+            if (creep.memory.arg || creep.pos.getRangeTo(lair) > 3)
+                creep.moveTo(lair);
         }
 
 	},
 	
-    create: function(energy) {
-        let anum = 20;
-        let hnum = 3;
-        let mnum = anum + hnum;
-        energy -= 150 * anum + 50 * mnum + 250 * hnum;
+    create: function(energy, hostiles) {
+        // 10 * 6 + 150 * 20 + 50 * 15 + 250 * 4 = 4810
+        // 10 * 6 + 80 * 27 + 50 * 19  + 250 * 5 = 4420
+        let tnum = hostiles ? 6 : 6;
+        let anum = hostiles ? 27 : 0;
+        let rnum = hostiles ? 0 : 20;
+        let hnum = 5;
+        let mnum = Math.ceil((tnum + anum + rnum + hnum)/2);
+        energy -= 10 * tnum + 80 * anum + 150 * rnum + 50 * mnum + 250 * hnum;
         
         let body = [];
         
+        while (tnum-- > 0)
+            body.push(TOUGH);
         while (mnum-- > 0)
             body.push(MOVE);
         while (anum-- > 0)
+            body.push(ATTACK);
+        while (rnum-- > 0)
             body.push(RANGED_ATTACK);
         while (hnum-- > 0)
             body.push(HEAL);
