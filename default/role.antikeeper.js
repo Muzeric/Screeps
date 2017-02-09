@@ -71,12 +71,14 @@ var role = {
         
         while (tnum-- > 0)
             body.push(TOUGH);
-        while (mnum-- > 0)
+        while (mnum-- > 1)
             body.push(MOVE);
         while (anum-- > 0)
             body.push(ATTACK);
         while (rnum-- > 0)
             body.push(RANGED_ATTACK);
+        while (mnum-- > 0)
+            body.push(MOVE);
         while (hnum-- > 0)
             body.push(HEAL);
         
