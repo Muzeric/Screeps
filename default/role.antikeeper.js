@@ -22,11 +22,14 @@ var role = {
         let seeked;
         if (target) {
             let safePlace;
-            if (creep.memory.arg) {
+            if (!creep.memory.arg) {
                 safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(creep, target.pos, 3));
                 creep.rangedAttack(target);
             } else {
-                creep.attack(target);
+                if (creep.pos.isNearTo(target)) {
+                    creep.cancelOrder('heal');
+                    creep.attack(target);
+                }
             }
             creep.moveTo(safePlace ? safePlace : target)
         } else if (seeked = creep.pos.findInRange(FIND_MY_CREEPS, 11, {filter: c => c.hits < c.hitsMax && c != creep})[0] ) {
