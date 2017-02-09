@@ -283,8 +283,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "role" : "antikeeper",
         "count" : fcount["Antikeeper"] ? (hostiles ? 2 : 1) : 0,
         "priority" : 15,
-        "wishEnergy" : hostiles ? 4420 : 4810,
-        "minEnergy" : hostiles ? 4420 : 4810,
+        "wishEnergy" : hostiles ? 4210 : 4810,
+        "minEnergy" : hostiles ? 4210 : 4810,
         "range" : 3,
         "arg" : hostiles,
     },{
@@ -442,7 +442,7 @@ function getRoomLimits (room, creepsCount) {
 
 function getSpawnForCreate (need, skipSpawnNames, reservedEnergy) {
     let spawnsInRange = _.filter(Game.spawns, s => 
-        Game.map.getRoomLinearDistance(s.room.name, need.roomName) <= need.range &&
+        (Game.map.getRoomLinearDistance(s.room.name, need.roomName) || 0) <= need.range &&
         !s.spawning && 
         !(s.name in skipSpawnNames) && 
         !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(s) && c.memory.needRepair)  
