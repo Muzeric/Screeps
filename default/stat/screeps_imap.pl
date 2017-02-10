@@ -19,7 +19,7 @@ $| = 1;
 
 my $password = _get_passwd();
 
-my $imap = new Net::IMAP::Simple::Gmail('imap.gmail.com')
+my $imap = new Net::IMAP::Simple::Gmail('imap.gmail.com', 'debug' => 1)
 #	Server => 'imap.gmail.com',
 #	Ssl => 1,
 #	Uid => 1,
@@ -96,7 +96,7 @@ foreach my $msg (@msgs) {
     }
   }
   $count++;
-  last if $count > 10;
+  last if $count > 11;
 }
 print "\n";
 
@@ -139,10 +139,14 @@ close(RUN);
 foreach my $msg (@msgs_done) {
   #my $newUid = $imap->move("ScreepsArchive" , $msg )
   #or die "Could not move: $@\n";
-  $imap->remove_labels($msg, qw/ScreepsInput/)
-  or die "remove_lables: ".$imap->errstr."\n";
-  $imap->add_labels($msg, qw/ScreepsArchive/)
-  or die "add_lables: ".$imap->errstr."\n";
+  print "Remove for $msg:";
+  print Dumper($imap->get_labels($msg));
+  $imap->remove_labels($msg, qw/\\ScreepsInput/);
+  print Dumper($imap->get_labels($msg));
+  print "\n";
+}
+foreach my $msg (@msgs_done) {
+  $imap->add_labels($msg, qw/ScreepsArchive/);
 }
 #$imap->expunge;
 
