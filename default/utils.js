@@ -58,7 +58,7 @@ module.exports = {
 
     findSource : function (creep, storage_priority) {
         let targets = [];
-        if (!creep.room.find(FIND_HOSTILE_CREEPS).length)
+        if (!creep.room.find(FIND_HOSTILE_CREEPS, {filter: c => c.owner.username != "Source Keeper"}).length)
             targets = creep.room.find(FIND_DROPPED_ENERGY, { filter: r => r.amount > 50 });
         
         targets = targets.concat( creep.room.find(FIND_STRUCTURES, { filter: s =>
