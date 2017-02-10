@@ -37,8 +37,7 @@ var role = {
                 if (!healed)
                     creep.heal(seeked);
             } else {
-                if (!moved)
-                    creep.moveTo(seeked);
+                creep.moveTo(seeked);
                 creep.rangedHeal(seeked);
             }
         } else {
@@ -77,7 +76,7 @@ var role = {
             body.push(ATTACK);
         while (rnum-- > 0)
             body.push(RANGED_ATTACK);
-        while (mnum-- > 0)
+        while (mnum-- > -1)
             body.push(MOVE);
         while (hnum-- > 0)
             body.push(HEAL);

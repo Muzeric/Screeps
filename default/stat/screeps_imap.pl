@@ -19,16 +19,18 @@ $| = 1;
 
 my $password = _get_passwd();
 
-my $imap = new Net::IMAP::Simple::Gmail(
-	Server => 'imap.gmail.com',
-	Ssl => 1,
-	Uid => 1,
-	User => 'yamuzer@gmail.com',
-	Password => $password,
-	Port => 993,
-)
+my $imap = new Net::IMAP::Simple::Gmail('imap.gmail.com')
+#	Server => 'imap.gmail.com',
+#	Ssl => 1,
+#	Uid => 1,
+#	User => 'yamuzer@gmail.com',
+#	Password => $password,
+#	Port => 993,
+#)
 or die "Couldn't connect: $@\n";
 print "Connected\n";
+
+$imap->login('yamuzer@gmail.com' => $password);
 
 my $folder = 'ScreepsInput';
 $imap->select($folder)
@@ -53,9 +55,11 @@ my @msgs_done = ();
 foreach my $msg (@msgs) {
   print "\r$count ($msg)           ";
 
-  my $string = $imap->message_string($msg) 
+  #my $string = $imap->message_string($msg) 
+  my $string = $imap->get($msg)
   or print STDERR "getting meassage: ".$imap->LastError."\n"
   and die;
+  $string = "$string";
 
   #print "String: $string\n";
 
@@ -65,8 +69,9 @@ foreach my $msg (@msgs) {
   #print "Before: ".$content."\n";
   #$content = decode_base64($content);
   $content = decode("utf8", $content);
-  #print "Unbased: ".$conte:qnt."\n";
-  print Dumper($imap->get_labels($msg));
+  #print "Unbased: ".$content."\n";
+  #print Dumper($imap->get_labels($msg));
+
   my $comp;
   if ($content =~ /CPUHistory/) {
     ($comp) = $content =~ /\d+ notification received:\s*CPUHistory:(\d+:.+)#END#/sg;
@@ -91,6 +96,7 @@ foreach my $msg (@msgs) {
     }
   }
   $count++;
+  last if $count > 10;
 }
 print "\n";
 
@@ -131,10 +137,14 @@ foreach my $tick (sort {$a <=> $b} keys %$info) {
 close(RUN);
 
 foreach my $msg (@msgs_done) {
-  my $newUid = $imap->move("ScreepsArchive" , $msg )
-  or die "Could not move: $@\n";
+  #my $newUid = $imap->move("ScreepsArchive" , $msg )
+  #or die "Could not move: $@\n";
+  $imap->remove_labels($msg, qw/ScreepsInput/)
+  or die "remove_lables: ".$imap->errstr."\n";
+  $imap->add_labels($msg, qw/ScreepsArchive/)
+  or die "add_lables: ".$imap->errstr."\n";
 }
-$imap->expunge;
+#$imap->expunge;
 
 sub lzw_decode {
     my $s = shift;
