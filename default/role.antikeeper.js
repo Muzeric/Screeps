@@ -37,8 +37,7 @@ var role = {
                 if (!healed)
                     creep.heal(seeked);
             } else {
-                if (!moved)
-                    creep.moveTo(seeked);
+                creep.moveTo(seeked);
                 creep.rangedHeal(seeked);
             }
         } else {
