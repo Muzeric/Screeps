@@ -1,7 +1,11 @@
 var utils = require('utils');
 var statObject = require('stat');
+const profiler = require('screeps-profiler');
+// This line monkey patches the global prototypes. 
+profiler.enable();
 
 module.exports.loop = function () {
+profiler.wrap(function() {
     var stat = statObject.init();
     var moveErrors = {};
     var rolesCount = {};
@@ -191,6 +195,7 @@ module.exports.loop = function () {
     }
     statObject.addCPU("create");
     statObject.addCPU("finish");
+});
 };
 
 function linkAction (room) {

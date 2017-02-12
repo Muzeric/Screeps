@@ -10,8 +10,8 @@ use Encode;
 use utf8;
 
 use POSIX;
-use locale; 
-setlocale LC_NUMERIC, "fr_FR";
+#use locale; 
+#setlocale LC_CTYPE, 'en_US.UTF-8';
 
 binmode STDOUT, ':utf8';
 
@@ -19,32 +19,18 @@ $| = 1;
 
 my $password = _get_passwd();
 
-my $imap = new Net::IMAP::Simple::Gmail('imap.gmail.com', 'debug' => 1)
-#	Server => 'imap.gmail.com',
-#	Ssl => 1,
-#	Uid => 1,
-#	User => 'yamuzer@gmail.com',
-#	Password => $password,
-#	Port => 993,
-#)
+my $imap = new Net::IMAP::Simple::Gmail('imap.gmail.com', 'debug' => 0, 'Uid' => 1)
 or die "Couldn't connect: $@\n";
 print "Connected\n";
 
 $imap->login('yamuzer@gmail.com' => $password);
 
-my $folder = 'ScreepsInput';
-$imap->select($folder)
-or print STDERR "select '$folder': ".$imap->LastError."\n"
-and die;
-print "Selected '$folder'\n";
-
-my @msgs = $imap->search('SUBJECT screeps')
-or print STDERR "Search in '$folder': ".$imap->LastError."\n"
-;#and die;
-print "Searching in '$folder'\n";
+my @msgs = $imap->search('SUBJECT screeps X-GM-LABELS ScreepsInput')
+or print STDERR "Searching: ".($imap->LastError || '')."\n";
 
 print "Got ".scalar(@msgs)." emailes\n";
 exit if scalar(@msgs) == 0;
+
 my $parser = MIME::Parser->new;
 $parser->tmp_to_core(1);
 $parser->output_to_core(1);
@@ -73,32 +59,42 @@ foreach my $msg (@msgs) {
   #print Dumper($imap->get_labels($msg));
 
   my $comp;
+  my $tick;
   if ($content =~ /CPUHistory/) {
-    ($comp) = $content =~ /\d+ notification received:\s*CPUHistory:(\d+:.+)#END#/sg;
+    ($tick, $comp) = $content =~ /\d+ notification received:\s*CPUHistory:(\d+):(.+)#END#/sg;
     print "\r$count ($msg) NEW!         ";
   } else {
     ($comp) = $content =~ /\d+ notification received:\s*(.+\:\{"memory.+)\s*\[msg\]/sg;
   }
   
   if (!$comp) {
-    print "not parsed: ".substr($content, 0, 100)."\n";
+    #$content = encode_utf8($content);
+    $content =~ s/[\n\r]/ /g;
+    print "not parsed: ".substr($content, 0, 50)." ... ".substr($content, -50)."\n";
   } else {
     my $eh = lzw_decode($comp);
     #print "After:  ".$eh."\n";
-    my ($tick, $jshash) = $eh =~ /^(\d+):(.+)$/;
+    my $jshash;
+    if (!$tick) {
+      ($tick, $jshash) = $eh =~ /^(\d+):(.+)$/;
+    } else {
+      $jshash = $eh;
+    }
     $jshash =~ s/:/=>/g;
     if (my $hash = eval($jshash) ) {
       $info->{$tick} = $hash;
       $max_tick = $tick if ($tick > $max_tick);
       push(@msgs_done, $msg);
     } else {
-      print "can't eval: $jshash\n";
+      print "can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
     }
   }
   $count++;
-  last if $count > 11;
+  #last if $count > 10;
 }
 print "\n";
+
+setlocale LC_NUMERIC, "fr_FR";
 
 open(STAT, ">stat_cpu_total.$max_tick.csv")
 or die $@;
@@ -136,17 +132,23 @@ foreach my $tick (sort {$a <=> $b} keys %$info) {
 }
 close(RUN);
 
+$imap->select('Inbox')
+or print STDERR "select 'Inbox': ".$imap->LastError."\n"
+and die;
+
+$count = 1;
 foreach my $msg (@msgs_done) {
+  print "\r$count ($msg)           ";
   #my $newUid = $imap->move("ScreepsArchive" , $msg )
   #or die "Could not move: $@\n";
-  print "Remove for $msg:";
-  print Dumper($imap->get_labels($msg));
-  $imap->remove_labels($msg, qw/\\ScreepsInput/);
-  print Dumper($imap->get_labels($msg));
-  print "\n";
-}
-foreach my $msg (@msgs_done) {
+  
+  #print "Remove for $msg:";
+  #print Dumper($imap->get_labels($msg));
+  $imap->remove_labels($msg, qw/ScreepsInput/);
   $imap->add_labels($msg, qw/ScreepsArchive/);
+  #print Dumper($imap->get_labels($msg));
+  #print "\n";
+  $count++;
 }
 #$imap->expunge;
 
