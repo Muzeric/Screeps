@@ -1,4 +1,4 @@
-//require('prototype.room');
+require('prototype.room');
 require('prototype.creep');
 var utils = require('utils');
 var statObject = require('stat');
@@ -12,6 +12,12 @@ profiler.wrap(function() {
     var moveErrors = {};
     var rolesCount = {};
     var objectCache = {};
+    var roomNames = _.uniq( 
+        _.map (Game.flags, 'pos.roomName').concat( 
+        _.map( Game.rooms, 'name' ) ).concat( 
+        Object.keys(Memory.rooms) ) 
+    );
+    
     if(!("targets" in Memory))
         Memory.targets = {};
     if(!("warning" in Memory))
@@ -27,6 +33,12 @@ profiler.wrap(function() {
             moveErrors[Game.creeps[name].room.name] = 1;
         }
     }
+
+    _.forEach(roomNames, function(roomName) {
+        if (0 && Game.rooms[roomName])
+            Game.rooms[roomName].update();
+    });
+
     statObject.addCPU("memory");
 
     let creepsCPUStat = {};
@@ -88,11 +100,7 @@ profiler.wrap(function() {
     let buildFlags = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build').length;
     let stopLongBuilders = longbuilders * 1.5 >= buildFlags;
     let roomsCPUStat = {};
-    _.forEach(
-        _.uniq(_.map (Game.flags, 'pos.roomName') ).concat( 
-        _.map( _.filter(Game.rooms, r => r.controller && r.controller.my), 'name' ) 
-    ),
-    function(roomName) {
+    _.forEach(roomNames, function(roomName) {
         let lastCPU = Game.cpu.getUsed();
         roomsCPUStat[roomName] = {
             cpu: 0,
@@ -140,7 +148,7 @@ profiler.wrap(function() {
             roomsCPUStat[roomName].links = Game.cpu.getUsed() - localCPU;
         }
         roomsCPUStat[roomName].cpu = Game.cpu.getUsed() - lastCPU;
-    }); // each flag end
+    });
     statObject.addCPU("needList", roomsCPUStat);
     if (Game.time % 20 == 0)
         console.log("needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.role})));

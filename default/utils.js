@@ -22,17 +22,15 @@ function _addPosition (creep, res, pos, x, y) {
     if (newy < 0 || newy > 49)
         return;
     let npos = new RoomPosition(newx, newy, pos.roomName);
-    let passing = 1;
     for (let t of npos.lookFor(LOOK_TERRAIN)) {
         if (t == "wall")
-            passing = 0;
+            return;
     }
     for (let c of npos.lookFor(LOOK_CREEPS)) {
         if (c != creep)
-            passing = 0;
+            return;
     }
-    if (passing)
-        res.push(npos);
+    res.push(npos);
 }
 
 module.exports = {
