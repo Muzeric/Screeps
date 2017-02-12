@@ -1,3 +1,5 @@
+require('prototype.room.js');
+require('prototype.creep.js');
 var utils = require('utils');
 var statObject = require('stat');
 const profiler = require('screeps-profiler');
