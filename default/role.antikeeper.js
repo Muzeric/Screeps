@@ -17,7 +17,7 @@ var role = {
             let friend = _.filter(Game.creeps, c => c.memory.role == "antikeeper" && c.memory.roomName == creep.memory.roomName && c != creep)[0];
             if (!friend) {
                 creep.say("Want pair");
-            } else if (creep.pos.inRangeTo(friend, 2) || friend.room.name == creep.memory.roomName) {
+            } else if (creep.pos.inRangeTo(friend, 4) || creep.pos.x == 0 || creep.pos.y == 0 || creep.pos.x == 49 || creep.pos.y == 49 || friend.room.name == creep.memory.roomName) {
                 creep.moveTo(Game.flags["Antikeeper." + creep.memory.roomName]);
             } else {
                 creep.moveTo(friend);

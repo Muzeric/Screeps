@@ -1,3 +1,5 @@
+var utils = require('utils');
+
 Room.prototype.init = function() {
 }
 
@@ -52,4 +54,8 @@ Room.prototype.updateHostileCreeps = function() {
                 memory.hostilesDeadTime = Game.tiime + c.ticksToLive;
         }
     });
+}
+
+Room.prototype.getNearHostile = function(pos, range) {
+    return _.filter( this.memory.hostileCreeps, c => c.owner.username != "Source Keeper" && pos.inRangeTo(c.pos, range) )[0];
 }

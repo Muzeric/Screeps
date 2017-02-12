@@ -69,31 +69,11 @@ var role = {
             }
         }
 
-        let hostiles;
-        if (0 && creep.room.memory.type == 'lair' && !creep.goFromKeepers()) {
-            console.log(creep.name + " gone out from keepers");
+        if (creep.room.memory.type == 'lair' && !creep.goFromKeepers())
             return;
-        } else {
-            let lair;
-            if (lair = creep.pos.findInRange(FIND_STRUCTURES, 10, { filter : s => s.structureType == STRUCTURE_KEEPER_LAIR && s.ticksToSpawn < 10})[0] ) {
-                let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(creep, lair.pos, 6));
-                creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
-                return;
-            }
 
-            hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 10, {filter: c => c.owner.username == "Source Keeper"});
-            if (hostiles.length) {
-                let safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(creep, hostiles[0].pos, 6));
-                creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
-                return;
-            }
-        }
-
-        hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 5, {filter: c => c.owner.username != "Source Keeper"});
-        if (hostiles.length) {
-            let target = hostiles.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
-            if (creep.attack(target) == ERR_NOT_IN_RANGE)
-                creep.moveTo(target);
+        if(!creep.attackNearHostile()) {
+            console.log(creep.name + " attacked near hostile");
         } else if(container.pos.inRangeTo(source, 2)) {
             if(creep.pos.isNearTo(source) && creep.pos.isNearTo(container)) {
                 if (creep.carry.energy && 

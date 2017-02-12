@@ -35,7 +35,7 @@ profiler.wrap(function() {
     }
 
     _.forEach(roomNames, function(roomName) {
-        if (0 && Game.rooms[roomName])
+        if (Game.rooms[roomName])
             Game.rooms[roomName].update();
     });
 
