@@ -10,10 +10,12 @@ profiler.wrap(function() {
     var moveErrors = {};
     var rolesCount = {};
     var objectCache = {};
-    if(!Memory.targets)
+    if(!("targets" in Memory))
         Memory.targets = {};
-    if(!Memory.warning)
+    if(!("warning" in Memory))
         Memory.warning = {};
+    if(!("rooms" in Memory))
+        Memory.rooms = {};
 
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
