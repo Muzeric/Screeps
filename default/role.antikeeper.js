@@ -14,7 +14,7 @@ var role = {
                 console.log(creep.name + " no flag in " + creep.memory.roomName);
                 return;
             }
-            let friend = _.filter(Game.creeps, c => c.memory.role == "antikeeper" && c.memory.roomName == creep.memory.roomName)[0];
+            let friend = _.filter(Game.creeps, c => c.memory.role == "antikeeper" && c.memory.roomName == creep.memory.roomName && c != creep)[0];
             if (!friend) {
                 creep.say("Want pair");
             } else if (creep.pos.inRangeTo(friend, 2) || friend.room.name == creep.memory.roomName) {
