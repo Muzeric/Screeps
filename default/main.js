@@ -1,5 +1,5 @@
-require('prototype.room.js');
-require('prototype.creep.js');
+//require('prototype.room');
+require('prototype.creep');
 var utils = require('utils');
 var statObject = require('stat');
 const profiler = require('screeps-profiler');
@@ -16,8 +16,6 @@ profiler.wrap(function() {
         Memory.targets = {};
     if(!("warning" in Memory))
         Memory.warning = {};
-    if(!("rooms" in Memory))
-        Memory.rooms = {};
 
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
