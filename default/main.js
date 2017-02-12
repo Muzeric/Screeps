@@ -501,7 +501,7 @@ function towerAction (room, canRepair) {
     let energy = _.sum(room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE}), 'store.energy');
     if (energy < room.energyCapacityAvailable)
         canRepair = 0;
-    let dstructs = room.find(FIND_STRUCTURES, {filter: s => s.hits < 0.9*s.hitsMax && (canRepair || s.hits < 10000)});
+    let dstructs = room.find(FIND_STRUCTURES, {filter: s => s.hits < 0.9*s.hitsMax && (canRepair || s.hits < 10000) && s.hits < 2500000});
 
     for(let tower of towers) {
         let target;
