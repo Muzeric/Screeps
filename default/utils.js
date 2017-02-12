@@ -147,19 +147,8 @@ module.exports = {
             return;
         }
 
-        let lair;
-        if (lair = creep.pos.findInRange(FIND_STRUCTURES, 10, { filter : s => s.structureType == STRUCTURE_KEEPER_LAIR && s.ticksToSpawn < 10})[0] ) {
-            let safePlace = creep.pos.findClosestByPath(this.getRangedPlaces(creep, lair.pos, 6));
-            creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
+        if (creep.room.memory.type == 'lair' && !creep.goFromKeepers())
             return;
-        }
-
-        let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 10, {filter: c => c.owner.username == "Source Keeper"});
-        if (hostiles.length) {
-            let safePlace = creep.pos.findClosestByPath(this.getRangedPlaces(creep, hostiles[0].pos, 6));
-            creep.moveTo(safePlace ? safePlace : Game.rooms[creep.memory.roomName].controller);
-            return;
-        }
         
         let res;
         if(source.structureType && (source.structureType == STRUCTURE_CONTAINER || source.structureType == STRUCTURE_STORAGE || source.structureType == STRUCTURE_LINK)) {

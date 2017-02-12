@@ -8,8 +8,8 @@ Creep.prototype.goFromKeepers = function() {
     return this.moveTo(safePlace ? safePlace : Game.rooms[this.memory.roomName].controller); 
 }
 
-Creep.prototype.attackNearHostile = function() {
-    let target = this.room.getNearHostile(this.pos, 5);
+Creep.prototype.attackNearHostile = function(range) {
+    let target = this.room.getNearHostile(this.pos, range || 5);
     if (!target)
         return -7;
     

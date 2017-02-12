@@ -20,11 +20,8 @@ var role = {
                 return;
         }
 
-        let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 5, {filter: c => c.owner.username != "Source Keeper"});
-        if (hostiles.length) {
-            let target = hostiles.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
-            if (creep.attack(target) == ERR_NOT_IN_RANGE)
-                creep.moveTo(target);
+        if (!creep.attackNearHostile()) {
+            console.log(creep.name + " attacked near hostile");
             return;
         } else {
             if(creep.carry.energy == 0 && creep.memory.transfering) {
