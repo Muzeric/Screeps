@@ -4,7 +4,7 @@ var role = {
 
     run: function(creep) {
         let healed = 0;
-        if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL)) {
+        if (creep.hits < creep.hitsMax) {
             creep.heal(creep);
             healed = 1;
         }
@@ -14,7 +14,14 @@ var role = {
                 console.log(creep.name + " no flag in " + creep.memory.roomName);
                 return;
             }
-            creep.moveTo(Game.flags["Antikeeper." + creep.memory.roomName]);
+            let friend = _.filter(Game.creeps, c => c.memory.role == "antikeeper" && c.memory.roomName == creep.memory.roomName)[0];
+            if (!friend) {
+                creep.say("Want pair");
+            } else if (creep.pos.inRangeTo(friend, 2) || friend.room.name == creep.memory.roomName) {
+                creep.moveTo(Game.flags["Antikeeper." + creep.memory.roomName]);
+            } else {
+                creep.moveTo(friend);
+            }
             return;
         }
 
@@ -27,7 +34,8 @@ var role = {
                 creep.rangedAttack(target);
             } else {
                 if (creep.pos.isNearTo(target)) {
-                    creep.cancelOrder('heal');
+                    if (healed)
+                        creep.cancelOrder('heal');
                     creep.attack(target);
                 }
             }
