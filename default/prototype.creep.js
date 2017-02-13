@@ -12,7 +12,8 @@ Creep.prototype.attackNearHostile = function(range) {
     let target = this.room.getNearHostile(this.pos, range || 5);
     if (!target)
         return -7;
-    
+        
+    target = Game.getObjectById(target.id);
     if (this.attack(target) == ERR_NOT_IN_RANGE)
         this.moveTo(target);
     return 0;
