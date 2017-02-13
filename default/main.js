@@ -248,6 +248,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     let allMiners = _.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.roomName == roomName).length;
     let workerHarvester = scount[STRUCTURE_CONTAINER] && scount["source"] && scount[STRUCTURE_CONTAINER] >= scount["source"] && allMiners >= scount[STRUCTURE_CONTAINER] ? 0 : 1;
     let sourcesForWork = fcount["Source"] ? _.max([fcount["Source"], scount["source"]]) : 0;
+    let antikeeperArged = _.filter(Game.creeps, c => c.memory.role == "antikeeper" && c.memory.roomName == roomName && c.memory.arg).length;
     
     let limits = [];
     limits.push({
@@ -302,20 +303,20 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "maxEnergy" : 2000,
     },{
         "role" : "antikeeper",
-        "count" : fcount["Antikeeper"] ? 1 : 0,
+        "count" : fcount["Antikeeper"] && !antikeeperArged ? (creepsCount["antikeeper"] ? 2 : 1) : 0,
+        "priority" : 15,
+        "wishEnergy" : 3790,
+        "minEnergy" : 3790,
+        "range" : 3,
+        "arg" : 1,
+    },{
+        "role" : "antikeeper",
+        "count" : fcount["Antikeeper"] && antikeeperArged ? 2 : 0,
         "priority" : 15,
         "wishEnergy" : 4560,
         "minEnergy" : 4560,
         "range" : 3,
         "arg" : 0,
-    },{
-        "role" : "antikeeper",
-        "count" : fcount["Antikeeper"] ? 2 : 0,
-        "priority" : 16,
-        "wishEnergy" : 3790,
-        "minEnergy" : 3790,
-        "range" : 3,
-        "arg" : 1,
     },{
         "role" : "longharvester",
         "count" : creepsCount["antikeeper"] ? sourcesForWork * 3 * (3 + workerHarvester) : 0,
