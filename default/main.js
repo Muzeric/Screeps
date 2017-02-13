@@ -273,7 +273,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "range" : 2,
     },{
         "role" : "longminer",
-        "count" : fcount["Antikeeper"] ? 0 : scount[STRUCTURE_CONTAINER],
+        "count" : fcount["Antikeeper"] ? 0 : (scount[STRUCTURE_CONTAINER] || 0),
         "priority" : 12,
         "wishEnergy" : 1060,
         "range" : 3,
@@ -331,7 +331,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "maxEnergy" : 3000,
     },{
         "role" : "longminer",
-        "count" : creepsCount["antikeeper"] ? scount[STRUCTURE_CONTAINER] : 0,
+        "count" : creepsCount["antikeeper"] ? (scount[STRUCTURE_CONTAINER] || 0) : 0,
         "arg" : 1,
         "priority" : 18,
         "wishEnergy" : 1450,
@@ -392,11 +392,11 @@ function getRoomLimits (room, creepsCount) {
             "wishEnergy" : 300,
     },{
             "role" : "miner",
-            "count" : _.min([scount[STRUCTURE_CONTAINER] + scount["sourceLink"], scount["source"], 1]),
+            "count" : _.min([(scount[STRUCTURE_CONTAINER] || 0) + scount["sourceLink"], scount["source"], 1]),
             "priority" : 1,
             "wishEnergy" : 650,
             "body" : {
-                "work" : 5 * _.min([scount[STRUCTURE_CONTAINER] + scount["sourceLink"], scount["source"], 1]),
+                "work" : 5 * _.min([(scount[STRUCTURE_CONTAINER] || 0) + scount["sourceLink"], scount["source"], 1]),
             },
     },{
             "role" : "defender",
@@ -417,11 +417,11 @@ function getRoomLimits (room, creepsCount) {
             },
     },{
             "role" : "miner",
-            "count" : _.min([scount[STRUCTURE_CONTAINER] + scount["sourceLink"], scount["source"]]),
+            "count" : _.min([(scount[STRUCTURE_CONTAINER] || 0) + scount["sourceLink"], scount["source"]]),
             "priority" : 2,
             "wishEnergy" : 650,
             "body" : {
-                "work" : 5 * _.min([scount[STRUCTURE_CONTAINER] + scount["sourceLink"], scount["source"]]),
+                "work" : 5 * _.min([(scount[STRUCTURE_CONTAINER] || 0) + scount["sourceLink"], scount["source"]]),
             },
     },{
             role : "upgrader",
@@ -431,7 +431,7 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : 2000,
     },{
             "role" : "builder",
-            "count" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 3 : 0,
+            "count" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 2 : 0,
             "priority" : 4,
             "wishEnergy" : 1500,
             "body" : {
