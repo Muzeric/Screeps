@@ -33,13 +33,14 @@ profiler.wrap(function() {
             moveErrors[Game.creeps[name].room.name] = 1;
         }
     }
+    statObject.addCPU("memory");
 
     _.forEach(roomNames, function(roomName) {
         if (Game.rooms[roomName])
             Game.rooms[roomName].update();
     });
-
-    statObject.addCPU("memory");
+    
+    statObject.addCPU("roomUpdate");
 
     let creepsCPUStat = {};
     for(let creep_name in Game.creeps) {
@@ -64,7 +65,12 @@ profiler.wrap(function() {
         
         let lastCPU = Game.cpu.getUsed();
         
-        objectCache[role].run(creep);
+        try {
+            objectCache[role].run(creep);
+        } catch (e) {
+            console.log(creep.name + " RUNNING ERROR: " + e);
+            Game.notify(creep.name + " RUNNING ERROR: " + e);
+        }
             
         creep.memory.stat.CPU += (Game.cpu.getUsed() - lastCPU);
         if (!creepsCPUStat[creep.memory.role])
@@ -276,7 +282,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         },
     },{
         "role" : "longbuilder",
-        "count" : fcount["Antikeeper"] ? 0 : (stopLongBuilders ? 0 : (builds ? 1 : 0) + (repairs ? 1 : 0)),
+        "count" : fcount["Antikeeper"] && !creepsCount["antikeeper"] ? 0 : (stopLongBuilders ? 0 : (builds ? 1 : 0) + (repairs ? 1 : 0)),
         "priority" : 13,
         "wishEnergy" : 1500,
         "range" : 2,
