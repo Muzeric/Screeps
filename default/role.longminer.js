@@ -114,7 +114,7 @@ var role = {
     create: function(energy, skarea) {
         energy -= 50; // CARRY
         let body = [];
-        let wlim = skarea ? 11 : 6;
+        let wlim = skarea ? 9 : 6;
         let fat = 1;
         while (energy >= 100 && wlim) {
             if (energy >= 100) {

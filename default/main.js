@@ -318,7 +318,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "arg" : 1,
     },{
         "role" : "longharvester",
-        "count" : creepsCount["antikeeper"] ? sourcesForWork * (3 + workerHarvester) : 0,
+        "count" : creepsCount["antikeeper"] ? sourcesForWork * 3 * (3 + workerHarvester) : 0,
         "arg" : workerHarvester,
         "priority" : 17,
         "minEnergy" : 550,
@@ -334,7 +334,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "count" : creepsCount["antikeeper"] ? (scount[STRUCTURE_CONTAINER] || 0) : 0,
         "arg" : 1,
         "priority" : 18,
-        "wishEnergy" : 1450,
+        "wishEnergy" : 1200,
+        "minEnergy" : 1200,
         "range" : 3,
         "body" : {
             "work" : 10 * scount[STRUCTURE_CONTAINER],

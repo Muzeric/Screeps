@@ -13,7 +13,7 @@ Creep.prototype.attackNearHostile = function(range) {
     if (!target)
         return -7;
     
-    if (creep.attack(target) == ERR_NOT_IN_RANGE)
-        creep.moveTo(target);
+    if (this.attack(target) == ERR_NOT_IN_RANGE)
+        this.moveTo(target);
     return 0;
 }
