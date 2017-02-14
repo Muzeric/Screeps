@@ -434,6 +434,7 @@ function getRoomLimits (room, creepsCount) {
             "count" : (scount["construction"] ? 1 : 0) + (scount["repair"] ? 1 : 0),
             "priority" : 4,
             "wishEnergy" : 1500,
+            "maxEnergy" : 3000,
             "body" : {
                 "carry" : (scount["construction"] || scount["repair"]) ? 9 : 0,
             },
