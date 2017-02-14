@@ -156,7 +156,7 @@ profiler.wrap(function() {
         }
         roomsCPUStat[roomName].cpu = Game.cpu.getUsed() - lastCPU;
     });
-    statObject.addCPU("needList", roomsCPUStat);
+    statObject.addCPU("needList");
     if (Game.time % 20 == 0)
         console.log("needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.role})));
     
