@@ -69,7 +69,7 @@ function getBuilderTargets (creep) {
         let rand = Math.floor(Math.random() * 5) % targets.length;
         target = targets.sort(function (a,b) { 
             let suma = a.hits / 1000 + creep.pos.getRangeTo(a);
-            let suma = b.hits / 1000 + creep.pos.getRangeTo(b);
+            let sumb = b.hits / 1000 + creep.pos.getRangeTo(b);
             return suma - sumb; 
         })[0];
         return target.id;
