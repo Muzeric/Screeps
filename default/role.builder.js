@@ -19,7 +19,7 @@ var role = {
                 creep.memory.targetID = getBuilderTargets(creep);
             
             let target = Game.getObjectById(creep.memory.targetID);
-            if (!target || target.hits && target.hits == target.hitsMax) {
+            if (!target || target.hits && (target.hits == target.hitsMax || target.hits >= utils.repairLimit)) {
                 creep.memory.targetID = null;
                 return;
             }
