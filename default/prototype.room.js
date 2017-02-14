@@ -10,6 +10,48 @@ Room.prototype.update = function() {
         this.updateHostileCreeps();
 }
 
+Room.prototype.updateResources = function() {
+    let memory = this.memory;
+    memory.resources = [];
+    memory.resourcesTime = Game.time;
+
+    this.find(FIND_DROPPED_ENERGY).forEach( function(r) {
+        let elem = {
+            find : FIND_DROPPED_ENERGY,
+            amount : r.amount,
+            wanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == r.id), function (sum, value) { return sum + value.carryCapacity; }, 0),
+            type : r.resourceType,
+            pos : r.pos,
+            id : r.id,
+        };
+        memory.resources.push(elem);
+    });
+
+    this.find(FIND_SOURCES).forEach( function(r) {
+        let elem = {
+            find : FIND_SOURCES,
+            amount : r.energy,
+            wanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == r.id), function (sum, value) { return sum + value.carryCapacity; }, 0),
+            type : RESOURCE_ENERGY,
+            pos : r.pos,
+            id : r.id,
+        };
+        memory.resources.push(elem);
+    });
+
+    this.find(FIND_STRUCTURES).forEach( function(r) {
+        let elem = {
+            find : FIND_SOURCES,
+            amount : r.energy,
+            wanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == r.id), function (sum, value) { return sum + value.carryCapacity; }, 0),
+            type : RESOURCE_ENERGY,
+            pos : r.pos,
+            id : r.id,
+        };
+        memory.resources.push(elem);
+    });
+}
+
 Room.prototype.getNearComingLair = function(pos, range, leftTime) {
     return _.filter( this.memory.structures['keeperLair'], s => _.inRange(this.memory.structuresTime + s.ticksToSpawn - Game.time, 1, leftTime || 10) && pos.inRangeTo(s.pos, range) )[0];
 }

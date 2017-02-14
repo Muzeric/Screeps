@@ -1,15 +1,3 @@
-var roomConfig = {
-    "W48N4" : {
-        "repairLimit" : 1040000,
-    },
-    "W49N4" : {
-        "repairLimit" : 1000000,
-    },
-    "W48N5" : {
-        "repairLimit" : 1000000,
-    },
-};
-
 function _clamp (n, min, max) {
     return n < min ? min : (n > max ? max : n);
 }
@@ -34,7 +22,7 @@ function _addPosition (creep, res, pos, x, y) {
 }
 
 module.exports = {
-    roomConfig : roomConfig,
+    repairLimit : 2500000,
 
     getRangedPlaces : function (creep, pos, range) {
         let res = [];

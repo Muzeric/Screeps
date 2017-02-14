@@ -240,9 +240,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     let scount = room ? _.countBy(room.find(FIND_STRUCTURES), 'structureType' ) : {};
     scount["source"] = room ? room.find(FIND_SOURCES).length : 0;
 
-    let repairLimit = utils.roomConfig[roomName] ? utils.roomConfig[roomName].repairLimit : 250000;
     let builds = room ? room.find(FIND_MY_CONSTRUCTION_SITES).length : 0;
-    let repairs = room ? room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.8 && s.hits < repairLimit } ).length : 0;
+    let repairs = room ? room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.8 && s.hits < utils.repairLimit } ).length : 0;
     let reservation = room && room.controller && room.controller.reservation ? room.controller.reservation.ticksToEnd : 0;
     let liteClaimer = reservation > 3000 ? 1 : 0;
     let allMiners = _.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.roomName == roomName).length;
@@ -377,8 +376,7 @@ function getRoomLimits (room, creepsCount) {
     let scount = _.countBy(room.find(FIND_STRUCTURES), 'structureType' );
     scount["source"] = room.find(FIND_SOURCES).length;
     scount["construction"] = room.find(FIND_MY_CONSTRUCTION_SITES).length;
-    let repairLimit = utils.roomConfig[room.name] ? utils.roomConfig[room.name].repairLimit : 100000;
-    scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < repairLimit }).length;
+    scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < utils.repairLimit }).length;
     let hostiles = room.find(FIND_HOSTILE_CREEPS, {filter: h => h.getActiveBodyparts(HEAL)}).length;
     scount["sourceLink"] = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK && _.some(s.pos.findInRange(FIND_SOURCES, 2)) }).length;
 
@@ -433,11 +431,11 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : 2000,
     },{
             "role" : "builder",
-            "count" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 2 : 0,
+            "count" : (scount["construction"] ? 1 : 0) + (scount["repair"] ? 1 : 0),
             "priority" : 4,
             "wishEnergy" : 1500,
             "body" : {
-                "carry" : (scount["construction"] || scount["repair"] && !scount[STRUCTURE_TOWER]) ? 9 : 0,
+                "carry" : (scount["construction"] || scount["repair"]) ? 9 : 0,
             },
     },{
             role : "upgrader",
@@ -514,10 +512,10 @@ function towerAction (room, canRepair) {
     if (!towers.length)
         return;
     
-    let energy = _.sum(room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE}), 'store.energy');
-    if (energy < room.energyCapacityAvailable)
-        canRepair = 0;
-    let dstructs = room.find(FIND_STRUCTURES, {filter: s => s.hits < 0.9*s.hitsMax && (canRepair || s.hits < 10000) && s.hits < 2500000});
+    //let energy = _.sum(room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE}), 'store.energy');
+    //if (energy < room.energyCapacityAvailable)
+    //    canRepair = 0;
+    let dstructs = room.find(FIND_STRUCTURES, {filter: s => s.hits < 0.5*s.hitsMax && s.hits < 10000});
 
     for(let tower of towers) {
         let target;
