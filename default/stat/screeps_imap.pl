@@ -38,6 +38,7 @@ my $count = 1;
 my $info = {};
 my $max_tick = 0;
 my @msgs_done = ();
+my @msgs_bad = ();
 foreach my $msg (@msgs) {
   print "\r$count ($msg)           ";
 
@@ -71,6 +72,7 @@ foreach my $msg (@msgs) {
     #$content = encode_utf8($content);
     $content =~ s/[\n\r]/ /g;
     print "not parsed: ".substr($content, 0, 50)." ... ".substr($content, -50)."\n";
+    push(@msgs_bad, $msg);
   } else {
     my $eh = lzw_decode($comp);
     #print "After:  ".$eh."\n";
@@ -87,6 +89,7 @@ foreach my $msg (@msgs) {
       push(@msgs_done, $msg);
     } else {
       print "can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
+      push(@msgs_bad, $msg);
     }
   }
   $count++;
@@ -136,21 +139,23 @@ $imap->select('Inbox')
 or print STDERR "select 'Inbox': ".$imap->LastError."\n"
 and die;
 
+print "We have ".scalar(@msgs_done)." done msgs\n";
 $count = 1;
 foreach my $msg (@msgs_done) {
   print "\r$count ($msg)           ";
-  #my $newUid = $imap->move("ScreepsArchive" , $msg )
-  #or die "Could not move: $@\n";
-  
-  #print "Remove for $msg:";
-  #print Dumper($imap->get_labels($msg));
   $imap->remove_labels($msg, qw/ScreepsInput/);
   $imap->add_labels($msg, qw/ScreepsArchive/);
-  #print Dumper($imap->get_labels($msg));
-  #print "\n";
   $count++;
 }
-#$imap->expunge;
+
+print "We have ".scalar(@msgs_bad)." bad msgs\n";
+$count = 1;
+foreach my $msg (@msgs_bad) {
+  print "\r$count ($msg)           ";
+  $imap->remove_labels($msg, qw/ScreepsInput/);
+  $imap->add_labels($msg, qw/ScreepsOther/);
+  $count++;
+}
 
 sub lzw_decode {
     my $s = shift;
