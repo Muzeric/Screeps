@@ -432,7 +432,7 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : 2000,
     },{
             "role" : "builder",
-            "count" : (scount["construction"] ? 1 : 0) + (scount["repair"] ? 2 : 0),
+            "count" : (scount["construction"] ? 1 : 0) + (scount["repair"] > 10 ? 2 : (scount["repair"] ? 1 : 0)),
             "priority" : 4,
             "wishEnergy" : 1500,
             "maxEnergy" : 3000,
@@ -510,7 +510,7 @@ function getSpawnForCreate (need, skipSpawnNames, reservedEnergy) {
 }
 
 function towerAction (room, canRepair) {
-    let towers = room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_TOWER });
+    let towers = room.find(FIND_MY_STRUCTURES, { filter: s => s.structureType == STRUCTURE_TOWER });
     if (!towers.length)
         return;
     
