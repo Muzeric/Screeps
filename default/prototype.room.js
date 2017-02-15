@@ -61,11 +61,17 @@ Room.prototype.updateStructures = function() {
     memory.structures = {};
     memory.type = 'other';
     memory.structuresTime = Game.time;
+    if (!("roads") in memory)
+        memory.roads = {};
     this.find(FIND_STRUCTURES).forEach( function(s) {
-        memory.structures[s.structureType] = memory.structures[s.structureType] || [];
-        memory.structures[s.structureType].push(s);
+        let elem;
         if (s.structureType == STRUCTURE_KEEPER_LAIR) {
             memory.type = 'lair';
+            elem = {
+                id : s.id,
+                pos : s.pos,
+                ticksToSpawn : s.ticksToSpawn,
+            };
         } else if (s.structureType == STRUCTURE_CONTROLLER) {
             if (s.my) {
                 memory.type = 'my';
@@ -73,6 +79,15 @@ Room.prototype.updateStructures = function() {
                 memory.type = 'reserved';
                 memory.reserveEnd = Game.time + s.reservation.ticksToEnd;
             } 
+        } else if (s.structureType == STRUCTURE_ROAD) {
+            memory.roads[s.pos.x + "," + s.pos.y] = memory.roads[s.pos.x + "," + s.pos.y] || {wanted : 0};
+            memory.roads[s.pos.x + "," + s.pos.y].hits = s.hits;
+            memory.roads[s.pos.x + "," + s.pos.y].id = s.id;
+        }
+
+        if (elem) {
+            memory.structures[s.structureType] = memory.structures[s.structureType] || [];
+            memory.structures[s.structureType].push(elem);
         }
     });
 }
