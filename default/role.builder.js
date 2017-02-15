@@ -2,7 +2,7 @@ var utils = require('utils');
 
 var role = {
     run: function(creep) {
-        if (!utils.checkInRoomAndGo(creep))
+        if (!creep.memory.targetID && !utils.checkInRoomAndGo(creep))
             return;
 
 	    if(creep.memory.building && creep.carry.energy == 0) {

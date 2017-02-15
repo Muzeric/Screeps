@@ -61,7 +61,7 @@ Room.prototype.updateStructures = function() {
     memory.structures = {};
     memory.type = 'other';
     memory.structuresTime = Game.time;
-    if (!("roads") in memory)
+    if (!("roads" in memory))
         memory.roads = {};
     this.find(FIND_STRUCTURES).forEach( function(s) {
         let elem;

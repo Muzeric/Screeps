@@ -1,5 +1,10 @@
 var utils = require('utils');
 
+let origMoveTo = Creep.prototype.moveTo;
+Creep.prototype.moveTo = function() {
+    return origMoveTo.apply(this, arguments);
+}
+
 Creep.prototype.goFromKeepers = function() {
     let target = this.room.getNearKeeper(this.pos, 10) || this.room.getNearComingLair(this.pos, 10);
     if (!target)
