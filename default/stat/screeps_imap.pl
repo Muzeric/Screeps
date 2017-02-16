@@ -26,7 +26,7 @@ print "Connected\n";
 $imap->login('yamuzer@gmail.com' => $password);
 
 my @msgs = $imap->search('SUBJECT screeps X-GM-LABELS ScreepsInput')
-or print STDERR "Searching: ".($imap->LastError || '')."\n";
+or print STDERR "Searching: ".$imap->errstr."\n";
 
 print "Got ".scalar(@msgs)." emailes\n";
 exit if scalar(@msgs) == 0;
@@ -44,7 +44,7 @@ foreach my $msg (@msgs) {
 
   #my $string = $imap->message_string($msg) 
   my $string = $imap->get($msg)
-  or print STDERR "getting meassage: ".$imap->LastError."\n"
+  or print STDERR "getting meassage: ".$imap->errstr."\n"
   and die;
   $string = "$string";
 

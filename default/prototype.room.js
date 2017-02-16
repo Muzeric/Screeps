@@ -80,9 +80,13 @@ Room.prototype.updateStructures = function() {
                 memory.reserveEnd = Game.time + s.reservation.ticksToEnd;
             } 
         } else if (s.structureType == STRUCTURE_ROAD) {
-            memory.roads[s.pos.x + "," + s.pos.y] = memory.roads[s.pos.x + "," + s.pos.y] || {wanted : 0};
-            memory.roads[s.pos.x + "," + s.pos.y].hits = s.hits;
-            memory.roads[s.pos.x + "," + s.pos.y].id = s.id;
+            if (memory.roads[s.pos.x + "," + s.pos.y]) {
+                memory.roads[s.pos.x + "," + s.pos.y].hits = s.hits;
+                if (Game.time - (memory.roads[s.pos.x + "," + s.pos.y].lastUpdate || 0) > 500)
+                    memory.roads[s.pos.x + "," + s.pos.y].wanted = 0;
+            } else {
+                memory.roads[s.pos.x + "," + s.pos.y] = {wanted : 0, lastUpdate : 0, id : s.id, hits : s.hits};
+            }
         }
 
         if (elem) {
