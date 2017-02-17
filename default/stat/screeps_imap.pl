@@ -147,7 +147,7 @@ foreach my $msg (@msgs_done) {
   $imap->add_labels($msg, qw/ScreepsArchive/);
   $count++;
 }
-
+print "\n";
 print "We have ".scalar(@msgs_bad)." bad msgs\n";
 $count = 1;
 foreach my $msg (@msgs_bad) {
@@ -156,6 +156,7 @@ foreach my $msg (@msgs_bad) {
   $imap->add_labels($msg, qw/ScreepsOther/);
   $count++;
 }
+print "\n";
 
 sub lzw_decode {
     my $s = shift;

@@ -15,6 +15,7 @@ foreach my $file (sort @files) {
         my @keys = ();
         while (my $str = <F>) {
             chomp($str);
+            $str =~ s/\./,/g;
             if (!$head) {
                 $head = 1;
                 @keys = split(/\t/, $str);
