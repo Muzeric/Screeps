@@ -109,7 +109,7 @@ Room.prototype.refreshRoad = function (memory, s) {
             return;
         }
 
-        if (memory.needRoads[key].wanted > ROADS_REPAIR_WANTED && (s.progress || s.hits && s.hits < s.hitsMax * 0.9))
+        if (memory.needRoads[key].wanted > ROADS_REPAIR_WANTED && (s.progressTotal || s.hits && s.hits < s.hitsMax * 0.9))
             memory.needRoads[key].needRepair = 1;
         else
             memory.needRoads[key].needRepair = 0;
