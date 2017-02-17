@@ -2,7 +2,12 @@ var utils = require('utils');
 
 let origMoveTo = Creep.prototype.moveTo;
 Creep.prototype.moveTo = function() {
-    return origMoveTo.apply(this, arguments);
+    let res = origMoveTo.apply(this, arguments);
+
+    if (res == OK)
+        this.room.needRoad(this);
+
+    return res;
 }
 
 Creep.prototype.goFromKeepers = function() {
