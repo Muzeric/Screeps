@@ -90,7 +90,7 @@ Room.prototype.needRoad = function(creep) {
         if (road.hits && road.hits < road.hitsMax) {
             //console.log(creep.name + ": repair road on " + key);
             creep.repair(road);
-        } else if (road.progress) {
+        } else if (road.progressTotal) {
             console.log(creep.name + ": build road on " + key);
             creep.build(road);
         }
