@@ -153,7 +153,7 @@ Room.prototype.updateStructures = function() {
         }
     });
 
-    this.find(FIND_STRUCTURES).forEach( function(s) {
+    this.find(FIND_MY_CONSTRUCTION_SITES).forEach( function(s) {
         if (s.structureType == STRUCTURE_ROAD) {
             room.refreshRoad(memory, s);
         }
