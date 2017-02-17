@@ -161,23 +161,25 @@ profiler.wrap(function() {
         console.log("needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.role})));
     
     let skipSpawnNames = {};
+    let skipRoomNames = {};
     let reservedEnergy = {};
     for (let need of needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } )) {
         if (!_.filter(Game.spawns, s => 
                 !s.spawning && 
                 !(s.name in skipSpawnNames) && 
+                !(s.room.name in skipRoomNames) &&
                 !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(s) && c.ticksToLive < 1000)  
         ).length) {
             //console.log("All spawns are spawning");
             break;
         }
         
-        let res = getSpawnForCreate(need, skipSpawnNames, reservedEnergy);
+        let res = getSpawnForCreate(need, skipSpawnNames, skipRoomNames, reservedEnergy);
         if (res[0] == -2) {
             //console.log("needList: " + need.role + " for " + need.roomName + " has no spawns in range");
         } else if (res[0] == -1) {
             if (res[1])
-                skipSpawnNames[res[1]] = 1;
+                skipRoomNames[res[1]] = 1;
             //console.log("needList: " + need.role + " for " + need.roomName + " return waitSpawnName=" + res[1]);
         } else if (res[0] == -3) {
             console.log("needList: " + need.role + " for " + need.roomName + " has no spawns with enough energyCapacity");
@@ -455,11 +457,12 @@ function getRoomLimits (room, creepsCount) {
     return limits;
 }
 
-function getSpawnForCreate (need, skipSpawnNames, reservedEnergy) {
+function getSpawnForCreate (need, skipSpawnNames, skipRoomNames, reservedEnergy) {
     let spawnsInRange = _.filter(Game.spawns, s => 
         (Game.map.getRoomLinearDistance(s.room.name, need.roomName) || 0) <= need.range &&
         !s.spawning && 
         !(s.name in skipSpawnNames) && 
+        !(s.room.name in skipRoomNames) &&
         !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(s) && c.memory.needRepair)  
     );
     
@@ -469,10 +472,12 @@ function getSpawnForCreate (need, skipSpawnNames, reservedEnergy) {
     //if (need.minEnergy && _.maxBy(spawnsInRange, function(s) {return s.room.energyCapacityAvailable} ).room.energyCapacityAvailable < need.minEnergy)
     //    return [-3];
 
-    let waitSpawnName = null;
+    let waitRoomName = null;
     for (let spawn of spawnsInRange.sort( function(a,b) { 
         return (Game.map.getRoomLinearDistance(a.room.name, need.roomName) - Game.map.getRoomLinearDistance(b.room.name, need.roomName)) || (a.room.energyAvailable - b.room.energyAvailable); 
     } )) {
+        if (spawn.room.name == waitRoomName)
+            continue;
         let energy = spawn.room.energyAvailable - (reservedEnergy[spawn.room.name] || 0);
         //console.log("getSpawnForCreate: " + need.roomName + " wants " + need.role + ", skipSpawnNames=" + JSON.stringify(skipSpawnNames) + ":" + spawn.name + " minEnergy=" + need.minEnergy + ", energyAvailable=" + spawn.room.energyAvailable);
         if (
@@ -485,12 +490,12 @@ function getSpawnForCreate (need, skipSpawnNames, reservedEnergy) {
             if (need.maxEnergy && energy > need.maxEnergy)
                 energy = need.maxEnergy;
             return [0, spawn, energy];
-        } else if (!waitSpawnName && spawn.room.energyCapacityAvailable >= need.minEnergy) {
-            waitSpawnName = spawn.name;
+        } else if (!waitRoomName && spawn.room.energyCapacityAvailable >= need.minEnergy) {
+            waitRoomName = spawn.room.name;
         }
     }
 
-    return [-1, waitSpawnName];
+    return [-1, waitRoomName];
 }
 
 function towerAction (room, canRepair) {
