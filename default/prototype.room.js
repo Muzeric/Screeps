@@ -9,12 +9,12 @@ Room.prototype.update = function() {
     if (!("hostileCreeps" in this.memory) || Game.time - (this.memory.hostileCreepsTime || 0) > UPDATE_INTERVAL_HOSTILES)
         this.updateHostileCreeps();
     
-    for (let key of _.filter(Object.keys(this.memory.needRoads), r => this.memory.needRoads[r].wanted > ROADS_MIN_WANTED)) {
+    for (let key of _.filter(Object.keys(this.memory.needRoads), r => this.memory.needRoads[r].wanted > ROADS_REPAIR_WANTED)) {
         let color = 'green';
-        if (this.memory.needRoads[key].wanted > 10)
-            color = 'yellow';
-        else if (this.memory.needRoads[key].wanted > 50)
+        if (this.memory.needRoads[key].wanted > ROADS_CONSTRUCT_WANTED)
             color = 'red';
+        else if (this.memory.needRoads[key].wanted > 10)
+            color = 'yellow';
             
         let pos = key.split(',');
         
@@ -92,7 +92,7 @@ Room.prototype.needRoad = function(creep) {
             creep.repair(road);
         } else if (road.progress) {
             console.log(creep.name + ": build road on " + key);
-            //creep.build(road);
+            creep.build(road);
         }
         return 0;
     }
@@ -109,7 +109,7 @@ Room.prototype.refreshRoad = function (memory, s) {
             return;
         }
 
-        if (memory.needRoads[key].wanted > ROADS_MIN_WANTED && (s.progress || s.hits && s.hits < s.hitsMax * 0.9))
+        if (memory.needRoads[key].wanted > ROADS_REPAIR_WANTED && (s.progress || s.hits && s.hits < s.hitsMax * 0.9))
             memory.needRoads[key].needRepair = 1;
         else
             memory.needRoads[key].needRepair = 0;
@@ -153,15 +153,21 @@ Room.prototype.updateStructures = function() {
         }
     });
 
+    let ccount = 0;
     this.find(FIND_MY_CONSTRUCTION_SITES).forEach( function(s) {
         if (s.structureType == STRUCTURE_ROAD) {
             room.refreshRoad(memory, s);
+            ccount++;
         }
     });
 
-    for (let key of _.filter(Object.keys(memory.needRoads), r => !memory.needRoads[r].id && memory.needRoads[r].wanted > ROADS_MIN_WANTED)) {
-        let pos = key.split(',');
-        //this.createConstructionSite(pos[0], pos[1], STRUCTURE_ROAD);
+    for (let key of _.filter(Object.keys(memory.needRoads), r => !memory.needRoads[r].id && memory.needRoads[r].wanted > ROADS_CONSTRUCT_WANTED)) {
+        if (ccount < 5) {
+            let pos = key.split(',');
+            this.createConstructionSite(pos[0], pos[1], STRUCTURE_ROAD);
+            console.log(this.name + " BUILT road at " + key);
+            ccount++;
+        }
     }
 }
 

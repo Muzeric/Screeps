@@ -66,9 +66,9 @@ var role = {
 	
     create: function(energy, hostiles) {
         // 10 * 6 + 150 * 16 + 50 * 13 + 250 * 3 = 4560 3860
-        // 10 * 6 + 80 * 17 + 50 * 14  + 250 * 5 = 3790 3370
+        // 10 * 6 + 80 * 19 + 50 * 15  + 250 * 5 = 3790 3580
         let tnum = hostiles ? 6 : 6;
-        let anum = hostiles ? 17 : 0;
+        let anum = hostiles ? 19 : 0;
         let rnum = hostiles ? 0 : 16;
         let hnum = hostiles ? 5 : 3;
         let mnum = Math.ceil((tnum + anum + rnum + hnum)/2);
