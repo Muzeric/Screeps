@@ -4,7 +4,7 @@ Room.prototype.init = function() {
 }
 
 Room.prototype.update = function() {
-    if (!("structures" in this.memory) || Game.time - (this.memory.structuresTime || 0) > 100)
+    if (!("structures" in this.memory) || Game.time - (this.memory.structuresTime || 0) > UPDATE_INTERVAL_STRUCTURES)
         this.updateStructures();
     if (!("hostileCreeps" in this.memory) || Game.time - (this.memory.hostileCreepsTime || 0) > 2)
         this.updateHostileCreeps();
@@ -76,7 +76,7 @@ Room.prototype.needRoad = function(creep) {
         if (!(key in roads)) {
             roads[key] = {wanted : 1, lastUpdate : Game.time, needRepair : 0, id : null};
         } else {
-            roads[key].wanted = Game.time - roads[key].lastUpdate < 500 ? roads[key].wanted + 1 : 1;
+            roads[key].wanted = Game.time - roads[key].lastUpdate < ROADS_TIMEOUT ? roads[key].wanted + 1 : 1;
             roads[key].lastUpdate = Game.time;
         }
     }
@@ -104,7 +104,7 @@ Room.prototype.refreshRoad = function (memory, s) {
     let key = s.pos.x + "," + s.pos.y;
     if (memory.needRoads[key]) {
         memory.needRoads[key].id = s.id;
-        if (Game.time - (memory.needRoads[key].lastUpdate || 0) > 500) {
+        if (Game.time - (memory.needRoads[key].lastUpdate || 0) > ROADS_TIMEOUT) {
             delete memory.needRoads[key];
             return;
         }

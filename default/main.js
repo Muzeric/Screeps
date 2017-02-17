@@ -1,4 +1,4 @@
-
+require('constants');
 require('prototype.room');
 require('prototype.creep');
 var utils = require('utils');
@@ -283,7 +283,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         },
     },{
         "role" : "longbuilder",
-        "count" : fcount["Antikeeper"] && !creepsCount["antikeeper"] ? 0 : (stopLongBuilders ? 0 : (builds ? 1 : 0) + (repairs ? 1 : 0)),
+        "count" : fcount["Build"] ? 0 : ( fcount["Antikeeper"] && !creepsCount["antikeeper"] ? 0 : (stopLongBuilders ? 0 : (builds ? 1 : 0) + (repairs ? 1 : 0)) ),
         "priority" : 13,
         "wishEnergy" : 1500,
         "range" : 2,

@@ -7,7 +7,14 @@ var role = {
             return;
 	    
         if (utils.try_attack(creep) <= 0) {
-            creep.moveTo(creep.room.controller);
+            let spawns = creep.room.find(FIND_MY_SPAWNS);
+            if (!spawns.length) {
+                console.log(creep.name + ": need recycle, but no spawns in room");
+                return;
+            }
+            let spawn = spawns.sort(function(a,b) {return a.spawning - b.spawning;})[0];
+            if (spawn.recycleCreep(creep) == ERR_NOT_IN_RANGE)
+                creep.moveTo(spawn);
             if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL))
                     creep.heal(creep);
         }
