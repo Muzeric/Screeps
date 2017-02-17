@@ -88,7 +88,7 @@ Room.prototype.needRoad = function(creep) {
             return -1;
         }
         if (road.hits && road.hits < road.hitsMax) {
-            console.log(creep.name + ": repair road on " + key);
+            //console.log(creep.name + ": repair road on " + key);
             creep.repair(road);
         } else if (road.progress) {
             console.log(creep.name + ": build road on " + key);
@@ -164,8 +164,8 @@ Room.prototype.updateStructures = function() {
     for (let key of _.filter(Object.keys(memory.needRoads), r => !memory.needRoads[r].id && memory.needRoads[r].wanted > ROADS_CONSTRUCT_WANTED)) {
         if (ccount < 5) {
             let pos = key.split(',');
-            this.createConstructionSite(pos[0], pos[1], STRUCTURE_ROAD);
-            console.log(this.name + " BUILT road at " + key);
+            let res = this.createConstructionSite(parseInt(pos[0]), parseInt(pos[1]), STRUCTURE_ROAD);
+            console.log(this.name + " BUILT (" + res + ") road at " + key);
             ccount++;
         }
     }
