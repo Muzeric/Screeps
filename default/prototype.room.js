@@ -164,9 +164,11 @@ Room.prototype.updateStructures = function() {
     for (let key of _.filter(Object.keys(memory.needRoads), r => !memory.needRoads[r].id && memory.needRoads[r].wanted > ROADS_CONSTRUCT_WANTED)) {
         if (ccount < 5) {
             let pos = key.split(',');
-            let res = this.createConstructionSite(parseInt(pos[0]), parseInt(pos[1]), STRUCTURE_ROAD);
-            console.log(this.name + " BUILT (" + res + ") road at " + key);
-            ccount++;
+            if (pos[0] != 0 && pos[0] != 49 && pos[1] != 0 && pos[1] != 49) {
+                let res = this.createConstructionSite(parseInt(pos[0]), parseInt(pos[1]), STRUCTURE_ROAD);
+                console.log(this.name + " BUILT (" + res + ") road at " + key);
+                ccount++;
+            }
         }
     }
 }

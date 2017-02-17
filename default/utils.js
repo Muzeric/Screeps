@@ -22,8 +22,6 @@ function _addPosition (creep, res, pos, x, y) {
 }
 
 module.exports = {
-    repairLimit : 2500000,
-
     getRangedPlaces : function (creep, pos, range) {
         let res = [];
         for (let x = -1 * range; x <= range; x++)

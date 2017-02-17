@@ -41,11 +41,6 @@ var role = {
         } else {
             if (creep.room.name != Game.spawns[creep.memory.spawnName].room.name) {
                 creep.moveTo(Game.spawns[creep.memory.spawnName]);
-                if (creep.getActiveBodyparts(WORK) && creep.carry.energy) {
-                    let targets = creep.pos.findInRange(FIND_STRUCTURES, 3, { filter: s => (s.structureType == STRUCTURE_ROAD || s.structureType == STRUCTURE_CONTAINER) && s.hits < s.hitsMax*0.95 } );
-                    if (targets.length)
-                        creep.repair(targets[0]);
-                }
                 return;
             }
 
