@@ -242,7 +242,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     scount["source"] = room ? room.find(FIND_SOURCES).length : 0;
 
     let builds = room ? room.find(FIND_MY_CONSTRUCTION_SITES).length : 0;
-    let repairs = room ? room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.8 && s.hits < utils.repairLimit } ).length : 0;
+    let repairs = room ? room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.8 && s.hits < REPAIR_LIMIT } ).length : 0;
     let reservation = room && room.controller && room.controller.reservation ? room.controller.reservation.ticksToEnd : 0;
     let liteClaimer = reservation > 3000 ? 1 : 0;
     let allMiners = _.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.roomName == roomName).length;
@@ -377,7 +377,7 @@ function getRoomLimits (room, creepsCount) {
     let scount = _.countBy(room.find(FIND_STRUCTURES), 'structureType' );
     scount["source"] = room.find(FIND_SOURCES).length;
     scount["construction"] = room.find(FIND_MY_CONSTRUCTION_SITES).length;
-    scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < utils.repairLimit }).length;
+    scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < REPAIR_LIMIT }).length;
     let hostiles = room.find(FIND_HOSTILE_CREEPS, {filter: h => h.getActiveBodyparts(HEAL)}).length;
     scount["sourceLink"] = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK && _.some(s.pos.findInRange(FIND_SOURCES, 2)) }).length;
 

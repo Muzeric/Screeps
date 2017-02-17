@@ -19,7 +19,7 @@ var role = {
                 creep.memory.targetID = getBuilderTargets(creep);
             
             let target = Game.getObjectById(creep.memory.targetID);
-            if (!target || target.hits && (target.hits == target.hitsMax || target.hits >= utils.repairLimit)) {
+            if (!target || target.hits && (target.hits == target.hitsMax || target.hits >= REPAIR_LIMIT)) {
                 creep.memory.targetID = null;
                 return;
             }
@@ -64,7 +64,7 @@ function getBuilderTargets (creep) {
     let target = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES, { filter : s => !_.some(Game.creeps, c => c.memory.role == "longbuilder" && c.memory.targetID == s.id) });
     if (target)
         return target.id;
-    let targets = creep.room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.9 && s.hits < utils.repairLimit && !_.some(Game.creeps, c => c.memory.targetID == s.id) } );
+    let targets = creep.room.find(FIND_STRUCTURES, { filter: s => s.structureType != STRUCTURE_ROAD && s.hits < s.hitsMax*0.9 && s.hits < REPAIR_LIMIT && !_.some(Game.creeps, c => c.memory.targetID == s.id) } );
     if (targets.length) {
         let rand = Math.floor(Math.random() * 5) % targets.length;
         target = targets.sort(function (a,b) { 
