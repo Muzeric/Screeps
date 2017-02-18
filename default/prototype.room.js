@@ -154,7 +154,7 @@ Room.prototype.updateStructures = function() {
             elem = {
                 id : s.id,
                 pos : s.pos,
-                energy : s.store[RESOURCE_ENERGY],
+                energy : s.structureType == STRUCTURE_LINK ? s.energy : s.store[RESOURCE_ENERGY],
                 structureType : s.structureType,
             };
 
