@@ -159,9 +159,12 @@ Room.prototype.updateStructures = function() {
             };
 
             if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_LINK) {
-                elem.miners = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.cID == s.id);
+                elem.miners = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.cID == s.id);
                 elem.source = _.filter(memory.structures[STRUCTURE_SOURCE], sr => s.pos.inRangeTo(sr.pos, 2))[0];
             }
+
+            if (s.structureType == STRUCTURE_LINK && this.storage && s.pos.inRangeTo(this.storage.pos, 2))
+                elem.storaged = 1;
         }
 
         if (elem) {
