@@ -63,7 +63,7 @@ Creep.prototype.findSource = function (storage_priority) {
     for(let target of targets) {
         let cenergy = target.resourceType ? target.amount : (target.structureType ? target.store[RESOURCE_ENERGY] : target.energy);
         let cpath = this.pos.getRangeTo(target);
-        let wantEnergy = _.reduce(_.filter(Game.creeps, c => c.memory.energyID == target.id), function (sum, value) { return sum + value.carryCapacity; }, 0);
+        let wantEnergy = Memory.energyWanted[target.id] || 0;
         let cpriority = 0;
         if (target.resourceType) { // Dropped
             cpriority = 1.5;

@@ -35,7 +35,7 @@ Room.prototype.updateResources = function() {
             pos : r.pos,
             amount : r.amount,
             energy : r.resourceType == RESOURCE_ENERGY ? r.amount : 0,
-            energyWanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == r.id), function (sum, value) { return sum + value.carryCapacity - value.carry.energy; }, 0),
+            energyWanted : Memory.energyWanted[r.id] || 0,
             type : r.resourceType,
         };
         memory.resources.push(elem);
@@ -48,7 +48,7 @@ Room.prototype.updateResources = function() {
             continue;
         }
         elem.energy = s.structureType ? s.store[RESOURCE_ENERGY] : s.energy;
-        elem.energyWanted = _.reduce(_.filter(Game.creeps, c => c.memory.energyID == s.id), function (sum, value) { return sum + value.carryCapacity - value.carry.energy; }, 0);
+        elem.energyWanted = Memory.energyWanted[s.id] || 0;
         if (s.structureType == STRUCTURE_CONTAINER)
             elem.miners = _.sum(Game.creeps, (c) => (c.memory.role == "miner" || c.memory.role == "longminer") && c.memory.cID == s.id);
     }
@@ -140,7 +140,7 @@ Room.prototype.updateStructures = function() {
                 id : s.id,
                 pos : s.pos,
                 energy : s.store[RESOURCE_ENERGY],
-                energyWanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == s.id), function (sum, value) { return sum + value.carryCapacity - value.carry.energy; }, 0),
+                energyWanted : Memory.energyWanted[s.id] || 0,
                 miners : s.structureType == STRUCTURE_CONTAINER ? _.sum(Game.creeps, (c) => (c.memory.role == "miner" || c.memory.role == "longminer") && c.memory.cID == s.id) : 0,
             };
         }
@@ -156,7 +156,7 @@ Room.prototype.updateStructures = function() {
                 id : s.id,
                 pos : s.pos,
                 energy : s.energy,
-                energyWanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == s.id), function (sum, value) { return sum + value.carryCapacity - value.carry.energy; }, 0),
+                energyWanted : Memory.energyWanted[s.id] || 0,
         };
         memory.structures[STRUCTURE_SOURCE] = memory.structures[STRUCTURE_SOURCE] || [];
         memory.structures[STRUCTURE_SOURCE].push(elem);
