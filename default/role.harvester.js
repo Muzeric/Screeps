@@ -5,7 +5,6 @@ var roleHarvester = {
         if (!utils.checkInRoomAndGo(creep))
             return;
 
-
         if(creep.carry.energy == 0 && creep.memory.transfering) {
 	        creep.memory.transfering = false;
             creep.memory.targetID = null;

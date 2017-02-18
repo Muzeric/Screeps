@@ -127,3 +127,17 @@ Creep.prototype.gotoSource = function() {
         this.memory.energyID = null;
     }
 }
+
+Creep.prototype.checkInRoomAndGo = function () {
+    if (this.room.name == this.memory.roomName)
+        return 0;
+    
+    if (!Memory.rooms[this.memory.roomName] || !Memory.rooms[this.memory.roomName].pointPos) {
+        console.log(this.name + ": no pointPos for " + this.memory.roomName);
+        return -1;
+    }
+
+    this.moveTo(Memory.rooms[this.memory.roomName].pointPos);
+
+    return 1;
+}

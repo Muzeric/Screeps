@@ -119,6 +119,19 @@ Room.prototype.updateStructures = function() {
     memory.structuresTime = Game.time;
     if (!("needRoads" in memory))
         memory.needRoads = {};
+    
+    this.find(FIND_SOURCES).forEach( function(s) {
+        let elem = {
+                id : s.id,
+                pos : s.pos,
+                energy : s.energy,
+                miners : _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.energyID == s.id),
+                structureType : STRUCTURE_SOURCE,
+        };
+        memory.structures[STRUCTURE_SOURCE] = memory.structures[STRUCTURE_SOURCE] || [];
+        memory.structures[STRUCTURE_SOURCE].push(elem);
+    });
+
     this.find(FIND_STRUCTURES).forEach( function(s) {
         let elem;
         if (s.structureType == STRUCTURE_KEEPER_LAIR) {
@@ -137,32 +150,24 @@ Room.prototype.updateStructures = function() {
             } 
         } else if (s.structureType == STRUCTURE_ROAD) {
             room.refreshRoad(memory, s);
-        } else if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) {
+        } else if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE || s.structureType == STRUCTURE_LINK) {
             elem = {
                 id : s.id,
                 pos : s.pos,
                 energy : s.store[RESOURCE_ENERGY],
-                miners : s.structureType == STRUCTURE_CONTAINER ?  _.filter(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.cID == s.id).length : 0,
                 structureType : s.structureType,
             };
+
+            if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_LINK) {
+                elem.miners = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.cID == s.id);
+                elem.source = _.filter(memory.structures[STRUCTURE_SOURCE], sr => s.pos.inRangeTo(sr.pos, 2))[0];
+            }
         }
 
         if (elem) {
             memory.structures[s.structureType] = memory.structures[s.structureType] || [];
             memory.structures[s.structureType].push(elem);
         }
-    });
-
-    this.find(FIND_SOURCES).forEach( function(s) {
-        let elem = {
-                id : s.id,
-                pos : s.pos,
-                energy : s.energy,
-                miners : _.filter(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.energyID == s.id).length,
-                structureType : STRUCTURE_SOURCE,
-        };
-        memory.structures[STRUCTURE_SOURCE] = memory.structures[STRUCTURE_SOURCE] || [];
-        memory.structures[STRUCTURE_SOURCE].push(elem);
     });
 
     let ccount = 0;
