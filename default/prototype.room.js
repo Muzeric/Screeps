@@ -36,7 +36,7 @@ Room.prototype.updateResources = function() {
             amount : r.amount,
             energy : r.resourceType == RESOURCE_ENERGY ? r.amount : 0,
             energyWanted : Memory.energyWanted[r.id] || 0,
-            type : r.resourceType,
+            resourceType : r.resourceType,
         };
         memory.resources.push(elem);
     });
@@ -141,7 +141,8 @@ Room.prototype.updateStructures = function() {
                 pos : s.pos,
                 energy : s.store[RESOURCE_ENERGY],
                 energyWanted : Memory.energyWanted[s.id] || 0,
-                miners : s.structureType == STRUCTURE_CONTAINER ? _.sum(Game.creeps, (c) => (c.memory.role == "miner" || c.memory.role == "longminer") && c.memory.cID == s.id) : 0,
+                miners : s.structureType == STRUCTURE_CONTAINER ?  _.filter(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.cID == s.id).length : 0,
+                structureType : s.structureType,
             };
         }
 
@@ -157,6 +158,8 @@ Room.prototype.updateStructures = function() {
                 pos : s.pos,
                 energy : s.energy,
                 energyWanted : Memory.energyWanted[s.id] || 0,
+                miners : _.filter(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.energyID == s.id).length,
+                structureType : STRUCTURE_SOURCE,
         };
         memory.structures[STRUCTURE_SOURCE] = memory.structures[STRUCTURE_SOURCE] || [];
         memory.structures[STRUCTURE_SOURCE].push(elem);
