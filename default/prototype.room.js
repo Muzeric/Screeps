@@ -35,7 +35,6 @@ Room.prototype.updateResources = function() {
             pos : r.pos,
             amount : r.amount,
             energy : r.resourceType == RESOURCE_ENERGY ? r.amount : 0,
-            energyWanted : Memory.energyWanted[r.id] || 0,
             resourceType : r.resourceType,
         };
         memory.resources.push(elem);
@@ -48,7 +47,6 @@ Room.prototype.updateResources = function() {
             continue;
         }
         elem.energy = s.structureType ? s.store[RESOURCE_ENERGY] : s.energy;
-        elem.energyWanted = Memory.energyWanted[s.id] || 0;
         if (s.structureType == STRUCTURE_CONTAINER)
             elem.miners = _.sum(Game.creeps, (c) => (c.memory.role == "miner" || c.memory.role == "longminer") && c.memory.cID == s.id);
     }
@@ -140,7 +138,6 @@ Room.prototype.updateStructures = function() {
                 id : s.id,
                 pos : s.pos,
                 energy : s.store[RESOURCE_ENERGY],
-                energyWanted : Memory.energyWanted[s.id] || 0,
                 miners : s.structureType == STRUCTURE_CONTAINER ?  _.filter(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.cID == s.id).length : 0,
                 structureType : s.structureType,
             };
@@ -157,7 +154,6 @@ Room.prototype.updateStructures = function() {
                 id : s.id,
                 pos : s.pos,
                 energy : s.energy,
-                energyWanted : Memory.energyWanted[s.id] || 0,
                 miners : _.filter(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.energyID == s.id).length,
                 structureType : STRUCTURE_SOURCE,
         };
