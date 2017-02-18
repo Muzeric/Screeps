@@ -18,6 +18,9 @@ profiler.wrap(function() {
         _.map( Game.rooms, 'name' ) ).concat( 
         Object.keys(Memory.rooms) ) 
     );
+    Memory.energyWanted = _.reduce( _.filter(Game.creeps, c => c.memory.energyID), function (sum, value, key) { 
+            sum[value.memory.energyID] = (sum[value.memory.energyID] || 0) + value.carryCapacity - value.carry.energy; return sum; 
+    }, {});
     
     if(!("targets" in Memory))
         Memory.targets = {};

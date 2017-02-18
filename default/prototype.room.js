@@ -34,13 +34,14 @@ Room.prototype.updateResources = function() {
             id : r.id,
             pos : r.pos,
             amount : r.amount,
-            wanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == r.id), function (sum, value) { return sum + value.carryCapacity; }, 0),
+            energy : r.resourceType == RESOURCE_ENERGY ? r.amount : 0,
+            energyWanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == r.id), function (sum, value) { return sum + value.carryCapacity - value.carry.energy; }, 0),
             type : r.resourceType,
         };
         memory.resources.push(elem);
     });
 
-    for (let elem of memory.structures[STRUCTURE_CONTAINER].concat(memory.structures[STRUCTURE_STORAGE], memory.structures[STRUCTURE_SOURCE])) {
+    for (let elem of (memory.structures[STRUCTURE_CONTAINER] || []).concat( (memory.structures[STRUCTURE_STORAGE] || []), (memory.structures[STRUCTURE_SOURCE] || []) )) {
         let s = Game.getObjectById(elem.id);
         if (!s) {
             console.log(this.name + ": no resource object " + elem.id);
