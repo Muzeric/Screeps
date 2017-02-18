@@ -31,8 +31,8 @@ Creep.prototype.attackNearHostile = function(range) {
 
 Creep.prototype.findSourceAndGo = function () {
     if (!this.memory.energyID || Game.time - (this.memory.energyTime || 0) > ENERGY_TIMEOUT) {
-        this.memory.energyID = this.findSource();
-        this.memory.energyTime = Game.time;
+        if (this.findSource() == OK)
+            this.memory.energyTime = Game.time;
     }
     this.gotoSource();
 }
@@ -81,13 +81,16 @@ Creep.prototype.findSource = function () {
     Memory.energyWanted[target.id] = (Memory.energyWanted[target.id] || 0) + energyNeed;
     
     //console.log(this.name + " [" + this.room.name + "] got target " + target.id + " structureType=" + target.structureType + " pos=" + target.pos.x + "," + target.pos.y);
-    return target.id;
+    this.memory.energyObj = target;
+    this.memory.energyID = target.id;
+    return 0;
 }
     
 Creep.prototype.gotoSource = function() {
     let source = Game.getObjectById(this.memory.energyID);
     if(!source) {
         console.log(this.name + " [" + this.room.name + "] can't get source with enegryID=" + this.memory.energyID);
+        this.memory.energyObj.energy = 0;
         this.memory.energyID = null;
         return;
     }
