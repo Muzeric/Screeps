@@ -48,7 +48,7 @@ Creep.prototype.findSource = function () {
 
     let energyNeed = this.carryCapacity - _.sum(this.carry);
     let targetInfo = {};
-    for(let target of targets) {
+    for(let target of _.filter(targets, t => t.energy)) {
         let range = this.pos.getRangeTo(target.pos.x, target.pos.y);
         let energyLeft = target.energy - (Memory.energyWanted[target.id] || 0);
         let energyTicks = (energyNeed - energyLeft) / 10;
@@ -80,14 +80,14 @@ Creep.prototype.findSource = function () {
 
     Memory.energyWanted[target.id] = (Memory.energyWanted[target.id] || 0) + energyNeed;
     
-    //console.log(this.name + " got target " + target.id + " in " + cont_info[target.id].cpath + " with " + cont_info[target.id].cenergy + " energy");
+    //console.log(this.name + " [" + this.room.name + "] got target " + target.id + " structureType=" + target.structureType + " pos=" + target.pos.x + "," + target.pos.y);
     return target.id;
 }
     
 Creep.prototype.gotoSource = function() {
     let source = Game.getObjectById(this.memory.energyID);
     if(!source) {
-        console.log(this.name + " can't get source with enegryID=" + this.memory.energyID);
+        console.log(this.name + " [" + this.room.name + "] can't get source with enegryID=" + this.memory.energyID);
         this.memory.energyID = null;
         return;
     }

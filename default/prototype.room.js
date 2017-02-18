@@ -48,7 +48,9 @@ Room.prototype.updateResources = function() {
         }
         elem.energy = s.structureType ? s.store[RESOURCE_ENERGY] : s.energy;
         if (s.structureType == STRUCTURE_CONTAINER)
-            elem.miners = _.sum(Game.creeps, (c) => (c.memory.role == "miner" || c.memory.role == "longminer") && c.memory.cID == s.id);
+            elem.miners = _.filter(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.cID == s.id).length;
+        else if (s.structureType == STRUCTURE_SOURCE)
+            elem.miners = _.filter(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.energyID == s.id).length;
     }
 }
 
