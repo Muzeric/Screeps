@@ -39,7 +39,12 @@ Creep.prototype.findSourceAndGo = function () {
 
 Creep.prototype.findSource = function () {    
     let memory =this.room.memory;
-    let targets = (memory.structures[STRUCTURE_CONTAINER] || []).concat( (memory.structures[STRUCTURE_STORAGE] || []), (memory.structures[STRUCTURE_SOURCE] || []), (memory.resources || []) );
+    let targets = _.filter(
+        (memory.structures[STRUCTURE_CONTAINER] || []).concat( 
+        (memory.structures[STRUCTURE_STORAGE] || []), 
+        (memory.structures[STRUCTURE_SOURCE] || []),
+        (memory.resources || []) ),
+     t => t.energy);
 
     if(!targets.length) {
         console.log(this.name + " no any source in room " + this.room.name);
@@ -48,7 +53,7 @@ Creep.prototype.findSource = function () {
 
     let energyNeed = this.carryCapacity - _.sum(this.carry);
     let targetInfo = {};
-    for(let target of _.filter(targets, t => t.energy)) {
+    for(let target of targets) {
         let range = this.pos.getRangeTo(target.pos.x, target.pos.y);
         let energyLeft = target.energy - (Memory.energyWanted[target.id] || 0);
         let energyTicks = (energyNeed - energyLeft) / 10;
