@@ -8,6 +8,8 @@ Room.prototype.update = function() {
         this.updateStructures();
     if (!("hostileCreeps" in this.memory) || Game.time - (this.memory.hostileCreepsTime || 0) > UPDATE_INTERVAL_HOSTILES)
         this.updateHostileCreeps();
+    if (!("resources" in this.memory) || Game.time - (this.memory.resourcesTime || 0) > UPDATE_INTERVAL_RESOURCES)
+        this.updateResources();
     
     for (let key of _.filter(Object.keys(this.memory.needRoads), r => this.memory.needRoads[r].wanted > ROADS_REPAIR_WANTED)) {
         let color = 'green';
@@ -29,39 +31,26 @@ Room.prototype.updateResources = function() {
 
     this.find(FIND_DROPPED_ENERGY).forEach( function(r) {
         let elem = {
-            find : FIND_DROPPED_ENERGY,
+            id : r.id,
+            pos : r.pos,
             amount : r.amount,
             wanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == r.id), function (sum, value) { return sum + value.carryCapacity; }, 0),
             type : r.resourceType,
-            pos : r.pos,
-            id : r.id,
         };
         memory.resources.push(elem);
     });
 
-    this.find(FIND_SOURCES).forEach( function(r) {
-        let elem = {
-            find : FIND_SOURCES,
-            amount : r.energy,
-            wanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == r.id), function (sum, value) { return sum + value.carryCapacity; }, 0),
-            type : RESOURCE_ENERGY,
-            pos : r.pos,
-            id : r.id,
-        };
-        memory.resources.push(elem);
-    });
-
-    this.find(FIND_STRUCTURES).forEach( function(r) {
-        let elem = {
-            find : FIND_SOURCES,
-            amount : r.energy,
-            wanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == r.id), function (sum, value) { return sum + value.carryCapacity; }, 0),
-            type : RESOURCE_ENERGY,
-            pos : r.pos,
-            id : r.id,
-        };
-        memory.resources.push(elem);
-    });
+    for (let elem of memory.structures[STRUCTURE_CONTAINER].concat(memory.structures[STRUCTURE_STORAGE], memory.structures[STRUCTURE_SOURCE])) {
+        let s = Game.getObjectById(elem.id);
+        if (!s) {
+            console.log(this.name + ": no resource object " + elem.id);
+            continue;
+        }
+        elem.energy = s.structureType ? s.store[RESOURCE_ENERGY] : s.energy;
+        elem.energyWanted = _.reduce(_.filter(Game.creeps, c => c.memory.energyID == s.id), function (sum, value) { return sum + value.carryCapacity - value.carry.energy; }, 0);
+        if (s.structureType == STRUCTURE_CONTAINER)
+            elem.miners = _.sum(Game.creeps, (c) => (c.memory.role == "miner" || c.memory.role == "longminer") && c.memory.cID == s.id);
+    }
 }
 
 Room.prototype.getNearComingLair = function(pos, range, leftTime) {
