@@ -145,12 +145,31 @@ Room.prototype.updateStructures = function() {
             } 
         } else if (s.structureType == STRUCTURE_ROAD) {
             room.refreshRoad(memory, s);
+        } else if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) {
+            elem = {
+                id : s.id,
+                pos : s.pos,
+                energy : s.store[RESOURCE_ENERGY],
+                energyWanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == s.id), function (sum, value) { return sum + value.carryCapacity - value.carry.energy; }, 0),
+                miners : s.structureType == STRUCTURE_CONTAINER ? _.sum(Game.creeps, (c) => (c.memory.role == "miner" || c.memory.role == "longminer") && c.memory.cID == s.id) : 0,
+            };
         }
 
         if (elem) {
             memory.structures[s.structureType] = memory.structures[s.structureType] || [];
             memory.structures[s.structureType].push(elem);
         }
+    });
+
+    this.find(FIND_SOURCES).forEach( function(s) {
+        let elem = {
+                id : s.id,
+                pos : s.pos,
+                energy : s.energy,
+                energyWanted : _.reduce(_.filter(Game.creeps, c => c.memory.energyID == s.id), function (sum, value) { return sum + value.carryCapacity - value.carry.energy; }, 0),
+        };
+        memory.structures[STRUCTURE_SOURCE] = memory.structures[STRUCTURE_SOURCE] || [];
+        memory.structures[STRUCTURE_SOURCE].push(elem);
     });
 
     let ccount = 0;
