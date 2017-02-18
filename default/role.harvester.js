@@ -17,7 +17,7 @@ var roleHarvester = {
 	    
 	    if(!creep.memory.transfering) {
             creep.memory.needRepair = 0;
-            utils.findSourceAndGo(creep);
+            creep.findSourceAndGo();
         } else {
             if (creep.ticksToLive < 500)
                 creep.memory.needRepair = 1;

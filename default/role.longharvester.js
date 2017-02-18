@@ -35,7 +35,7 @@ var role = {
         
         if(!creep.memory.transfering) {
 	        if(creep.room.name == Game.flags[creep.memory.energyName].pos.roomName)
-                utils.findSourceAndGo(creep);
+                creep.findSourceAndGo();
             else
                 creep.moveTo(Game.flags[creep.memory.energyName].pos);
         } else {

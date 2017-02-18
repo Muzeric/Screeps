@@ -56,7 +56,7 @@ var roleLongBuilder = {
                 creep.moveTo(target, {ignoreRoads : true});
 	    }
 	    else {
-	        utils.findSourceAndGo(creep);
+	        creep.findSourceAndGo();
 	    }
 	},
 	

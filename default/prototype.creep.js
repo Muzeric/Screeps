@@ -38,6 +38,7 @@ Creep.prototype.findSourceAndGo = function () {
 }
 
 Creep.prototype.findSource = function () {    
+    let memory =this.room.memory;
     let targets = (memory.structures[STRUCTURE_CONTAINER] || []).concat( (memory.structures[STRUCTURE_STORAGE] || []), (memory.structures[STRUCTURE_SOURCE] || []), (memory.resources || []) );
 
     if(!targets.length) {
@@ -48,7 +49,7 @@ Creep.prototype.findSource = function () {
     let energyNeed = this.carryCapacity - _.sum(this.carry);
     let targetInfo = {};
     for(let target of targets) {
-        let range = this.pos.getRangeTo(target);
+        let range = this.pos.getRangeTo(target.pos.x, target.pos.y);
         let energyLeft = target.energy - (Memory.energyWanted[target.id] || 0);
         let energyTicks = (energyNeed - energyLeft) / 10;
         if (energyTicks < 0)
@@ -67,8 +68,8 @@ Creep.prototype.findSource = function () {
         }
 
         targetInfo[target.id] = range * 1.2 + energyTicks - 100 * cpriority;
-        //if (this.room.name == "W46N4")
-        //    console.log(this.name + " [" + this.room.name + "] has target " + target.id + " in " + cpath + " with " + cenergy + " energy and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + targetInfo[target.id]);
+        //if (this.room.name == "W48N4")
+        //   console.log(this.name + " [" + this.room.name + "]: targetID=" + target.id + ", range=" + range + ", energyTicks=" + energyTicks + ", energyLeft=" + energyLeft + ", cpriotiy=" + cpriority + ", energyNeed=" + energyNeed + ", sum=" + targetInfo[target.id]);
     }
     let target = targets.sort( function (a,b) {
         let suma = targetInfo[a.id];

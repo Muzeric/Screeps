@@ -36,7 +36,7 @@ var role = {
             if (res == ERR_NOT_IN_RANGE)
                 creep.moveTo(target);
 	    } else {
-	        utils.findSourceAndGo(creep);
+	        creep.findSourceAndGo();
 	    }
 	},
 	
