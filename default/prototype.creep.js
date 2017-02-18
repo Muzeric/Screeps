@@ -34,7 +34,8 @@ Creep.prototype.findSourceAndGo = function () {
         if (this.findSource() == OK)
             this.memory.energyTime = Game.time;
     }
-    this.gotoSource();
+    if (this.memory.energyID)
+        this.gotoSource();
 }
 
 Creep.prototype.findSource = function () {    
@@ -47,7 +48,8 @@ Creep.prototype.findSource = function () {
      t => t.energy);
 
     if(!targets.length) {
-        console.log(this.name + " no any source in room " + this.room.name);
+        this.memory.energyID = null;
+        //console.log(this.name + " no any source in room " + this.room.name);
         return;
     }
 
