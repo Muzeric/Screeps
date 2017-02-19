@@ -43,8 +43,13 @@ var role = {
                 creep.moveTo(Game.flags[creep.memory.energyName].pos);
         } else {
             if (creep.room.name != creep.memory.containerRoomName && !creep.memory.cID) {
-                //creep.moveTo(Memory.rooms[creep.memory.containerRoomName].pointPos);
-                creep.moveTo(Game.rooms[creep.memory.containerRoomName].controller);
+                let p = Memory.rooms[creep.memory.containerRoomName].pointPos;
+                if (!p) {
+                    console.log(creep.name + ": no alive containerRoom.pos");
+                    creep.memory.containerRoomName = null;
+                    return;
+                }
+                creep.moveTo(new RoomPosition(p.x, p.y, p.roomName));
                 return;
             }
 

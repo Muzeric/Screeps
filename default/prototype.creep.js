@@ -158,7 +158,7 @@ Creep.prototype.setContainerRoomName = function () {
     let minCost;
 
     let creep = this;
-    _.filter(Game.rooms, r => r.memory.type == "my" && Game.map.getRoomLinearDistance(r.name, creep.memory.roomName) <= 3).forEach( function(r) {
+    _.filter(Game.rooms, r => r.memory.type == "my" && r.memory.pointPos && Game.map.getRoomLinearDistance(r.name, creep.memory.roomName) <= 3).forEach( function(r) {
         let carryParts = _.sum( _.map( _.filter(Game.creeps, c => c.memory.role == "longharvester" && c.memory.containerRoomName == r.name), c => _.sum(c.body, p => p.type == CARRY) ) );
         let cost = carryParts / r.energyCapacityAvailable;
         if (minCost === undefined || cost < minCost) {
