@@ -15,6 +15,9 @@ var role = {
 			return;
 		}
 
+        if (!creep.memory.containerRoomName)
+            this.setContainerRoomName();
+
         if(!creep.memory.energyName || !Game.flags[creep.memory.energyName]) {
             if(!set_energy(creep)) 
                 return;

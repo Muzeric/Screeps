@@ -123,7 +123,6 @@ Room.prototype.updateStructures = function() {
             memory.pointPos = flag.pos;
     }
         
-    
     this.find(FIND_SOURCES).forEach( function(s) {
         let elem = {
                 id : s.id,
@@ -152,6 +151,10 @@ Room.prototype.updateStructures = function() {
             } else if (s.reservation && s.reservation.username == 'Saint') {
                 memory.type = 'reserved';
                 memory.reserveEnd = Game.time + s.reservation.ticksToEnd;
+            } else if (s.reservation || s.owner) {
+                memory.type = 'hostiled';
+            } else {
+                memory.type = 'empty';
             }
             if (!memory.pointPos)
                 memory.pointPos = s.pos;
