@@ -42,17 +42,14 @@ Room.prototype.updateResources = function() {
         memory.resources.push(elem);
     });
 
-    for (let elem of (memory.structures[STRUCTURE_CONTAINER] || []).concat( (memory.structures[STRUCTURE_STORAGE] || []), (memory.structures[STRUCTURE_SOURCE] || []) )) {
+    for ( let elem of _.filter(_.flatten(_.values(memory.structures)), s => "energy" in s) )  {
         let s = Game.getObjectById(elem.id);
         if (!s) {
             console.log(this.name + ": no resource object " + elem.id);
+            elem.energy = 0;
             continue;
         }
-        elem.energy = s.structureType ? s.store[RESOURCE_ENERGY] : s.energy;
-        if (s.structureType == STRUCTURE_CONTAINER)
-            elem.miners = _.filter(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.cID == s.id).length;
-        else if (s.structureType == STRUCTURE_SOURCE)
-            elem.miners = _.filter(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.energyID == s.id).length;
+        elem.energy = "energy" in s ? s.energy : ("store" in s ? s.store[RESOURCE_ENERGY] : 0);
     }
 }
 
@@ -125,7 +122,7 @@ Room.prototype.updateStructures = function() {
                 id : s.id,
                 pos : s.pos,
                 energy : s.energy,
-                miners : _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.energyID == s.id),
+                minersFrom : _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.energyID == s.id),
                 structureType : STRUCTURE_SOURCE,
         };
         memory.structures[STRUCTURE_SOURCE] = memory.structures[STRUCTURE_SOURCE] || [];
@@ -159,12 +156,15 @@ Room.prototype.updateStructures = function() {
             };
 
             if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_LINK) {
-                elem.miners = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.cID == s.id);
+                elem.minersTo = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.cID == s.id);
                 elem.source = _.filter(memory.structures[STRUCTURE_SOURCE], sr => s.pos.inRangeTo(sr.pos, 2))[0];
             }
 
-            if (s.structureType == STRUCTURE_LINK && this.storage && s.pos.inRangeTo(this.storage.pos, 2))
-                elem.storaged = 1;
+            if (s.structureType == STRUCTURE_LINK) {
+                elem.minersFrom = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.energyID == s.id);
+                if (this.storage && s.pos.inRangeTo(this.storage.pos, 2))
+                    elem.storaged = 1;
+            }
         }
 
         if (elem) {

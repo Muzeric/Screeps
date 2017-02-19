@@ -47,14 +47,15 @@ Creep.prototype.findSource = function () {
         (memory.resources || []) ),
      t => t.energy);
 
-    if(!targets.length) {
+    if (!targets.length) {
         this.memory.energyID = null;
         //console.log(this.name + " no any source in room " + this.room.name);
-        return;
+        return -1;
     }
 
     let energyNeed = this.carryCapacity - _.sum(this.carry);
-    let targetInfo = {};
+    let resultTarget;
+    let minCost = 0;
     for(let target of targets) {
         let range = this.pos.getRangeTo(target.pos.x, target.pos.y);
         let energyLeft = target.energy - (Memory.energyWanted[target.id] || 0);
@@ -64,32 +65,38 @@ Creep.prototype.findSource = function () {
 
         let cpriority = 0;
         if (target.resourceType) { // Dropped
-            cpriority = this.room.memory.hostilesCount ? -100 : 2;
+            if (this.room.memory.hostilesCount || energyLeft <= 0)
+                continue;
+            else
+                cpriority = 2;
         } else if (target.structureType == STRUCTURE_CONTAINER && energyNeed <= energyLeft) {
             cpriority = 2;
         } else if (target.structureType == STRUCTURE_SOURCE) { // Source
-            if (target.miners)
-                cpriority = -100;
+            if (target.minersFrom)
+                continue;
             else
                 cpriority = -2;
         }
 
-        targetInfo[target.id] = range * 1.2 + energyTicks - 100 * cpriority;
+        let cost = range * 1.2 + energyTicks - 100 * cpriority;
+        if (minCost === undefined || cost < minCost) {
+            resultTarget = target;
+            minCost = cost;
+        }
         //if (this.room.name == "W48N4")
-        //   console.log(this.name + " [" + this.room.name + "]: targetID=" + target.id + ", range=" + range + ", energyTicks=" + energyTicks + ", energyLeft=" + energyLeft + ", cpriotiy=" + cpriority + ", energyNeed=" + energyNeed + ", sum=" + targetInfo[target.id]);
+        //   console.log(this.name + " [" + this.room.name + "]: targetID=" + target.id + ", range=" + range + ", energyTicks=" + energyTicks + ", energyLeft=" + energyLeft + ", cpriotiy=" + cpriority + ", energyNeed=" + energyNeed + ", cost=" + cost);
     }
-    let target = targets.sort( function (a,b) {
-        let suma = targetInfo[a.id];
-        let sumb = targetInfo[b.id];
-        //console.log("a=" + a.id + ",b=" + b.id + ",suma=" + suma + ",sumb=" + sumb);
-        return suma - sumb;
-    })[0];
+    if (!resultTarget) {
+        this.memory.energyID = null;
+        //console.log(this.name + " no any source in room " + this.room.name);
+        return -2;
+    }
 
-    Memory.energyWanted[target.id] = (Memory.energyWanted[target.id] || 0) + energyNeed;
+    Memory.energyWanted[resultTarget.id] = (Memory.energyWanted[resultTarget.id] || 0) + energyNeed;
     
     //console.log(this.name + " [" + this.room.name + "] got target " + target.id + " structureType=" + target.structureType + " pos=" + target.pos.x + "," + target.pos.y);
-    this.memory.energyObj = target;
-    this.memory.energyID = target.id;
+    this.memory.energyObj = resultTarget;
+    this.memory.energyID = resultTarget.id;
     return 0;
 }
     

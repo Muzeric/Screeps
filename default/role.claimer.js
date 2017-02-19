@@ -14,7 +14,7 @@ var roleClaimer = {
                 creep.moveTo(Game.spawns[creep.memory.spawnName].room.controller);
                 return;
             }
-            console.log(creep.name + " controllers: " + controllers);
+            //console.log(creep.name + " controllers: " + controllers);
             
             creep.memory.controllerName = controllers.sort( function(a,b) {
                 let suma = 0;
@@ -25,7 +25,7 @@ var roleClaimer = {
                     sumb += cr.ticksToLive;
                 return suma - sumb;
             })[0].name;
-            console.log(creep.name + " controllerName=" + creep.memory.controllerName);
+            //console.log(creep.name + " controllerName=" + creep.memory.controllerName);
         }
         
         if(creep.room.name == Game.flags[creep.memory.controllerName].pos.roomName) {

@@ -23,7 +23,7 @@ var role = {
                 return suma - sumb || (a.structureType == STRUCTURE_LINK ? -1 : 1);
             })[0];
             creep.memory.cID = container.id;
-            console.log(creep.name + " found container " + creep.memory.cID);
+            //console.log(creep.name + " found container " + creep.memory.cID);
 
             source = container.pos.findClosestByPath(FIND_SOURCES, {ignoreCreeps : true});
             if(!source) {
@@ -31,7 +31,7 @@ var role = {
                 return;
             }
             creep.memory.energyID = source.id;
-            console.log(creep.name + " found source " + creep.memory.energyID);
+            //console.log(creep.name + " found source " + creep.memory.energyID);
         } else {
             container = Game.getObjectById(creep.memory.cID);
             if(!container) {
