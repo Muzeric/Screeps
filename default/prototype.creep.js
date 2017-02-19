@@ -170,5 +170,5 @@ Creep.prototype.setContainerRoomName = function () {
     if (!this.memory.containerRoomName)
         console.log(this.name + ": can't set container room name");
     
-    console.log(this.name + ": set containerRoomName=" + this.memory.containerRoomName);
+    //console.log(this.name + ": set containerRoomName=" + this.memory.containerRoomName);
 }

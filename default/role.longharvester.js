@@ -16,7 +16,7 @@ var role = {
 		}
 
         if (!creep.memory.containerRoomName)
-            this.setContainerRoomName();
+            creep.setContainerRoomName();
 
         if(!creep.memory.energyName || !Game.flags[creep.memory.energyName]) {
             if(!set_energy(creep)) 
@@ -29,9 +29,9 @@ var role = {
         } else {
             if(creep.carry.energy == 0 && creep.memory.transfering) {
                 creep.memory.transfering = false;
+                creep.memory.cID = null;
             } else if (creep.carry.energy == creep.carryCapacity && !creep.memory.transfering) {
                 creep.memory.transfering = true;
-                delete creep.memory.cID;
                 creep.memory.energyID = null;
             }
         }
@@ -42,18 +42,18 @@ var role = {
             else
                 creep.moveTo(Game.flags[creep.memory.energyName].pos);
         } else {
-            if (creep.room.name != Game.spawns[creep.memory.spawnName].room.name) {
-                creep.moveTo(Game.spawns[creep.memory.spawnName]);
+            if (creep.room.name != creep.memory.containerRoomName) {
+                creep.moveTo(Memory.rooms[creep.memory.containerRoomName].pointPos);
                 return;
             }
 
-            if(creep.memory.cID === undefined)
+            if(!creep.memory.cID)
                 set_cid(creep);
         
             let container = Game.getObjectById(creep.memory.cID);
             if(!container) {
                 console.log("Problem getting container for " + creep.name);
-                delete creep.memory.cID;
+                creep.memory.cID = null;
                 return;
             }
 
