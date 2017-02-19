@@ -70,7 +70,7 @@ Creep.prototype.findSource = function () {
 
         let cpriority = 0;
         if (target.resourceType) { // Dropped
-            if (this.room.memory.hostilesCount || energyLeft <= 0)
+            if (this.room.memory.hostilesCount || energyLeft - range * 1.2 <= 0)
                 continue;
             else
                 cpriority = 2;

@@ -114,6 +114,7 @@ Room.prototype.updateStructures = function() {
     memory.structures = {};
     memory.type = 'other';
     memory.structuresTime = Game.time;
+    memory.constructions = 0;
     if (!("needRoads" in memory))
         memory.needRoads = {};
     
@@ -148,14 +149,18 @@ Room.prototype.updateStructures = function() {
             } 
         } else if (s.structureType == STRUCTURE_ROAD) {
             room.refreshRoad(memory, s);
-        } else if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE || s.structureType == STRUCTURE_LINK) {
+        } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_LAB].indexOf(s.structureType) !== -1) {
             elem = {
                 id : s.id,
                 pos : s.pos,
-                energy : s.structureType == STRUCTURE_LINK ? s.energy : s.store[RESOURCE_ENERGY],
                 structureType : s.structureType,
                 places : utils.getRangedPlaces(null, s.pos, 1).length,
             };
+
+            if ("energy" in s)
+                elem.energy = s.energy;
+            else if ("store" in s)
+                elem.energy = s.store[RESOURCE_ENERGY];
 
             if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_LINK) {
                 elem.minersTo = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.cID == s.id);
@@ -175,21 +180,20 @@ Room.prototype.updateStructures = function() {
         }
     });
 
-    let ccount = 0;
     this.find(FIND_MY_CONSTRUCTION_SITES).forEach( function(s) {
+        memory.constructions++;
         if (s.structureType == STRUCTURE_ROAD) {
             room.refreshRoad(memory, s);
-            ccount++;
         }
     });
 
     for (let key of _.filter(Object.keys(memory.needRoads), r => !memory.needRoads[r].id && memory.needRoads[r].wanted > ROADS_CONSTRUCT_WANTED)) {
-        if (ccount < 5) {
+        if (memory.constructions < 5) {
             let pos = key.split(',');
             if (pos[0] != 0 && pos[0] != 49 && pos[1] != 0 && pos[1] != 49) {
                 let res = this.createConstructionSite(parseInt(pos[0]), parseInt(pos[1]), STRUCTURE_ROAD);
                 console.log(this.name + " BUILT (" + res + ") road at " + key);
-                ccount++;
+                memory.constructions++;
             }
         }
     }
