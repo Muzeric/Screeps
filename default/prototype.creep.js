@@ -19,6 +19,9 @@ Creep.prototype.goFromKeepers = function() {
 }
 
 Creep.prototype.attackNearHostile = function(range) {
+    if (!this.getActiveBodyparts(ATTACK))
+        return -1;
+        
     let target = this.room.getNearHostile(this.pos, range || 5);
     if (!target)
         return -7;
