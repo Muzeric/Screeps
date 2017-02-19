@@ -42,8 +42,9 @@ var role = {
             else
                 creep.moveTo(Game.flags[creep.memory.energyName].pos);
         } else {
-            if (creep.room.name != creep.memory.containerRoomName) {
-                creep.moveTo(Memory.rooms[creep.memory.containerRoomName].pointPos);
+            if (creep.room.name != creep.memory.containerRoomName && !creep.memory.cID) {
+                //creep.moveTo(Memory.rooms[creep.memory.containerRoomName].pointPos);
+                creep.moveTo(Game.rooms[creep.memory.containerRoomName].controller);
                 return;
             }
 
@@ -107,7 +108,7 @@ var role = {
 
 function set_cid (creep) {
     //console.log("Searching container for " + creep.name);
-    if(creep.room.storage && creep.room.storage.storeCapacity - creep.room.storage.store[RESOURCE_ENERGY] > 0) {
+    if(creep.room.storage && creep.room.storage.storeCapacity - _.sum(creep.room.storage.store) > 0) {
         let links = creep.room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK && s.pos.getRangeTo(creep.room.storage) > 3 && s.energyCapacity - s.energy > 0});
         creep.memory.cID = creep.pos.findClosestByPath(links.concat(creep.room.storage), {ignoreCreeps: true}).id;
         return;

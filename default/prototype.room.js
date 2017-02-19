@@ -117,11 +117,7 @@ Room.prototype.updateStructures = function() {
     memory.constructions = 0;
     if (!("needRoads" in memory))
         memory.needRoads = {};
-    if (!memory.pointPos) {
-        let flag = _.filter(Game.flags, f => f.pos.roomName == this.name)[0];
-        if (flag)
-            memory.pointPos = flag.pos;
-    }
+    memory.pointPos = null;
         
     this.find(FIND_SOURCES).forEach( function(s) {
         let elem = {
@@ -156,8 +152,7 @@ Room.prototype.updateStructures = function() {
             } else {
                 memory.type = 'empty';
             }
-            if (!memory.pointPos)
-                memory.pointPos = s.pos;
+            memory.pointPos = new RoomPosition(s.pos.x, s.pos.y, s.pos.roomName);
         } else if (s.structureType == STRUCTURE_ROAD) {
             room.refreshRoad(memory, s);
         } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_LAB].indexOf(s.structureType) !== -1) {
@@ -207,6 +202,12 @@ Room.prototype.updateStructures = function() {
                 memory.constructions++;
             }
         }
+    }
+
+    if (!memory.pointPos) {
+        let flag = _.filter(Game.flags, f => f.pos.roomName == this.name)[0];
+        if (flag)
+            memory.pointPos = new RoomPosition(flag.pos.x, flag.pos.y, flag.pos.roomName);
     }
 }
 
