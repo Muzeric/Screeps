@@ -107,6 +107,22 @@ Room.prototype.refreshRoad = function (memory, s) {
     return;
 }
 
+Room.prototype.getStoragedLink = function() {
+    let link = _.filter(this.memory.structures[STRUCTURE_LINK], l => l.storaged)[0];
+    if (link)
+        return Game.getObjectById(link.id);
+    
+    return null;
+}
+
+Room.prototype.getUnStoragedLinks = function() {
+    return _.map( _.filter(this.memory.structures[STRUCTURE_LINK], l => !l.storaged), l => Game.getObjectById(l.id));
+}
+
+Room.prototype.getTowers = function() {
+    return _.map( this.memory.structures[STRUCTURE_TOWER], t => Game.getObjectById(t.id) );
+}
+
 Room.prototype.updateStructures = function() {
     console.log(this.name + ": updateStructures");
     let room = this;
@@ -137,8 +153,6 @@ Room.prototype.updateStructures = function() {
         if (s.structureType == STRUCTURE_KEEPER_LAIR) {
             memory.type = 'lair';
             elem = {
-                id : s.id,
-                pos : s.pos,
                 ticksToSpawn : s.ticksToSpawn,
             };
         } else if (s.structureType == STRUCTURE_CONTROLLER) {
@@ -157,8 +171,6 @@ Room.prototype.updateStructures = function() {
             room.refreshRoad(memory, s);
         } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_LAB].indexOf(s.structureType) !== -1) {
             elem = {
-                id : s.id,
-                pos : s.pos,
                 structureType : s.structureType,
                 places : utils.getRangedPlaces(null, s.pos, 1).length,
             };
@@ -178,9 +190,16 @@ Room.prototype.updateStructures = function() {
                 if (room.storage && s.pos.inRangeTo(room.storage.pos, 2))
                     elem.storaged = 1;
             }
+        } else if ([STRUCTURE_WALL, STRUCTURE_RAMPART].indexOf(s.structureType) !== -1 && s.hits < s.hitsMax*0.9 && s.hits < REPAIR_LIMIT ) {
+            elem = {
+                hits : s.hits,
+                hitsMax : s.hitsMax, 
+            }
         }
 
         if (elem) {
+            elem.id = s.id;
+            elem.pos = s.pos;
             memory.structures[s.structureType] = memory.structures[s.structureType] || [];
             memory.structures[s.structureType].push(elem);
         }
