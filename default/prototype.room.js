@@ -169,7 +169,7 @@ Room.prototype.updateStructures = function() {
 
             if (s.structureType == STRUCTURE_LINK) {
                 elem.minersFrom = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.energyID == s.id);
-                if (this.storage && s.pos.inRangeTo(this.storage.pos, 2))
+                if (room.storage && s.pos.inRangeTo(room.storage.pos, 2))
                     elem.storaged = 1;
             }
         }
