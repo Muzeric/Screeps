@@ -28,7 +28,7 @@ var roleHarvester = {
                     console.log(creep.name + ": needRepair, but no spawns in room");
                     return;
                 }
-                let spawn = spawns.sort(function(a,b) {return a.spawning - b.spawning;})[0];
+                let spawn = spawns.sort(function(a,b) {return (a.spawning ? a.spawning.remainingTime : 0) - (b.spawning ? b.spawning.remainingTime : 0);})[0];
                 if (spawn.energy < spawn.energyCapacity)
                     creep.transfer(spawn, RESOURCE_ENERGY);
                 if(spawn.renewCreep(creep) == ERR_NOT_IN_RANGE)
