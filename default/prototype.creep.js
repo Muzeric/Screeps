@@ -30,6 +30,9 @@ Creep.prototype.attackNearHostile = function(range) {
 }
 
 Creep.prototype.findSourceAndGo = function () {
+    if (this.room.memory.type == 'lair' && !this.goFromKeepers())
+        return;
+        
     if (!this.memory.energyID || Game.time - (this.memory.energyTime || 0) > ENERGY_TIMEOUT) {
         if (this.findSource() == OK)
             this.memory.energyTime = Game.time;
@@ -108,9 +111,6 @@ Creep.prototype.gotoSource = function() {
         this.memory.energyID = null;
         return;
     }
-
-    if (this.room.memory.type == 'lair' && !this.goFromKeepers())
-        return;
     
     let res;
     if(source.structureType && (source.structureType == STRUCTURE_CONTAINER || source.structureType == STRUCTURE_STORAGE || source.structureType == STRUCTURE_LINK)) {
