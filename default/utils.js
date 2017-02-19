@@ -14,9 +14,11 @@ function _addPosition (creep, res, pos, x, y) {
         if (t == "wall")
             return;
     }
-    for (let c of npos.lookFor(LOOK_CREEPS)) {
-        if (c != creep)
-            return;
+    if (creep) {
+        for (let c of npos.lookFor(LOOK_CREEPS)) {
+            if (c != creep)
+                return;
+        }
     }
     res.push(npos);
 }

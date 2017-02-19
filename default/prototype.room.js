@@ -124,6 +124,7 @@ Room.prototype.updateStructures = function() {
                 energy : s.energy,
                 minersFrom : _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.energyID == s.id),
                 structureType : STRUCTURE_SOURCE,
+                places : utils.getRangedPlaces(null, s.pos, 1).length,
         };
         memory.structures[STRUCTURE_SOURCE] = memory.structures[STRUCTURE_SOURCE] || [];
         memory.structures[STRUCTURE_SOURCE].push(elem);
@@ -153,6 +154,7 @@ Room.prototype.updateStructures = function() {
                 pos : s.pos,
                 energy : s.structureType == STRUCTURE_LINK ? s.energy : s.store[RESOURCE_ENERGY],
                 structureType : s.structureType,
+                places : utils.getRangedPlaces(null, s.pos, 1).length,
             };
 
             if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_LINK) {
