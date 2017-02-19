@@ -59,6 +59,9 @@ Creep.prototype.findSource = function () {
     let resultTarget;
     let minCost;
     for(let target of targets) {
+        let placesLeft = target.places - (Memory.energyWanted[target.id] ? Memory.energyWanted[target.id].creepsCount : 0);
+        if (placesLeft <= 0)
+            continue;
         let range = this.pos.getRangeTo(target.pos.x, target.pos.y);
         let energyLeft = target.energy - (Memory.energyWanted[target.id] ? Memory.energyWanted[target.id].energy : 0);
         let energyTicks = (energyNeed - energyLeft) / 10;
