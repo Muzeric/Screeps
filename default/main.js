@@ -488,7 +488,7 @@ function getSpawnForCreate (need, skipSpawnNames, skipRoomNames, reservedEnergy)
 }
 
 function towerAction (room, canRepair) {
-    let towers = room.find(FIND_MY_STRUCTURES, { filter: s => s.structureType == STRUCTURE_TOWER });
+    let towers = room.getTowers();
     if (!towers.length)
         return;
     

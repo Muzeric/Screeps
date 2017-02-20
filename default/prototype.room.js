@@ -123,6 +123,28 @@ Room.prototype.getTowers = function() {
     return _.map( this.memory.structures[STRUCTURE_TOWER], t => Game.getObjectById(t.id) );
 }
 
+Room.prototype.getPairedContainer = function() {
+    let containers = _.filter(
+        (this.memory.structures[STRUCTURE_CONTAINER] || []).concat( 
+        (this.memory.structures[STRUCTURE_LINK] || []) ),
+     c => c.source);
+
+     if (!containers.length)
+        return null;
+    
+    let resultContainer;
+    let minTicks;
+    for (let container of containers) {
+        let ticks = _.sum(_.filter(Game.creeps, c => c.memory.cID == container.id), c => c.ticksToLive);
+        if (minTicks === undefined || ticks < minTicks) {
+            resultContainer = container;
+            minTicks = ticks;
+        }
+    }
+
+    return resultContainer;
+}
+
 Room.prototype.updateStructures = function() {
     console.log(this.name + ": updateStructures");
     let room = this;
@@ -186,8 +208,11 @@ Room.prototype.updateStructures = function() {
             if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_LINK) {
                 elem.minersTo = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.cID == s.id);
                 elem.source = _.filter(memory.structures[STRUCTURE_SOURCE], sr => s.pos.inRangeTo(sr.pos, 2))[0];
-                if (elem.source)
-                    elem.source.pair = (elem.source.pair || 0) + 1;
+                if (elem.source) {
+                    elem.source.betweenPos = _.filter( utils.getRangedPlaces(null, elem.source.pos, 1), p => p.isNearTo(s.pos) )[0];
+                    if (elem.source.betweenPos)
+                        elem.source.pair = (elem.source.pair || 0) + 1;
+                }
             }
 
             if (s.structureType == STRUCTURE_LINK) {

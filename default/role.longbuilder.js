@@ -95,7 +95,7 @@ function getLongBuilderTargets(creep) {
 		if (creep.room.name == buildf.room.name)
 			object = creep;
 			
-		let target = object.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES, { filter : s => !_.some(Game.creeps, c => c.memory.role == "longbuilder" && c.memory.targetID == s.id) });
+		let target = object.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES, { filter : s => s.structureType != STRUCTURE_ROAD && !_.some(Game.creeps, c => c.memory.role == "longbuilder" && c.memory.targetID == s.id) });
 		if(target)
 			return target.id;
 	}
@@ -105,6 +105,7 @@ function getLongBuilderTargets(creep) {
 		if(_.some(buildf.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER})))
 			continue;
 		targets = targets.concat( buildf.room.find(FIND_STRUCTURES, { filter: (structure) => 
+			structure.structureType != STRUCTURE_ROAD &&
 			structure.hits < structure.hitsMax*0.9 &&
 			structure.hits < REPAIR_LIMIT &&
 			!_.some(Game.creeps, c => c.memory.role == "longbuilder" && c.memory.targetID == structure.id) 
