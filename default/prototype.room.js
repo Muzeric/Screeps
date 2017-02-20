@@ -131,6 +131,7 @@ Room.prototype.updateStructures = function() {
     memory.type = 'other';
     memory.structuresTime = Game.time;
     memory.constructions = 0;
+    memory.repairs = 0;
     if (!("needRoads" in memory))
         memory.needRoads = {};
     memory.pointPos = null;
@@ -173,6 +174,8 @@ Room.prototype.updateStructures = function() {
             elem = {
                 structureType : s.structureType,
                 places : utils.getRangedPlaces(null, s.pos, 1).length,
+                hits : s.hits,
+                hitsMax : s.hitsMax, 
             };
 
             if ("energy" in s)
@@ -183,6 +186,8 @@ Room.prototype.updateStructures = function() {
             if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_LINK) {
                 elem.minersTo = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.cID == s.id);
                 elem.source = _.filter(memory.structures[STRUCTURE_SOURCE], sr => s.pos.inRangeTo(sr.pos, 2))[0];
+                if (elem.source)
+                    elem.source.pair = (elem.source.pair || 0) + 1;
             }
 
             if (s.structureType == STRUCTURE_LINK) {
@@ -202,6 +207,8 @@ Room.prototype.updateStructures = function() {
             elem.pos = s.pos;
             memory.structures[s.structureType] = memory.structures[s.structureType] || [];
             memory.structures[s.structureType].push(elem);
+            if (elem.hits < elem.hitsMax * 0.9 && elem.hits < REPAIR_LIMIT)
+                memory.repairs++;
         }
     });
 

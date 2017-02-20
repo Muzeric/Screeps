@@ -114,6 +114,8 @@ profiler.wrap(function() {
     let stopLongBuilders = longbuilders * 1.5 >= buildFlags;
     let roomsCPUStat = {};
     _.forEach(roomNames, function(roomName) {
+        if (roomName == "undefined")
+            return;
         let lastCPU = Game.cpu.getUsed();
         roomsCPUStat[roomName] = {
             cpu: 0,
@@ -242,21 +244,15 @@ function linkAction (room) {
 
 function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) {
     let lastCPU = Game.cpu.getUsed();
-    let room = Game.rooms[roomName];
-    //console.log(roomName + ": start observing");
-
+    let memory = Memory.rooms[roomName] || {structures : {}};
     let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
-    let scount = room ? _.countBy(room.find(FIND_STRUCTURES), 'structureType' ) : {};
-    scount["source"] = room ? room.find(FIND_SOURCES).length : 0;
-
-    let builds = room ? room.find(FIND_MY_CONSTRUCTION_SITES).length : 0;
-    let repairs = room ? room.find(FIND_STRUCTURES, { filter: s => s.hits < s.hitsMax*0.8 && s.hits < REPAIR_LIMIT && s.structureType != STRUCTURE_ROAD } ).length : 0;
-    let reservation = room && room.controller && room.controller.reservation ? room.controller.reservation.ticksToEnd : 0;
-    let liteClaimer = reservation > 3000 ? 1 : 0;
-    let allMiners = _.filter(Game.creeps, c => c.memory.role == "longminer" && c.memory.roomName == roomName).length;
-    let workerHarvester = scount[STRUCTURE_CONTAINER] && scount["source"] && scount[STRUCTURE_CONTAINER] >= scount["source"] && allMiners >= scount[STRUCTURE_CONTAINER] ? 0 : 1;
-    let sourcesForWork = fcount["Source"] ? _.max([fcount["Source"], scount["source"]]) : 0;
+    let builds = memory.constructions || 0;
+    let repairs = memory.repairs || 0;
+    let liteClaimer = memory.type == 'reserved' && memory.reserveEnd - Game.time > 3000 ? 1 : 0;
+    let workerHarvester = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom) ? 1 : 0;
+    let sourcesForWork = (memory.structures[STRUCTURE_SOURCE] || []).length;
     let antikeeperArged = _.filter(Game.creeps, c => c.memory.role == "antikeeper" && c.memory.roomName == roomName && c.memory.arg).length;
+    let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
     
     let limits = [];
     limits.push({
@@ -282,13 +278,11 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "range" : 2,
     },{
         "role" : "longminer",
-        "count" : fcount["Antikeeper"] ? 0 : (scount[STRUCTURE_CONTAINER] || 0),
+        "count" : fcount["Antikeeper"] ? 0 : pairedSources,
         "priority" : 12,
         "wishEnergy" : 1060,
+        "minEnergy" : 1060,
         "range" : 3,
-        "body" : {
-            "work" : 6 * scount[STRUCTURE_CONTAINER],
-        },
     },{
         "role" : "longbuilder",
         "count" : fcount["Build"] ? ( fcount["Antikeeper"] && !creepsCount["antikeeper"] ? 0 : (stopLongBuilders ? 0 : (builds ? 1 : 0) + (repairs ? 1 : 0)) ) : 0,
@@ -327,7 +321,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "arg" : 0,
     },{
         "role" : "longharvester",
-        "count" : creepsCount["antikeeper"] ? sourcesForWork * 3 * (3 + workerHarvester) : 0,
+        "count" : creepsCount["antikeeper"] ? sourcesForWork * (3 + workerHarvester) : 0,
         "arg" : workerHarvester,
         "priority" : 17,
         "minEnergy" : 550,
@@ -340,15 +334,12 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "maxEnergy" : 3000,
     },{
         "role" : "longminer",
-        "count" : creepsCount["antikeeper"] ? (scount[STRUCTURE_CONTAINER] || 0) : 0,
+        "count" : creepsCount["antikeeper"] ? pairedSources : 0,
         "arg" : 1,
         "priority" : 18,
         "wishEnergy" : 1200,
         "minEnergy" : 1200,
         "range" : 3,
-        "body" : {
-            "work" : 10 * scount[STRUCTURE_CONTAINER],
-        },
     });
 
     for (let limit of limits) {
@@ -365,57 +356,55 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
 
 function getRoomLimits (room, creepsCount) {
     let lastCPU = Game.cpu.getUsed();
-    //console.log(room.name + ": start observing");
-    let scount = _.countBy(room.find(FIND_STRUCTURES), 'structureType' );
-    scount["source"] = room.find(FIND_SOURCES).length;
-    scount["construction"] = room.find(FIND_MY_CONSTRUCTION_SITES).length;
-    scount["repair"] = room.find(FIND_STRUCTURES, { filter : s => s.hits < s.hitsMax*0.9 && s.hits < REPAIR_LIMIT && s.structureType != STRUCTURE_ROAD }).length;
-    let hostiles = room.find(FIND_HOSTILE_CREEPS, {filter: h => h.getActiveBodyparts(HEAL)}).length;
-    scount["sourceLink"] = room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK && _.some(s.pos.findInRange(FIND_SOURCES, 2)) }).length;
+    let memory = Memory.rooms[room.name] || {structures : {}};
 
-    let workerHarvester = scount[STRUCTURE_CONTAINER] && creepsCount["miner"] ? 0 : 1;
-    let countHarvester = _.ceil((scount[STRUCTURE_EXTENSION] || 0) / 15) + _.floor((scount[STRUCTURE_TOWER] || 0) / 3);
+    let builds = memory.constructions || 0;
+    let repairs = memory.repairs || 0;
+    let unminerSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom);
+    let sources = (memory.structures[STRUCTURE_SOURCE] || []).length;
+    let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
+    let countHarvester = _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 15) + _.floor((memory.structures[STRUCTURE_TOWER] || []).length / 3);
+    let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
+    let hostiles = memory.hostilesCount && memory.hostilesDeadTime - Game.time > 50 ? 1 : 0;
     
     let limits = [];
     limits.push({
             "role" : "harvester",
             "count" : 1,
-            "arg" : workerHarvester,
+            "arg" : unminerSources ? 1 : 0,
             "priority" : 1,
             "wishEnergy" : 300,
     },{
             "role" : "miner",
-            "count" : _.min([(scount[STRUCTURE_CONTAINER] || 0) + scount["sourceLink"], scount["source"], 1]),
+            "count" : _.min([pairedSources, 1]),
             "priority" : 1,
             "wishEnergy" : 650,
             "body" : {
-                "work" : 5 * _.min([(scount[STRUCTURE_CONTAINER] || 0) + scount["sourceLink"], scount["source"], 1]),
+                "work" : 5 * _.min([pairedSources, 1]),
             },
     },{
             "role" : "defender",
             "count" : hostiles * 2,
-            "arg" : scount[STRUCTURE_TOWER] ? 1 : 0,
+            "arg" : memory.structures[STRUCTURE_TOWER] ? 1 : 0,
             "priority" : 1,
             "wishEnergy" : 1500,
             "minEnergy" : 1500,
     },{
             "role" : "harvester",
             "count" : countHarvester,
-            "arg" : workerHarvester,
+            "arg" : unminerSources ? 1 : 0,
             "priority" : 2,
             "wishEnergy" : 1350,
             "body" : {
-                "work" : workerHarvester ? 10*scount["source"] : 0,
+                "work" : 10*unminerSources,
                 "carry" : 10*countHarvester,
             },
     },{
             "role" : "miner",
-            "count" : _.min([(scount[STRUCTURE_CONTAINER] || 0) + scount["sourceLink"], scount["source"]]),
+            "count" : pairedSources,
             "priority" : 2,
-            "wishEnergy" : 650,
-            "body" : {
-                "work" : 5 * _.min([(scount[STRUCTURE_CONTAINER] || 0) + scount["sourceLink"], scount["source"]]),
-            },
+            "minEnergy" : 700,
+            "wishEnergy" : 700,
     },{
             role : "upgrader",
             "count" : 1,
@@ -424,30 +413,24 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : 2000,
     },{
             "role" : "builder",
-            "count" : (scount["construction"] ? 1 : 0) + (scount["repair"] > 10 ? 2 : (scount["repair"] ? 1 : 0)),
+            "count" : (builds ? 1 : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)),
             "priority" : 4,
             "wishEnergy" : 1500,
             "maxEnergy" : 3000,
             "body" : {
-                "carry" : (scount["construction"] ? 6 : 0 ) + (scount["repair"] ? 18 : 0),
+                "carry" : (builds ? 6 : 0 ) + (repairs > 10 ? 18 : (repairs ? 9 : 0)),
             },
     },{
             role : "upgrader",
-            "count" : scount["construction"] ? 1 : scount["source"],
+            "count" : builds ? 1 : sources,
             "priority" : 5,
             "wishEnergy" : 1500,
             "maxEnergy" : 2000,
     },{
             "role" : "shortminer",
-            "count" : (scount[STRUCTURE_LINK] >= 2 && scount[STRUCTURE_STORAGE]) ? 1 : 0, // TODO: harvester count
+            "count" : storagedLink ? 1 : 0, // TODO: harvester count
             "priority" : 6,
             "wishEnergy" : 300,
-    },{
-            "role" : "upgrader",
-            "count" : scount["construction"] ? 1 : scount["source"],
-            "priority" : 20,
-            "wishEnergy" : 1500,
-            "maxEnergy" : 2000,
     });
 
     for (let limit of limits) {

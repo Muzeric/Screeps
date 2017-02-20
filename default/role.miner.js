@@ -90,7 +90,6 @@ var role = {
         let body = [CARRY];
         let wlim = 5;
         let fat = 1;
-        let mnum = 0;
         while (energy >= 100 && wlim) {
             if (energy >= 100) {
 	            body.push(WORK);
@@ -98,10 +97,10 @@ var role = {
                 fat++;
 	            energy -= 100;
 	        }
-            if ((!mnum || fat/(mnum*2) >= 2) && energy >= 50) {
+            if (fat > 0 && energy >= 50) {
                 body.push(MOVE);
 	            energy -= 50;
-                mnum++;
+                fat -= 2;
             }
         }
 
