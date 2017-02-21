@@ -253,6 +253,9 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     let sourcesForWork = (memory.structures[STRUCTURE_SOURCE] || []).length;
     let antikeeperArged = _.filter(Game.creeps, c => c.memory.role == "antikeeper" && c.memory.roomName == roomName && c.memory.arg).length;
     let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
+
+    if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"])
+        return [];
     
     let limits = [];
     limits.push({
