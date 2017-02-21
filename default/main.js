@@ -30,14 +30,16 @@ profiler.wrap(function() {
     if(!("warning" in Memory))
         Memory.warning = {};
 
-    for(var name in Memory.creeps) {
-        if(!Game.creeps[name]) {
-            console.log(name + " DEAD (" + Memory.creeps[name].roomName + ")");
-            statObject.die(name);
-            delete Memory.creeps[name];
-        } else if (Game.creeps[name].memory.errors > 0) {
-            console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
-            moveErrors[Game.creeps[name].room.name] = 1;
+    if (Game.time % PERIOD_MEMORY == 0) {
+        for(var name in Memory.creeps) {
+            if(!Game.creeps[name]) {
+                console.log(name + " DEAD (" + Memory.creeps[name].roomName + ")");
+                statObject.die(name);
+                delete Memory.creeps[name];
+            } else if (Game.creeps[name].memory.errors > 0) {
+                console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
+                moveErrors[Game.creeps[name].room.name] = 1;
+            }
         }
     }
     statObject.addCPU("memory");
@@ -123,40 +125,44 @@ profiler.wrap(function() {
             links: 0,
         };
         let room = Game.rooms[roomName];
-        let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), 'memory.role');
-        let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
         let hostiles = room ? room.find(FIND_HOSTILE_CREEPS, {filter: c => c.owner.username != "Source Keeper"}).length : -1;
-
         if (hostiles == -1 && Memory.warning[roomName] > 0)
             ; // TODO: can leave room forever
         else
             Memory.warning[roomName] = hostiles;
 
-        if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
-            Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders, hostiles);
-            Memory.limitTime[roomName] = Game.time;
-        }
+            
 
-        for (let limit of Memory.limitList[roomName]) {
-            let notEnoughBody = 0;
-            let hasBodyLimits = 0;
-            if (limit["body"]) {
-                for (let part in limit["body"]) {
-                    if (limit["body"][part])
-                        hasBodyLimits = 1;
-                    if ((bodyCount[limit.role + "," + part] || 0) < limit["body"][part])
-                        notEnoughBody = 1;
-                }
+        if (Game.time % PERIOD_NEEDLIST == 1) {
+            let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), 'memory.role');
+            let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
+
+            if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
+                Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders, hostiles);
+                Memory.limitTime[roomName] = Game.time;
             }
-            if ( (creepsCount[limit.role] || 0) < limit.count && (!hasBodyLimits || notEnoughBody) ) {
-                needList.push(limit);
-                creepsCount[limit.role] = (creepsCount[limit.role] || 0) + 1;
+
+            for (let limit of Memory.limitList[roomName]) {
+                let notEnoughBody = 0;
+                let hasBodyLimits = 0;
+                if (limit["body"]) {
+                    for (let part in limit["body"]) {
+                        if (limit["body"][part])
+                            hasBodyLimits = 1;
+                        if ((bodyCount[limit.role + "," + part] || 0) < limit["body"][part])
+                            notEnoughBody = 1;
+                    }
+                }
+                if ( (creepsCount[limit.role] || 0) < limit.count && (!hasBodyLimits || notEnoughBody) ) {
+                    needList.push(limit);
+                    creepsCount[limit.role] = (creepsCount[limit.role] || 0) + 1;
+                }
             }
         }
 
         if (room) {
             let localCPU = Game.cpu.getUsed();
-            towerAction(room, creepsCount["upgrader"] ? 1 : 0);
+            towerAction(room);
             roomsCPUStat[roomName].towers = Game.cpu.getUsed() - localCPU;
             localCPU = Game.cpu.getUsed();
             linkAction(room);
@@ -490,14 +496,11 @@ function getSpawnForCreate (need, skipSpawnNames, skipRoomNames, reservedEnergy)
     return [-1, waitRoomName];
 }
 
-function towerAction (room, canRepair) {
+function towerAction (room) {
     let towers = room.getTowers();
     if (!towers.length)
         return;
     
-    //let energy = _.sum(room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE}), 'store.energy');
-    //if (energy < room.energyCapacityAvailable)
-    //    canRepair = 0;
     let dstructs = room.find(FIND_STRUCTURES, {filter: s => s.structureType != STRUCTURE_ROAD && s.hits < 0.5*s.hitsMax && s.hits < 10000});
 
     for(let tower of towers) {

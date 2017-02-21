@@ -8,3 +8,5 @@ global.ROADS_CONSTRUCT_WANTED = 30;
 global.REPAIR_LIMIT = 2500000;
 global.STRUCTURE_SOURCE = "source";
 global.ENERGY_TIMEOUT = 50;
+global.PERIOD_MEMORY = 10;
+global.PERIOD_NEEDLIST = 10;
