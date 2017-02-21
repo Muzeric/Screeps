@@ -160,7 +160,7 @@ profiler.wrap(function() {
             }
         }
 
-        if (room) {
+        if (room && Memory.rooms[roomName].type == 'my') {
             let localCPU = Game.cpu.getUsed();
             towerAction(room);
             roomsCPUStat[roomName].towers = Game.cpu.getUsed() - localCPU;

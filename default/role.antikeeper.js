@@ -3,6 +3,7 @@ var utils = require('utils');
 var role = {
 
     run: function(creep) {
+        creep.memory.gotoFriendID = null;
         let healed = 0;
         if (creep.hits < creep.hitsMax) {
             creep.heal(creep);
@@ -33,7 +34,10 @@ var role = {
 
         let target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         if (target && friend && (!creep.pos.inRangeTo(friend, 4) || friend.hits < friend.hitsMax) && !creep.pos.inRangeTo(target, 4) ) {
-            creep.moveTo(friend);
+            if (!friend.memory.gotoFriendID) {
+                creep.moveTo(friend);
+                creep.memory.gotoFriendID = friend.id;
+            }
             if (friend.hits < friend.hitsMax && !healed) {
                 if (creep.heal(friend) == ERR_NOT_IN_RANGE)
                     creep.rangedHeal(friend);
@@ -54,7 +58,7 @@ var role = {
                     creep.attack(target);
                 }
             }
-            creep.moveTo(safePlace ? safePlace : target)
+            creep.moveTo(safePlace ? safePlace : target);
         } else if (seeked = creep.pos.findInRange(FIND_MY_CREEPS, 11, {filter: c => c.hits < c.hitsMax && c != creep})[0] ) {
             if (creep.pos.isNearTo(seeked)) {
                 if (!healed)
