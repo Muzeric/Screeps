@@ -32,8 +32,12 @@ var role = {
         }
 
         let target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        if (target && friend && !creep.pos.inRangeTo(friend, 4) && creep.pos.inRangeTo(target, 4) ) {
+        if (target && friend && (!creep.pos.inRangeTo(friend, 4) || friend.hits < friend.hitsMax) && !creep.pos.inRangeTo(target, 4) ) {
             creep.moveTo(friend);
+            if (friend.hits < friend.hitsMax && !healed) {
+                if (creep.heal(friend) == ERR_NOT_IN_RANGE)
+                    creep.rangedHeal(friend);
+            }
             return;
         }
 
