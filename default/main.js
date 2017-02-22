@@ -5,7 +5,7 @@ var utils = require('utils');
 var statObject = require('stat');
 const profiler = require('screeps-profiler');
 // This line monkey patches the global prototypes. 
-profiler.enable();
+// profiler.enable();
 
 module.exports.loop = function () {
 profiler.wrap(function() {
@@ -30,16 +30,14 @@ profiler.wrap(function() {
     if(!("warning" in Memory))
         Memory.warning = {};
 
-    if (Game.time % PERIOD_MEMORY == 0) {
-        for(var name in Memory.creeps) {
-            if(!Game.creeps[name]) {
-                console.log(name + " DEAD (" + Memory.creeps[name].roomName + ")");
-                statObject.die(name);
-                delete Memory.creeps[name];
-            } else if (Game.creeps[name].memory.errors > 0) {
-                console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
-                moveErrors[Game.creeps[name].room.name] = 1;
-            }
+    for(var name in Memory.creeps) {
+        if(!Game.creeps[name]) {
+            console.log(name + " DEAD (" + Memory.creeps[name].roomName + ")");
+            statObject.die(name);
+            delete Memory.creeps[name];
+        } else if (Game.creeps[name].memory.errors > 0) {
+            console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
+            moveErrors[Game.creeps[name].room.name] = 1;
         }
     }
     statObject.addCPU("memory");
