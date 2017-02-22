@@ -54,7 +54,7 @@ var role = {
                 return;
             } else {
                 let target = 
-                    Game.getObjectById(Memory.targets[creep.room.name]) ||
+                    //Game.getObjectById(Memory.targets[creep.room.name]) ||
                     _.filter(flag.pos.lookFor(LOOK_STRUCTURES), s => s.structureType != "road")[0] ||
                     creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK)}) ||
                     creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}) ||
@@ -63,7 +63,7 @@ var role = {
                     creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType != STRUCTURE_CONTROLLER})
                 ;
                 if (target) {
-                    Memory.targets[creep.room.name] = target.id;
+                    //Memory.targets[creep.room.name] = target.id;
                     if (creep.attack(target) == ERR_NOT_IN_RANGE)
                         creep.moveTo(target);
                 } else {

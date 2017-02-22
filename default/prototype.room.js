@@ -244,8 +244,13 @@ Room.prototype.updateStructures = function() {
         }
     });
 
-    for (let key of _.filter(Object.keys(memory.needRoads), r => !memory.needRoads[r].id && memory.needRoads[r].wanted > ROADS_CONSTRUCT_WANTED)) {
-        if (memory.constructions < 5) {
+    for (let key of _.filter(Object.keys(memory.needRoads), r => 
+            !memory.needRoads[r].id && 
+            (memory.needRoads[r].wanted > ROADS_CONSTRUCT_WANTED || Game.time - (memory.needRoads[r].lastUpdate || 0) > ROADS_TIMEOUT)
+    )) {
+        if (Game.time - (memory.needRoads[key].lastUpdate || 0) > ROADS_TIMEOUT) {
+            delete memory.needRoads[key];
+        } else if (memory.constructions < 5) {
             let pos = key.split(',');
             if (pos[0] != 0 && pos[0] != 49 && pos[1] != 0 && pos[1] != 49) {
                 let res = this.createConstructionSite(parseInt(pos[0]), parseInt(pos[1]), STRUCTURE_ROAD);

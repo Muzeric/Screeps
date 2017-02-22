@@ -11,7 +11,7 @@ module.exports.loop = function () {
 profiler.wrap(function() {
     var stat = statObject.init();
     var moveErrors = {};
-    var rolesCount = {};
+    //var rolesCount = {};
     var objectCache = {};
     var roomNames = _.uniq( 
         _.map (Game.flags, 'pos.roomName').concat( 
@@ -25,15 +25,15 @@ profiler.wrap(function() {
             return sum; 
     }, {});
     
-    if(!("targets" in Memory))
-        Memory.targets = {};
+    //if(!("targets" in Memory))
+    //    Memory.targets = {};
     if(!("warning" in Memory))
         Memory.warning = {};
 
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
             console.log(name + " DEAD (" + Memory.creeps[name].roomName + ")");
-            statObject.die(name);
+            //statObject.die(name);
             delete Memory.creeps[name];
         } else if (Game.creeps[name].memory.errors > 0) {
             console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
@@ -56,13 +56,13 @@ profiler.wrap(function() {
             continue;
         }
         let role = creep.memory.role;
-        if(!(role in rolesCount))
-            rolesCount[role] = {};
+        //if(!(role in rolesCount))
+        //    rolesCount[role] = {};
         if(!(role in objectCache))
             objectCache[role] = require('role.' + role);
         
-        if (creep.ticksToLive > 200)
-            rolesCount[role][creep.memory.roomName] = (rolesCount[role][creep.memory.roomName] || 0) + 1;
+        //if (creep.ticksToLive > 200)
+        //    rolesCount[role][creep.memory.roomName] = (rolesCount[role][creep.memory.roomName] || 0) + 1;
         
         if(moveErrors[creep.room.name]) {
             if(creep.moveTo(creep.room.controller) == OK)
@@ -78,7 +78,8 @@ profiler.wrap(function() {
             console.log(creep.name + " RUNNING ERROR: " + e);
             Game.notify(creep.name + " RUNNING ERROR: " + e);
         }
-            
+        
+        /*
         creep.memory.stat.CPU += (Game.cpu.getUsed() - lastCPU);
         if (!creepsCPUStat[creep.memory.role])
             creepsCPUStat[creep.memory.role] = {"cpu" : 0, "sum" : 0};
@@ -97,11 +98,11 @@ profiler.wrap(function() {
             creep.memory.stat.moves++;
             creep.memory.lastPos = creep.pos.toString();
         }
-        
+        */
     }
     statObject.addCPU("run", creepsCPUStat);
     
-    stat.roles = JSON.parse(JSON.stringify(rolesCount));
+    //stat.roles = JSON.parse(JSON.stringify(rolesCount));
     
     if (!Memory.limitList || !Memory.limitTime) {
         Memory.limitList = {};
