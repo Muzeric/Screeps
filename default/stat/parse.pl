@@ -49,7 +49,7 @@ if ($limit) {
 } 
 open(STAT, ">stat_total.csv")
 or die $@;
-print STAT "tick\t".join("\t", sort keys %$total_keys)."\tcreeps\n";
+print STAT "tick\t".join("\t", sort keys %$total_keys)."\tbucket\tcreeps\tenergy\n";
 my $run_keys = {};
 foreach my $tick (@ticks) {
   my $hash = $info->{$tick};
@@ -59,15 +59,12 @@ foreach my $tick (@ticks) {
     $value =~ s/\./,/;
     print STAT "\t$value";
   }
-  my $creeps = 0;
-  if (exists $hash->{"run"}->{"info"}) {
-    foreach my $v (values %{$hash->{"run"}->{"info"}}) {
-      $creeps += $v->{sum};
-    }
-  } else {
-    $creeps = 0;
-  }
-  print STAT "\t$creeps";
+
+  my $bucket = $hash->{_total}->{bucket} || 0;
+  my $creeps = $hash->{_total}->{creeps} || 0;
+  my $energy = $hash->{_total}->{energy} || 0;
+
+  print STAT "\t$bucket\t$creeps\t$energy";
   print STAT "\n";
 
   my $run = $hash->{"run"}->{"info"};
