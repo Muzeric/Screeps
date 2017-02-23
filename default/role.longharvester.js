@@ -76,32 +76,35 @@ var role = {
 	
     create: function(energy, opts) {
         let attack = 0;
+        let partsLimit = 50;
         if (energy > 1000 && opts.attack)
             attack = 1;
-        if (attack)
+        if (attack) {
 	        energy -= 80*2 + 50*1; // For move-attack parts
+            partsLimit -= 3;
+        }
         let body = [];
 	    let cnum = 0;
 	    let fat = 0;
         let wnum = 0;
-	    while (energy >= 50 && body.length < 47) {
+	    while (energy >= 50 && body.length < partsLimit) {
             if(fat >= 0 && energy >= 50) {
 	            body.push(MOVE);
 	            energy -= 50;
 	            fat -= 2;
 	        }
-            if(cnum % 2 == 0 && energy >= 100 && (opts.work || !wnum) && body.length < 47) {
+            if(cnum % 2 == 0 && energy >= 100 && (opts.work || !wnum) && body.length < partsLimit) {
 	            body.push(WORK);
 	            energy -= 100;
 	            fat++;
                 wnum++;
 	        }
-	        if(fat >= 0 && energy >= 50 && body.length < 47) {
+	        if(fat >= 0 && energy >= 50 && body.length < partsLimit) {
 	            body.push(MOVE);
 	            energy -= 50;
 	            fat -= 2;
 	        }
-	        if(energy >= 50 && body.length < 47) {
+	        if(energy >= 50 && body.length < partsLimit) {
 	            body.push(CARRY);
 	            energy -= 50;
 	            cnum++;
