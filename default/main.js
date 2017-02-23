@@ -203,7 +203,7 @@ profiler.wrap(function() {
                 objectCache[need.role] = require('role.' + need.role);
             let [body, leftEnergy] = objectCache[need.role].create(energy, need.arg);
             
-            let newName = spawn.createCreep(body, need.role + "." + Math.random().toFixed(2), {
+            let newName = spawn.createCreep(body, need.role + "." + Math.random().toFixed(3), {
                 "role": need.role,
                 "spawnName": spawn.name,
                 "roomName" : need.roomName,
@@ -275,7 +275,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
             "work" : workerHarvester ? 10*sourcesForWork : 0,
             "carry" : 20*sourcesForWork,
         },
-        "maxEnergy" : 2000,
+        "maxEnergy" : 3000,
     },{
         "role" : "claimer",
         "count" : fcount["Controller"],
@@ -310,7 +310,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
             "work" : workerHarvester ? 20 * 3 * sourcesForWork : 0,
             "carry" : 20 * 2 * sourcesForWork,
         },
-        "maxEnergy" : 2000,
+        "maxEnergy" : 3000,
     },{
         "role" : "antikeeper",
         "count" : fcount["Antikeeper"] && !antikeeperArged ? (creepsCount["antikeeper"] ? 2 : 1) : 0,
@@ -339,7 +339,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
             "work" : workerHarvester ? 20 * 4 * sourcesForWork : 0,
             "carry" : 30 * 3 * sourcesForWork,
         },
-        "maxEnergy" : 3000,
+        "maxEnergy" : 4000,
     },{
         "role" : "longminer",
         "count" : creepsCount["antikeeper"] ? pairedSources : 0,
