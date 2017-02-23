@@ -313,7 +313,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "maxEnergy" : 3000,
     },{
         "role" : "antikeeper",
-        "count" : fcount["Antikeeper"] && !antikeeperArged ? (creepsCount["antikeeper"] ? 2 : 1) : 0,
+        "count" : fcount["Antikeeper"] && !antikeeperArged ? (creepsCount["antikeeper"]+1) : 0,
         "priority" : _.sum(creepsCount) > 5 ? 3 : 15,
         "wishEnergy" : 3580,
         "minEnergy" : 3580,
@@ -321,7 +321,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "arg" : 1,
     },{
         "role" : "antikeeper",
-        "count" : fcount["Antikeeper"] && antikeeperArged ? 2 : 0,
+        "count" : fcount["Antikeeper"] && antikeeperArged ? 3 : 0,
         "priority" : _.sum(creepsCount) > 5 ? 3 : 15,
         "wishEnergy" : 3860,
         "minEnergy" : 3860,
