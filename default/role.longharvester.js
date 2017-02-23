@@ -42,6 +42,9 @@ var role = {
             else
                 creep.moveTo(Game.flags[creep.memory.energyName].pos);
         } else {
+            if (creep.room.memory.type == 'lair' && !this.goFromKeepers())
+                return;
+                
             if (creep.room.name != creep.memory.containerRoomName && !creep.memory.cID) {
                 let p = Memory.rooms[creep.memory.containerRoomName].pointPos;
                 if (!p) {
