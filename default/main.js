@@ -61,7 +61,7 @@ profiler.wrap(function() {
         if(!(role in objectCache))
             objectCache[role] = require('role.' + role);
         
-        //if (creep.ticksToLive > 200)
+        //if (creep.ticksToLive > ALIVE_TICKS)
         //    rolesCount[role][creep.memory.roomName] = (rolesCount[role][creep.memory.roomName] || 0) + 1;
         
         if(moveErrors[creep.room.name]) {
@@ -110,7 +110,7 @@ profiler.wrap(function() {
     }
     let needList = [];
 
-    let longbuilders = _.filter(Game.creeps, c => c.memory.role == "longbuilder" && (c.ticksToLive > 200 || c.spawning)).length;
+    let longbuilders = _.filter(Game.creeps, c => c.memory.role == "longbuilder" && (c.ticksToLive > ALIVE_TICKS || c.spawning)).length;
     let buildFlags = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build').length;
     let stopLongBuilders = longbuilders * 1.5 >= buildFlags;
     let roomsCPUStat = {};
@@ -133,8 +133,8 @@ profiler.wrap(function() {
             
 
         if (Game.time % PERIOD_NEEDLIST == 1) {
-            let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), 'memory.role');
-            let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > 200 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
+            let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), 'memory.role');
+            let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
 
             if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
                 Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders, hostiles);
