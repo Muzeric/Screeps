@@ -157,6 +157,7 @@ Room.prototype.updateStructures = function() {
     if (!("needRoads" in memory))
         memory.needRoads = {};
     memory.pointPos = null;
+    memory.energy = 0;
         
     this.find(FIND_SOURCES).forEach( function(s) {
         let elem = {
@@ -204,6 +205,9 @@ Room.prototype.updateStructures = function() {
                 elem.energy = s.energy;
             else if ("store" in s)
                 elem.energy = s.store[RESOURCE_ENERGY];
+            
+            if ("energy" in elem)
+                memory.energy += elem.energy;
 
             if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_LINK) {
                 elem.minersTo = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.cID == s.id);

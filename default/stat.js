@@ -14,23 +14,21 @@ var stat = {
 
     addCPU : function (marker, info) {
         if(!Memory.stat.CPUHistory[marker])
-            Memory.stat.CPUHistory[marker] = { cpu: 0, count: 0};
+            Memory.stat.CPUHistory[marker] = { cpu: 0};
         let mem = Memory.stat.CPUHistory[marker];
 
         mem.cpu += Game.cpu.getUsed() - this.lastCPU;
-        mem.count++;
-
+        
         if (info) {
             if(!mem.info)
                 mem.info = {};
             for (let key in info) {
                 if (!mem.info[key])
-                    mem.info[key] = {count: 0};
+                    mem.info[key] = {};
                 let imem = mem.info[key];
                 for (let ikey in info[key]) {
                     imem[ikey] = (imem[ikey] || 0) + info[key][ikey];
                 }
-                imem.count++;
             }
         }
         
@@ -41,6 +39,9 @@ var stat = {
             Memory.stat.CPUHistory["_total"].cpu += Game.cpu.getUsed();
             Memory.stat.CPUHistory["_total"].count++;
             if (Memory.stat.CPUHistory["_total"].count >= 100) {
+                Memory.stat.CPUHistory["_total"].bucket = Game.cpu.bucket;
+                Memory.stat.CPUHistory["_total"].creeps = _.keys(Game.creeps).length;
+                Memory.stat.CPUHistory["_total"].energy = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.energy);
                 Game.notify(
                     "CPUHistory:" + Game.time + ":" + 
                     utils.lzw_encode(JSON.stringify(Memory.stat.CPUHistory, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} )) +
