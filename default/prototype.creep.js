@@ -130,7 +130,9 @@ Creep.prototype.gotoSource = function() {
         res = this.harvest(source);
     }
     
-    if (res == ERR_NOT_IN_RANGE) {
+    if (res == OK) {
+        this.memory.energyTime = Game.time;
+    } else if (res == ERR_NOT_IN_RANGE) {
         this.moveTo(source, { visualizePathStyle : {lineStyle: "dotted", stroke : 'green' , opacity : 0.5}, costCallback : function(name, cm) { cm.set(4, 43, 255); cm.set(4, 42, 255); cm.set(4, 41, 255); } });
     } else if (res == ERR_NOT_ENOUGH_ENERGY) {
         return;
