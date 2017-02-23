@@ -111,7 +111,7 @@ Creep.prototype.findSource = function () {
 Creep.prototype.gotoSource = function() {
     let source = Game.getObjectById(this.memory.energyID);
     if(!source) {
-        console.log(this.name + " [" + this.room.name + "] can't get source with enegryID=" + this.memory.energyID);
+        //console.log(this.name + " [" + this.room.name + "] can't get source with enegryID=" + this.memory.energyID);
         this.memory.energyObj.energy = 0;
         this.memory.energyID = null;
         return;

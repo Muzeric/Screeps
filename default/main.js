@@ -222,7 +222,7 @@ profiler.wrap(function() {
             skipSpawnNames[spawn.name] = 1;
             
             //let newName = need.role;
-            console.log(newName + " (arg: " + need.arg + ") BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") " + body.length + ":[" + body + "]");
+            console.log(newName + " (arg: " + JSON.stringify(need.arg) + ") BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") " + body.length + ":[" + body + "]");
         }
     }
     statObject.addCPU("create");
@@ -266,7 +266,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     limits.push({
         "role" : "longharvester",
         "count" : fcount["Antikeeper"] ? 0 : sourcesForWork,
-        "arg" : {work: workerHarvester, attack: 0},
+        "arg" : {work: workerHarvester, attack: 1},
         "priority" : 10,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
@@ -301,7 +301,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     },{
         "role" : "longharvester",
         "count" : fcount["Antikeeper"] ? 0 : sourcesForWork * (2 + workerHarvester),
-        "arg" : {work: workerHarvester, attack: 0},
+        "arg" : {work: workerHarvester, attack: 1},
         "priority" : 14,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
@@ -330,7 +330,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     },{
         "role" : "longharvester",
         "count" : creepsCount["antikeeper"] ? sourcesForWork * (3 + workerHarvester) : 0,
-        "arg" : {work: workerHarvester, attack: 1},
+        "arg" : {work: workerHarvester, attack: 0},
         "priority" : 17,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
