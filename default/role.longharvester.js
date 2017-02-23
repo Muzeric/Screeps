@@ -74,9 +74,9 @@ var role = {
         }
 	},
 	
-    create: function(energy, worker) {
+    create: function(energy, opts) {
         let attack = 0;
-        if (energy > 1000)
+        if (energy > 1000 && opts.attack)
             attack = 1;
         if (attack)
 	        energy -= 80*2 + 50*1; // For move-attack parts
@@ -90,7 +90,7 @@ var role = {
 	            energy -= 50;
 	            fat -= 2;
 	        }
-            if(cnum % 2 == 0 && energy >= 100 && (worker || !wnum) && body.length < 47) {
+            if(cnum % 2 == 0 && energy >= 100 && (opts.work || !wnum) && body.length < 47) {
 	            body.push(WORK);
 	            energy -= 100;
 	            fat++;

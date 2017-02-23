@@ -33,10 +33,12 @@ var role = {
         }
 
         let target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        if (target && friend && (!creep.pos.inRangeTo(friend, 4) || friend.hits < friend.hitsMax) && !creep.pos.inRangeTo(target, 4) ) {
+        if (target && friend && (!creep.pos.inRangeTo(friend, 4) || friend.hits < friend.hitsMax) && !creep.pos.inRangeTo(target, 4) && friend.room.name == creep.room.name) {
             if (!friend.memory.gotoFriendID) {
                 creep.moveTo(friend);
                 creep.memory.gotoFriendID = friend.id;
+            } else if (creep.pos.x == 0 || creep.pos.y == 0 || creep.pos.x == 49 || creep.pos.y == 49) {
+                creep.moveTo(friend);
             }
             if (friend.hits < friend.hitsMax && !healed) {
                 if (creep.heal(friend) == ERR_NOT_IN_RANGE)

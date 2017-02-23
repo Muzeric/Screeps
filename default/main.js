@@ -222,7 +222,7 @@ profiler.wrap(function() {
             skipSpawnNames[spawn.name] = 1;
             
             //let newName = need.role;
-            console.log(newName + " BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") " + body.length + ":[" + body + "]");
+            console.log(newName + " (arg: " + need.arg + ") BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") " + body.length + ":[" + body + "]");
         }
     }
     statObject.addCPU("create");
@@ -266,7 +266,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     limits.push({
         "role" : "longharvester",
         "count" : fcount["Antikeeper"] ? 0 : sourcesForWork,
-        "arg" : workerHarvester,
+        "arg" : {work: workerHarvester, attack: 0},
         "priority" : 10,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
@@ -301,7 +301,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     },{
         "role" : "longharvester",
         "count" : fcount["Antikeeper"] ? 0 : sourcesForWork * (2 + workerHarvester),
-        "arg" : workerHarvester,
+        "arg" : {work: workerHarvester, attack: 0},
         "priority" : 14,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
@@ -330,7 +330,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     },{
         "role" : "longharvester",
         "count" : creepsCount["antikeeper"] ? sourcesForWork * (3 + workerHarvester) : 0,
-        "arg" : workerHarvester,
+        "arg" : {work: workerHarvester, attack: 1},
         "priority" : 17,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
@@ -506,10 +506,10 @@ function towerAction (room) {
         let target;
         if(target = room.find(FIND_HOSTILE_CREEPS).sort(function (a,b) { return a.hits - b.hits;})[0]) {
             tower.attack(target);
-            console.log("Tower " + tower.id + " attacked hostile: owner=" + target.owner.username + "; hits=" + target.hits);
+            console.log("Tower " + room.name + "." + tower.id + " attacked hostile: owner=" + target.owner.username + "; hits=" + target.hits);
         } else if (target = room.find(FIND_MY_CREEPS, {filter : c => c.hits < c.hitsMax})[0]) {
             tower.heal(target);
-            console.log("Tower " + tower.id + " healed " + target.name + " (" + target.hits + "/" + target.hitsMax + ")");
+            console.log("Tower " + room.name + "." + tower.id + " healed " + target.name + " (" + target.hits + "/" + target.hitsMax + ")");
         } else if(dstructs.length && tower.energy > 700) {
             let dstruct = dstructs.sort(function (a,b) {return a.hits - b.hits;})[0];
             tower.repair(dstruct);
