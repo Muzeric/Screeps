@@ -35,8 +35,6 @@ my $parser = MIME::Parser->new;
 $parser->tmp_to_core(1);
 $parser->output_to_core(1);
 my $count = 1;
-my $info = {};
-my $max_tick = 0;
 my @msgs_done = ();
 my @msgs_bad = ();
 foreach my $msg (@msgs) {
@@ -84,8 +82,11 @@ foreach my $msg (@msgs) {
     }
     $jshash =~ s/:/=>/g;
     if (my $hash = eval($jshash) ) {
-      $info->{$tick} = $hash;
-      $max_tick = $tick if ($tick > $max_tick);
+      open(MSGF, ">mail/m$msg.msg")
+      or die $@;
+      print MSGF "$tick\n";
+      print MSGF "$jshash\n";
+
       push(@msgs_done, $msg);
     } else {
       print "can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
@@ -97,48 +98,6 @@ foreach my $msg (@msgs) {
 }
 print "\n";
 
-setlocale LC_NUMERIC, "fr_FR";
-
-open(STAT, ">stat_cpu_total.$max_tick.csv")
-or die $@;
-
-my $runkeys = {};
-my $first = 0;
-foreach my $tick (sort {$a <=> $b} keys %$info) {
-  my $hash = $info->{$tick};
-  print STAT "tick\t".join("\t", sort keys %$hash)."\n" if !$first++;
-  print STAT $tick;
-  foreach my $key (sort keys %$hash) {
-    print STAT "\t$hash->{$key}->{cpu}";
-  }
-  print STAT "\n";
-
-  my $run = $hash->{"run"}->{"info"};
-  foreach my $key (keys %$run) {
-    $runkeys->{$key} = 1;
-  }
-}
-close(STAT);
-
-open(RUN, ">stat_cpu_run.$max_tick.csv")
-or die $@;
-print RUN "tick\t".join("\t", sort keys %$runkeys)."\n";
-foreach my $tick (sort {$a <=> $b} keys %$info) {
-  my $hash = $info->{$tick};
-  my $run = $hash->{"run"}->{"info"};
-  print RUN $tick;
-  foreach my $key (sort keys %$runkeys) {
-    my $value = exists $run->{$key} ? sprintf("%0.2f", $run->{$key}->{"cpu"} / $run->{$key}->{"sum"}) : 0;
-    print RUN "\t$value";
-  }
-  print RUN "\n";
-}
-close(RUN);
-
-$imap->select('Inbox')
-or print STDERR "select 'Inbox': ".$imap->LastError."\n"
-and die;
-
 print "We have ".scalar(@msgs_done)." done msgs\n";
 $count = 1;
 foreach my $msg (@msgs_done) {
@@ -148,6 +107,7 @@ foreach my $msg (@msgs_done) {
   $count++;
 }
 print "\n";
+
 print "We have ".scalar(@msgs_bad)." bad msgs\n";
 $count = 1;
 foreach my $msg (@msgs_bad) {

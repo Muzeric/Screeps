@@ -79,14 +79,15 @@ profiler.wrap(function() {
             Game.notify(creep.name + " RUNNING ERROR: " + e);
         }
         
-        /*
-        creep.memory.stat.CPU += (Game.cpu.getUsed() - lastCPU);
+        
         if (!creepsCPUStat[creep.memory.role])
             creepsCPUStat[creep.memory.role] = {"cpu" : 0, "sum" : 0};
         
         creepsCPUStat[creep.memory.role]["cpu"] += (Game.cpu.getUsed() - lastCPU);
         creepsCPUStat[creep.memory.role]["sum"]++;
 
+        /*
+        creep.memory.stat.CPU += (Game.cpu.getUsed() - lastCPU);
         let diffEnergy = creep.carry[RESOURCE_ENERGY] - creep.memory.lastEnergy;
         creep.memory.lastEnergy = creep.carry[RESOURCE_ENERGY];
         if (diffEnergy < 0)
