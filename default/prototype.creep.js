@@ -12,9 +12,14 @@ Creep.prototype.moveToPos = function (a, b) {
     return null;
 }
 
+RoomPosition.prototype.getArea = function() {
+    let x = _.parseInt(_.floor(this.x / 5) * 5);
+}
+
 let origMoveTo = Creep.prototype.moveTo;
 Creep.prototype.moveTo = function() {
     //let targetPos = this.moveToPos(arguments[0], arguments[1]);
+    //let targetArea = targetPos.getArea();
 
     let res = origMoveTo.apply(this, arguments);
 
@@ -81,13 +86,11 @@ Creep.prototype.findSource = function () {
             continue;
         let range = this.pos.getRangeTo(target.pos.x, target.pos.y);
         let energyLeft = target.energy - (Memory.energyWanted[target.id] ? Memory.energyWanted[target.id].energy : 0);
-        let energyTicks = (energyNeed - energyLeft) / 10;
-        if (energyTicks < 0)
-            energyTicks = 0;
 
         let cpriority = 0;
         if (target.resourceType) { // Dropped
-            if (this.room.memory.hostilesCount || energyLeft - range * 1.2 <= 0)
+            energyLeft -= range * 1.2;
+            if (this.room.memory.hostilesCount || energyLeft <= 0)
                 continue;
             else
                 cpriority = 2;
@@ -96,9 +99,13 @@ Creep.prototype.findSource = function () {
         } else if (target.structureType == STRUCTURE_SOURCE) { // Source
             if (target.minersFrom)
                 continue;
-            else
+            else if (this.getActiveBodyparts(WORK) <= 1)
                 cpriority = -2;
         }
+
+        let energyTicks = (energyNeed - energyLeft) / 10;
+        if (energyTicks < 0)
+            energyTicks = 0;
 
         let cost = range * 1.2 + energyTicks - 100 * cpriority;
         if (minCost === undefined || cost < minCost) {
