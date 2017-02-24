@@ -27,6 +27,8 @@ profiler.wrap(function() {
     
     //if(!("targets" in Memory))
     //    Memory.targets = {};
+    if(!("pathCache" in Memory))
+        Memory.pathCache = {};
     if(!("warning" in Memory))
         Memory.warning = {};
 
@@ -330,6 +332,27 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "arg" : 0,
     },{
         "role" : "longharvester",
+        "count" : creepsCount["antikeeper"] ? sourcesForWork : 0,
+        "arg" : {work: workerHarvester, attack: 0},
+        "priority" : 17,
+        "minEnergy" : 550,
+        "wishEnergy" : 1500,
+        "range" : 5,
+        "body" : {
+            "work" : workerHarvester ? 20 * sourcesForWork : 0,
+            "carry" : 30 * sourcesForWork,
+        },
+        "maxEnergy" : 4000,
+    },{
+        "role" : "longminer",
+        "count" : creepsCount["antikeeper"] ? pairedSources : 0,
+        "arg" : 1,
+        "priority" : 18,
+        "wishEnergy" : 1200,
+        "minEnergy" : 1200,
+        "range" : 3,
+    },{
+        "role" : "longharvester",
         "count" : creepsCount["antikeeper"] ? sourcesForWork * (3 + workerHarvester) : 0,
         "arg" : {work: workerHarvester, attack: 0},
         "priority" : 17,
@@ -341,14 +364,6 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
             "carry" : 30 * 3 * sourcesForWork,
         },
         "maxEnergy" : 4000,
-    },{
-        "role" : "longminer",
-        "count" : creepsCount["antikeeper"] ? pairedSources : 0,
-        "arg" : 1,
-        "priority" : 18,
-        "wishEnergy" : 1200,
-        "minEnergy" : 1200,
-        "range" : 3,
     });
 
     for (let limit of limits) {

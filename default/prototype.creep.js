@@ -1,7 +1,21 @@
 var utils = require('utils');
 
+Creep.prototype.moveToPos = function (a, b) {
+    if (_.isNumber(a) && _.isNumber(b)) {
+        return new RoomPosition(a, b, this.room.name);
+    } else if (_.isObject(a)) {
+        if (a instanceof global.RoomPosition)
+            return a;
+        else if (a.pos && a.pos instanceof global.RoomPosition)
+            return a.pos;
+    }
+    return null;
+}
+
 let origMoveTo = Creep.prototype.moveTo;
 Creep.prototype.moveTo = function() {
+    //let targetPos = this.moveToPos(arguments[0], arguments[1]);
+
     let res = origMoveTo.apply(this, arguments);
 
     if (res == OK)

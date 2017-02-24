@@ -37,8 +37,9 @@ var role = {
 
             if (creep.carry.energy && 
                 (
-                    container.hits < container.hitsMax * 0.5 && Game.time - (creep.memory.lastRepair || 0) > 2 ||
-                    container.hits < container.hitsMax * 0.95 && Game.time - (creep.memory.lastRepair || 0) > 10
+                    container.hits < container.hitsMax * 0.8 && Game.time - (creep.memory.lastRepair || 0) > 2 ||
+                    container.hits < container.hitsMax * 0.95 && Game.time - (creep.memory.lastRepair || 0) > 10 ||
+                    container.hits < container.hitsMax && container.store[RESOURCE_ENERGY] == container.storeCapacity
                 )
             ) {
                 creep.repair(container);
