@@ -1,7 +1,3 @@
-function _clamp (n, min, max) {
-    return n < min ? min : (n > max ? max : n);
-}
-
 function _addPosition (creep, res, pos, x, y) {
     let newx = parseInt(pos.x) + parseInt(x);
     if (newx < 0 || newx > 49)
@@ -24,6 +20,10 @@ function _addPosition (creep, res, pos, x, y) {
 }
 
 module.exports = {
+    clamp : function (n, min, max) {
+        return n < min ? min : (n > max ? max : n);
+    },
+
     getRangedPlaces : function (creep, pos, range) {
         let res = [];
         for (let x = -1 * range; x <= range; x++)

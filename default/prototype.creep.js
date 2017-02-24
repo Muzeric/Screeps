@@ -12,14 +12,40 @@ Creep.prototype.moveToPos = function (a, b) {
     return null;
 }
 
-RoomPosition.prototype.getArea = function() {
-    let x = _.parseInt(_.floor(this.x / 5) * 5);
+RoomPosition.prototype.getKey = function() {
+    let xi = _.floor(this.x / 5);
+    let yi = _.floor(this.y / 5);
+    return xi*10 + yi + this.roomName;
 }
 
 let origMoveTo = Creep.prototype.moveTo;
 Creep.prototype.moveTo = function() {
-    //let targetPos = this.moveToPos(arguments[0], arguments[1]);
-    //let targetArea = targetPos.getArea();
+    if (0 && this.name == "longharvester.0.999") {
+        if (this.fatigue > 0)
+            return ERR_TIRED;
+        let targetPos = this.moveToPos(arguments[0], arguments[1]);
+        let targetKey = targetPos.getKey();
+        console.log(this.name + ": moveTo targetKey=" + targetKey);
+        if (this.pos.isEqualTo(targetPos)) {
+                this.memory.travel = {};
+                return OK;
+        }
+        if (this.memory.travel && this.memory.travel.targetKey == targetKey && this.memory.travel.path) {
+            let pos = this.memory.travel.iter >= this.memory.travel.path.length ? targetPos : this.memory.travel.path[this.memory.travel.iter];
+            let res = this.move(this.pos.getDirectionTo(pos));
+            if (res == OK) {
+                this.memory.travel.iter++;
+                this.memory.travel.iter;
+            } else {
+                this.memory
+            }
+        } else {
+            this.memory.travel = {};
+
+        }
+
+        return res;
+    }
 
     let res = origMoveTo.apply(this, arguments);
 

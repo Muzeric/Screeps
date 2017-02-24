@@ -244,6 +244,7 @@ Room.prototype.updateStructures = function() {
     this.find(FIND_MY_CONSTRUCTION_SITES).forEach( function(s) {
         memory.constructions++;
         if (s.structureType == STRUCTURE_ROAD) {
+            memory.constructionsRoads++;
             room.refreshRoad(memory, s);
         }
     });
@@ -260,6 +261,7 @@ Room.prototype.updateStructures = function() {
                 let res = this.createConstructionSite(parseInt(pos[0]), parseInt(pos[1]), STRUCTURE_ROAD);
                 console.log(this.name + " BUILT (" + res + ") road at " + key);
                 memory.constructions++;
+                memory.constructionsRoads++;
             }
         }
     }

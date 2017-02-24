@@ -254,7 +254,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     let lastCPU = Game.cpu.getUsed();
     let memory = Memory.rooms[roomName] || {structures : {}};
     let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
-    let builds = memory.constructions || 0;
+    let builds = (memory.constructions || 0) - (memory.constructionsRoads || 0);
     let repairs = memory.repairs || 0;
     let liteClaimer = memory.type == 'reserved' && memory.reserveEnd - Game.time > 3000 ? 1 : 0;
     let workerHarvester = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom) ? 1 : 0;
@@ -382,7 +382,7 @@ function getRoomLimits (room, creepsCount) {
     let lastCPU = Game.cpu.getUsed();
     let memory = Memory.rooms[room.name] || {structures : {}};
 
-    let builds = memory.constructions || 0;
+    let builds = (memory.constructions || 0) - (memory.constructionsRoads || 0);
     let repairs = memory.repairs || 0;
     let unminerSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom);
     let sources = (memory.structures[STRUCTURE_SOURCE] || []).length;
@@ -390,6 +390,7 @@ function getRoomLimits (room, creepsCount) {
     let countHarvester = _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 15) + _.floor((memory.structures[STRUCTURE_TOWER] || []).length / 3);
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
     let hostiles = memory.hostilesCount && memory.hostilesDeadTime - Game.time > 50 ? 1 : 0;
+    let extraUpgraders = utils.clamp( _.floor(memory.energy / 50000), 0, 2);
     
     let limits = [];
     limits.push({
@@ -445,16 +446,16 @@ function getRoomLimits (room, creepsCount) {
                 "carry" : (builds ? 6 : 0 ) + (repairs > 10 ? 18 : (repairs ? 9 : 0)),
             },
     },{
-            role : "upgrader",
-            "count" : builds ? 1 : sources,
-            "priority" : 5,
-            "wishEnergy" : 1500,
-            "maxEnergy" : 2000,
-    },{
             "role" : "shortminer",
             "count" : storagedLink ? 1 : 0, // TODO: harvester count
-            "priority" : 6,
+            "priority" : 5,
             "wishEnergy" : 300,
+    },{
+            role : "upgrader",
+            "count" : builds ? 1 : sources + extraUpgraders,
+            "priority" : 6,
+            "wishEnergy" : 1500,
+            "maxEnergy" : 2000,
     });
 
     for (let limit of limits) {

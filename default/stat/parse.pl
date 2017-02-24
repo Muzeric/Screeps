@@ -61,8 +61,8 @@ foreach my $tick (@ticks) {
   }
 
   my $bucket = $hash->{_total}->{bucket} || 0;
-  my $creeps = $hash->{_total}->{creeps} || 0;
-  my $energy = $hash->{_total}->{energy} || 0;
+  my $creeps = ($hash->{_total}->{creeps} || 0) * 100;
+  my $energy = int(($hash->{_total}->{energy} || 0) / 10);
 
   print STAT "\t$bucket\t$creeps\t$energy";
   print STAT "\n";
