@@ -158,6 +158,7 @@ Room.prototype.updateStructures = function() {
         memory.needRoads = {};
     memory.pointPos = null;
     memory.energy = 0;
+    let costs = new PathFinder.CostMatrix;
         
     this.find(FIND_SOURCES).forEach( function(s) {
         let elem = {
@@ -192,6 +193,7 @@ Room.prototype.updateStructures = function() {
             }
             memory.pointPos = s.pos;
         } else if (s.structureType == STRUCTURE_ROAD) {
+            costs.set(s.pos.x, s.pos.y, 1);
             room.refreshRoad(memory, s);
         } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_LAB].indexOf(s.structureType) !== -1) {
             elem = {
@@ -224,11 +226,21 @@ Room.prototype.updateStructures = function() {
                 if (room.storage && s.pos.inRangeTo(room.storage.pos, 2))
                     elem.storaged = 1;
             }
-        } else if ([STRUCTURE_WALL, STRUCTURE_RAMPART].indexOf(s.structureType) !== -1 && s.hits < s.hitsMax*0.9 && s.hits < REPAIR_LIMIT ) {
-            elem = {
-                hits : s.hits,
-                hitsMax : s.hitsMax, 
+
+            if (s.structureType != STRUCTURE_CONTAINER)
+                costs.set(s.pos.x, s.pos.y, 0xff);
+        } else if ([STRUCTURE_WALL, STRUCTURE_RAMPART].indexOf(s.structureType) !== -1) {
+            if (s.hits < s.hitsMax*0.9 && s.hits < REPAIR_LIMIT ) {
+                elem = {
+                    hits : s.hits,
+                    hitsMax : s.hitsMax, 
+                }
             }
+
+            if ((s.structureType != STRUCTURE_RAMPART || !s.my))
+                costs.set(s.pos.x, s.pos.y, 0xff);
+        } else {
+            costs.set(s.pos.x, s.pos.y, 0xff);
         }
 
         if (elem) {
@@ -248,6 +260,8 @@ Room.prototype.updateStructures = function() {
             room.refreshRoad(memory, s);
         }
     });
+
+    memory.costMatrix = costs.serialize();
 
     for (let key of _.filter(Object.keys(memory.needRoads), r => 
             !memory.needRoads[r].id && 
