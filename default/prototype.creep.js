@@ -12,42 +12,104 @@ Creep.prototype.moveToPos = function (a, b) {
     return null;
 }
 
-RoomPosition.prototype.getKey = function() {
-    let xi = _.floor(this.x / 5);
-    let yi = _.floor(this.y / 5);
-    return xi*10 + yi + this.roomName;
+RoomPosition.prototype.getKey = function(long) {
+    return this.x + "x" + this.y + (long ? this.roomName : '');
 }
 
 let origMoveTo = Creep.prototype.moveTo;
 Creep.prototype.moveTo = function() {
-    if (0 && this.name == "longharvester.0.999") {
+    let res;
+    if (this.memory.role == "scout") {
         if (this.fatigue > 0)
             return ERR_TIRED;
         let targetPos = this.moveToPos(arguments[0], arguments[1]);
-        let targetKey = targetPos.getKey();
+        let targetKey = targetPos.getKey(1);
         console.log(this.name + ": moveTo targetKey=" + targetKey);
         if (this.pos.isEqualTo(targetPos)) {
-                this.memory.travel = {};
-                return OK;
-        }
-        if (this.memory.travel && this.memory.travel.targetKey == targetKey && this.memory.travel.path) {
-            let pos = this.memory.travel.iter >= this.memory.travel.path.length ? targetPos : this.memory.travel.path[this.memory.travel.iter];
-            let res = this.move(this.pos.getDirectionTo(pos));
-            if (res == OK) {
+                this.memory.travel = null;
+                res = OK;
+        } else if (this.memory.travel && this.memory.travel.targetKey == targetKey) {
+            //if (this.memory.travel.gotoSourcePos)
+            if (this.memory.travel.iter < this.memory.travel.path.length && this.pos.isEqualTo(this.memory.travel.path[this.memory.travel.iter]))
                 this.memory.travel.iter++;
-                this.memory.travel.iter;
-            } else {
-                this.memory
-            }
+
+            if (this.memory.travel.iter >= this.memory.travel.path.length)
+                res = this.move(this.pos.getDirectionTo(targetPos));
+            else
+                res = this.move(this.pos.getDirectionTo(this.memory.travel.path[this.memory.travel.iter]));
+        } else if (targetPos.roomName == this.room.name && this.pos.getRangeTo(targetPos) < 6) {
+            console.log(creep.name + ": moveTo short distance");
+            res = origMoveTo.apply(this, arguments);
         } else {
             this.memory.travel = {};
+            let pathCahce = this.room.memory.pathCahce;
+            let sourceKey = this.pos.getKey();
+            if (pathCache[targetKey] && pathCache[targetKey][sourceKey]) {
+                console.log(this.name + ": moveTo use path from cache");
+                memory.travel.path = _.clone(pathCache[targetKey][sourceKey]);
+                memory.travel.iter = 0;
+                memory.travel.targetKey = targetKey;
+                res = this.move(this.pos.getDirectionTo(this.memory.travel.path[this.memory.travel.iter]));
+            /*
+            } else if (pathCache[targetKey]) {
+                let sourcePoses = [];
+                for (let key in pathCache[targetKey]) {
+                    let poses = this.pos.findInRange(_.filter(pathCache[targetKey][key].path, p => p.roomName == this.room.name), 3);
+                    if (poses.length) {
+                        sourcePoses.concat(poses);
+                    }
+                }
+                if (sourcePoses.length) {
+                    let pf = PathFinder.search(
+                        this.pos,
+                        sourcePoses,
+                        {
+                            plainCost: 2,
+                            swampCost: 10,
+                            roomCallback: function(roomName) { 
+                                if (!(roomName in Memory.rooms) || Memory.rooms[roomName].type == 'hostiled' || !(costMatrix in Memory.rooms[roomName]))
+                                    return false;
+                                return PathFinder.CostMatrix.deserialize(Memory.rooms[roomName].costMatrix); 
+                            },
+                        }
+                    );
 
+                }
+            */
+            }
+            
+            if (!memory.travel.path) {
+                let pf = PathFinder.search(
+                    this.pos,
+                    {pos: targetPos, range: 1},
+                    {
+                        plainCost: 2,
+                        swampCost: 10,
+                        roomCallback: function(roomName) { 
+                            if (!(roomName in Memory.rooms) || Memory.rooms[roomName].type == 'hostiled' || !(costMatrix in Memory.rooms[roomName]))
+                                return false;
+                            return PathFinder.CostMatrix.deserialize(Memory.rooms[roomName].costMatrix); 
+                        },
+                    }
+                );
+                if (pf.incomplete) {
+                    console.log(this.name + ": moveTo incomplete path to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+                    res = origMoveTo.apply(this, arguments);
+                } else {
+                    console.log(this.name + ": moveTo got path to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+                    memory.travel.path = _.clone(pf.path);
+                    memory.travel.iter = 0;
+                    memory.travel.targetKey = targetKey;
+                    Memory.pathCache[targetKey] = Memory.pathCache[targetKey] || {};
+                    Memory.pathCache[targetKey][sourceKey] = _.clone(pf.path);
+
+                    res = this.move(this.pos.getDirectionTo(pf.path[0]));
+                }
+            }
         }
-
-        return res;
+    } else {
+        res = origMoveTo.apply(this, arguments);
     }
-
-    let res = origMoveTo.apply(this, arguments);
 
     if (res == OK)
         this.room.needRoad(this);

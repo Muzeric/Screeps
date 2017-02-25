@@ -41,15 +41,28 @@ foreach my $file (@files) {
     print "can't eval ($@): ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
   }
   $count++;
+  close(F);
 }
 
 my @ticks = sort {$a <=> $b} keys %$info;
 if ($limit) {
   @ticks = splice(@ticks, -$limit);
-} 
+}
+my $extra = {
+  bucket => undef,
+  creeps => sub {
+    return ($_[0] || 0) * 100;
+  },
+  energy => sub {
+    return int(($_[0] || 0) / 10);
+  },
+  gcl => sub {
+    return $_[0] || $_[1]->{glc} || 0; # This fix of start typo: 'glc' instead of 'gcl'
+  },
+};
 open(STAT, ">stat_total.csv")
 or die $@;
-print STAT "tick\t".join("\t", sort keys %$total_keys)."\tbucket\tcreeps\tenergy\n";
+print STAT "tick\t".join("\t", sort keys %$total_keys)."\t".join("\t", sort keys %$extra)."\n";
 my $run_keys = {};
 foreach my $tick (@ticks) {
   my $hash = $info->{$tick};
@@ -60,11 +73,11 @@ foreach my $tick (@ticks) {
     print STAT "\t$value";
   }
 
-  my $bucket = $hash->{_total}->{bucket} || 0;
-  my $creeps = ($hash->{_total}->{creeps} || 0) * 100;
-  my $energy = int(($hash->{_total}->{energy} || 0) / 10);
+  foreach my $key (sort keys %$extra) {
+    my $value = defined $extra->{$key} ? $extra->{$key}->($hash->{_total}->{$key}, $hash->{_total}) : ($hash->{_total}->{$key} || 0);
+    print STAT "\t$value";
+  }
 
-  print STAT "\t$bucket\t$creeps\t$energy";
   print STAT "\n";
 
   my $run = $hash->{"run"}->{"info"};

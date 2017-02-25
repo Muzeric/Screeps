@@ -25,10 +25,6 @@ profiler.wrap(function() {
             return sum; 
     }, {});
     
-    //if(!("targets" in Memory))
-    //    Memory.targets = {};
-    if(!("pathCache" in Memory))
-        Memory.pathCache = {};
     if(!("warning" in Memory))
         Memory.warning = {};
 
@@ -441,7 +437,7 @@ function getRoomLimits (room, creepsCount) {
             "count" : (builds ? 1 : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)),
             "priority" : 4,
             "wishEnergy" : 1500,
-            "maxEnergy" : 3000,
+            "maxEnergy" : builds ? 3000 : 2000,
             "body" : {
                 "carry" : (builds ? 6 : 0 ) + (repairs > 10 ? 18 : (repairs ? 9 : 0)),
             },
@@ -456,6 +452,11 @@ function getRoomLimits (room, creepsCount) {
             "priority" : 6,
             "wishEnergy" : 1500,
             "maxEnergy" : 2000,
+    },{
+            role : "scout",
+            "count" : memory.scoutCount || 0,
+            "priority" : 1,
+            "wishEnergy" : 50,
     });
 
     for (let limit of limits) {

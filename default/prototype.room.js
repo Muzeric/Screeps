@@ -4,6 +4,8 @@ Room.prototype.init = function() {
 }
 
 Room.prototype.update = function() {
+    if(!("pathCache" in this.memory))
+        this.memory.pathCache = {};
     if (!("structures" in this.memory) || Game.time - (this.memory.structuresTime || 0) > UPDATE_INTERVAL_STRUCTURES)
         this.updateStructures();
     if (!("hostileCreeps" in this.memory) || Game.time - (this.memory.hostileCreepsTime || 0) > UPDATE_INTERVAL_HOSTILES)
@@ -153,6 +155,7 @@ Room.prototype.updateStructures = function() {
     memory.type = 'other';
     memory.structuresTime = Game.time;
     memory.constructions = 0;
+    memory.constructionsRoads = 0;
     memory.repairs = 0;
     if (!("needRoads" in memory))
         memory.needRoads = {};
