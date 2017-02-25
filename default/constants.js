@@ -10,3 +10,4 @@ global.STRUCTURE_SOURCE = "source";
 global.ENERGY_TIMEOUT = 50;
 global.PERIOD_MEMORY = 10;
 global.PERIOD_NEEDLIST = 10;
+global.PATH_TIMEOUT = 5;

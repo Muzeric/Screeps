@@ -16,40 +16,90 @@ RoomPosition.prototype.getKey = function(long) {
     return this.x + "x" + this.y + (long ? this.roomName : '');
 }
 
+Creep.prototype.serializePath = function(path) {
+    let ret = '';
+    let curRoomName;
+    for (let p of path) {
+        if (curRoomName === undefined || curRoomName != p.roomName) {
+            curRoomName = p.roomName;
+            ret += String.fromCharCode(33) + curRoomName + String.fromCharCode(33);
+        }
+        ret += String.fromCharCode(p.x * 50 + p.y + 34);
+    }
+
+    return ret;
+}
+
+Creep.prototype.getPosFromSerializedPath = function (path, index) {
+    let curRoomName;
+    let curIndex = 0;
+    for (let i = 0; i < path.length; i++) {
+        let code = path.charCodeAt(i);
+        if (code == 33) {
+            let end = path.indexOf(String.fromCharCode(33), i+1);
+            curRoomName = path.substring(i+1, end);
+            i = end;
+        } else {
+            if (curIndex == index) {
+                code -= 34;
+                let x = _.floor(code / 50);
+                let y = code - x * 50;
+                return new RoomPosition(x, y, curRoomName);
+            }
+            curIndex++;
+        }
+    }
+
+    return null;
+}
+
 let origMoveTo = Creep.prototype.moveTo;
 Creep.prototype.moveTo = function() {
+    let memory = this.memory;
     let res;
-    if (this.memory.role == "scout") {
+    if (memory.role == "scout") {
         if (this.fatigue > 0)
             return ERR_TIRED;
         let targetPos = this.moveToPos(arguments[0], arguments[1]);
         let targetKey = targetPos.getKey(1);
         console.log(this.name + ": moveTo targetKey=" + targetKey);
         if (this.pos.isEqualTo(targetPos)) {
-                this.memory.travel = null;
+                memory.travel = null;
                 res = OK;
-        } else if (this.memory.travel && this.memory.travel.targetKey == targetKey) {
-            //if (this.memory.travel.gotoSourcePos)
-            if (this.memory.travel.iter < this.memory.travel.path.length && this.pos.isEqualTo(this.memory.travel.path[this.memory.travel.iter]))
-                this.memory.travel.iter++;
+        } else if (memory.travel && memory.travel.targetKey == targetKey) {
+            console.log(this.name + ": moveTo use travel, iter=" + memory.travel.iter);
+            if (memory.travel.iter < memory.travel.length && this.pos.isEqualTo(this.getPosFromSerializedPath(memory.travel.path,memory.travel.iter))) {
+                memory.travel.iter++;
+                memory.travel.here = 0;
+            }
 
-            if (this.memory.travel.iter >= this.memory.travel.path.length)
+            if (memory.travel.iter >= memory.travel.length) {
                 res = this.move(this.pos.getDirectionTo(targetPos));
-            else
-                res = this.move(this.pos.getDirectionTo(this.memory.travel.path[this.memory.travel.iter]));
+            } else {
+                if (memory.travel.here > PATH_TIMEOUT) {
+                    console.log(creep.name + ": moveTo too much here");
+                    memory.travel = null;
+                    res = origMoveTo.apply(this, arguments);
+                } else {
+                    res = this.move(this.pos.getDirectionTo(this.getPosFromSerializedPath(memory.travel.path,memory.travel.iter)));
+                    if (res == OK)
+                        memory.travel.here++;
+                }
+            }
         } else if (targetPos.roomName == this.room.name && this.pos.getRangeTo(targetPos) < 6) {
             console.log(creep.name + ": moveTo short distance");
             res = origMoveTo.apply(this, arguments);
         } else {
-            this.memory.travel = {};
-            let pathCahce = this.room.memory.pathCahce;
+            memory.travel = {};
+            let pathCache = this.room.memory.pathCache;
             let sourceKey = this.pos.getKey();
             if (pathCache[targetKey] && pathCache[targetKey][sourceKey]) {
                 console.log(this.name + ": moveTo use path from cache");
-                memory.travel.path = _.clone(pathCache[targetKey][sourceKey]);
+                memory.travel.path = pathCache[targetKey][sourceKey].path;
                 memory.travel.iter = 0;
+                memory.travel.here = 0;
                 memory.travel.targetKey = targetKey;
-                res = this.move(this.pos.getDirectionTo(this.memory.travel.path[this.memory.travel.iter]));
+                res = this.move(this.pos.getDirectionTo(this.getPosFromSerializedPath(memory.travel.path,memory.travel.iter)));
             /*
             } else if (pathCache[targetKey]) {
                 let sourcePoses = [];
@@ -77,7 +127,7 @@ Creep.prototype.moveTo = function() {
                 }
             */
             }
-            
+
             if (!memory.travel.path) {
                 let pf = PathFinder.search(
                     this.pos,
@@ -86,7 +136,7 @@ Creep.prototype.moveTo = function() {
                         plainCost: 2,
                         swampCost: 10,
                         roomCallback: function(roomName) { 
-                            if (!(roomName in Memory.rooms) || Memory.rooms[roomName].type == 'hostiled' || !(costMatrix in Memory.rooms[roomName]))
+                            if (!(roomName in Memory.rooms) || Memory.rooms[roomName].type == 'hostiled' || !("costMatrix" in Memory.rooms[roomName]))
                                 return false;
                             return PathFinder.CostMatrix.deserialize(Memory.rooms[roomName].costMatrix); 
                         },
@@ -94,14 +144,16 @@ Creep.prototype.moveTo = function() {
                 );
                 if (pf.incomplete) {
                     console.log(this.name + ": moveTo incomplete path to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
-                    res = origMoveTo.apply(this, arguments);
+                    res = ERR_NO_PATH; //origMoveTo.apply(this, arguments);
                 } else {
                     console.log(this.name + ": moveTo got path to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
-                    memory.travel.path = _.clone(pf.path);
+                    memory.travel.path = this.serializePath(pf.path);
+                    memory.travel.length = pf.path.length;
                     memory.travel.iter = 0;
+                    memory.travel.here = 0;
                     memory.travel.targetKey = targetKey;
-                    Memory.pathCache[targetKey] = Memory.pathCache[targetKey] || {};
-                    Memory.pathCache[targetKey][sourceKey] = _.clone(pf.path);
+                    pathCache[targetKey] = pathCache[targetKey] || {};
+                    pathCache[targetKey][sourceKey] = {path: memory.travel.path, useTime: Game.time};
 
                     res = this.move(this.pos.getDirectionTo(pf.path[0]));
                 }
