@@ -22,7 +22,7 @@ Creep.prototype.usePath = function(memory, memkey, targetPos, opts, goto, timeou
     travel.updateIter(this, mem);
 
     if (mem.iter === null || mem.iter >= mem.length) {
-        console.log(this.name + ": moveTo " + memkey + " path ended with iter=" + mem.iter);
+        //console.log(this.name + ": moveTo " + memkey + " path ended with iter=" + mem.iter);
         memory[memkey] = null;
         if (goto)
             return this.move(this.pos.getDirectionTo(targetPos));
@@ -30,8 +30,8 @@ Creep.prototype.usePath = function(memory, memkey, targetPos, opts, goto, timeou
     } 
 
     if (mem.here > PATH_TIMEOUT) {
-        console.log(this.name + ": moveTo " + memkey + " too much here");
-        if (timeoutFunc) {
+        console.log(this.name + ": moveTo " + memkey + " too much here iter=" + mem.iter + ", here=" + mem.here + ", pos=" + this.pos.getKey());
+        if (timeoutCallback) {
             let res = timeoutCallback(this, memory, memkey, targetPos, opts);
             if (res !== null)
                 return res;
