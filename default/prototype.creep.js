@@ -31,7 +31,7 @@ Creep.prototype.usePath = function(memory, memkey, targetPos, opts, goto, timeou
 
     if (mem.here > PATH_TIMEOUT) {
         if (this.pos.isBorder())
-            console.log(this.name + ": moveTo " + memkey + " too much here iter=" + mem.iter + ", here=" + mem.here + ", pos=" + this.pos.getKey(1));
+            console.log(this.name + ": moveTo (" + targetPos.getKey(1) + ") " + memkey + " too much here iter=" + mem.iter + ", here=" + mem.here + ", pos=" + this.pos.getKey(1));
         if (timeoutCallback) {
             let res = timeoutCallback(this, memory, memkey, targetPos, opts);
             if (res !== null)

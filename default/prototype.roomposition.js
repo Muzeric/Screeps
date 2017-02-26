@@ -8,26 +8,26 @@ RoomPosition.prototype.getDirectionTo = function (pos) {
         return origgetDirectionTo.apply(this, arguments);
     
     let dir = _.reduce(Game.map.describeExits(this.roomName), function(a,v,k) {return v == pos.roomName ? k : a;}, 0);
-    switch (dir) {
-        case global.LEFT:
+    switch (_.parseInt(dir)) {
+        case LEFT:
             if (pos.y > this.y)
                 return BOTTOM_LEFT;
             else if (pos.y < this.y)
                 return TOP_LEFT;
             break;
-        case global.RIGHT:
+        case RIGHT:
             if (pos.y > this.y)
                 return BOTTOM_RIGHT;
             else if (pos.y < this.y)
                 return TOP_RIGHT;
             break;
-        case global.TOP:
+        case TOP:
             if (pos.x > this.x)
                 return TOP_RIGHT;
             else if (pos.x < this.x)
                 return TOP_LEFT;
             break;
-        case global.BOTTOM:
+        case BOTTOM:
             if (pos.x > this.x)
                 return BOTTOM_RIGHT;
             else if (pos.x < this.x)
