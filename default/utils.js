@@ -94,31 +94,6 @@ module.exports = {
 
         return 0;
     },
-
-    test : function (total_energy) {
-        let inEnergy = total_energy;
-
-        total_energy -= 50;
-        let body = [CARRY];
-        let wlim = 5;
-        let fat = 1;
-        let mnum = 0;
-        while (total_energy >= 100 && wlim) {
-            if (total_energy >= 100) {
-	            body.push(WORK);
-	            wlim--;
-                fat++;
-	            total_energy -= 100;
-	        }
-            if ((!mnum || fat/(mnum*2) >= 2) && total_energy >= 50) {
-                body.push(MOVE);
-	            total_energy -= 50;
-                mnum++;
-            }
-        }
-
-        console.log((inEnergy - total_energy) + ": " + body);
-    },
     
     lzw_encode: function (s) {
         var dict = {};
