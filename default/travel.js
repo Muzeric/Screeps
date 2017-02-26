@@ -113,7 +113,6 @@ module.exports = {
         let sourceKey = sourcePos.getKey();
         if (!Array.isArray(targetPos) && targetKey !== null) {
             if (pathCache[targetKey] && pathCache[targetKey][sourceKey]) {
-                console.log("getPath use path from cache for " + targetKey + " from " + sourceKey);
                 pathCache[targetKey][sourceKey].useTime = Game.time;
                 return { path: pathCache[targetKey][sourceKey].path, serialized: 1 };
             }
@@ -150,7 +149,7 @@ module.exports = {
 
         pathCache[mem.targetKey] = pathCache[mem.targetKey] || {};
         if (!(sourceKey in pathCache[mem.targetKey]))
-            pathCache[mem.targetKey][sourceKey] = {path: mem.path, useTime: Game.time};
+            pathCache[mem.targetKey][sourceKey] = {path: mem.path, useTime: Game.time, createTime: Game.time};
     },
 
     updateIter: function (creep, mem) {
