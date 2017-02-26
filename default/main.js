@@ -73,8 +73,8 @@ profiler.wrap(function() {
         try {
             objectCache[role].run(creep);
         } catch (e) {
-            console.log(creep.name + " RUNNING ERROR: " + e);
-            Game.notify(creep.name + " RUNNING ERROR: " + e);
+            console.log(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
+            Game.notify(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
         }
         
         

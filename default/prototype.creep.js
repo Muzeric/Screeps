@@ -66,12 +66,12 @@ timeoutFunc = function(creep, memory, memkey, targetPos, opts) {
         return null;
 
     let pf = travel.getPath(creep.pos, subpath, null, 1, creep.room.memory.pathCache);
-    if (pf.incomplete) {
+    if (pf.incomplete || !pf.path.length) {
         console.log(creep.name + ": moveTo incomplete path from " + creep.pos.getKey(1) + " to subpath; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         memory[memkey] = null;
         return origMoveTo.apply(creep, [targetPos, opts]);
     } else {
-        console.log(creep.name + ": moveTo got subpath from " + creep.pos.getKey(1) + " to subpath; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+        //console.log(creep.name + ": moveTo got subpath from " + creep.pos.getKey(1) + " to subpath; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         mem.sub = {};
         travel.setPath(mem.sub, pf.serialized ? pf.path : travel.serializePath(pf.path), creep.pos.getKey(), null, creep.room.memory.pathCache);
         return creep.move(creep.pos.getDirectionTo(travel.getPosFromSerializedPath(mem.sub.path,mem.sub.iter)));
@@ -107,13 +107,13 @@ Creep.prototype.travelTo = function (targetPos, opts) {
         let sourceKey = this.pos.getKey();
 
         let pf = travel.getPath(this.pos, {pos: targetPos, range: 1}, targetKey, 0, this.room.memory.pathCache);
-        if (pf.incomplete) {
+        if (pf.incomplete || !pf.path.length) {
             console.log(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
             Game.notify(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
             //res = ERR_NO_PATH; 
             return origMoveTo.apply(this, [targetPos, opts]);
         } else {
-            console.log(this.name + ": moveTo got path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+            //console.log(this.name + ": moveTo got path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
             travel.setPath(memory.travel, pf.serialized ? pf.path : travel.serializePath(pf.path), sourceKey, targetKey, this.room.memory.pathCache);
             return this.move(this.pos.getDirectionTo(travel.getPosFromSerializedPath(memory.travel.path,memory.travel.iter)));
         }
