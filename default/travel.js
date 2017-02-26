@@ -155,7 +155,10 @@ var travel = {
 
     updateIter: function (creep, mem) {
         let iter = this.getIterFromSerializedPath(mem.path, creep.pos, utils.clamp(mem.iter-1, 0, mem.iter));
-        //console.log(creep.name + ": moveTo iter=" + mem.iter + " => "+ iter + ", here=" + mem.here);
+        if (creep.pos.isBorder) {
+            let key = this.getPosFromSerializedPath(mem.path, mem.iter).getKey(1);
+            console.log(creep.name + ": moveTo BORDER mem.iter=" + mem.iter + " (" + key + "), iter="+ iter + " (" + creep.pos.getKey(1) + "), here=" + mem.here);
+        }
         if (iter >= mem.iter) {
             mem.iter = iter+1;
             mem.here = 0;

@@ -48,14 +48,6 @@ Creep.prototype.usePath = function(memory, memkey, targetPos, opts, goto, timeou
     return null;
 }
 
-let origgetDirectionTo = RoomPosition.prototype.getDirectionTo;
-RoomPosition.prototype.getDirectionTo = function (pos) {
-    if (this.roomName == pos.roomName)
-        return origgetDirectionTo.apply(this, arguments);
-    
-    return _.reduce(Game.map.describeExits(this.roomName), function(a,v,k) {return v == pos.roomName ? k : a;}, 0);
-}
-
 timeoutFunc = function(creep, memory, memkey, targetPos, opts) {
     let mem = memory[memkey];
     let subpath = travel.getSubFromSerializedPath(mem.path, 5, mem.iter);

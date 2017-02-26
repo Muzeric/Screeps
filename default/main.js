@@ -1,6 +1,7 @@
 require('constants');
 require('prototype.room');
 require('prototype.creep');
+require('prototype.roomposition');
 var utils = require('utils');
 var statObject = require('stat');
 const profiler = require('screeps-profiler');
