@@ -1,3 +1,5 @@
+ var utils = require('utils');
+
 module.exports = {
     serializePath: function(path) {
         let poses = '';
@@ -107,10 +109,9 @@ module.exports = {
         return path.length - pi;
     },
 
-    getPath: function(sourcePos, targetPos, addCreeps, pathCache) {
+    getPath: function(sourcePos, targetPos, targetKey = null, addCreeps, pathCache) {
         let sourceKey = sourcePos.getKey();
-        if (!Array.isArray(targetPos)) {
-            let targetKey = targetPos.getKey();
+        if (!Array.isArray(targetPos) && targetKey !== null) {
             if (pathCache[targetKey] && pathCache[targetKey][sourceKey]) {
                 console.log("getPath use path from cache for " + targetKey + " from " + sourceKey);
                 pathCache[targetKey][sourceKey].useTime = Game.time;
@@ -124,6 +125,7 @@ module.exports = {
             {
                 plainCost: 2,
                 swampCost: 10,
+                maxOps: 3000,
                 roomCallback: function(roomName) { 
                     if (!(roomName in Memory.rooms) || Memory.rooms[roomName].type == 'hostiled' || !("costMatrix" in Memory.rooms[roomName]))
                         return false;
@@ -152,14 +154,15 @@ module.exports = {
     },
 
     updateIter: function (creep, mem) {
-        let iter = travel.getIterFromSerializedPath(mem.path, creep.pos, mem.iter);
-        console.log(creep.name + ": moveTo iter=" + mem.iter + " => "+ iter + ", here=" + mem.here);
+        let iter = this.getIterFromSerializedPath(mem.path, creep.pos, utils.clamp(mem.iter-1, 0, mem.iter));
+        //console.log(creep.name + ": moveTo iter=" + mem.iter + " => "+ iter + ", here=" + mem.here);
         if (iter >= mem.iter) {
             mem.iter = iter+1;
             mem.here = 0;
         } else if (iter === null) {
             console.log(creep.name + ": moveTo iter=null");
-            mem.iter = null;
+            if (!mem.iter) // TODO: Zero iter may be means we are on the source pos, must check..
+                mem.iter = null;
         }
     },
 

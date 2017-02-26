@@ -17,7 +17,7 @@ RoomPosition.prototype.getKey = function(long) {
     return this.x + "x" + this.y + (long ? this.roomName : '');
 }
 
-Creep.prototype.usePath = function(mememory, memkey, targetPos, opts, goto, timeoutCallback) {
+Creep.prototype.usePath = function(memory, memkey, targetPos, opts, goto, timeoutCallback) {
     let mem = memory[memkey];
     travel.updateIter(this, mem);
 
@@ -48,6 +48,14 @@ Creep.prototype.usePath = function(mememory, memkey, targetPos, opts, goto, time
     return null;
 }
 
+let origgetDirectionTo = RoomPosition.prototype.getDirectionTo;
+RoomPosition.prototype.getDirectionTo = function (pos) {
+    if (this.roomName == pos.roomName)
+        return origgetDirectionTo.apply(this, arguments);
+    
+    return _.reduce(Game.map.describeExits(this.roomName), function(a,v,k) {return v == pos.roomName ? k : a;}, 0);
+}
+
 timeoutFunc = function(creep, memory, memkey, targetPos, opts) {
     let mem = memory[memkey];
     let subpath = travel.getSubFromSerializedPath(mem.path, 5, mem.iter);
@@ -57,13 +65,14 @@ timeoutFunc = function(creep, memory, memkey, targetPos, opts) {
     if (!subpath.length)
         return null;
 
-    let pf = travel.getPath(creep.pos, subpath, 1, creep.room.memory.pathCache);
+    let pf = travel.getPath(creep.pos, subpath, null, 1, creep.room.memory.pathCache);
     if (pf.incomplete) {
         console.log(creep.name + ": moveTo incomplete path to subpath; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         memory[memkey] = null;
         return origMoveTo.apply(creep, [targetPos, opts]);
     } else {
         console.log(creep.name + ": moveTo got subpath to subpath; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+        mem.sub = {};
         travel.setPath(mem.sub, pf.serialized ? pf.path : travel.serializePath(pf.path), creep.pos.getKey(), null, creep.room.memory.pathCache);
         return creep.move(creep.pos.getDirectionTo(travel.getPosFromSerializedPath(mem.sub.path,mem.sub.iter)));
     }
@@ -81,7 +90,7 @@ Creep.prototype.travelTo = function (targetPos, opts) {
     let targetKey = targetPos.getKey(1);
     
     if (memory.travel && memory.travel.targetKey == targetKey) {
-        console.log(this.name + ": moveTo use travel for " + targetKey + ", iter=" + memory.travel.iter + ", here=" + memory.travel.here + ", pos=" + this.pos.getKey());
+        //console.log(this.name + ": moveTo use travel for " + targetKey + ", iter=" + memory.travel.iter + ", here=" + memory.travel.here + ", pos=" + this.pos.getKey());
         if (memory.travel.sub) {
             let res = this.usePath(memory.travel, 'sub', targetPos, opts, 0);
             if (res !== null)
@@ -90,14 +99,14 @@ Creep.prototype.travelTo = function (targetPos, opts) {
 
         return this.usePath(memory, 'travel', targetPos, opts, 1, timeoutFunc);
     } else if (targetPos.roomName == this.room.name && this.pos.getRangeTo(targetPos) < 6) {
-        console.log(this.name + ": moveTo short distance");
+        //console.log(this.name + ": moveTo short distance");
         return origMoveTo.apply(this, [targetPos, opts]);
     } else {
         memory.travel = {};
         let pathCache = this.room.memory.pathCache;
         let sourceKey = this.pos.getKey();
 
-        let pf = travel.getPath(this.pos, {pos: targetPos, range: 1}, 0, this.room.memory.pathCache);
+        let pf = travel.getPath(this.pos, {pos: targetPos, range: 1}, targetKey, 0, this.room.memory.pathCache);
         if (pf.incomplete) {
             console.log(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
             //res = ERR_NO_PATH; 
@@ -115,7 +124,7 @@ Creep.prototype.moveTo = function() {
     let res, targetPos, opts;
     [targetPos, opts] = this.moveToPos(arguments[0], arguments[1], arguments[2]);
     
-    if (memory.role == "scout") {
+    if (this.memory.role == "scout" || (1 && this.memory.role == "longharvester")) {
         res = this.travelTo(targetPos, opts);
     } else {
         res = origMoveTo.apply(this, [targetPos, opts]);
