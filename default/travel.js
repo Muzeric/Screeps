@@ -125,7 +125,7 @@ module.exports = {
             {
                 plainCost: 2,
                 swampCost: 10,
-                maxOps: 3000,
+                maxOps: 5500,
                 roomCallback: function(roomName) { 
                     if (!(roomName in Memory.rooms) || Memory.rooms[roomName].type == 'hostiled' || !("costMatrix" in Memory.rooms[roomName]))
                         return false;
