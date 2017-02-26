@@ -14,21 +14,25 @@ RoomPosition.prototype.getDirectionTo = function (pos) {
                 return BOTTOM_LEFT;
             else if (pos.y < this.y)
                 return TOP_LEFT;
+            break;
         case RIGHT:
             if (pos.y > this.y)
                 return BOTTOM_RIGHT;
             else if (pos.y < this.y)
                 return TOP_RIGHT;
+            break;
         case TOP:
             if (pos.x > this.x)
                 return TOP_RIGHT;
             else if (pos.x < this.x)
                 return TOP_LEFT;
+            break;
         case BOTTOM:
             if (pos.x > this.x)
                 return BOTTOM_RIGHT;
             else if (pos.x < this.x)
                 return BOTTOM_LEFT;
+            break;
         default:
             console.log("getDirectionTo from " + this.roomName + " to " + pos.roomName + " got dir=" + dir);
     }
