@@ -44,6 +44,7 @@ var stat = {
                 Memory.stat.CPUHistory["_total"].creeps = _.keys(Game.creeps).length;
                 Memory.stat.CPUHistory["_total"].energy = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.energy);
                 Memory.stat.CPUHistory["_total"].gcl = _.floor(Game.gcl.progress/1000);
+                Memory.stat.CPUHistory["_total"].paths = _.sum(Memory.rooms, r => r.pathCount || 0);
                 Game.notify(
                     "CPUHistory:" + Game.time + ":" + 
                     utils.lzw_encode(JSON.stringify(Memory.stat.CPUHistory, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} )) +
