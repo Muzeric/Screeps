@@ -1,4 +1,5 @@
 var utils = require('utils');
+const profiler = require('screeps-profiler');
 
 var role = {
 
@@ -103,3 +104,4 @@ var role = {
 };
 
 module.exports = role;
+profiler.registerObject(role, 'roleAttacker');

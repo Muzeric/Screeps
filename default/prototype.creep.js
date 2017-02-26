@@ -125,7 +125,7 @@ Creep.prototype.moveTo = function() {
     let res, targetPos, opts;
     [targetPos, opts] = this.moveToPos(arguments[0], arguments[1], arguments[2]);
     
-    if (this.memory.role == "scout" || (1 && this.memory.role == "longharvester")) {
+    if (1 || this.memory.role == "scout" || (1 && this.memory.role == "longharvester")) {
         res = this.travelTo(targetPos, opts);
     } else {
         res = origMoveTo.apply(this, [targetPos, opts]);

@@ -1,4 +1,5 @@
 var utils = require('utils');
+const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
@@ -140,3 +141,4 @@ var role = {
 };
 
 module.exports = role;
+profiler.registerObject(role, 'roleLongminer');

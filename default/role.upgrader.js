@@ -1,6 +1,7 @@
 var utils = require('utils');
+const profiler = require('screeps-profiler');
 
-var roleUpgrader = {
+var role = {
     run: function(creep) {
 		if (!utils.checkInRoomAndGo(creep))
             return;
@@ -48,4 +49,5 @@ var roleUpgrader = {
 	},
 };
 
-module.exports = roleUpgrader;
+module.exports = role;
+profiler.registerObject(role, 'roleUpgrader');

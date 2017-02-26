@@ -1,6 +1,7 @@
 var utils = require('utils');
+const profiler = require('screeps-profiler');
 
-var roleHarvester = {
+var role = {
     run: function(creep) {
         if (!utils.checkInRoomAndGo(creep))
             return;
@@ -140,4 +141,5 @@ var roleHarvester = {
 	},
 };
 
-module.exports = roleHarvester;
+module.exports = role;
+profiler.registerObject(role, 'roleHarvester');

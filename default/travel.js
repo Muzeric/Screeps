@@ -1,6 +1,7 @@
- var utils = require('utils');
+var utils = require('utils');
+const profiler = require('screeps-profiler');
 
-module.exports = {
+var travel = {
     serializePath: function(path) {
         let poses = '';
         let rooms = '';
@@ -165,3 +166,6 @@ module.exports = {
     },
 
 };
+
+module.exports = travel;
+profiler.registerObject(travel, 'travel');

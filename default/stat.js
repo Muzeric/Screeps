@@ -1,4 +1,5 @@
 var utils = require('utils');
+const profiler = require('screeps-profiler');
 
 var stat = {
     lastCPU : 0,
@@ -74,5 +75,5 @@ var stat = {
     },
 };
 
-
 module.exports = stat;
+profiler.registerObject(stat, 'stat');

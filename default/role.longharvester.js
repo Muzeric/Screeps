@@ -1,4 +1,5 @@
 var utils = require('utils');
+const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
@@ -151,3 +152,4 @@ function set_energy (creep) {
 }
 
 module.exports = role;
+profiler.registerObject(role, 'roleLongharvester');

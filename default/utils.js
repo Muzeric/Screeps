@@ -1,3 +1,5 @@
+const profiler = require('screeps-profiler');
+
 function _addPosition (creep, res, pos, x, y) {
     let newx = parseInt(pos.x) + parseInt(x);
     if (newx < 0 || newx > 49)
@@ -19,7 +21,7 @@ function _addPosition (creep, res, pos, x, y) {
     res.push(npos);
 }
 
-module.exports = {
+var utils = {
     clamp : function (n, min, max) {
         return n < min ? min : (n > max ? max : n);
     },
@@ -147,3 +149,6 @@ module.exports = {
         return out.join("");
     },
 };
+
+module.exports = utils;
+profiler.registerObject(utils, 'utils');

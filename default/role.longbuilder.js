@@ -1,6 +1,7 @@
 var utils = require('utils');
+const profiler = require('screeps-profiler');
 
-var roleLongBuilder = {
+var role = {
     run: function(creep) {
 		if (Memory.warning[creep.room.name] > 1) {
 			creep.say("AAA");
@@ -124,4 +125,5 @@ function getLongBuilderTargets(creep) {
 	return null;
 }
 
-module.exports = roleLongBuilder;
+module.exports = role;
+profiler.registerObject(role, 'roleLongbuilder');

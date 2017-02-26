@@ -1,6 +1,7 @@
 var utils = require('utils');
+const profiler = require('screeps-profiler');
 
-var roleClaimer = {
+var role = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
@@ -56,4 +57,5 @@ var roleClaimer = {
 	}
 };
 
-module.exports = roleClaimer;
+module.exports = role;
+profiler.registerObject(role, 'roleClaimer');

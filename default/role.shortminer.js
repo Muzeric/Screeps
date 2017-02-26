@@ -1,6 +1,7 @@
 var utils = require('utils');
+const profiler = require('screeps-profiler');
 
-var roleShortMiner = {
+var role = {
     /** @param {Creep} creep **/
     run: function(creep) {
         if (!utils.checkInRoomAndGo(creep))
@@ -54,4 +55,5 @@ var roleShortMiner = {
 	},
 };
 
-module.exports = roleShortMiner;
+module.exports = role;
+profiler.registerObject(role, 'roleShortminer');
