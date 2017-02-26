@@ -4,8 +4,8 @@ Room.prototype.init = function() {
 }
 
 Room.prototype.update = function() {
-    if(!("pathCache" in this.memory))
-        this.memory.pathCache = {};
+    if (!("pathCache" in this.memory) || Game.time - (this.memory.pathCacheTime || 0) > UPDATE_INTERVAL_PATHCACHE)
+        this.updatePathCache();
     if (!("structures" in this.memory) || Game.time - (this.memory.structuresTime || 0) > UPDATE_INTERVAL_STRUCTURES)
         this.updateStructures();
     if (!("hostileCreeps" in this.memory) || Game.time - (this.memory.hostileCreepsTime || 0) > UPDATE_INTERVAL_HOSTILES)
@@ -26,6 +26,29 @@ Room.prototype.update = function() {
         this.visual.circle(parseInt(pos[0]), parseInt(pos[1]), {fill: color});
     }
     */
+}
+
+Room.prototype.updatePathCache = function() {
+    let memory = this.memory;
+    memory.pathCache = memory.pathCache || {};
+    memory.pathCacheTime = Game.time;
+
+    let allCount = 0;
+    let delCount = 0;
+    for (let target in memory.pathCache) {
+        for (let source in memory.pathCache[target]) {
+            allCount++;
+            if (Game.time - memory.pathCache[target][source].useTime > PATHCACHE_USE_TIMEOUT || Game.time - memory.pathCache[target][source].createTime > PATHCACHE_CREATE_TIMEOUT) {
+                delete memory.pathCache[target][source];
+                delCount++;
+            }
+        }
+        if (!_.keys(memory.pathCache[target]).length)
+            delete memory.pathCache[target];
+    }
+    memory.pathCount = allCount - delCount;
+
+    console.log(this.name + ": updatePathCache: " + allCount + " paths, " + delCount + " deleted");
 }
 
 Room.prototype.updateResources = function() {
