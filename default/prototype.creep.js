@@ -67,11 +67,11 @@ timeoutFunc = function(creep, memory, memkey, targetPos, opts) {
 
     let pf = travel.getPath(creep.pos, subpath, null, 1, creep.room.memory.pathCache);
     if (pf.incomplete) {
-        console.log(creep.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to subpath; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+        console.log(creep.name + ": moveTo incomplete path from " + creep.pos.getKey(1) + " to subpath; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         memory[memkey] = null;
         return origMoveTo.apply(creep, [targetPos, opts]);
     } else {
-        console.log(creep.name + ": moveTo got subpath from " + this.pos.getKey(1) + " to subpath; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+        console.log(creep.name + ": moveTo got subpath from " + creep.pos.getKey(1) + " to subpath; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         mem.sub = {};
         travel.setPath(mem.sub, pf.serialized ? pf.path : travel.serializePath(pf.path), creep.pos.getKey(), null, creep.room.memory.pathCache);
         return creep.move(creep.pos.getDirectionTo(travel.getPosFromSerializedPath(mem.sub.path,mem.sub.iter)));
