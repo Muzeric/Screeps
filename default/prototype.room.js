@@ -120,16 +120,18 @@ Room.prototype.refreshRoad = function (memory, s) {
         memory.needRoads[key].id = s.id;
         if (Game.time - (memory.needRoads[key].lastUpdate || 0) > ROADS_TIMEOUT) {
             delete memory.needRoads[key];
-            return;
+            return -1;
         }
 
         if (memory.needRoads[key].wanted > ROADS_REPAIR_WANTED && (s.progressTotal || s.hits && s.hits < s.hitsMax * 0.9))
             memory.needRoads[key].needRepair = 1;
         else
             memory.needRoads[key].needRepair = 0;
+        
+        return 0;
     }
 
-    return;
+    return -2;
 }
 
 Room.prototype.getStoragedLink = function() {
@@ -282,8 +284,10 @@ Room.prototype.updateStructures = function() {
     this.find(FIND_MY_CONSTRUCTION_SITES).forEach( function(s) {
         memory.constructions++;
         if (s.structureType == STRUCTURE_ROAD) {
-            memory.constructionsRoads++;
-            room.refreshRoad(memory, s);
+            if( room.refreshRoad(memory, s) < 0)
+                s.remove();
+            else
+                memory.constructionsRoads++;
         }
     });
 
