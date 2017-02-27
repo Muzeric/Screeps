@@ -100,7 +100,7 @@ Creep.prototype.travelTo = function (targetPos, opts) {
         let pathCache = this.room.memory.pathCache;
         let sourceKey = this.pos.getKey();
 
-        let pf = travel.getPath(this.pos, {pos: targetPos, range: 1}, targetKey, 0, this.room.memory.pathCache);
+        let pf = travel.getPath(this.pos, {pos: targetPos, range: 1}, targetKey, 0, this.room.memory.pathCache, this.pos.roomName == targetPos.roomName ? 1000 : null);
         if (pf.incomplete || !pf.path.length) {
             console.log(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
             Game.notify(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);

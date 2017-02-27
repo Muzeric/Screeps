@@ -110,7 +110,7 @@ var travel = {
         return path.length - pi;
     },
 
-    getPath: function(sourcePos, targetPos, targetKey = null, addCreeps, pathCache) {
+    getPath: function(sourcePos, targetPos, targetKey = null, addCreeps, pathCache, limit = 5500) {
         let sourceKey = sourcePos.getKey();
         if (!Array.isArray(targetPos) && targetKey !== null) {
             if (pathCache[targetKey] && pathCache[targetKey][sourceKey]) {
@@ -125,7 +125,7 @@ var travel = {
             {
                 plainCost: 2,
                 swampCost: 10,
-                maxOps: 5500,
+                maxOps: limit,
                 roomCallback: function(roomName) { 
                     if (!(roomName in Memory.rooms) || Memory.rooms[roomName].type == 'hostiled' || !("costMatrix" in Memory.rooms[roomName]))
                         return false;
