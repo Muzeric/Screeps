@@ -155,15 +155,14 @@ var travel = {
 
     updateIter: function (creep, mem) {
         let iter = this.getIterFromSerializedPath(mem.path, creep.pos, utils.clamp(mem.iter-1, 0, mem.iter));
-        if (creep.pos.isBorder() && mem.here > 1) {
+        if (creep.pos.isBorder() && mem.here > 1 || (iter === null && mem.iter)) {
             let key = this.getPosFromSerializedPath(mem.path, mem.iter).getKey(1);
-            console.log(creep.name + ": moveTo (time=" + Game.time + ")BORDER mem.iter=" + mem.iter + " (" + key + "), iter="+ iter + " (" + creep.pos.getKey(1) + "), here=" + mem.here);
+            console.log(creep.name + ": moveTo (time=" + Game.time + ") mem.iter=" + mem.iter + " (" + key + "), iter="+ iter + " (" + creep.pos.getKey(1) + "); travel=" + JSON.stringify(creep.memory.travel));
         }
         if (iter !== null && iter >= mem.iter) {
             mem.iter = iter+1;
             mem.here = 0;
         } else if (iter === null && mem.iter) { // TODO: Zero iter may be means we are on the source pos, must check..
-            console.log(creep.name + ": moveTo iter=null, iter=" + mem.iter);
             mem.iter = null;
         }
     },

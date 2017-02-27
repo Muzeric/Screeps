@@ -38,7 +38,7 @@ var role = {
                 return;
             }
 
-	        if(creep.room.name == Game.flags[creep.memory.energyName].pos.roomName)
+            if(!creep.pos.isBorder() && creep.room.name == Game.flags[creep.memory.energyName].pos.roomName)
                 creep.findSourceAndGo();
             else
                 creep.moveTo(Game.flags[creep.memory.energyName].pos);
