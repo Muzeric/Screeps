@@ -58,7 +58,7 @@ timeoutFunc = function(creep, memory, memkey, targetPos, opts) {
     if (!subpath.length)
         return null;
 
-    let pf = travel.getPath(creep.pos, subpath, null, 1, creep.room.memory.pathCache);
+    let pf = travel.getPath(creep.pos, subpath, null, 1, creep.room.memory.pathCache, 1000);
     if (pf.incomplete || !pf.path.length) {
         console.log(creep.name + ": moveTo incomplete path from " + creep.pos.getKey(1) + " to " + JSON.stringify(subpath) + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         memory[memkey] = null;
@@ -116,18 +116,11 @@ Creep.prototype.travelTo = function (targetPos, opts) {
 
 let origMoveTo = Creep.prototype.moveTo;
 Creep.prototype.moveTo = function() {
-    let res, targetPos, opts;
+    let targetPos, opts;
     [targetPos, opts] = this.moveToPos(arguments[0], arguments[1], arguments[2]);
-    
-    if (1 || this.memory.role == "scout" || (1 && this.memory.role == "longharvester")) {
-        res = this.travelTo(targetPos, opts);
-    } else {
-        res = origMoveTo.apply(this, [targetPos, opts]);
-    }
-
+    let res = this.travelTo(targetPos, opts);
     if (res == OK)
         this.room.needRoad(this);
-
     return res;
 }
 
