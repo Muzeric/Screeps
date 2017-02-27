@@ -64,9 +64,9 @@ timeoutFunc = function(creep, memory, memkey, targetPos, opts) {
         memory[memkey] = null;
         return origMoveTo.apply(creep, [targetPos, opts]);
     } else {
-        //console.log(creep.name + ": moveTo got subpath from " + creep.pos.getKey(1) + " to subpath; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         mem.sub = {};
         travel.setPath(mem.sub, pf.serialized ? pf.path : travel.serializePath(pf.path), creep.pos.getKey(), null, creep.room.memory.pathCache);
+        //console.log(creep.name + ": moveTo got subpath from " + creep.pos.getKey(1) + " to " + travel.getPosFromSerializedPath(mem.sub.path, mem.sub.length-1).getKey(1) + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         return creep.move(creep.pos.getDirectionTo(travel.getPosFromSerializedPath(mem.sub.path,mem.sub.iter)));
     }
 }

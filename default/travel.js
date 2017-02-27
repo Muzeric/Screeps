@@ -159,11 +159,11 @@ var travel = {
             let key = this.getPosFromSerializedPath(mem.path, mem.iter).getKey(1);
             console.log(creep.name + ": moveTo BORDER mem.iter=" + mem.iter + " (" + key + "), iter="+ iter + " (" + creep.pos.getKey(1) + "), here=" + mem.here);
         }
-        if (iter >= mem.iter) {
+        if (iter !== null && iter >= mem.iter) {
             mem.iter = iter+1;
             mem.here = 0;
-        } else if (iter === null && !mem.iter) { // TODO: Zero iter may be means we are on the source pos, must check..
-            console.log(creep.name + ": moveTo iter=null");
+        } else if (iter === null && mem.iter) { // TODO: Zero iter may be means we are on the source pos, must check..
+            console.log(creep.name + ": moveTo iter=null, iter=" + mem.iter);
             mem.iter = null;
         }
     },
