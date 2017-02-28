@@ -20,10 +20,15 @@ var role = {
             if (!friend && Memory.warning[creep.memory.roomName] > 1) {
                 creep.say("Want pair");
                 creep.moveTo(Game.spawns[creep.memory.spawnName])
-            } else if (!friend || creep.pos.inRangeTo(friend, 4) || Memory.warning[creep.memory.roomName] < 1 || creep.pos.x == 0 || creep.pos.y == 0 || creep.pos.x == 49 || creep.pos.y == 49 || friend.room.name == creep.memory.roomName) {
+            } else if (!friend || creep.pos.inRangeTo(friend, 3) || Memory.warning[creep.memory.roomName] < 1 || creep.pos.x == 0 || creep.pos.y == 0 || creep.pos.x == 49 || creep.pos.y == 49 || friend.room.name == creep.memory.roomName) {
                 creep.moveTo(Game.flags["Antikeeper." + creep.memory.roomName], {visualizePathStyle : {lineStyle: "dotted", stroke : "#FF0000", opacity : 0.5}});
             } else {
-                creep.moveTo(friend);
+                if (!friend.memory.gotoFriendID) {
+                    creep.moveTo(friend);
+                    creep.memory.gotoFriendID = friend.id;
+                } else if (creep.pos.isBorder()) {
+                    creep.moveTo(friend);
+                }
             }
             return;
         } else {
@@ -38,7 +43,7 @@ var role = {
             if (!friend.memory.gotoFriendID) {
                 creep.moveTo(friend);
                 creep.memory.gotoFriendID = friend.id;
-            } else if (creep.pos.x == 0 || creep.pos.y == 0 || creep.pos.x == 49 || creep.pos.y == 49) {
+            } else if (creep.pos.isBorder()) {
                 creep.moveTo(friend);
             }
             if (friend.hits < friend.hitsMax && !healed) {

@@ -3,12 +3,18 @@ var travel = require('travel');
 
 Creep.prototype.moveToPos = function (a, b, c) {
     if (_.isNumber(a) && _.isNumber(b)) {
+        c = c || {};
+        c.withCreeps = 0;
         return [new RoomPosition(a, b, this.room.name), c];
     } else if (_.isObject(a)) {
-        if (a instanceof global.RoomPosition)
+        b = b || {};
+        if (a instanceof global.RoomPosition) {
+            b.withCreeps = 0;
             return [a, b];
-        else if (a.pos && a.pos instanceof global.RoomPosition)
+        } else if (a.pos && a.pos instanceof global.RoomPosition) {
+            b.withCreeps = a instanceof Creep ? 1 : 0;
             return [a.pos, b];
+        }
     }
     return null;
 }
@@ -23,9 +29,11 @@ trySubPath = function(creep, mem, targetPos, opts) {
         return ERR_INVALID_ARGS;
 
     let pf = travel.getPath(creep.pos, subpath, null, 1, creep.room.memory.pathCache, 300);
-    if (pf.incomplete || !pf.path.length) {
+    if (pf.incomplete) {
         console.log(creep.name + ": moveTo BAD sub path from " + creep.pos.getKey(1) + " to " + JSON.stringify(subpath) + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         return ERR_NO_PATH;
+    } else if (!pf.path.length) {
+        return OK;
     }
 
     mem.sub = {};
@@ -43,7 +51,7 @@ Creep.prototype.usePath = function(memory, memkey, targetPos, opts, goto, timeou
         mem.here = 0;
     } else if (iter === null && (mem.iter || this.pos.getKey() != mem.sourceKey)) { // Zero mem.iter may be means we are on the source pos and it's ok
         let key = travel.getPosFromSerializedPath(mem.path, mem.iter).getKey(1);
-        console.log(this.name + ": moveTo " + memkey + " (time=" + Game.time + ") mem.iter=" + mem.iter + " (" + key + "), iter="+ iter + " (" + creep.pos.getKey(1) + "); travel=" + JSON.stringify(this.memory.travel));
+        console.log(this.name + ": moveTo " + memkey + " (time=" + Game.time + ") mem.iter=" + mem.iter + " (" + key + "), iter="+ iter + " (" + this.pos.getKey(1) + "); travel=" + JSON.stringify(this.memory.travel));
 
         memory[memkey] = null; // We don't know where we are
         return ERR_NO_PATH;
@@ -114,9 +122,11 @@ Creep.prototype.travelTo = function (targetPos, opts) {
                 maxOps = 2000;
             }
         }
+        if (opts.withCreeps)
+            addCreeps = 1;
 
         let pf = travel.getPath(this.pos, {pos: targetPos, range: 1}, targetKey, addCreeps, this.room.memory.pathCache, maxOps);
-        if (pf.incomplete || !pf.path.length) {
+        if (pf.incomplete) {
             console.log(this.name + ": moveTo BAD path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
             Game.notify(this.name + ": moveTo BAD path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         }
@@ -125,6 +135,8 @@ Creep.prototype.travelTo = function (targetPos, opts) {
             //console.log(this.name + ": moveTo got path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
             travel.setPath(memory.travel, pf.serialized ? pf.path : travel.serializePath(pf.path), sourceKey, targetKey, addCreeps || pf.incomplete ? null : this.room.memory.pathCache, pf.incomplete);
             return this.move(this.pos.getDirectionTo(travel.getPosFromSerializedPath(memory.travel.path,memory.travel.iter)));
+        } else if (!pf.incomplete) {
+            return this.move(this.pos.getDirectionTo(targetPos));
         }
 
         return ERR_NO_PATH;

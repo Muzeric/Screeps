@@ -127,12 +127,12 @@ var travel = {
                 swampCost: 10,
                 maxOps: limit,
                 roomCallback: function(roomName) { 
-                    if (!(roomName in Memory.rooms) || Memory.rooms[roomName].type == 'hostiled' || !global.cache.matrix[this.name])
+                    if (!(roomName in Memory.rooms) || Memory.rooms[roomName].type == 'hostiled' || !global.cache.matrix[roomName])
                         return false;
                     
                     if (addCreeps)
-                        return global.cache.matrix[this.name]["withCreeps"];
-                    return global.cache.matrix[this.name]["common"];
+                        return global.cache.matrix[roomName]["withCreeps"];
+                    return global.cache.matrix[roomName]["common"];
                 },
             }
         );
