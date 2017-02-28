@@ -13,32 +13,63 @@ Creep.prototype.moveToPos = function (a, b, c) {
     return null;
 }
 
-RoomPosition.prototype.getKey = function(long) {
-    return this.x + "x" + this.y + (long ? this.roomName : '');
+trySubPath = function(creep, mem, targetPos, opts) {
+    mem.sub = null;
+    let subpath = travel.getSubFromSerializedPath(mem.path, 5, mem.iter);
+    if (mem.length - mem.iter <= 5)
+        subpath.push({pos: targetPos, range: 1});
+
+    if (!subpath.length)
+        return ERR_INVALID_ARGS;
+
+    let pf = travel.getPath(creep.pos, subpath, null, 1, creep.room.memory.pathCache, 300);
+    if (pf.incomplete || !pf.path.length) {
+        console.log(creep.name + ": moveTo BAD sub path from " + creep.pos.getKey(1) + " to " + JSON.stringify(subpath) + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+        return ERR_NO_PATH;
+    }
+
+    mem.sub = {};
+    travel.setPath(mem.sub, pf.serialized ? pf.path : travel.serializePath(pf.path), creep.pos.getKey(), null, null, pf.incomplete);
+    //console.log(creep.name + ": moveTo got subpath from " + creep.pos.getKey(1) + " to " + travel.getPosFromSerializedPath(mem.sub.path, mem.sub.length-1).getKey(1) + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+    return creep.move(creep.pos.getDirectionTo(travel.getPosFromSerializedPath(mem.sub.path,mem.sub.iter)));
 }
 
 Creep.prototype.usePath = function(memory, memkey, targetPos, opts, goto, timeoutCallback) {
     let mem = memory[memkey];
-    travel.updateIter(this, mem);
 
-    if (mem.iter === null || mem.iter >= mem.length) {
+    let iter = travel.getIterFromSerializedPath(mem.path, this.pos, utils.clamp(mem.iter-1, 0, mem.iter));
+    if (iter !== null && iter >= mem.iter) {
+        mem.iter = iter+1;
+        mem.here = 0;
+    } else if (iter === null && (mem.iter || this.pos.getKey() != mem.sourceKey)) { // Zero mem.iter may be means we are on the source pos and it's ok
+        let key = travel.getPosFromSerializedPath(mem.path, mem.iter).getKey(1);
+        console.log(this.name + ": moveTo " + memkey + " (time=" + Game.time + ") mem.iter=" + mem.iter + " (" + key + "), iter="+ iter + " (" + creep.pos.getKey(1) + "); travel=" + JSON.stringify(this.memory.travel));
+
+        memory[memkey] = null; // We don't know where we are
+        return ERR_NO_PATH;
+    }
+
+    if (mem.iter >= mem.length) { // We are on the last position of mem.path
         //console.log(this.name + ": moveTo " + memkey + " path ended with iter=" + mem.iter);
-        memory[memkey] = null;
-        if (goto)
-            return this.move(this.pos.getDirectionTo(targetPos));
-        return null;
+        if (memory.path && travel.getIterFromSerializedPath(memory.path, this.pos) !== null) { // This is sub path, and we on the main path again
+            memory[memkey] = null;
+            return null;
+        }
+        
+        if (mem.incomplete)
+            memory[memkey] = null;
+
+        return this.move(this.pos.getDirectionTo(targetPos)); // This is main path and we are on the last pos OR sub path have gone to targetPos
     } 
 
     if (mem.here > PATH_TIMEOUT) {
         if (this.pos.isBorder())
             console.log(this.name + ": moveTo (" + targetPos.getKey(1) + ") " + memkey + " too much here iter=" + mem.iter + ", here=" + mem.here + ", pos=" + this.pos.getKey(1));
-        if (timeoutCallback) {
-            let res = timeoutCallback(this, memory, memkey, targetPos, opts);
-            if (res !== null)
-                return res;
-        }
+        if (timeoutCallback)
+            return timeoutCallback(this, mem, targetPos, opts);
+    
         memory[memkey] = null;
-        return origMoveTo.apply(this, [targetPos, opts]);
+        return ERR_NO_PATH;
     } else {
         let res = this.move(this.pos.getDirectionTo(travel.getPosFromSerializedPath(mem.path,mem.iter)));
         if (res == OK)
@@ -47,28 +78,6 @@ Creep.prototype.usePath = function(memory, memkey, targetPos, opts, goto, timeou
     }
 
     return null;
-}
-
-timeoutFunc = function(creep, memory, memkey, targetPos, opts) {
-    let mem = memory[memkey];
-    let subpath = travel.getSubFromSerializedPath(mem.path, 5, mem.iter);
-    if (mem.length - mem.iter <= 5)
-        subpath.push({pos: targetPos, range: 1});
-
-    if (!subpath.length)
-        return null;
-
-    let pf = travel.getPath(creep.pos, subpath, null, 1, creep.room.memory.pathCache, 1000);
-    if (pf.incomplete || !pf.path.length) {
-        console.log(creep.name + ": moveTo incomplete path from " + creep.pos.getKey(1) + " to " + JSON.stringify(subpath) + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
-        memory[memkey] = null;
-        return origMoveTo.apply(creep, [targetPos, opts]);
-    } else {
-        mem.sub = {};
-        travel.setPath(mem.sub, pf.serialized ? pf.path : travel.serializePath(pf.path), creep.pos.getKey(), null, creep.room.memory.pathCache);
-        //console.log(creep.name + ": moveTo got subpath from " + creep.pos.getKey(1) + " to " + travel.getPosFromSerializedPath(mem.sub.path, mem.sub.length-1).getKey(1) + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
-        return creep.move(creep.pos.getDirectionTo(travel.getPosFromSerializedPath(mem.sub.path,mem.sub.iter)));
-    }
 }
 
 Creep.prototype.travelTo = function (targetPos, opts) {
@@ -84,33 +93,41 @@ Creep.prototype.travelTo = function (targetPos, opts) {
     
     if (memory.travel && memory.travel.targetKey == targetKey) {
         //console.log(this.name + ": moveTo use travel for " + targetKey + ", iter=" + memory.travel.iter + ", here=" + memory.travel.here + ", pos=" + this.pos.getKey());
-        if (memory.travel.sub) {
+        if (memory.travel.sub && memory.travel.sub.length) {
             let res = this.usePath(memory.travel, 'sub', targetPos, opts, 0);
             if (res !== null)
                 return res;
         }
 
-        return this.usePath(memory, 'travel', targetPos, opts, 1, timeoutFunc);
-    } else if (targetPos.roomName == this.room.name && this.pos.getRangeTo(targetPos) < 6) {
-        memory.travel = null;
-        //console.log(this.name + ": moveTo short distance");
-        return origMoveTo.apply(this, [targetPos, opts]);
+        return this.usePath(memory, 'travel', targetPos, opts, 1, trySubPath);
     } else {
         memory.travel = {};
         let pathCache = this.room.memory.pathCache;
         let sourceKey = this.pos.getKey();
+        let maxOps = 5500;
+        let addCreeps = 0;
+        if (targetPos.roomName == this.pos.RoomName) {
+            if (this.pos.getRangeTo(targetPos) < 6) {
+                maxOps = 200;
+                addCreeps = 1;
+            } else {
+                maxOps = 2000;
+            }
+        }
 
-        let pf = travel.getPath(this.pos, {pos: targetPos, range: 1}, targetKey, 0, this.room.memory.pathCache, this.pos.roomName == targetPos.roomName ? 2000 : 5500);
+        let pf = travel.getPath(this.pos, {pos: targetPos, range: 1}, targetKey, addCreeps, this.room.memory.pathCache, maxOps);
         if (pf.incomplete || !pf.path.length) {
-            console.log(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
-            Game.notify(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
-            //res = ERR_NO_PATH; 
-            return origMoveTo.apply(this, [targetPos, opts]);
-        } else {
+            console.log(this.name + ": moveTo BAD path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+            Game.notify(this.name + ": moveTo BAD path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+        }
+
+        if (pf.path.length) {
             //console.log(this.name + ": moveTo got path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
-            travel.setPath(memory.travel, pf.serialized ? pf.path : travel.serializePath(pf.path), sourceKey, targetKey, this.room.memory.pathCache);
+            travel.setPath(memory.travel, pf.serialized ? pf.path : travel.serializePath(pf.path), sourceKey, targetKey, addCreeps || pf.incomplete ? null : this.room.memory.pathCache, pf.incomplete);
             return this.move(this.pos.getDirectionTo(travel.getPosFromSerializedPath(memory.travel.path,memory.travel.iter)));
         }
+
+        return ERR_NO_PATH;
     }
 }
 
@@ -185,7 +202,7 @@ Creep.prototype.findSource = function () {
         let cpriority = 0;
         if (target.resourceType) { // Dropped
             energyLeft -= range * 1.2;
-            if (this.room.memory.hostilesCount || energyLeft <= 0)
+            if (this.room.memory.invadersCount || energyLeft <= 0)
                 continue;
             else
                 cpriority = 2;

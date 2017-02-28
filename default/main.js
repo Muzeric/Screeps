@@ -11,6 +11,7 @@ profiler.enable();
 module.exports.loop = function () {
 profiler.wrap(function() {
     var stat = statObject.init();
+    global.cache = {};
     var moveErrors = {};
     //var rolesCount = {};
     var objectCache = {};
@@ -386,7 +387,7 @@ function getRoomLimits (room, creepsCount) {
     let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
     let countHarvester = _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 15) + _.floor((memory.structures[STRUCTURE_TOWER] || []).length / 3);
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
-    let hostiles = memory.hostilesCount && memory.hostilesDeadTime - Game.time > 50 ? 1 : 0;
+    let hostiles = memory.invadersCount && memory.hostilesDeadTime - Game.time > 50 ? 1 : 0;
     let extraUpgraders = utils.clamp( _.floor(memory.energy / 50000), 0, 2);
     
     let limits = [];

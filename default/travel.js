@@ -127,43 +127,30 @@ var travel = {
                 swampCost: 10,
                 maxOps: limit,
                 roomCallback: function(roomName) { 
-                    if (!(roomName in Memory.rooms) || Memory.rooms[roomName].type == 'hostiled' || !("costMatrix" in Memory.rooms[roomName]))
+                    if (!(roomName in Memory.rooms) || Memory.rooms[roomName].type == 'hostiled' || !global.cache.matrix[this.name])
                         return false;
-                    let costs = PathFinder.CostMatrix.deserialize(Memory.rooms[roomName].costMatrix);
-                    if (addCreeps && Game.rooms[roomName]) {
-                        Game.rooms[roomName].find(FIND_CREEPS, {filter: c => c.pos.roomName == roomName}).forEach( function(c) {
-                            costs.set(c.pos.x, c.pos.y, 0xff); 
-                        });
-                    }
-                    return costs;
+                    
+                    if (addCreeps)
+                        return global.cache.matrix[this.name]["withCreeps"];
+                    return global.cache.matrix[this.name]["common"];
                 },
             }
         );
     },
 
-    setPath: function(mem, path, sourceKey, targetKey, pathCache) {
+    setPath: function(mem, path, sourceKey, targetKey, pathCache, incomplete) {
         mem.path = path;
         mem.length = this.getLengthOfSerializedPath(path);
         mem.iter = 0;
         mem.here = 0;
+        mem.sourceKey = sourceKey;
         mem.targetKey = targetKey || this.getPosFromSerializedPath(path, mem.length-1).getKey(1);
+        mem.incomplete = incomplete ? 1 : 0;
 
-        pathCache[mem.targetKey] = pathCache[mem.targetKey] || {};
-        if (!(sourceKey in pathCache[mem.targetKey]))
-            pathCache[mem.targetKey][sourceKey] = {path: mem.path, useTime: Game.time, createTime: Game.time};
-    },
-
-    updateIter: function (creep, mem) {
-        let iter = this.getIterFromSerializedPath(mem.path, creep.pos, utils.clamp(mem.iter-1, 0, mem.iter));
-        if (creep.pos.isBorder() && mem.here > 1 || (iter === null && mem.iter)) {
-            let key = this.getPosFromSerializedPath(mem.path, mem.iter).getKey(1);
-            console.log(creep.name + ": moveTo (time=" + Game.time + ") mem.iter=" + mem.iter + " (" + key + "), iter="+ iter + " (" + creep.pos.getKey(1) + "); travel=" + JSON.stringify(creep.memory.travel));
-        }
-        if (iter !== null && iter >= mem.iter) {
-            mem.iter = iter+1;
-            mem.here = 0;
-        } else if (iter === null && mem.iter) { // TODO: Zero iter may be means we are on the source pos, must check..
-            mem.iter = null;
+        if (pathCache) {
+            pathCache[mem.targetKey] = pathCache[mem.targetKey] || {};
+            if (!(sourceKey in pathCache[mem.targetKey]))
+                pathCache[mem.targetKey][sourceKey] = {path: mem.path, useTime: Game.time, createTime: Game.time};
         }
     },
 

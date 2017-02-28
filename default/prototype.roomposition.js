@@ -2,6 +2,11 @@ RoomPosition.prototype.isBorder = function () {
     return (this.x == 0 || this.x == 49 || this.y == 0 || this.y == 49) ? true : false;
 }
 
+
+RoomPosition.prototype.getKey = function(long) {
+    return this.x + "x" + this.y + (long ? this.roomName : '');
+}
+
 let origgetDirectionTo = RoomPosition.prototype.getDirectionTo;
 RoomPosition.prototype.getDirectionTo = function (pos) {
     if (this.roomName == pos.roomName)

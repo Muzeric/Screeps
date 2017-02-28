@@ -4,15 +4,18 @@ Room.prototype.init = function() {
 }
 
 Room.prototype.update = function() {
-    if (!("pathCache" in this.memory) || Game.time - (this.memory.pathCacheTime || 0) > UPDATE_INTERVAL_PATHCACHE)
+    global.cache.matrix = global.cache.matrix || {};
+    global.cache.matrix[this.name] = {};
+
+    if (!("pathCache" in this.memory) || Game.time - (this.memory.pathCacheTime || 0) >= UPDATE_INTERVAL_PATHCACHE)
         this.updatePathCache();
-    if (!("structures" in this.memory) || Game.time - (this.memory.structuresTime || 0) > UPDATE_INTERVAL_STRUCTURES)
+    if (!("structures" in this.memory) || Game.time - (this.memory.structuresTime || 0) >= UPDATE_INTERVAL_STRUCTURES)
         this.updateStructures();
-    if (!("hostileCreeps" in this.memory) || Game.time - (this.memory.hostileCreepsTime || 0) > UPDATE_INTERVAL_HOSTILES)
-        this.updateHostileCreeps();
-    if (!("resources" in this.memory) || Game.time - (this.memory.resourcesTime || 0) > UPDATE_INTERVAL_RESOURCES)
+    if (!("hostileCreeps" in this.memory) || Game.time - (this.memory.creepsTime || 0) >= UPDATE_INTERVAL_CREEPS)
+        this.updateCreeps();
+    if (!("resources" in this.memory) || Game.time - (this.memory.resourcesTime || 0) >= UPDATE_INTERVAL_RESOURCES)
         this.updateResources();
-    
+
     /*
     for (let key of _.filter(Object.keys(this.memory.needRoads), r => this.memory.needRoads[r].wanted > ROADS_REPAIR_WANTED)) {
         let color = 'green';
@@ -292,6 +295,7 @@ Room.prototype.updateStructures = function() {
     });
 
     memory.costMatrix = costs.serialize();
+    global.cache.matrix[this.name]["common"] = costs;
 
     for (let key of _.filter(Object.keys(memory.needRoads), r => 
             !memory.needRoads[r].id && 
@@ -321,21 +325,32 @@ Room.prototype.getNearKeeper = function(pos, range) {
     return _.filter( this.memory.hostileCreeps, c => c.owner.username == "Source Keeper" && pos.inRangeTo(c.pos, range) )[0];
 }
 
-Room.prototype.updateHostileCreeps = function() {
+Room.prototype.updateCreeps = function() {
     let memory = this.memory;
     memory.hostileCreeps = [];
-    memory.hostileCreepsTime = Game.time;
-    memory.hostilesCount = 0;
+    memory.creepsTime = Game.time;
+    memory.invadersCount = 0;
     memory.hostilesDeadTime = 0;
+    if (!("common" in global.cache.matrix[this.name]))
+        global.cache.matrix[this.name]["common"] = PathFinder.CostMatrix.deserialize(memory.costMatrix);
+    let costs = global.cache.matrix[this.name]["common"].clone();
 
-    this.find(FIND_HOSTILE_CREEPS).forEach( function(c) {
-        memory.hostileCreeps.push(c);
+    this.find(FIND_CREEPS).forEach( function(c) {
         if (c.owner.username == "Invader") {
-            memory.hostilesCount++;
+            memory.hostileCreeps.push(c);
+            memory.invadersCount++;
             if (Game.tiime + c.ticksToLive > memory.hostilesDeadTime)
                 memory.hostilesDeadTime = Game.tiime + c.ticksToLive;
+        } else if (c.my) {
+            ;
+        } else  {
+            memory.hostileCreeps.push(c);
         }
+        costs.set(c.pos.x, c.pos.y, 0xff);
     });
+
+    
+    global.cache.matrix[this.name]["withCreeps"] = costs;
 }
 
 Room.prototype.getNearHostile = function(pos, range) {
