@@ -19,10 +19,12 @@ var role = {
             creep.memory.needRepair = 0;
             creep.findSourceAndGo();
         } else {
+            /*
             if (creep.ticksToLive < 500)
                 creep.memory.needRepair = 1;
             else if (creep.ticksToLive > 1200)
                 creep.memory.needRepair = 0;
+
             if (creep.memory.needRepair) {
                 let spawns = creep.room.find(FIND_MY_SPAWNS);
                 if (!spawns.length) {
@@ -36,60 +38,11 @@ var role = {
                     creep.moveTo(spawn);
                 return;
             }
-            let target;
-            if (creep.memory.targetID)
-                target = Game.getObjectById(creep.memory.targetID);
-            if( !target ||
-                (target.energyCapacity && target.energy == target.energyCapacity) ||
-                (target.storeCapacity && target.store[RESOURCE_ENERGY] == target.storeCapacity) ||
-                (target.structureType == STRUCTURE_TOWER && target.energy > target.energyCapacity * 0.9)
-             ) {
-                creep.memory.targetID = null;
-                let targets = creep.room.find(FIND_STRUCTURES, {filter: s => 
-                    (
-                        s.structureType == STRUCTURE_EXTENSION ||
-                        s.structureType == STRUCTURE_LAB ||
-                        s.structureType == STRUCTURE_TOWER ||
-                        s.structureType == STRUCTURE_SPAWN ||
-                        s.structureType == STRUCTURE_STORAGE
-                    ) && (
-                        (s.energyCapacity && s.energy < s.energyCapacity) ||
-                        (s.storeCapacity && s.store[RESOURCE_ENERGY] < s.storeCapacity)
-                    )
-                });
+            */
 
-                if (!targets.length) {
-                    //console.log(creep.name + ": no any container for energy");
-                    return;
-                }
-
-                let targetInfo = {};
-                for(let target of targets) {
-                    let wantEnergy = target.storeCapacity ? target.storeCapacity - target.store[RESOURCE_ENERGY] : target.energyCapacity - target.energy;
-                    let cpath = creep.pos.getRangeTo(target);
-                    let wantCarry = _.reduce(_.filter(Game.creeps, c => c.memory.role == "harvester" && c.memory.targetID == target.id), function (sum, value) { return sum + value.carry.energy; }, 0);
-                    let cpriority = 0;
-                    if (wantCarry >= wantEnergy)
-                        cpriority = -100;
-                    else if (target.structureType == STRUCTURE_STORAGE)
-                        cpriority = -50;
-                    else if (target.structureType == STRUCTURE_TOWER && target.energy < target.energyCapacity * 0.9)
-                        cpriority = 100;
-                    else if (target.structureType == STRUCTURE_TOWER && target.energy > target.energyCapacity * 0.9)
-                        cpriority = -30;
-
-                    targetInfo[target.id] = cpath * 1.2 - cpriority;
-                    //console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + wantCarry + " wantCarry and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " sum=" + targetInfo[target.id]);
-                }
-                target = targets.sort( function (a,b) {
-                    let suma = targetInfo[a.id];
-                    let sumb = targetInfo[b.id];
-                    //console.log("a=" + a.id + ",b=" + b.id + ",suma=" + suma + ",sumb=" + sumb);
-                    return suma - sumb;
-                })[0];
-                creep.memory.targetID = target.id;
-            }
-
+            if (!creep.memory.targetID)
+                setTarget(creep);
+            let target = Game.getObjectById(creep.memory.targetID);
             if(!target) {
                 console.log(creep.name + ": target "+ creep.memory.targetID +" dead");
                 creep.memory.targetID = null;
@@ -140,6 +93,48 @@ var role = {
 	    return [body, energy];
 	},
 };
+
+function setTarget (creep) {
+    creep.memory.targetID = null;
+    let targets = _.filter(
+        (creep.room.memory.structures[STRUCTURE_EXTENSION] || []).concat( 
+        (creep.room.memory.structures[STRUCTURE_LAB] || []), 
+        (creep.room.memory.structures[STRUCTURE_TOWER] || []),
+        (creep.room.memory.structures[STRUCTURE_SPAWN] || []),
+        (creep.room.memory.structures[STRUCTURE_STORAGE] || []) ),
+    t => t.energy < t.energyCapacity);
+
+    if (!targets.length) {
+        //console.log(creep.name + ": no any container for energy");
+        return;
+    }
+
+    let minTarget;
+    let minCost;
+    for(let target of targets) {
+        let wantEnergy = target.energyCapacity - target.energy;
+        let cpath = creep.pos.getRangeTo(target.pos.x, target.pos.y);
+        let wantCarry = global.cache.wantCarry[creep.room.name] ? global.cache.wantCarry[creep.room.name][target.id] || 0 : 0;
+        let cpriority = 0;
+        if (wantCarry >= wantEnergy)
+            cpriority = -100;
+        else if (target.structureType == STRUCTURE_STORAGE)
+            cpriority = -50;
+        else if (target.structureType == STRUCTURE_TOWER && target.energy < target.energyCapacity * 0.9)
+            cpriority = 100;
+        else if (target.structureType == STRUCTURE_TOWER && target.energy > target.energyCapacity * 0.9)
+            cpriority = -30;
+
+        let cost = cpath * 1.2 - cpriority;
+        if (minCost === undefined || cost < minCost) {
+            minTarget = target;
+            minCost = cost;
+        }
+        if (creep.name == "harvester.0.56")
+            console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + wantCarry + " wantCarry and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " cost=" + cost + ", targetID=" + minTarget.id);
+    }
+    creep.memory.targetID = minTarget.id;
+}
 
 module.exports = role;
 profiler.registerObject(role, 'roleHarvester');
