@@ -71,8 +71,8 @@ Creep.prototype.usePath = function(memory, memkey, targetPos, opts) {
             return null; // No movements performed
         }
 
-        memory.travel.near = this.pos.getKey(1);
-        memory.travel.here = 0;
+        this.memory.travel.near = this.pos.getKey(1);
+        this.memory.travel.here = 0;
         return this.move(this.pos.getDirectionTo(targetPos)); // This is main path and we are on the last pos OR sub path have gone to targetPos
     } 
 
