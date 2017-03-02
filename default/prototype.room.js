@@ -239,6 +239,11 @@ Room.prototype.updateStructures = function() {
             else if ("store" in s)
                 elem.energy = s.store[RESOURCE_ENERGY];
             
+            if ("energyCapacity" in s)
+                elem.energyCapacity = s.energyCapacity;
+            else if ("storeCapacity" in s)
+                elem.energyCapacity = s.storeCapacity;
+            
             if ("energy" in elem)
                 memory.energy += elem.energy;
 
