@@ -20,7 +20,7 @@ Creep.prototype.moveToPos = function (a, b, c) {
 }
 
 Creep.prototype.trySubPath = function(targetPos, opts) {
-    let mem = memory.travel;
+    let mem = this.memory.travel;
     mem.sub = null;
     let subpath = travel.getSubFromSerializedPath(mem.path, 5, mem.iter);
     if (mem.length - mem.iter <= 5)
