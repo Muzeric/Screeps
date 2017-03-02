@@ -4,8 +4,8 @@ Room.prototype.init = function() {
 }
 
 Room.prototype.update = function() {
-    global.cache.matrix = global.cache.matrix || {};
     global.cache.matrix[this.name] = {};
+    global.cache.wantCarry[this.name] = {};
 
     if (!("pathCache" in this.memory) || Game.time - (this.memory.pathCacheTime || 0) >= UPDATE_INTERVAL_PATHCACHE)
         this.updatePathCache();
@@ -332,6 +332,7 @@ Room.prototype.getNearKeeper = function(pos, range) {
 
 Room.prototype.updateCreeps = function() {
     let memory = this.memory;
+    let roomName = this.name;
     memory.hostileCreeps = [];
     memory.creepsTime = Game.time;
     memory.invadersCount = 0;
@@ -347,7 +348,8 @@ Room.prototype.updateCreeps = function() {
             if (Game.tiime + c.ticksToLive > memory.hostilesDeadTime)
                 memory.hostilesDeadTime = Game.tiime + c.ticksToLive;
         } else if (c.my) {
-            ;
+            if (c.memory.role == "harvester" && c.memory.targetID)
+                global.cache.wantCarry[roomName][c.memory.targetID] = (global.cache.wantCarry[roomName][c.memory.targetID] || 0) + c.carry.energy;
         } else  {
             memory.hostileCreeps.push(c);
         }

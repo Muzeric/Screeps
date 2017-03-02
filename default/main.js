@@ -12,6 +12,9 @@ module.exports.loop = function () {
 profiler.wrap(function() {
     var stat = statObject.init();
     global.cache = {};
+    global.cache.matrix = {};
+    global.cache.wantCarry = {};
+    
     var moveErrors = {};
     //var rolesCount = {};
     var objectCache = {};
@@ -40,6 +43,7 @@ profiler.wrap(function() {
             moveErrors[Game.creeps[name].room.name] = 1;
         }
     }
+
     statObject.addCPU("memory");
 
     _.forEach(roomNames, function(roomName) {
@@ -47,7 +51,6 @@ profiler.wrap(function() {
             Game.rooms[roomName].update();
         } else {
             if (roomName in Memory.rooms && "costMatrix" in Memory.rooms[roomName]) {
-                global.cache.matrix = global.cache.matrix || {};
                 global.cache.matrix[roomName] = global.cache.matrix[roomName] || {};
                 global.cache.matrix[roomName]["common"] = PathFinder.CostMatrix.deserialize(Memory.rooms[roomName]);
                 global.cache.matrix[roomName]["withCreeps"] = global.cache.matrix[roomName]["common"];
