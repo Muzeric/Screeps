@@ -40,9 +40,7 @@ var role = {
             }
             */
 
-            if (!creep.memory.targetID)
-                setTarget(creep);
-            let target = Game.getObjectById(creep.memory.targetID);
+            let target = getTarget(creep);
             if(!target) {
                 console.log(creep.name + ": target "+ creep.memory.targetID +" dead");
                 creep.memory.targetID = null;
@@ -94,6 +92,22 @@ var role = {
 	},
 };
 
+function getTarget (creep) {
+    let target = Game.getObjectById(creep.memory.targetID);
+    
+    if (!target || 
+        (target.energyCapacity && target.energy == target.energyCapacity) ||                
+        (target.storeCapacity && target.store[RESOURCE_ENERGY] == target.storeCapacity)
+    ) {
+        if (creep.memory.targetObj)
+            creep.memory.targetObj.energy = creep.memory.targetObj.energyCapacity;
+        setTarget(creep);
+    }
+    target = Game.getObjectById(creep.memory.targetID);
+    
+    return target;
+}
+
 function setTarget (creep) {
     creep.memory.targetID = null;
     let targets = _.filter(
@@ -130,10 +144,11 @@ function setTarget (creep) {
             minTarget = target;
             minCost = cost;
         }
-        if (creep.name == "harvester.0.56")
-            console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + wantCarry + " wantCarry and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " cost=" + cost + ", targetID=" + minTarget.id);
+        //if (creep.name == "harvester.0.999")
+        //   console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + wantCarry + " wantCarry and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " cost=" + cost + ", targetID=" + minTarget.id);
     }
     creep.memory.targetID = minTarget.id;
+    creep.memory.targetObj = minTarget;
 }
 
 module.exports = role;
