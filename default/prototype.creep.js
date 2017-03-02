@@ -105,7 +105,7 @@ Creep.prototype.travelTo = function (targetPos, opts) {
         if (memory.travel.near) {
             if (memory.travel.near == this.pos.getKey(1)) {
                 memory.travel.here++;
-                if (memory.travel.here > PATH_TIMEOUT && this.pos.roomName == targetPos.roomName && !this.pos.isNeaarTo(targetPos) ) {
+                if (memory.travel.here > PATH_TIMEOUT && this.pos.roomName == targetPos.roomName && !this.pos.isNearTo(targetPos) ) {
                     memory.travel.near = null;
                 } else 
                     return this.move(this.pos.getDirectionTo(targetPos));
