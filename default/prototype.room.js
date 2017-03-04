@@ -225,7 +225,7 @@ Room.prototype.updateStructures = function() {
             memory.pointPos = s.pos;
             elem = {
                 structureType : s.structureType,
-                places : utils.getRangedPlaces(null, s.pos, 1).length,
+                rangedPlaces : utils.getRangedPlaces(null, s.pos, 1),
             };
         } else if (s.structureType == STRUCTURE_ROAD) {
             costs.set(s.pos.x, s.pos.y, 1);

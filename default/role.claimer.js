@@ -3,49 +3,37 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        /*
-        if (!creep.memory.controllerPos) {
-            if (!Memory.rooms[creep.memory.roomName] || Memory.rooms[creep.memory.roomName].structures || Memory.rooms[creep.memory.roomName].structures[STRUCTURE_CONTROLLER]) {
-                console.log(this.name + ": no controller info for " + creep.memory.roomName);
-                return;
-            }
-        }
-        */
-        
-        if(!creep.memory.controllerName || !Game.flags[creep.memory.controllerName]) {
-            let controllers = _.filter(Game.flags, f => 
-                f.name.substring(0, 10) == 'Controller' &&
-                f.pos.roomName == creep.memory.roomName
-            );
-	        if(!controllers.length) {
-                console.log(creep.name + " found no flags");
-                return;
-            }
-            //console.log(creep.name + " controllers: " + controllers);
-            
-            creep.memory.controllerName = controllers.sort( function(a,b) {
-                let suma = 0;
-                let sumb = 0;
-                for (let cr of _.filter(Game.creeps, c => c.memory.role == "claimer" && c.memory.controllerName == a.name))
-                    suma += cr.ticksToLive;
-                for (let cr of _.filter(Game.creeps, c => c.memory.role == "claimer" && c.memory.controllerName == b.name))
-                    sumb += cr.ticksToLive;
-                return suma - sumb;
-            })[0].name;
-            //console.log(creep.name + " controllerName=" + creep.memory.controllerName);
-        }
-        
-        if(creep.room.name == Game.flags[creep.memory.controllerName].pos.roomName) {
-            if(
-            (Game.flags[creep.memory.controllerName].memory.claim && creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) ||
-            (creep.reserveController(creep.room.controller) == ERR_NOT_IN_RANGE)
+        if (!creep.memory.controllerPlace) {
+            if (
+                !(creep.memory.roomName in Memory.rooms) || 
+                !("structures" in Memory.rooms[creep.memory.roomName]) ||
+                !(STRUCTURE_CONTROLLER in Memory.rooms[creep.memory.roomName].structures) ||
+                !Memory.rooms[creep.memory.roomName].structures[STRUCTURE_CONTROLLER].length
             ) {
-                //creep.moveTo(creep.room.controller);
-                creep.moveTo(Game.flags[creep.memory.controllerName].pos);
+                console.log(creep.name + ": no controller info for " + creep.memory.roomName);
+                return;
             }
+
+            let controller = Memory.rooms[creep.memory.roomName].structures[STRUCTURE_CONTROLLER][0];
+            if (!("rangedPlaces" in controller) || !controller.rangedPlaces.length) {
+                console.log(creep.name + ": no rangedPlaces for controller");
+                return;
+            }
+
+            creep.memory.controllerPlace = controller.rangedPlaces[0];
+        }
+
+        let controllerPos = new RoomPosition(creep.memory.controllerPlace.x, creep.memory.controllerPlace.y, creep.memory.controllerPlace.roomName);
+        if (creep.pos.isEqualTo(controllerPos)) {
+            let res;
+            if (Game.flags[creep.memory.controllerName].memory.claim)
+                res = creep.claimController(creep.room.controller);
+            else
+                res = creep.reserveController(creep.room.controller);
+            if (res < 0)
+                console.log(creep.name + ": reserve[claim]Controller with res=" + res);
         } else {
-            creep.moveTo(Game.flags[creep.memory.controllerName].pos);
-            //console.log(creep.name + " going to " + creep.memory.energyName + " to " + exitDir);
+            creep.moveTo(controllerPos);
         }
 	},
 	
