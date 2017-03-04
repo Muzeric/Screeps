@@ -6,6 +6,12 @@ RoomPosition.prototype.isBorder = function () {
 RoomPosition.prototype.getKey = function(long) {
     return this.x + "x" + this.y + (long ? this.roomName : '');
 }
+RoomPosition.prototype.invertBorderPos () {
+    let x = this.x == 49 ? 0 : this.x == 0 ? 49 : this.x;
+    let y = this.y == 49 ? 0 : this.y == 0 ? 49 : this.y;
+
+    return new RoomPosition(x, y, this.roomName);
+}
 
 let origgetDirectionTo = RoomPosition.prototype.getDirectionTo;
 RoomPosition.prototype.getDirectionTo = function (pos) {
