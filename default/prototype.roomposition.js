@@ -3,10 +3,11 @@ RoomPosition.prototype.isBorder = function () {
 }
 
 
-RoomPosition.prototype.getKey = function(long) {
+RoomPosition.prototype.getKey = function (long) {
     return this.x + "x" + this.y + (long ? this.roomName : '');
 }
-RoomPosition.prototype.invertBorderPos () {
+
+RoomPosition.prototype.invertBorderPos = function () {
     let x = this.x == 49 ? 0 : this.x == 0 ? 49 : this.x;
     let y = this.y == 49 ? 0 : this.y == 0 ? 49 : this.y;
 

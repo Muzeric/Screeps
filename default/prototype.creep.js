@@ -62,7 +62,7 @@ Creep.prototype.usePath = function(memory, memkey, targetPos, opts) {
     } else if (iter === null && (mem.iter || this.pos.getKey() != mem.sourceKey)) { // Zero mem.iter may be means we are on the source pos and it's ok
         let key = travel.getPosFromSerializedPath(mem.path, mem.iter).getKey(1);
         console.log(this.name + ": moveTo " + memkey + " (time=" + Game.time + ") mem.iter=" + mem.iter + " (" + key + "), iter="+ iter + " (" + this.pos.getKey(1) + "); travel=" + JSON.stringify(this.memory.travel));
-        let border_iter = travel.getIterFromSerializedPath(mem.path, this.pos.invertBorderPos, utils.clamp(mem.iter-1, 0, mem.iter));
+        let border_iter = travel.getIterFromSerializedPath(mem.path, this.pos.invertBorderPos(), utils.clamp(mem.iter-1, 0, mem.iter));
         if (border_iter !== null) {
             console.log(this.name + ": moveTo BUT got inverted pos, iter=" + border_iter);
             return OK;
