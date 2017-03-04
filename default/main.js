@@ -14,6 +14,7 @@ profiler.wrap(function() {
     global.cache = {};
     global.cache.matrix = {};
     global.cache.wantCarry = {};
+    global.cache.wantEnergy = {};
     
     var moveErrors = {};
     //var rolesCount = {};
@@ -23,7 +24,7 @@ profiler.wrap(function() {
         _.map( Game.rooms, 'name' ) ).concat( 
         Object.keys(Memory.rooms) ) 
     );
-    Memory.energyWanted = _.reduce( _.filter(Game.creeps, c => c.memory.energyID), function (sum, value, key) { 
+    global.cache.wantEnergy = _.reduce( _.filter(Game.creeps, c => c.memory.energyID), function (sum, value, key) { 
             sum[value.memory.energyID] = sum[value.memory.energyID] || {energy : 0, creepsCount : 0};
             sum[value.memory.energyID].energy += value.carryCapacity - value.carry.energy;
             sum[value.memory.energyID].creepsCount++;

@@ -234,11 +234,11 @@ Creep.prototype.findSource = function () {
     let resultTarget;
     let minCost;
     for(let target of targets) {
-        let placesLeft = target.places - (Memory.energyWanted[target.id] ? Memory.energyWanted[target.id].creepsCount : 0);
+        let placesLeft = target.places - (global.cache.wantEnergy[target.id] ? global.cache.wantEnergy[target.id].creepsCount : 0);
         if (placesLeft <= 0)
             continue;
         let range = this.pos.getRangeTo(target.pos.x, target.pos.y);
-        let energyLeft = target.energy - (Memory.energyWanted[target.id] ? Memory.energyWanted[target.id].energy : 0);
+        let energyLeft = target.energy - (global.cache.wantEnergy[target.id] ? global.cache.wantEnergy[target.id].energy : 0);
 
         let cpriority = 0;
         if (target.resourceType) { // Dropped
@@ -273,9 +273,9 @@ Creep.prototype.findSource = function () {
         return -2;
     }
 
-    Memory.energyWanted[resultTarget.id] = Memory.energyWanted[resultTarget.id] || {energy : 0, creepsCount : 0};
-    Memory.energyWanted[resultTarget.id].energy += energyNeed;
-    Memory.energyWanted[resultTarget.id].creepsCount++;
+    global.cache.wantEnergy[resultTarget.id] = global.cache.wantEnergy[resultTarget.id] || {energy : 0, creepsCount : 0};
+    global.cache.wantEnergy[resultTarget.id].energy += energyNeed;
+    global.cache.wantEnergy[resultTarget.id].creepsCount++;
     
     this.memory.energyObj = resultTarget;
     this.memory.energyID = resultTarget.id;
