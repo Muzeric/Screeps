@@ -51,7 +51,7 @@ Room.prototype.updatePathCache = function() {
     }
     memory.pathCount = allCount - delCount;
 
-    console.log(this.name + ": updatePathCache: " + allCount + " paths, " + delCount + " deleted");
+    //console.log(this.name + ": updatePathCache: " + allCount + " paths, " + delCount + " deleted");
 }
 
 Room.prototype.updateResources = function() {
