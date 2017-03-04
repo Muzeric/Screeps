@@ -223,6 +223,10 @@ Room.prototype.updateStructures = function() {
                 memory.type = 'empty';
             }
             memory.pointPos = s.pos;
+            elem = {
+                structureType : s.structureType,
+                places : utils.getRangedPlaces(null, s.pos, 1).length,
+            };
         } else if (s.structureType == STRUCTURE_ROAD) {
             costs.set(s.pos.x, s.pos.y, 1);
             room.refreshRoad(memory, s);

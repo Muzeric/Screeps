@@ -2,17 +2,23 @@ var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var role = {
-
-    /** @param {Creep} creep **/
     run: function(creep) {
+        /*
+        if (!creep.memory.controllerPos) {
+            if (!Memory.rooms[creep.memory.roomName] || Memory.rooms[creep.memory.roomName].structures || Memory.rooms[creep.memory.roomName].structures[STRUCTURE_CONTROLLER]) {
+                console.log(this.name + ": no controller info for " + creep.memory.roomName);
+                return;
+            }
+        }
+        */
+        
         if(!creep.memory.controllerName || !Game.flags[creep.memory.controllerName]) {
             let controllers = _.filter(Game.flags, f => 
                 f.name.substring(0, 10) == 'Controller' &&
                 f.pos.roomName == creep.memory.roomName
             );
 	        if(!controllers.length) {
-                //console.log(creep.name + " found no flags");
-                creep.moveTo(Game.spawns[creep.memory.spawnName].room.controller);
+                console.log(creep.name + " found no flags");
                 return;
             }
             //console.log(creep.name + " controllers: " + controllers);

@@ -8,10 +8,27 @@ RoomPosition.prototype.getKey = function (long) {
 }
 
 RoomPosition.prototype.invertBorderPos = function () {
-    let x = this.x == 49 ? 0 : this.x == 0 ? 49 : this.x;
-    let y = this.y == 49 ? 0 : this.y == 0 ? 49 : this.y;
-
-    return new RoomPosition(x, y, this.roomName);
+    let x = this.x;
+    let y = this.y;
+    let roomName;
+    let exits = Game.map.describeExits(this.roomName);
+    if (this.x == 49) {
+        x = 0;
+        roomName = exits[RIGHT];
+    } else if (this.x == 0) {
+        x = 49;
+        roomName = exits[LEFT];
+    } else if (this.y == 49) {
+        y = 0;
+        roomName = exits[BOTTOM];
+    } else if (this.y == 0) {
+        y = 49;
+        roomName = exits[TOP];
+    } else {
+        return this;
+    }
+    
+    return new RoomPosition(x, y, roomName);
 }
 
 let origgetDirectionTo = RoomPosition.prototype.getDirectionTo;
