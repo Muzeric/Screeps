@@ -217,15 +217,19 @@ profiler.wrap(function() {
                 "energy" : energy - leftEnergy,
                 "body" : body,
                 "arg" : need.arg,
+                /*
                 "stat" : {
                     spentEnergy : 0,
                     gotEnergy : 0,
                     CPU : 0,
                     moves : 0,
                 },
+                */
             });
-            if(newName)
+            if(newName) {
                 reservedEnergy[spawn.room.name] = (reservedEnergy[spawn.room.name] || 0) + (energy - leftEnergy);
+                global.cache.stat.updateRoom(need.roomName, 'create', -1 * (energy - leftEnergy));
+            }
             skipSpawnNames[spawn.name] = 1;
             
             //let newName = need.role;
