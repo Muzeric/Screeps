@@ -1,6 +1,69 @@
 var utils = require('utils');
 var travel = require('travel');
 
+// harvest: 0, create: 0, build: 0, repair: 0, upgrade: 0, pickup
+let origHarvest = Creep.prototype.harvest;
+Creep.prototype.harvest = function () {
+    let res = origHarvest.apply(this, arguments);
+    if (res == OK && arguments[0] instanceof Source) {
+        let can = this.getActiveBodyparts(WORK) * 2;
+        let was = arguments[0].energy;
+
+        global.cache.stat.updateRoom(this.room.name, 'harvest', _.min([can, was]));
+    }
+    return res;
+}
+
+let origPickup = Creep.prototype.pickup;
+Creep.prototype.pickup = function () {
+    let res = origPickup.apply(this, arguments);
+    if (res == OK && arguments[0] instanceof Resource && arguments[0].resourceType == RESOURCE_ENERGY) {
+        let can = this.carryCapacity - _.sum(this.carry);
+        let was = arguments[0].amount;
+
+        global.cache.stat.updateRoom(this.room.name, 'pickup', _.min([can, was]));
+    }
+    return res;
+}
+
+let origBuild = Creep.prototype.build;
+Creep.prototype.build = function () {
+    let res = origBuild.apply(this, arguments);
+    if (res == OK && arguments[0] instanceof ConstructionSite) {
+        let can = this.getActiveBodyparts(WORK) * 5;
+        let got = this.carry.energy;
+        let was = arguments[0].progressTotal - arguments[0].progress;
+
+        global.cache.stat.updateRoom(this.room.name, 'build', -1 * _.min([can, got, was]));
+    }
+    return res;
+}
+
+let origRepair = Creep.prototype.repair;
+Creep.prototype.repair = function () {
+    let res = origRepair.apply(this, arguments);
+    if (res == OK && arguments[0] instanceof Structure) {
+        let can = this.getActiveBodyparts(WORK);
+        let got = this.carry.energy;
+        let was = _.ceil((arguments[0].hitsMax - arguments[0].hits) / 100);
+
+        global.cache.stat.updateRoom(this.room.name, 'repair', -1 * _.min([can, got, was]));
+    }
+    return res;
+}
+
+let origUpgrade = Creep.prototype.upgrade;
+Creep.prototype.upgrade = function () {
+    let res = origUpgrade.apply(this, arguments);
+    if (res == OK && arguments[0] instanceof StructureController) {
+        let can = this.getActiveBodyparts(WORK);
+        let got = this.carry.energy;
+        
+        global.cache.stat.updateRoom(this.room.name, 'upgrade', -1 * _.min([can, got]));
+    }
+    return res;
+}
+
 Creep.prototype.moveToPos = function (a, b, c) {
     if (_.isNumber(a) && _.isNumber(b)) {
         c = c || {};

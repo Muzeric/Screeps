@@ -3,15 +3,15 @@ require('prototype.room');
 require('prototype.creep');
 require('prototype.roomposition');
 var utils = require('utils');
-var statObject = require('stat');
 const profiler = require('screeps-profiler');
 // This line monkey patches the global prototypes. 
 profiler.enable();
 
 module.exports.loop = function () {
 profiler.wrap(function() {
-    var stat = statObject.init();
     global.cache = {};
+    global.cache.stat = require('stat');
+    global.cache.stat.init();
     global.cache.matrix = {};
     global.cache.wantCarry = {};
     global.cache.wantEnergy = {};
@@ -37,7 +37,7 @@ profiler.wrap(function() {
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
             console.log(name + " DEAD (" + Memory.creeps[name].roomName + ")");
-            //statObject.die(name);
+            //global.cache.stat.die(name);
             delete Memory.creeps[name];
         } else if (Game.creeps[name].memory.errors > 0) {
             console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
@@ -45,9 +45,10 @@ profiler.wrap(function() {
         }
     }
 
-    statObject.addCPU("memory");
+    global.cache.stat.addCPU("memory");
 
     _.forEach(roomNames, function(roomName) {
+        global.cache.stat.addRoom(roomName);
         if (Game.rooms[roomName]) {
             Game.rooms[roomName].update();
         } else {
@@ -59,7 +60,7 @@ profiler.wrap(function() {
         }
     });
     
-    statObject.addCPU("roomUpdate");
+    global.cache.stat.addCPU("roomUpdate");
 
     let creepsCPUStat = {};
     for(let creep_name in Game.creeps) {
@@ -95,8 +96,11 @@ profiler.wrap(function() {
         if (!creepsCPUStat[creep.memory.role])
             creepsCPUStat[creep.memory.role] = {"cpu" : 0, "sum" : 0};
         
-        creepsCPUStat[creep.memory.role]["cpu"] += (Game.cpu.getUsed() - lastCPU);
+        let cpu = Game.cpu.getUsed() - lastCPU;
+        creepsCPUStat[creep.memory.role]["cpu"] += cpu;
         creepsCPUStat[creep.memory.role]["sum"]++;
+
+        global.cache.stat.updateRoom(creep.room.name, 'cpu', cpu);
 
         /*
         creep.memory.stat.CPU += (Game.cpu.getUsed() - lastCPU);
@@ -113,7 +117,7 @@ profiler.wrap(function() {
         }
         */
     }
-    statObject.addCPU("run", creepsCPUStat);
+    global.cache.stat.addCPU("run", creepsCPUStat);
     
     //stat.roles = JSON.parse(JSON.stringify(rolesCount));
     
@@ -126,16 +130,10 @@ profiler.wrap(function() {
     let longbuilders = _.filter(Game.creeps, c => c.memory.role == "longbuilder" && (c.ticksToLive > ALIVE_TICKS || c.spawning)).length;
     let buildFlags = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build').length;
     let stopLongBuilders = longbuilders * 1.5 >= buildFlags;
-    let roomsCPUStat = {};
     _.forEach(roomNames, function(roomName) {
         if (roomName == "undefined")
             return;
         let lastCPU = Game.cpu.getUsed();
-        roomsCPUStat[roomName] = {
-            cpu: 0,
-            towers: 0,
-            links: 0,
-        };
         let room = Game.rooms[roomName];
         let hostiles = room ? room.find(FIND_HOSTILE_CREEPS, {filter: c => c.owner.username != "Source Keeper"}).length : -1;
         if (hostiles == -1 && Memory.warning[roomName] > 0)
@@ -173,16 +171,12 @@ profiler.wrap(function() {
         }
 
         if (room && Memory.rooms[roomName].type == 'my') {
-            let localCPU = Game.cpu.getUsed();
             towerAction(room);
-            roomsCPUStat[roomName].towers = Game.cpu.getUsed() - localCPU;
-            localCPU = Game.cpu.getUsed();
             linkAction(room);
-            roomsCPUStat[roomName].links = Game.cpu.getUsed() - localCPU;
         }
-        roomsCPUStat[roomName].cpu = Game.cpu.getUsed() - lastCPU;
+        global.cache.stat.updateRoom(roomName, 'cpu', Game.cpu.getUsed() - lastCPU);
     });
-    statObject.addCPU("needList");
+    global.cache.stat.addCPU("needList");
     if (Game.time % PERIOD_NEEDLIST == 1)
         console.log("needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.role})));
     
@@ -238,8 +232,8 @@ profiler.wrap(function() {
             console.log(newName + " (arg: " + JSON.stringify(need.arg) + ") BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") " + body.length + ":[" + body + "]");
         }
     }
-    statObject.addCPU("create");
-    statObject.addCPU("finish");
+    global.cache.stat.addCPU("create");
+    global.cache.stat.finish();
 });
 };
 
