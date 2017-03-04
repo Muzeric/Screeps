@@ -52,8 +52,8 @@ Creep.prototype.repair = function () {
     return res;
 }
 
-let origUpgrade = Creep.prototype.upgrade;
-Creep.prototype.upgrade = function () {
+let origUpgrade = Creep.prototype.upgradeController;
+Creep.prototype.upgradeController = function () {
     let res = origUpgrade.apply(this, arguments);
     if (res == OK && arguments[0] instanceof StructureController) {
         let can = this.getActiveBodyparts(WORK);
