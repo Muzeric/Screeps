@@ -26,7 +26,7 @@ var role = {
         let controllerPos = new RoomPosition(creep.memory.controllerPlace.x, creep.memory.controllerPlace.y, creep.memory.controllerPlace.roomName);
         if (creep.pos.isEqualTo(controllerPos)) {
             let res;
-            if (Game.flags[creep.memory.controllerName].memory.claim)
+            if ("claimRoom" in Memory && Memory.claimRoom == creep.room.name)
                 res = creep.claimController(creep.room.controller);
             else
                 res = creep.reserveController(creep.room.controller);
