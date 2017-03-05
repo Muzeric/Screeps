@@ -178,7 +178,7 @@ profiler.wrap(function() {
     });
     global.cache.stat.addCPU("needList");
     if (Game.time % PERIOD_NEEDLIST == 1)
-        console.log("needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.role})));
+        console.log("needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.countName})));
     
     let skipSpawnNames = {};
     let skipRoomNames = {};

@@ -199,6 +199,7 @@ Room.prototype.updateStructures = function() {
                 minersFrom : _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.energyID == s.id),
                 structureType : STRUCTURE_SOURCE,
                 places : utils.getRangedPlaces(null, s.pos, 1).length,
+                rangedPlaces : utils.getRangedPlaces(null, s.pos, 1),
         };
         memory.structures[STRUCTURE_SOURCE] = memory.structures[STRUCTURE_SOURCE] || [];
         memory.structures[STRUCTURE_SOURCE].push(elem);
