@@ -343,9 +343,9 @@ Room.prototype.getNearAttackers = function (pos, range = 5) {
 }
 
 Room.prototype.updateCreeps = function() {
-    memory.creepsTime = Game.time;
     let memory = this.memory;
     let roomName = this.name;
+    memory.creepsTime = Game.time;
     global.cache.creeps[this.name] = {
         keepersPoses: [],
         hostileAttackers: [],
