@@ -33,6 +33,7 @@ exit if scalar(@msgs) == 0;
 
 my $room_versions = {
   '1' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'cpu'],
+  '2' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'cpu'],
 };
 
 my $parser = MIME::Parser->new;
