@@ -1,21 +1,22 @@
 let usedOnStart = 0;
 let enabled = false;
 let depth = 0;
+let depthName = '';
 
 function setupProfiler() {
   depth = 0; // reset depth, this needs to be done each tick.
   Game.profiler = {
     stream(duration, filter) {
-      setupMemory('stream', duration || 10, filter);
+      return setupMemory('stream', duration || 10, filter);
     },
     email(duration, filter) {
-      setupMemory('email', duration || 100, filter);
+      return setupMemory('email', duration || 100, filter);
     },
     profile(duration, filter) {
-      setupMemory('profile', duration || 100, filter);
+      return setupMemory('profile', duration || 100, filter);
     },
-    background(filter) {
-      setupMemory('background', false, filter);
+    background(filter, depthChains) {
+      return setupMemory('background', false, filter, depthChains);
     },
     restart() {
       if (Profiler.isProfiling()) {
@@ -27,7 +28,7 @@ function setupProfiler() {
           duration = Memory.profiler.disableTick - Memory.profiler.enabledTick + 1;
         }
         const type = Memory.profiler.type;
-        setupMemory(type, duration, filter);
+        return setupMemory(type, duration, filter);
       }
     },
     reset: resetMemory,
@@ -37,7 +38,7 @@ function setupProfiler() {
   overloadCPUCalc();
 }
 
-function setupMemory(profileType, duration, filter) {
+function setupMemory(profileType, duration, filter, depthChains) {
   resetMemory();
   const disableTick = Number.isInteger(duration) ? Game.time + duration : false;
   if (!Memory.profiler) {
@@ -48,7 +49,10 @@ function setupMemory(profileType, duration, filter) {
       disableTick,
       type: profileType,
       filter,
+      depthChains,
     };
+
+    return `Profiler '${profileType}' activated with filter '${filter}', depthChains=${depthChains}`;
   }
 }
 
@@ -79,13 +83,17 @@ function wrapFunction(name, originalFunction) {
     if (Profiler.isProfiling()) {
       const nameMatchesFilter = name === getFilter();
       const start = Game.cpu.getUsed();
+      let oldDepthName = depthName;
+      if (depth > 0 || !getFilter())
+        depthName += (depthName ? '->' : '') + name;
       if (nameMatchesFilter) {
         depth++;
       }
       const result = originalFunction.apply(this, arguments);
       if (depth > 0 || !getFilter()) {
         const end = Game.cpu.getUsed();
-        Profiler.record(name, end - start);
+        Profiler.record(Memory.profiler.depthChains ? depthName : name, end - start);
+        depthName = oldDepthName;
       }
       if (nameMatchesFilter) {
         depth--;
@@ -148,7 +156,7 @@ const Profiler = {
     }
 
     const elapsedTicks = Game.time - Memory.profiler.enabledTick + 1;
-    const header = 'calls\t\ttime\t\tavg\t\tfunction';
+    const header = 'calls\t\tperc\t\ttime\t\tavg\t\tfunction';
     const footer = [
       `Avg: ${(Memory.profiler.totalTime / elapsedTicks).toFixed(2)}`,
       `Total: ${Memory.profiler.totalTime.toFixed(2)}`,
@@ -158,7 +166,7 @@ const Profiler = {
   },
 
   lines() {
-    const stats = Object.keys(Memory.profiler.map).map(functionName => {
+    const stats = _.filter(Object.keys(Memory.profiler.map), k => Memory.profiler.map[k].time / Memory.profiler.totalTime > 0.01).map(functionName => {
       const functionCalls = Memory.profiler.map[functionName];
       return {
         name: functionName,
@@ -167,12 +175,26 @@ const Profiler = {
         averageTime: functionCalls.time / functionCalls.calls,
       };
     }).sort((val1, val2) => {
-      return val2.totalTime - val1.totalTime;
+      if (!Memory.profiler.depthChains)
+        return val2.totalTime - val1.totalTime;
+
+      let space1 = val1.name.split('->');
+      let space2 = val2.name.split('->');
+      let prename = '';
+      for (let i = 0; i < space1.length; i++) {
+        if (i >= space2.length)
+          return 1;
+        else if (space1[i] != space2[i])
+          return Memory.profiler.map[prename + space2[i]].time - Memory.profiler.map[prename + space1[i]].time;
+        prename += space1[i] + '->';
+      }
+      return -1;
     });
 
     const lines = stats.map(data => {
       return [
         data.calls,
+        (data.totalTime / Memory.profiler.totalTime * 100).toFixed(1),
         data.totalTime.toFixed(1),
         data.averageTime.toFixed(3),
         data.name,

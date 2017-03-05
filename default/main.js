@@ -144,7 +144,7 @@ profiler.wrap(function() {
             
 
         if (Game.time % PERIOD_NEEDLIST == 1) {
-            let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), 'memory.role');
+            let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), c => c.memory.countName || c.memory.role);
             let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
 
             if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
@@ -163,9 +163,9 @@ profiler.wrap(function() {
                             notEnoughBody = 1;
                     }
                 }
-                if ( (creepsCount[limit.role] || 0) < limit.count && (!hasBodyLimits || notEnoughBody) ) {
+                if ( (creepsCount[limit.countName] || 0) < limit.count && (!hasBodyLimits || notEnoughBody) ) {
                     needList.push(limit);
-                    creepsCount[limit.role] = (creepsCount[limit.role] || 0) + 1;
+                    creepsCount[limit.countName] = (creepsCount[limit.countName] || 0) + 1;
                 }
             }
         }
@@ -210,13 +210,14 @@ profiler.wrap(function() {
                 objectCache[need.role] = require('role.' + need.role);
             let [body, leftEnergy] = objectCache[need.role].create(energy, need.arg);
             
-            let newName = spawn.createCreep(body, need.role + "." + Math.random().toFixed(3), {
+            let newName = spawn.createCreep(body, need.role + "-" + _.round(Math.random()*1000), {
                 "role": need.role,
                 "spawnName": spawn.name,
                 "roomName" : need.roomName,
                 "energy" : energy - leftEnergy,
                 "body" : body,
                 "arg" : need.arg,
+                "countName": need.countName,
                 /*
                 "stat" : {
                     spentEnergy : 0,
@@ -267,7 +268,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     let liteClaimer = memory.type == 'reserved' && memory.reserveEnd - Game.time > 3000 ? 1 : 0;
     let workerHarvester = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom) ? 1 : 0;
     let sourcesForWork = (memory.structures[STRUCTURE_SOURCE] || []).length;
-    let antikeeperArged = _.filter(Game.creeps, c => c.memory.role == "antikeeper" && c.memory.roomName == roomName && c.memory.arg).length;
+    let antikeepersCount = (creepsCount["antikeeper-a"] || 0) + (creepsCount["antikeeper-r"] || 0);
     let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
 
     if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"])
@@ -304,7 +305,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "range" : 3,
     },{
         "role" : "longbuilder",
-        "count" : fcount["Build"] && !stopLongBuilders && builds && !(fcount["Antikeeper"] && !creepsCount["antikeeper"]) ? 1 : 0,
+        "count" : fcount["Build"] && !stopLongBuilders && builds && !(fcount["Antikeeper"] && !antikeepersCount) ? 1 : 0,
         "priority" : 13,
         "wishEnergy" : 1500,
         "range" : 2,
@@ -324,23 +325,25 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "maxEnergy" : 3000,
     },{
         "role" : "antikeeper",
-        "count" : fcount["Antikeeper"] && !antikeeperArged && (creepsCount["antikeeper"] || 0) < 3 ? ((creepsCount["antikeeper"]||0)+1) : 0,
+        "count" : fcount["Antikeeper"] ? 1 : 0,
         "priority" : _.sum(creepsCount) > 5 ? 3 : 15,
         "wishEnergy" : 3580,
         "minEnergy" : 3580,
         "range" : 3,
         "arg" : 1,
+        "countName" : "antikeeper-a",
     },{
         "role" : "antikeeper",
-        "count" : fcount["Antikeeper"] && antikeeperArged ? 3 : 0,
+        "count" : fcount["Antikeeper"] ? 1 : 0,
         "priority" : _.sum(creepsCount) > 5 ? 3 : 15,
         "wishEnergy" : 3860,
         "minEnergy" : 3860,
         "range" : 3,
         "arg" : 0,
+        "countName" : "antikeeper-r",
     },{
         "role" : "longharvester",
-        "count" : creepsCount["antikeeper"] ? sourcesForWork : 0,
+        "count" : antikeepersCount ? sourcesForWork : 0,
         "arg" : {work: workerHarvester, attack: 0},
         "priority" : 16,
         "minEnergy" : 550,
@@ -353,7 +356,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "maxEnergy" : 4000,
     },{
         "role" : "longminer",
-        "count" : creepsCount["antikeeper"] ? pairedSources : 0,
+        "count" : antikeepersCount ? pairedSources : 0,
         "arg" : 1,
         "priority" : 17,
         "wishEnergy" : 1200,
@@ -361,7 +364,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         "range" : 3,
     },{
         "role" : "longharvester",
-        "count" : creepsCount["antikeeper"] ? sourcesForWork * (3 + workerHarvester) : 0,
+        "count" : antikeepersCount ? sourcesForWork * (3 + workerHarvester) : 0,
         "arg" : {work: workerHarvester, attack: 0},
         "priority" : 18,
         "minEnergy" : 550,
@@ -379,6 +382,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
         limit["originalEnergyCapacity"] = 0;
         if (!("minEnergy" in limit))
             limit["minEnergy"] = 0;
+        if (!("countName" in limit))
+            limit["countName"] = limit.role;
     }
 
     //console.log(roomName + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; limits=" + JSON.stringify(limits));
@@ -477,6 +482,8 @@ function getRoomLimits (room, creepsCount) {
         limit["range"] = 2;
         if (!("minEnergy" in limit))
             limit["minEnergy"] = 0;
+        if (!("countName" in limit))
+            limit["countName"] = limit.role;
     }
 
     //console.log(room.name + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; limits=" + JSON.stringify(limits));

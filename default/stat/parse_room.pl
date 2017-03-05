@@ -64,16 +64,40 @@ if ($limit) {
 open(STAT, ">stat_room.csv")
 or die $@;
 print STAT "tick\t".join("\t", sort keys %$total_keys)."\n";
+my $room_keys = {};
 foreach my $tick (@ticks) {
   my $hash = $info->{$tick};
   print STAT $tick;
   foreach my $key (sort keys %$total_keys) {
     my $sum = 0;
-    foreach my $v (values %{$hash->{$key}}) {
-      $sum += $v;
+    foreach my $k (keys %{$hash->{$key}}) {
+      next if $k eq "cpu";
+      $room_keys->{$k} = 1;
+      next if $k eq "pickup";
+      $sum += $hash->{$key}->{$k};
     }
     $sum =~ s/\./,/;
     print STAT "\t$sum";
+  }
+  print STAT "\n";
+}
+print STAT "\n";
+
+foreach my $room (sort keys %$total_keys) {
+  print STAT "$room\n";
+  print STAT "tick\t".join("\t",sort keys %{$room_keys})."\n";
+  my $sum = {};
+  foreach my $tick (@ticks) {
+    print STAT $tick;
+    my $hash = $info->{$tick}->{$room};
+    foreach my $k (sort keys %{$room_keys}) {
+      my $v = $hash->{$k} || 0;
+      #$sum->{$k} += $hash->{$k} || 0;
+      #my $v = $sum->{$k};
+      $v =~ s/\./,/;
+      print STAT "\t$v";
+    }
+    print STAT "\n";
   }
   print STAT "\n";
 }
