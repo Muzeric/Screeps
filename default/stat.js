@@ -8,7 +8,7 @@ var stat = {
         Memory.stat = Memory.stat || {};
         Memory.stat.CPUHistory = Memory.stat.CPUHistory || {};
         Memory.stat.roomHistory = Memory.stat.roomHistory || {};
-        Memory.stat.lastGcl =  Memory.stat.lastGcl || _.floor(Game.gcl.progress/1000);
+        Memory.stat.lastGcl =  Memory.stat.lastGcl || Game.gcl.progress;
         Memory.stat.roomSent = Memory.stat.roomSent || Game.time;
         this.lastCPU = 0;
     },
@@ -54,7 +54,7 @@ var stat = {
             Memory.stat.CPUHistory["_total"].bucket = Game.cpu.bucket;
             Memory.stat.CPUHistory["_total"].creeps = _.keys(Game.creeps).length;
             Memory.stat.CPUHistory["_total"].energy = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.energy);
-            Memory.stat.CPUHistory["_total"].gcl = _.floor(Game.gcl.progress/1000 - Memory.stat.lastGcl);
+            Memory.stat.CPUHistory["_total"].gcl = Game.gcl.progress - Memory.stat.lastGcl;
             Memory.stat.CPUHistory["_total"].paths = _.sum(Memory.rooms, r => r.pathCount || 0);
             Game.notify(
                 "CPUHistory:" + Game.time + ":" + 
@@ -62,18 +62,32 @@ var stat = {
                 "#END#"
             );
             delete Memory.stat.CPUHistory;
-            Memory.stat.lastGcl = _.floor(Game.gcl.progress/1000);
+            Memory.stat.lastGcl = Game.gcl.progress;
         }
 
         if (Game.time - Memory.stat.roomSent > 100) {
             Game.notify(
-                "roomHistory:" + Game.time + ":" + 
-                utils.lzw_encode(JSON.stringify(Memory.stat.roomHistory, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} )) +
+                "room.1:" + Game.time + ":" + 
+                utils.lzw_encode(this.dumpRoomStat()) +
                 "#END#"
             );
             delete Memory.stat.roomHistory;
             Memory.stat.roomSent = Game.time;
         }
+    },
+
+    dumpRoomStat : function () {
+        let res = '';
+        let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'cpu'];
+        for (let roomName in Memory.stat.roomHistory) {
+            res += roomName;
+            for (let key of keys) {
+                res += ':' + _.floor(Memory.stat.roomHistory[roomName][key] || 0, 1);
+            }
+            res += ';';
+        }
+
+        return res;
     },
 
     die : function (name) {

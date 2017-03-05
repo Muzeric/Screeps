@@ -300,6 +300,8 @@ Room.prototype.updateStructures = function() {
                 s.remove();
             else
                 memory.constructionsRoads++;
+        } else if ((s.structureType != STRUCTURE_RAMPART || !s.my) && s.structureType != STRUCTURE_CONTAINER) {
+            costs.set(s.pos.x, s.pos.y, 0xff);
         }
     });
 

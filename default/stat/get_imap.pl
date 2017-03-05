@@ -31,6 +31,10 @@ or print STDERR "Searching: ".$imap->errstr."\n";
 print "Got ".scalar(@msgs)." emailes\n";
 exit if scalar(@msgs) == 0;
 
+my $room_versions = {
+  '1' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'cpu'],
+};
+
 my $parser = MIME::Parser->new;
 $parser->tmp_to_core(1);
 $parser->output_to_core(1);
@@ -57,44 +61,73 @@ foreach my $msg (@msgs) {
   #print "Unbased: ".$content."\n";
   #print Dumper($imap->get_labels($msg));
 
-  my $comp;
-  my $tick;
-  if ($content =~ /CPUHistory/) {
-    ($tick, $comp) = $content =~ /\d+ notification received:\s*CPUHistory:(\d+):(.+)#END#/sg;
-    print "\r$count ($msg) NEW!         ";
-  } else {
-    ($comp) = $content =~ /\d+ notification received:\s*(.+\:\{"memory.+)\s*\[msg\]/sg;
+  my $good = 0;
+  my $cpu_out = '';
+  my $room_out = '';
+  my ($tick, $comp, $version);
+  foreach my $str (split(/\n/, $content)) {
+    if ($str =~ /\d+ notifications? received:\s*|\[msg\]|^$/) {
+      ;
+    } elsif (($tick, $comp) = $str =~ /CPUHistory:(\d+):(.+)#END#/g) {
+      my $jshash = lzw_decode($comp);
+      $jshash =~ s/:/=>/g;
+      if (my $hash = eval($jshash) ) {
+        $cpu_out .= "$tick\n$jshash\n";
+        $good = 1;       
+      } else {
+        print STDERR "can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
+      }
+    } elsif (($version, $tick, $comp) = $str =~ /room\.(\d+):(\d+):(.+)#END#/g) {
+      if (!exists($room_versions->{$version})) {
+        print STDERR "No version=$version\n";
+        next;
+      }
+      my $hash = {};
+      $room_out .= "$tick\n";
+      $room_out .= "{";
+      foreach my $roomt (split(/;/, lzw_decode($comp))) {
+        my $i = -1;
+        foreach my $value (split(/:/, $roomt)) {
+          if ($i == -1) {
+            $room_out .= "\"$value\"=>{";
+          } else {
+            $room_out .= "\"".$room_versions->{$version}->[$i]."\"=>$value,";
+          }
+          $i++;
+        }
+        $room_out .= "},";
+      }
+      $room_out .= "}";
+      $good = 1;
+    } else {
+      #print "not parsed: ".substr($str, 0, 50)." ... ".substr($str, -50)."\n";
+      print STDERR "not parsed: $str\n";
+    }
+
   }
   
-  if (!$comp) {
-    #$content = encode_utf8($content);
-    $content =~ s/[\n\r]/ /g;
-    print "not parsed: ".substr($content, 0, 50)." ... ".substr($content, -50)."\n";
-    push(@msgs_bad, $msg);
+  if ($good) {
+    push(@msgs_done, $msg);
   } else {
-    my $eh = lzw_decode($comp);
-    #print "After:  ".$eh."\n";
-    my $jshash;
-    if (!$tick) {
-      ($tick, $jshash) = $eh =~ /^(\d+):(.+)$/;
-    } else {
-      $jshash = $eh;
-    }
-    $jshash =~ s/:/=>/g;
-    if (my $hash = eval($jshash) ) {
-      open(MSGF, ">mail/m$msg.msg")
-      or die $@;
-      print MSGF "$tick\n";
-      print MSGF "$jshash\n";
-
-      push(@msgs_done, $msg);
-    } else {
-      print "can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
-      push(@msgs_bad, $msg);
-    }
+    push(@msgs_bad, $msg);
   }
+
+  if ($cpu_out) {
+    open(MSGF, ">mail_cpu/m$msg.msg")
+    or die $@;        
+  
+    print MSGF "$cpu_out\n";
+    close(MSGF);
+  }
+  if ($room_out) {
+    open(MSGF, ">mail_room/m$msg.msg")
+    or die $@;        
+  
+    print MSGF "$room_out\n";
+    close(MSGF);
+  }
+  
   $count++;
-  #last if $count > 10;
 }
 print "\n";
 

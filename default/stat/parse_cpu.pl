@@ -13,8 +13,20 @@ my $limit = shift @ARGV || 0;
 binmode STDOUT, ':utf8';
 $| = 1;
 
-my @files = glob('mail/*.msg');
+my @files = glob('mail_cpu/m*.msg');
 print "Got ".scalar(@files)." files\n";
+
+sub sortf {
+  my ($n1) = $a =~ /m(\d+)\.msg/;
+  my ($n2) = $b =~ /m(\d+)\.msg/;
+  return $n1 <=> $n2;
+}
+
+if ($limit) {
+  my @new_files = sort sortf @files;
+  @files = splice(@new_files, -$limit);
+}
+print "Splice to ".scalar(@files)." files\n";
 
 my $info = {};
 my $count = 1;
