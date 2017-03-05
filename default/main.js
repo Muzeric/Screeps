@@ -15,6 +15,7 @@ profiler.wrap(function() {
     global.cache.matrix = {};
     global.cache.wantCarry = {};
     global.cache.wantEnergy = {};
+    global.cache.creeps = {};
     
     var moveErrors = {};
     var objectCache = {};
@@ -29,9 +30,6 @@ profiler.wrap(function() {
             sum[value.memory.energyID].creepsCount++;
             return sum; 
     }, {});
-    
-    if(!("warning" in Memory))
-        Memory.warning = {};
 
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
@@ -142,7 +140,7 @@ profiler.wrap(function() {
             let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
 
             if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
-                Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders, hostiles);
+                Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders);
                 Memory.limitTime[roomName] = Game.time;
             }
 
@@ -253,7 +251,7 @@ function linkAction (room) {
     }
 }
 
-function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) {
+function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let lastCPU = Game.cpu.getUsed();
     let memory = Memory.rooms[roomName] || {structures : {}};
     let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
@@ -264,12 +262,20 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders, hostiles) 
     let sourcesForWork = (memory.structures[STRUCTURE_SOURCE] || []).length;
     let antikeepersCount = (creepsCount["antikeeper-a"] || 0) + (creepsCount["antikeeper-r"] || 0);
     let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
+    let hostiles = memory.hostilesCount && memory.hostilesDeadTime - Game.time > HOSTILES_DEAD_TIMEOUT ? memory.hostilesCount : 0;
 
     if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"])
         return [];
     
     let limits = [];
     limits.push({
+        "role" : "defender",
+        "count" : !fcount["Antikeeper"] && hostiles > 1 ? 1 : 0,
+        "priority" : 3,
+        "wishEnergy" : 1500,
+        "minEnergy" : 1500,
+        "range": 3,
+    },{
         "role" : "longharvester",
         "count" : fcount["Antikeeper"] ? 0 : sourcesForWork,
         "arg" : {work: workerHarvester, attack: 1},
@@ -396,8 +402,8 @@ function getRoomLimits (room, creepsCount) {
     let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
     let countHarvester = _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 15) + _.floor((memory.structures[STRUCTURE_TOWER] || []).length / 3);
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
-    let hostiles = memory.invadersCount && memory.hostilesDeadTime - Game.time > 50 ? 1 : 0;
-    let extraUpgraders = utils.clamp( _.floor(memory.energy / 50000), 0, 2);
+    let hostiles = memory.hostilesCount && memory.hostilesDeadTime - Game.time > HOSTILES_DEAD_TIMEOUT ? memory.hostilesCount : 0;
+    let extraUpgraders = utils.clamp( _.floor(memory.energy / UPGRADERS_EXTRA_ENERGY), 0, 2);
     
     let limits = [];
     limits.push({

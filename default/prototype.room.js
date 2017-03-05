@@ -6,13 +6,13 @@ Room.prototype.init = function() {
 Room.prototype.update = function() {
     global.cache.matrix[this.name] = {};
     global.cache.wantCarry[this.name] = {};
+    global.cache.creeps[this.name] = {};
 
     if (!("pathCache" in this.memory) || Game.time - (this.memory.pathCacheTime || 0) >= UPDATE_INTERVAL_PATHCACHE)
         this.updatePathCache();
     if (!("structures" in this.memory) || Game.time - (this.memory.structuresTime || 0) >= UPDATE_INTERVAL_STRUCTURES)
         this.updateStructures();
-    if (!("hostileCreeps" in this.memory) || Game.time - (this.memory.creepsTime || 0) >= UPDATE_INTERVAL_CREEPS)
-        this.updateCreeps();
+    this.updateCreeps();
     if (!("resources" in this.memory) || Game.time - (this.memory.resourcesTime || 0) >= UPDATE_INTERVAL_RESOURCES)
         this.updateResources();
 
@@ -81,8 +81,9 @@ Room.prototype.updateResources = function() {
     }
 }
 
-Room.prototype.getNearComingLair = function(pos, range, leftTime) {
-    return _.filter( this.memory.structures['keeperLair'], s => _.inRange(this.memory.structuresTime + s.ticksToSpawn - Game.time, 1, leftTime || 10) && pos.inRangeTo(s.pos, range) )[0];
+Room.prototype.getNearComingLairPos = function(pos, range, leftTime) {
+    let lair = _.filter( this.memory.structures['keeperLair'], s => _.inRange(this.memory.structuresTime + s.ticksToSpawn - Game.time, 1, leftTime || 10) && pos.inRangeTo(s.pos, range) )[0];
+    return lair ? lair.pos : null;
 }
 
 Room.prototype.needRoad = function(creep) {
@@ -333,40 +334,48 @@ Room.prototype.updateStructures = function() {
     }
 }
 
-Room.prototype.getNearKeeper = function(pos, range) {
-    return _.filter( this.memory.hostileCreeps, c => c.owner.username == "Source Keeper" && pos.inRangeTo(c.pos, range) )[0];
+Room.prototype.getNearKeeperPos = function(pos, range) {
+    return _.filter( global.cache.creeps[this.name].keepersPoses, p => pos.inRangeTo(p, range) )[0];
+}
+
+Room.prototype.getNearAttackers = function (pos, range = 5) {
+    return _.filter( global.cache.creeps[this.name].hostileAttackers, c => pos.inRangeTo(c.pos, range) );
 }
 
 Room.prototype.updateCreeps = function() {
+    memory.creepsTime = Game.time;
     let memory = this.memory;
     let roomName = this.name;
-    memory.hostileCreeps = [];
-    memory.creepsTime = Game.time;
-    memory.invadersCount = 0;
+    global.cache.creeps[this.name] = {
+        keepersPoses: [],
+        hostileAttackers: [],
+        //hostileOther: [],
+    };
+    let cache = global.cache.creeps[this.name];
+    memory.hostilesCount = 0;
     memory.hostilesDeadTime = 0;
     if (!("common" in global.cache.matrix[this.name]))
         global.cache.matrix[this.name]["common"] = PathFinder.CostMatrix.deserialize(memory.costMatrix);
     let costs = global.cache.matrix[this.name]["common"].clone();
 
     this.find(FIND_CREEPS).forEach( function(c) {
-        if (c.owner.username == "Invader") {
-            memory.hostileCreeps.push(c);
-            memory.invadersCount++;
+        if (c.owner.username == "Source Keeper") {
+            cache.keepersPoses.push(c.pos);
+            cache.hostileAttackers.push(c);
+        } else if (!c.my && (c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK))) {
+            cache.hostileAttackers.push(c);
+            memory.hostilesCount++;
             if (Game.tiime + c.ticksToLive > memory.hostilesDeadTime)
                 memory.hostilesDeadTime = Game.tiime + c.ticksToLive;
         } else if (c.my) {
             if (c.memory.role == "harvester" && c.memory.targetID)
                 global.cache.wantCarry[roomName][c.memory.targetID] = (global.cache.wantCarry[roomName][c.memory.targetID] || 0) + c.carry.energy;
         } else  {
-            memory.hostileCreeps.push(c);
+            ;//memory.hostileOther.push(c);
         }
         costs.set(c.pos.x, c.pos.y, 0xff);
     });
 
     
     global.cache.matrix[this.name]["withCreeps"] = costs;
-}
-
-Room.prototype.getNearHostile = function(pos, range) {
-    return _.filter( this.memory.hostileCreeps, c => c.owner.username != "Source Keeper" && pos.inRangeTo(c.pos, range) )[0];
 }

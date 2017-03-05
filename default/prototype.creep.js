@@ -246,22 +246,25 @@ Creep.prototype.moveTo = function() {
 }
 
 Creep.prototype.goFromKeepers = function() {
-    let target = this.room.getNearKeeper(this.pos, 10) || this.room.getNearComingLair(this.pos, 10);
-    if (!target)
+    let targetPos = this.room.getNearKeeperPos(this.pos, 10) || this.room.getNearComingLairPos(this.pos, 10);
+    if (!targetPos)
         return -7;
-    let safePlace = this.pos.findClosestByPath(utils.getRangedPlaces(this, target.pos, 6));
-    return this.moveTo(safePlace ? safePlace : Game.rooms[this.memory.roomName].controller); 
+    let safePlace = this.pos.findClosestByPath(utils.getRangedPlaces(this, targetPos, 6));
+    return this.moveTo(safePlace ? safePlace : Game.spawns[this.memory.spawnName].room.controller); 
 }
 
 Creep.prototype.attackNearHostile = function(range) {
     if (!this.getActiveBodyparts(ATTACK))
         return -1;
 
-    let target = this.room.getNearHostile(this.pos, range || 5);
+    let targets = this.room.getNearAttackers(this.pos, range || 5);
+    if (!targets.length)
+        return -7;
+        
+    let target = Game.getObjectById(targets[0].id);
     if (!target)
         return -7;
         
-    target = Game.getObjectById(target.id);
     if (this.attack(target) == ERR_NOT_IN_RANGE)
         this.moveTo(target);
     return 0;

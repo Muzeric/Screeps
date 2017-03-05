@@ -65,6 +65,7 @@ open(STAT, ">stat_room.csv")
 or die $@;
 print STAT "tick\t".join("\t", sort keys %$total_keys)."\n";
 my $room_keys = {};
+my $total_sum = {};
 foreach my $tick (@ticks) {
   my $hash = $info->{$tick};
   print STAT $tick;
@@ -73,9 +74,10 @@ foreach my $tick (@ticks) {
     foreach my $k (keys %{$hash->{$key}}) {
       next if $k eq "cpu";
       $room_keys->{$k} = 1;
-      next if $k eq "pickup";
       $sum += $hash->{$key}->{$k};
     }
+    $total_sum->{$key} += $sum;
+    $sum = $total_sum->{$key};
     $sum =~ s/\./,/;
     print STAT "\t$sum";
   }
