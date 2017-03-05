@@ -14,7 +14,7 @@ var stat = {
     },
 
     addRoom : function (roomName) {
-        Memory.stat.roomHistory[roomName] = Memory.stat.roomHistory[roomName] || {harvest: 0, create: 0, build: 0, repair: 0, upgrade: 0, pickup: 0, cpu: 0};
+        Memory.stat.roomHistory[roomName] = Memory.stat.roomHistory[roomName] || {harvest: 0, create: 0, build: 0, repair: 0, upgrade: 0, pickup: 0, dead: 0, cpu: 0};
     },
 
     updateRoom : function (roomName, param, diff) {
@@ -67,7 +67,7 @@ var stat = {
 
         if (Game.time - Memory.stat.roomSent > 100) {
             Game.notify(
-                "room.1:" + Game.time + ":" + 
+                "room.2:" + Game.time + ":" + 
                 utils.lzw_encode(this.dumpRoomStat()) +
                 "#END#"
             );
@@ -78,7 +78,7 @@ var stat = {
 
     dumpRoomStat : function () {
         let res = '';
-        let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'cpu'];
+        let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'cpu'];
         for (let roomName in Memory.stat.roomHistory) {
             res += roomName;
             for (let key of keys) {
@@ -92,6 +92,9 @@ var stat = {
 
     die : function (name) {
         let creepm = Memory.creeps[name];
+        this.updateRoom(creepm.roomName, 'dead', -1 * (creepm.carryEnergy || 0));
+        return;
+
         if(!Memory.stat[creepm.role])
             Memory.stat[creepm.role] = {};
         if(!Memory.stat[creepm.role][creepm.energy])

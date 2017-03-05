@@ -17,7 +17,6 @@ profiler.wrap(function() {
     global.cache.wantEnergy = {};
     
     var moveErrors = {};
-    //var rolesCount = {};
     var objectCache = {};
     var roomNames = _.uniq( 
         _.map (Game.flags, 'pos.roomName').concat( 
@@ -37,7 +36,7 @@ profiler.wrap(function() {
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
             console.log(name + " DEAD (" + Memory.creeps[name].roomName + ")");
-            //global.cache.stat.die(name);
+            global.cache.stat.die(name);
             delete Memory.creeps[name];
         } else if (Game.creeps[name].memory.errors > 0) {
             console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
@@ -65,17 +64,11 @@ profiler.wrap(function() {
     let creepsCPUStat = {};
     for(let creep_name in Game.creeps) {
         let creep = Game.creeps[creep_name];
-        if(creep.spawning) {
+        if(creep.spawning)
             continue;
-        }
         let role = creep.memory.role;
-        //if(!(role in rolesCount))
-        //    rolesCount[role] = {};
         if(!(role in objectCache))
             objectCache[role] = require('role.' + role);
-        
-        //if (creep.ticksToLive > ALIVE_TICKS)
-        //    rolesCount[role][creep.memory.roomName] = (rolesCount[role][creep.memory.roomName] || 0) + 1;
         
         if(moveErrors[creep.room.name]) {
             if(creep.moveTo(creep.room.controller) == OK)
@@ -86,6 +79,7 @@ profiler.wrap(function() {
         let lastCPU = Game.cpu.getUsed();
         
         try {
+            creep.memory.carryEnergy = creep.carry.energy;
             objectCache[role].run(creep);
         } catch (e) {
             console.log(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
