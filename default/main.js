@@ -1,5 +1,5 @@
 require('constants');
-require('prototype.room');
+Game.roomsHelper = require('prototype.room');
 require('prototype.creep');
 require('prototype.roomposition');
 var utils = require('utils');
@@ -19,11 +19,12 @@ profiler.wrap(function() {
     
     var moveErrors = {};
     var objectCache = {};
-    var roomNames = _.uniq( 
-        _.map (Game.flags, 'pos.roomName').concat( 
-        _.map( Game.rooms, 'name' ) ).concat( 
-        Object.keys(Memory.rooms) ) 
-    );
+    var roomNames = _.filter( _.uniq( [].concat( 
+        _.map(Game.flags, 'pos.roomName'), 
+        _.map( Game.rooms, 'name' ), 
+        Object.keys(Memory.rooms) 
+    ) ), n => n != "undefined");
+
     global.cache.wantEnergy = _.reduce( _.filter(Game.creeps, c => c.memory.energyID), function (sum, value, key) { 
             sum[value.memory.energyID] = sum[value.memory.energyID] || {energy : 0, creepsCount : 0};
             sum[value.memory.energyID].energy += value.carryCapacity - value.carry.energy;
@@ -45,16 +46,7 @@ profiler.wrap(function() {
     global.cache.stat.addCPU("memory");
 
     _.forEach(roomNames, function(roomName) {
-        global.cache.stat.addRoom(roomName);
-        if (Game.rooms[roomName]) {
-            Game.rooms[roomName].update();
-        } else {
-            if (roomName in Memory.rooms && "costMatrix" in Memory.rooms[roomName]) {
-                global.cache.matrix[roomName] = global.cache.matrix[roomName] || {};
-                global.cache.matrix[roomName]["common"] = PathFinder.CostMatrix.deserialize(Memory.rooms[roomName]);
-                global.cache.matrix[roomName]["withCreeps"] = global.cache.matrix[roomName]["common"];
-            }
-        }
+        Game.roomsHelper.fakeUpdate(roomName);
     });
     
     global.cache.stat.addCPU("roomUpdate");
@@ -123,17 +115,8 @@ profiler.wrap(function() {
     let buildFlags = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build').length;
     let stopLongBuilders = longbuilders * 1.5 >= buildFlags;
     _.forEach(roomNames, function(roomName) {
-        if (roomName == "undefined")
-            return;
         let lastCPU = Game.cpu.getUsed();
         let room = Game.rooms[roomName];
-        let hostiles = room ? room.find(FIND_HOSTILE_CREEPS, {filter: c => c.owner.username != "Source Keeper"}).length : -1;
-        if (hostiles == -1 && Memory.warning[roomName] > 0)
-            ; // TODO: can leave room forever
-        else
-            Memory.warning[roomName] = hostiles;
-
-            
 
         if (Game.time % PERIOD_NEEDLIST == 1) {
             let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), c => c.memory.countName || c.memory.role);
@@ -262,15 +245,14 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let sourcesForWork = (memory.structures[STRUCTURE_SOURCE] || []).length;
     let antikeepersCount = (creepsCount["antikeeper-a"] || 0) + (creepsCount["antikeeper-r"] || 0);
     let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
-    let hostiles = memory.hostilesCount && memory.hostilesDeadTime - Game.time > HOSTILES_DEAD_TIMEOUT ? memory.hostilesCount : 0;
-
+    
     if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"])
         return [];
     
     let limits = [];
     limits.push({
         "role" : "defender",
-        "count" : !fcount["Antikeeper"] && hostiles > 1 ? 1 : 0,
+        "count" : !fcount["Antikeeper"] && Game.roomsHelper.getHostilesCount(roomName) > 1 ? 1 : 0,
         "priority" : 3,
         "wishEnergy" : 1500,
         "minEnergy" : 1500,
@@ -402,7 +384,6 @@ function getRoomLimits (room, creepsCount) {
     let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
     let countHarvester = _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 15) + _.floor((memory.structures[STRUCTURE_TOWER] || []).length / 3);
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
-    let hostiles = memory.hostilesCount && memory.hostilesDeadTime - Game.time > HOSTILES_DEAD_TIMEOUT ? memory.hostilesCount : 0;
     let extraUpgraders = utils.clamp( _.floor(memory.energy / UPGRADERS_EXTRA_ENERGY), 0, 2);
     
     let limits = [];
@@ -422,7 +403,7 @@ function getRoomLimits (room, creepsCount) {
             },
     },{
             "role" : "defender",
-            "count" : hostiles * 2,
+            "count" : Game.roomsHelper.getHostilesCount(roomName) * 2,
             "arg" : memory.structures[STRUCTURE_TOWER] ? 1 : 0,
             "priority" : 1,
             "wishEnergy" : 1500,

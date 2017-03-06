@@ -1,7 +1,39 @@
 var utils = require('utils');
 
-Room.prototype.init = function() {
-}
+var roomsHelper = {
+    fakeUpdate: function (roomName) {
+        let lastCPU = Game.cpu.getUsed();
+        let res;
+        if (Game.rooms[roomName]) {
+            res = Game.rooms[roomName].update();
+        } else if (!(roomName in Memory.rooms)) {
+            res = ERR_NOT_FOUND;
+        } else {
+            let memory = Memory.rooms[roomName];
+            if ("costMatrix" in memory) {
+                global.cache.matrix[roomName] = global.cache.matrix[roomName] || {};
+                global.cache.matrix[roomName]["common"] = PathFinder.CostMatrix.deserialize(memory.costMatrix);
+                global.cache.matrix[roomName]["withCreeps"] = global.cache.matrix[roomName]["common"];
+            }
+            memory.hostilesCount = memory.hostilesCount && memory.hostilesDeadTime - Game.time > 0 ? memory.hostilesCount : 0;
+            res = OK;
+        }
+        global.cache.stat.updateRoom(creep.room.name, 'cpu', Game.cpu.getUsed() - lastCPU);
+        return res;
+    },
+
+    getHostilesCount: function (roomName, timeout = HOSTILES_DEAD_TIMEOUT) {
+        if (!(roomName in Memory.rooms))
+            return null;
+
+        let memory = Memory.rooms[roomName];
+        return memory.hostilesCount && memory.hostilesDeadTime - Game.time > timeout ? memory.hostilesCount : 0;
+    },
+    
+};
+
+module.exports = roomsHelper;
+profiler.registerObject(roomsHelper, 'roomsHelper');
 
 Room.prototype.update = function() {
     global.cache.matrix[this.name] = {};
@@ -29,6 +61,8 @@ Room.prototype.update = function() {
         this.visual.circle(parseInt(pos[0]), parseInt(pos[1]), {fill: color});
     }
     */
+
+    return OK;
 }
 
 Room.prototype.updatePathCache = function() {

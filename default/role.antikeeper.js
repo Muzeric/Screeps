@@ -17,11 +17,11 @@ var role = {
                 console.log(creep.name + " no flag in " + creep.memory.roomName);
                 return;
             }
-            if (!friend && Memory.warning[creep.memory.roomName] > 1) {
+            if (!friend && Game.roomsHelper.getHostilesCount(creep.memory.roomName, 0) > 1) {
                 creep.say("Want pair");
                 creep.moveTo(Game.spawns[creep.memory.spawnName])
-            } else if (!friend || creep.pos.inRangeTo(friend, 3) || Memory.warning[creep.memory.roomName] < 1 || creep.pos.x == 0 || creep.pos.y == 0 || creep.pos.x == 49 || creep.pos.y == 49 || friend.room.name == creep.memory.roomName) {
-                creep.moveTo(Game.flags["Antikeeper." + creep.memory.roomName], {visualizePathStyle : {lineStyle: "dotted", stroke : "#FF0000", opacity : 0.5}});
+            } else if (!friend || creep.pos.inRangeTo(friend, 3) || Game.roomsHelper.getHostilesCount(creep.memory.roomName, 0) <= 1 || creep.pos.isBorder() || friend.room.name == creep.memory.roomName) {
+                creep.moveTo(Game.flags["Antikeeper." + creep.memory.roomName]);
             } else {
                 if (!friend.memory.gotoFriendID) {
                     creep.moveTo(friend);
@@ -32,7 +32,7 @@ var role = {
             }
             return;
         } else {
-            if (!friend && Memory.warning[creep.memory.roomName] > 1) {
+            if (!friend && Game.roomsHelper.getHostilesCount(creep.memory.roomName, 0) > 1) {
                 creep.moveTo(Game.spawns[creep.memory.spawnName]);
                 return;
             }
