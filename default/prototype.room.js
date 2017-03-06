@@ -1,3 +1,4 @@
+const profiler = require('screeps-profiler');
 var utils = require('utils');
 
 var roomsHelper = {
