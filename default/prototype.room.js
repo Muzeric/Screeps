@@ -19,7 +19,7 @@ var roomsHelper = {
             memory.hostilesCount = memory.hostilesCount && memory.hostilesDeadTime - Game.time > 0 ? memory.hostilesCount : 0;
             res = OK;
         }
-        global.cache.stat.updateRoom(creep.room.name, 'cpu', Game.cpu.getUsed() - lastCPU);
+        global.cache.stat.updateRoom(roomName, 'cpu', Game.cpu.getUsed() - lastCPU);
         return res;
     },
 
