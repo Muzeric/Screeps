@@ -1,5 +1,4 @@
 require('constants');
-Game.roomsHelper = require('prototype.room');
 require('prototype.creep');
 require('prototype.roomposition');
 var utils = require('utils');
@@ -9,6 +8,7 @@ profiler.enable();
 
 module.exports.loop = function () {
 profiler.wrap(function() {
+    Game.roomsHelper = require('prototype.room');
     global.cache = {};
     global.cache.stat = require('stat');
     global.cache.stat.init();
@@ -403,7 +403,7 @@ function getRoomLimits (room, creepsCount) {
             },
     },{
             "role" : "defender",
-            "count" : Game.roomsHelper.getHostilesCount(roomName) * 2,
+            "count" : Game.roomsHelper.getHostilesCount(room.name) * 2,
             "arg" : memory.structures[STRUCTURE_TOWER] ? 1 : 0,
             "priority" : 1,
             "wishEnergy" : 1500,
