@@ -404,7 +404,7 @@ Room.prototype.updateCreeps = function() {
         } else if (!c.my && (c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL))) {
             cache.hostileAttackers.push(c);
             memory.hostilesCount++;
-            if (Game.tiime + c.ticksToLive > memory.hostilesDeadTime)
+            if (Game.time + c.ticksToLive > memory.hostilesDeadTime)
                 memory.hostilesDeadTime = Game.tiime + c.ticksToLive;
         } else if (c.my) {
             if (c.memory.role == "harvester" && c.memory.targetID)
