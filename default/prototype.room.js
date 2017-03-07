@@ -317,6 +317,9 @@ Room.prototype.updateStructures = function() {
 
             if ((s.structureType != STRUCTURE_RAMPART || !s.my))
                 costs.set(s.pos.x, s.pos.y, 0xff);
+        } else if (s.structureType == STRUCTURE_PORTAL) {
+            memory.type = 'portal';
+            costs.set(s.pos.x, s.pos.y, 0xff);
         } else {
             costs.set(s.pos.x, s.pos.y, 0xff);
         }

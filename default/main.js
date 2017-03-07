@@ -288,19 +288,19 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let limits = [];
     limits.push({
         "role" : "defender",
-        "count" : !fcount["Antikeeper"] && Game.roomsHelper.getHostilesCount(roomName) > 1 ? 1 : 0,
+        "count" : memory.type != 'lair' && Game.roomsHelper.getHostilesCount(roomName) > 1 ? 1 : 0,
         "priority" : 3,
         "wishEnergy" : 1500,
         "minEnergy" : 1500,
         "range": 3,
     },{
         "role" : "longharvester",
-        "count" : fcount["Antikeeper"] ? 0 : needHarvester * sourcesForWork,
+        "count" : memory.type == 'lair' ? 0 : needHarvester * sourcesForWork,
         "arg" : {work: workerHarvester, attack: 1},
         "priority" : 10,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
-        "range" : 1,
+        "range" : 3,
         "maxEnergy" : 3000,
     },{
         "role" : "claimer",
@@ -312,30 +312,30 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 2,
     },{
         "role" : "longminer",
-        "count" : fcount["Antikeeper"] ? 0 : pairedSources,
+        "count" : memory.type == 'lair' ? 0 : pairedSources,
         "priority" : 12,
         "wishEnergy" : 1060,
         "minEnergy" : 1060,
         "range" : 3,
     },{
         "role" : "longbuilder",
-        "count" : fcount["Build"] && !stopLongBuilders && builds && !(fcount["Antikeeper"] && !antikeepersCount) ? 1 : 0,
+        "count" : fcount["Build"] && !stopLongBuilders && builds && !(memory.type == 'lair' && !antikeepersCount) ? 1 : 0,
         "priority" : 13,
         "wishEnergy" : 1500,
         "range" : 2,
         "maxEnergy" : 2000,
     },{
         "role" : "longharvester",
-        "count" : fcount["Antikeeper"] || !needHarvester ? 0 : (creepsCount["longharvester"] || 0) + 1,
+        "count" : memory.type == 'lair' || !needHarvester ? 0 : (creepsCount["longharvester"] || 0) + 1,
         "arg" : {work: workerHarvester, attack: 1},
         "priority" : 14,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
-        "range" : 1,
+        "range" : 3,
         "maxEnergy" : 3000,
     },{
         "role" : "antikeeper",
-        "count" : fcount["Antikeeper"] ? 1 : 0,
+        "count" : memory.type == 'lair' ? 1 : 0,
         "priority" : _.sum(creepsCount) > 5 ? 3 : 15,
         "wishEnergy" : 3580,
         "minEnergy" : 3580,
@@ -344,7 +344,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "countName" : "antikeeper-a",
     },{
         "role" : "antikeeper",
-        "count" : fcount["Antikeeper"] ? 1 : 0,
+        "count" : memory.type == 'lair' ? 1 : 0,
         "priority" : _.sum(creepsCount) > 5 ? 3 : 15,
         "wishEnergy" : 3860,
         "minEnergy" : 3860,
@@ -358,7 +358,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "priority" : 16,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
-        "range" : 5,
+        "range" : 3,
         "maxEnergy" : 4000,
     },{
         "role" : "longminer",
@@ -375,7 +375,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "priority" : 18,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
-        "range" : 5,
+        "range" : 3,
         "maxEnergy" : 4000,
     });
 
