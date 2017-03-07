@@ -268,15 +268,16 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let needWorkSpeed = sourcesWorkCapacity / ENERGY_REGEN_TIME;
     let haveSpeed = 0;
     let haveWorkSpeed = 0;
-    _.forEach( _.filter(Game.creeps, c => c.memory.role == "longharvester" && c.memory.roomName == roomName), function(c) {
+    _.forEach( _.filter(Game.creeps, c => c.memory.role == "longharvester" && c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), function(c) {
         let carryCapacity = _.sum(c.body, p => p.type == CARRY) * CARRY_CAPACITY;
         let workParts = _.sum(c.body, p => p.type == WORK);
         let workSpeed = workParts * HARVEST_POWER;
         let workTicks = workParts > 1 && haveWorkSpeed < needWorkSpeed ? carryCapacity/workSpeed : 0;
-        if (haveWorkSpeed < needWorkSpeed)
-            haveWorkSpeed += workSpeed;
         let carryDistance = Game.map.getRoomLinearDistance(c.memory.containerRoomName, roomName) * 50 * 2;
         haveSpeed += carryCapacity / (carryDistance + workTicks);
+        if (workParts > 1)
+            haveWorkSpeed += carryCapacity / (carryDistance + workTicks);
+        
     });
     console.log(`getNotMyRoomLimits for ${roomName}: needSpeed=${needSpeed}, haveSpeed=${haveSpeed}, needWorkSpeed=${needWorkSpeed}, haveWorkSpeed=${haveWorkSpeed}`);
         
