@@ -257,7 +257,6 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let builds = (memory.constructions || 0) - (memory.constructionsRoads || 0);
     let repairs = memory.repairs || 0;
     let liteClaimer = memory.type == 'reserved' && memory.reserveEnd - Game.time > 3000 ? 1 : 0;
-    let workerHarvester = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom) ? 1 : 0;
     let sourcesForWork = (memory.structures[STRUCTURE_SOURCE] || []).length;
     let sourcesCapacity = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.energyCapacity);
     let sourcesWorkCapacity = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom ? s.energyCapacity : 0);
@@ -280,6 +279,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         
     });
     console.log(`getNotMyRoomLimits for ${roomName}: needSpeed=${needSpeed}, haveSpeed=${haveSpeed}, needWorkSpeed=${needWorkSpeed}, haveWorkSpeed=${haveWorkSpeed}`);
+    let needHarvester = needSpeed < haveSpeed || needWorkSpeed < haveWorkSpeed ? 1 : 0;
+    let workerHarvester = sourcesWorkCapacity > 0 ? 1 : 0;
         
     if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"])
         return [];
@@ -294,16 +295,12 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range": 3,
     },{
         "role" : "longharvester",
-        "count" : fcount["Antikeeper"] ? 0 : sourcesForWork,
+        "count" : fcount["Antikeeper"] ? 0 : needHarvester * sourcesForWork,
         "arg" : {work: workerHarvester, attack: 1},
         "priority" : 10,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
         "range" : 1,
-        "body" : {
-            "work" : workerHarvester ? 10*sourcesForWork : 0,
-            "carry" : 20*sourcesForWork,
-        },
         "maxEnergy" : 3000,
     },{
         "role" : "claimer",
@@ -329,16 +326,12 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "maxEnergy" : 2000,
     },{
         "role" : "longharvester",
-        "count" : fcount["Antikeeper"] ? 0 : sourcesForWork * (2 + workerHarvester),
+        "count" : fcount["Antikeeper"] || !needHarvester ? 0 : (creepsCount["longharvester"] || 0) + 1,
         "arg" : {work: workerHarvester, attack: 1},
         "priority" : 14,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
         "range" : 1,
-        "body" : {
-            "work" : workerHarvester ? 20 * 3 * sourcesForWork : 0,
-            "carry" : 20 * 2 * sourcesForWork,
-        },
         "maxEnergy" : 3000,
     },{
         "role" : "antikeeper",
@@ -360,16 +353,12 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "countName" : "antikeeper-r",
     },{
         "role" : "longharvester",
-        "count" : antikeepersCount ? sourcesForWork : 0,
+        "count" : antikeepersCount ? needHarvester * sourcesForWork : 0,
         "arg" : {work: workerHarvester, attack: 0},
         "priority" : 16,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
         "range" : 5,
-        "body" : {
-            "work" : workerHarvester ? 20 * sourcesForWork : 0,
-            "carry" : 30 * sourcesForWork,
-        },
         "maxEnergy" : 4000,
     },{
         "role" : "longminer",
@@ -381,16 +370,12 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 3,
     },{
         "role" : "longharvester",
-        "count" : antikeepersCount ? sourcesForWork * (3 + workerHarvester) : 0,
+        "count" : antikeepersCount && needHarvester ? (creepsCount["longharvester"] || 0) + 1 : 0,
         "arg" : {work: workerHarvester, attack: 0},
         "priority" : 18,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
         "range" : 5,
-        "body" : {
-            "work" : workerHarvester ? 20 * 4 * sourcesForWork : 0,
-            "carry" : 30 * 3 * sourcesForWork,
-        },
         "maxEnergy" : 4000,
     });
 
