@@ -66,6 +66,7 @@ or die $@;
 print STAT "tick\t".join("\t", sort keys %$total_keys)."\n";
 my $room_keys = {};
 my $total_sum = {};
+my $tc = 0;
 foreach my $tick (@ticks) {
   my $hash = $info->{$tick};
   print STAT $tick;
@@ -82,6 +83,7 @@ foreach my $tick (@ticks) {
     print STAT "\t$sum";
   }
   print STAT "\n";
+  $tc++;
 }
 print STAT "\n";
 
