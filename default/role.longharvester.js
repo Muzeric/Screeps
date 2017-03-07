@@ -9,8 +9,10 @@ var role = {
 			return;
 		}
 
-        if (!creep.memory.containerRoomName)
-            creep.setContainerRoomName();
+        if (!creep.memory.containerRoomName) {
+            creep.memory.containerRoomName = this.findContainerRoomName(creep);
+            return;
+        }
 
         if(!creep.memory.energyName || !Game.flags[creep.memory.energyName]) {
             if(!set_energy(creep)) 
@@ -74,6 +76,30 @@ var role = {
                 set_cid(creep);
         }
 	},
+
+    prerun : function (creep) {
+        if (!creep.memory.containerRoomName)
+            creep.memory.containerRoomName = this.findContainerRoomName(creep);
+    },
+
+    findContainerRoomName: function (creep) {
+        let minCost;
+        let res = null;
+        _.filter(Game.rooms, r => r.memory.type == "my" && r.memory.pointPos && Game.map.getRoomLinearDistance(r.name, creep.memory.roomName) <= 3).forEach( function(r) {
+            let carryParts = _.sum( _.map( _.filter(Game.creeps, c => c.memory.role == "longharvester" && c.memory.containerRoomName == r.name), c => _.sum(c.body, p => p.type == CARRY) ) );
+            let cost = carryParts / r.energyCapacityAvailable;
+            if (minCost === undefined || cost < minCost) {
+                res = r.name;
+                minCost = cost;
+            }
+        });
+
+        if (!res)
+            console.log(creep.name + ": findContainerRoomName, can't set container room name from " + creep.memory.roomName);
+        return res;
+
+        //console.log(this.name + ": set containerRoomName=" + this.memory.containerRoomName);
+    },
 	
     create: function(energy, opts) {
         let attack = 0;

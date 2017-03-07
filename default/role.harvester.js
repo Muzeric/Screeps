@@ -16,7 +16,7 @@ var role = {
 	    }
 	    
 	    if(!creep.memory.transfering) {
-            creep.memory.needRepair = 0;
+            //creep.memory.needRepair = 0;
             creep.findSourceAndGo();
         } else {
             /*

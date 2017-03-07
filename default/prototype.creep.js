@@ -264,7 +264,7 @@ Creep.prototype.attackNearHostile = function(range) {
     let target = Game.getObjectById(targets[0].id);
     if (!target)
         return -7;
-        
+
     if (this.attack(target) == ERR_NOT_IN_RANGE)
         this.moveTo(target);
     return 0;
@@ -394,23 +394,4 @@ Creep.prototype.checkInRoomAndGo = function () {
     this.moveTo(Memory.rooms[this.memory.roomName].pointPos);
 
     return 1;
-}
-
-Creep.prototype.setContainerRoomName = function () {
-    let minCost;
-
-    let creep = this;
-    _.filter(Game.rooms, r => r.memory.type == "my" && r.memory.pointPos && Game.map.getRoomLinearDistance(r.name, creep.memory.roomName) <= 3).forEach( function(r) {
-        let carryParts = _.sum( _.map( _.filter(Game.creeps, c => c.memory.role == "longharvester" && c.memory.containerRoomName == r.name), c => _.sum(c.body, p => p.type == CARRY) ) );
-        let cost = carryParts / r.energyCapacityAvailable;
-        if (minCost === undefined || cost < minCost) {
-            creep.memory.containerRoomName = r.name;
-            minCost = cost;
-        }
-    });
-
-    if (!this.memory.containerRoomName)
-        console.log(this.name + ": can't set container room name");
-    
-    //console.log(this.name + ": set containerRoomName=" + this.memory.containerRoomName);
 }

@@ -54,11 +54,22 @@ profiler.wrap(function() {
     let creepsCPUStat = {};
     for(let creep_name in Game.creeps) {
         let creep = Game.creeps[creep_name];
-        if(creep.spawning)
-            continue;
+        
         let role = creep.memory.role;
         if(!(role in objectCache))
             objectCache[role] = require('role.' + role);
+        
+        if(creep.spawning) {
+            if ("prerun" in objectCache[role]) {
+                try {
+                    objectCache[role].prerun(creep);
+                } catch (e) {
+                    console.log(creep.name + " PRERUNNING ERROR: " + e.toString() + " => " + e.stack);
+                    Game.notify(creep.name + " PRERUNNING ERROR: " + e.toString() + " => " + e.stack);
+                }
+            }
+            continue;
+        }
         
         if(moveErrors[creep.room.name]) {
             if(creep.moveTo(creep.room.controller) == OK)
@@ -123,7 +134,12 @@ profiler.wrap(function() {
             let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
 
             if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
-                Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders);
+                try {
+                    Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders);
+                } catch (e) {
+                    console.log(creep.name + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
+                    Game.notify(creep.name + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
+                }
                 Memory.limitTime[roomName] = Game.time;
             }
 
@@ -243,9 +259,27 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let liteClaimer = memory.type == 'reserved' && memory.reserveEnd - Game.time > 3000 ? 1 : 0;
     let workerHarvester = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom) ? 1 : 0;
     let sourcesForWork = (memory.structures[STRUCTURE_SOURCE] || []).length;
+    let sourcesCapacity = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.energyCapacity);
+    let sourcesWorkCapacity = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom ? s.energyCapacity : 0);
     let antikeepersCount = (creepsCount["antikeeper-a"] || 0) + (creepsCount["antikeeper-r"] || 0);
     let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
-    
+
+    let needSpeed = sourcesCapacity / ENERGY_REGEN_TIME;
+    let needWorkSpeed = sourcesWorkCapacity / ENERGY_REGEN_TIME;
+    let haveSpeed = 0;
+    let haveWorkSpeed = 0;
+    _.forEach( _.filter(Game.creeps, c => c.memory.role == "longharvester" && c.memory.roomName == roomName), function(c) {
+        let carryCapacity = _.sum(c.body, p => p.type == CARRY) * CARRY_CAPACITY;
+        let workParts = _.sum(c.body, p => p.type == WORK);
+        let workSpeed = workParts * HARVEST_POWER;
+        let workTicks = workParts > 1 && haveWorkSpeed < needWorkSpeed ? carryCapacity/workSpeed : 0;
+        if (haveWorkSpeed < needWorkSpeed)
+            haveWorkSpeed += workSpeed;
+        let carryDistance = Game.map.getRoomLinearDistance(c.memory.containerRoomName, roomName) * 50 * 2;
+        haveSpeed += carryCapacity / (carryDistance + workTicks);
+    });
+    console.log(`getNotMyRoomLimits for ${roomName}: needSpeed=${needSpeed}, haveSpeed=${haveSpeed}, needWorkSpeed=${needWorkSpeed}, haveWorkSpeed=${haveWorkSpeed}`);
+        
     if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"])
         return [];
     

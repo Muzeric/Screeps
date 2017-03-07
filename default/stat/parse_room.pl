@@ -77,7 +77,7 @@ foreach my $tick (@ticks) {
       $sum += $hash->{$key}->{$k};
     }
     $total_sum->{$key} += $sum;
-    $sum = $total_sum->{$key};
+    #$sum = $total_sum->{$key};
     $sum =~ s/\./,/;
     print STAT "\t$sum";
   }
@@ -87,19 +87,20 @@ print STAT "\n";
 
 foreach my $room (sort keys %$total_keys) {
   print STAT "$room\n";
-  print STAT "tick\t".join("\t",sort keys %{$room_keys})."\n";
-  my $sum = {};
+  print STAT "tick\t".join("\t",sort keys %{$room_keys})."\tsum\ttotal\n";
+  my $total = 0;
   foreach my $tick (@ticks) {
     print STAT $tick;
     my $hash = $info->{$tick}->{$room};
+    my $sum = 0;
     foreach my $k (sort keys %{$room_keys}) {
       my $v = $hash->{$k} || 0;
-      #$sum->{$k} += $hash->{$k} || 0;
-      #my $v = $sum->{$k};
+      $sum += $v;
       $v =~ s/\./,/;
       print STAT "\t$v";
     }
-    print STAT "\n";
+    $total += $sum;
+    print STAT "\t$sum\t$total\n";
   }
   print STAT "\n";
 }
