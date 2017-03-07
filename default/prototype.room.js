@@ -405,7 +405,7 @@ Room.prototype.updateCreeps = function() {
             cache.hostileAttackers.push(c);
             memory.hostilesCount++;
             if (Game.time + c.ticksToLive > memory.hostilesDeadTime)
-                memory.hostilesDeadTime = Game.tiime + c.ticksToLive;
+                memory.hostilesDeadTime = Game.time + c.ticksToLive;
         } else if (c.my) {
             if (c.memory.role == "harvester" && c.memory.targetID)
                 global.cache.wantCarry[roomName][c.memory.targetID] = (global.cache.wantCarry[roomName][c.memory.targetID] || 0) + c.carry.energy;
