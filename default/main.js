@@ -279,7 +279,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         
     });
     console.log(`getNotMyRoomLimits for ${roomName}: needSpeed=${needSpeed}, haveSpeed=${haveSpeed}, needWorkSpeed=${needWorkSpeed}, haveWorkSpeed=${haveWorkSpeed}`);
-    let needHarvester = needSpeed < haveSpeed || needWorkSpeed < haveWorkSpeed ? 1 : 0;
+    let needHarvester = needSpeed > haveSpeed || needWorkSpeed > haveWorkSpeed ? 1 : 0;
     let workerHarvester = sourcesWorkCapacity > 0 ? 1 : 0;
         
     if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"])
