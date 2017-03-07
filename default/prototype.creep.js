@@ -203,14 +203,14 @@ Creep.prototype.travelTo = function (targetPos, opts) {
     memory.travel = {};
     let pathCache = this.room.memory.pathCache;
     let sourceKey = this.pos.getKey();
-    let maxOps = 5500;
+    let maxOps = PATH_OPS_LIMIT_LONG;
     let addCreeps = 0;
     if (targetPos.roomName == this.pos.RoomName) {
         if (this.pos.getRangeTo(targetPos) < 6) {
-            maxOps = 200;
+            maxOps = PATH_OPS_LIMIT_SHORT;
             addCreeps = 1;
         } else {
-            maxOps = 2000;
+            maxOps = PATH_OPS_LIMIT_ROOM;
         }
     }
     if (opts.withCreeps)

@@ -110,7 +110,7 @@ var travel = {
         return path.length - pi;
     },
 
-    getPath: function(sourcePos, targetPos, targetKey = null, addCreeps, pathCache, limit = 5500) {
+    getPath: function(sourcePos, targetPos, targetKey = null, addCreeps, pathCache, limit = PATH_OPS_LIMIT_LONG) {
         let sourceKey = sourcePos.getKey();
         if (!Array.isArray(targetPos) && targetKey !== null) {
             if (pathCache[targetKey] && pathCache[targetKey][sourceKey]) {
