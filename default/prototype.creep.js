@@ -372,6 +372,15 @@ Creep.prototype.gotoSource = function() {
         this.memory.energyTime = Game.time;
         return this.moveTo(source);
     }
+
+    if (this.memory.energyObj.buildContainerID) {
+        let container = Game.getObjectById(this.memory.energyObj.buildContainerID);
+        if (container && this.pos.isEqualTo(container.pos) && this.carry.energy >= this.getActiveBodyparts(WORK) * BUILD_POWER) {
+            let res = this.build(container);
+            console.log(this.name + ": built container, energy=" + this.carry.energy + ", res=" + res);
+            return res;
+        }
+    }
     
     let res;
     if(source.structureType && (source.structureType == STRUCTURE_CONTAINER || source.structureType == STRUCTURE_STORAGE || source.structureType == STRUCTURE_LINK)) {

@@ -336,6 +336,7 @@ Room.prototype.updateStructures = function() {
         }
     });
 
+    let constructionsContainers = {};
     this.find(FIND_MY_CONSTRUCTION_SITES).forEach( function(s) {
         memory.constructions++;
         if (s.structureType == STRUCTURE_ROAD) {
@@ -345,11 +346,25 @@ Room.prototype.updateStructures = function() {
                 memory.constructionsRoads++;
         } else if ((s.structureType != STRUCTURE_RAMPART || !s.my) && s.structureType != STRUCTURE_CONTAINER) {
             costs.set(s.pos.x, s.pos.y, 0xff);
+        } else if (s.structureType == STRUCTURE_CONTAINER) {
+            constructionsContainers[s.pos.getKey()] = s.id;
         }
     });
 
     memory.costMatrix = costs.serialize();
     global.cache.matrix[this.name]["common"] = costs;
+
+    for (let source of _.filter(memory.structures[STRUCTURE_SOURCE], s => !s.pair && s.rangedPlaces.length && s.rangedPlaces.length <= 1)) {
+        let contPos = source.rangedPlaces[0];
+        if (constructionsContainers[contPos.x + "x" + contPos.y]) {
+            source.buildContainerID = constructionsContainers[contPos.x + "x" + contPos.y];
+            continue;
+        }
+        let res = this.createConstructionSite(contPos.x, contPos.y, STRUCTURE_CONTAINER);
+        console.log(this.name + ": BUILT (" + res + ") container at " + contPos.x + "x" + contPos.y);
+        if (res == OK)
+            memory.constructions++;
+    }
 
     for (let key of _.filter(Object.keys(memory.needRoads), r => 
             !memory.needRoads[r].id && 

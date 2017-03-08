@@ -51,7 +51,12 @@ var role = {
                 creep.transfer(container, RESOURCE_ENERGY);
             }
         } else {
-            creep.moveTo(betweenPos);
+            let res = creep.moveTo(betweenPos);
+            if(res == ERR_NO_PATH) {
+                creep.memory.errors++;
+            } else if (res == OK) {
+                creep.memory.errors = 0;
+            }
         }
 	},
 	
