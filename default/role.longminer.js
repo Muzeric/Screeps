@@ -44,7 +44,7 @@ var role = {
         
         let betweenPos = new RoomPosition(creep.memory.betweenPos.x, creep.memory.betweenPos.y, creep.memory.betweenPos.roomName);
         if(!creep.attackNearHostile()) {
-            console.log(creep.name + " attacked near hostile");
+            return;
         } else if (creep.pos.isEqualTo(betweenPos)) {
             container = Game.getObjectById(creep.memory.cID);
             if(!container) {

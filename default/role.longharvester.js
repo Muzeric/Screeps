@@ -15,7 +15,6 @@ var role = {
         }
 
         if (!creep.attackNearHostile()) {
-            console.log(creep.name + " attacked near hostile");
             return;
         } else {
             if(creep.carry.energy == 0 && creep.memory.transfering) {

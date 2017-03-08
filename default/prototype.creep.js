@@ -255,19 +255,21 @@ Creep.prototype.goFromKeepers = function() {
 
 Creep.prototype.attackNearHostile = function(range) {
     if (!this.getActiveBodyparts(ATTACK))
-        return -1;
+        return ERR_NO_BODYPART;
 
     let targets = this.room.getNearAttackers(this.pos, range || 5);
     if (!targets.length)
-        return -7;
+        return ERR_NOT_FOUND;
         
     let target = Game.getObjectById(targets[0].id);
     if (!target)
-        return -7;
+        return ERR_INVALID_TARGET;
+
+    console.log(this.name + ": attackNearHostile, pos=" + this.pos.getKey(1) + ", hits=" + target.hits + ", owner=" + target.owner.username);
 
     if (this.attack(target) == ERR_NOT_IN_RANGE)
         this.moveTo(target);
-    return 0;
+    return OK;
 }
 
 Creep.prototype.findSourceAndGo = function () {
