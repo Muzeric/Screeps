@@ -223,7 +223,7 @@ Room.prototype.updateStructures = function() {
     memory.repairs = 0;
     if (!("needRoads" in memory))
         memory.needRoads = {};
-    memory.pointPos = null;
+    memory.pointPos = Game.flags["PointPos." + this.name] ? Game.flags["PointPos." + this.name].pos : null;
     memory.energy = 0;
     let costs = new PathFinder.CostMatrix;
         
@@ -367,13 +367,9 @@ Room.prototype.updateStructures = function() {
     }
 
     if (!memory.pointPos) {
-        if (Game.flags["PointPos." + this.name]) {
-            memory.pointPos = Game.flags["PointPos." + this.name].pos;
-        } else {
-            let flag = _.filter(Game.flags, f => f.pos.roomName == this.name)[0];
-            if (flag)
-                memory.pointPos = flag.pos;
-        }
+        let flag = _.filter(Game.flags, f => f.pos.roomName == this.name)[0];
+        if (flag)
+            memory.pointPos = flag.pos;
     }
 }
 
