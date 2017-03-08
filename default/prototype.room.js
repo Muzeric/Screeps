@@ -367,9 +367,13 @@ Room.prototype.updateStructures = function() {
     }
 
     if (!memory.pointPos) {
-        let flag = _.filter(Game.flags, f => f.pos.roomName == this.name)[0];
-        if (flag)
-            memory.pointPos = flag.pos;
+        if (Game.flags["PointPos." + this.name]) {
+            memory.pointPos = Game.flags["PointPos." + this.name].pos;
+        } else {
+            let flag = _.filter(Game.flags, f => f.pos.roomName == this.name)[0];
+            if (flag)
+                memory.pointPos = flag.pos;
+        }
     }
 }
 

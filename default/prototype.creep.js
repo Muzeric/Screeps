@@ -280,8 +280,12 @@ Creep.prototype.findSourceAndGo = function () {
         if (this.findSource() == OK)
             this.memory.energyTime = Game.time;
     }
-    if (this.memory.energyID)
+    if (this.memory.energyID) {
         this.gotoSource();
+    } else if (Memory.rooms[this.memory.roomName] && Memory.rooms[this.memory.roomName].pointPos) {
+        let pos = Memory.rooms[this.memory.roomName].pointPos;
+        this.moveTo(new RoomPosition(pos.x, pos.y, pos.roomName));
+    }
 }
 
 Creep.prototype.findSource = function () {
