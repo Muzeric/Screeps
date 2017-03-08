@@ -359,7 +359,12 @@ Creep.prototype.gotoSource = function() {
         //console.log(this.name + " [" + this.room.name + "] can't get source with enegryID=" + this.memory.energyID);
         this.memory.energyObj.energy = 0;
         this.memory.energyID = null;
-        return;
+        return ERR_INVALID_TARGET;
+    }
+
+    if (this.room.name != source.pos.roomName) {
+        this.memory.energyTime = Game.time;
+        return this.moveTo(source);
     }
     
     let res;
@@ -369,7 +374,7 @@ Creep.prototype.gotoSource = function() {
         res = this.pickup(source);
         if (!res) {
             this.memory.energyID = null;
-            return;
+            return ERR_INVALID_TARGET;
         }
     } else {
         res = this.harvest(source);
@@ -378,13 +383,15 @@ Creep.prototype.gotoSource = function() {
     if (res == OK) {
         this.memory.energyTime = Game.time;
     } else if (res == ERR_NOT_IN_RANGE) {
-        this.moveTo(source, { visualizePathStyle : {lineStyle: "dotted", stroke : 'green' , opacity : 0.5}, costCallback : function(name, cm) { cm.set(4, 43, 255); cm.set(4, 42, 255); cm.set(4, 41, 255); } });
+        return this.moveTo(source);
     } else if (res == ERR_NOT_ENOUGH_ENERGY) {
-        return;
+        ;
     } else if (res < 0) {
         console.log(this.name + " tried to get energy from " + this.memory.energyID + " with res = " + res);
         this.memory.energyID = null;
     }
+
+    return res;
 }
 
 Creep.prototype.checkInRoomAndGo = function () {
