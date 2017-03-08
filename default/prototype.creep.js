@@ -246,7 +246,7 @@ Creep.prototype.moveTo = function() {
 }
 
 Creep.prototype.goFromKeepers = function() {
-    let targetPos = this.room.getNearKeeperPos(this.pos, 10) || this.room.getNearComingLairPos(this.pos, 10);
+    let targetPos = this.room.getNearKeeperPos(this.pos, 5) || this.room.getNearComingLairPos(this.pos, 5);
     if (!targetPos)
         return -7;
     let safePlace = this.pos.findClosestByPath(utils.getRangedPlaces(this, targetPos, 6));
@@ -377,7 +377,7 @@ Creep.prototype.gotoSource = function() {
         let container = Game.getObjectById(this.memory.energyObj.buildContainerID);
         if (container && this.pos.isEqualTo(container.pos) && this.carry.energy >= this.getActiveBodyparts(WORK) * BUILD_POWER) {
             let res = this.build(container);
-            console.log(this.name + ": built container, energy=" + this.carry.energy + ", res=" + res);
+            //console.log(this.name + ": built container, energy=" + this.carry.energy + ", res=" + res);
             return res;
         }
     }
