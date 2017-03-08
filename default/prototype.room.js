@@ -260,7 +260,8 @@ Room.prototype.updateStructures = function() {
             } else {
                 memory.type = 'empty';
             }
-            memory.pointPos = s.pos;
+            if (!memory.pointPos)
+                memory.pointPos = s.pos;
             elem = {
                 structureType : s.structureType,
                 rangedPlaces : utils.getRangedPlaces(null, s.pos, 1),
