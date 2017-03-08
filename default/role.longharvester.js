@@ -14,11 +14,6 @@ var role = {
             return;
         }
 
-        if(!creep.memory.energyName || !Game.flags[creep.memory.energyName]) {
-            if(!set_energy(creep)) 
-                return;
-        }
-
         if (!creep.attackNearHostile()) {
             console.log(creep.name + " attacked near hostile");
             return;
@@ -40,10 +35,7 @@ var role = {
                 return;
             }
 
-            if(!creep.pos.isBorder() && creep.room.name == Game.flags[creep.memory.energyName].pos.roomName)
-                creep.findSourceAndGo();
-            else
-                creep.moveTo(Game.flags[creep.memory.energyName].pos);
+            creep.findSourceAndGo();
         } else {
             if (creep.room.memory.type == 'lair' && !creep.goFromKeepers())
                 return;
@@ -158,23 +150,6 @@ function set_cid (creep) {
     }
     creep.memory.cID = containers.sort( function(a,b) { return a.store[RESOURCE_ENERGY] - b.store[RESOURCE_ENERGY]; })[0].id;
     //console.log(creep.name + " container=" + creep.memory.cID);
-}
-
-function set_energy (creep) {
-    let sources = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && f.pos.roomName == creep.memory.roomName);
-    if(!sources.length) {
-        console.log(creep.name + " found no flags");
-        return;
-    }
-    //console.log(creep.name + " sources: " + sources);
-    
-    creep.memory.energyName = sources.sort( function(a,b) { 
-        let suma = _.sum(Game.creeps, (c) => c.memory.role == "longharvester" && c.memory.energyName == a.name);// + Game.map.getRoomLinearDistance(a.pos.roomName, creep.memory.roomName);
-        let sumb = _.sum(Game.creeps, (c) => c.memory.role == "longharvester" && c.memory.energyName == b.name);// + Game.map.getRoomLinearDistance(b.pos.roomName, creep.memory.roomName);
-        //console.log("a=" + a.id + ",b=" + b.id + ",suma=" + suma + ",sumb=" + sumb);
-        return suma - sumb;
-    })[0].name;
-    //console.log(creep.name + " energyName=" + creep.memory.energyName);
 }
 
 module.exports = role;

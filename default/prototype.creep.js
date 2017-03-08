@@ -282,8 +282,13 @@ Creep.prototype.findSourceAndGo = function () {
         this.gotoSource();
 }
 
-Creep.prototype.findSource = function () {    
-    let memory =this.room.memory;
+Creep.prototype.findSource = function () {
+    let memory = Memory.rooms[this.memory.roomName];
+    if (!memory) {
+        console.log(this.name + ": findSource have no memory of " + this.memory.roomName);
+        return -1;
+    }
+
     let targets = _.filter(
         (memory.structures[STRUCTURE_CONTAINER] || []).concat( 
         (memory.structures[STRUCTURE_STORAGE] || []), 
