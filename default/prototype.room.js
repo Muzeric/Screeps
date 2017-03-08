@@ -404,7 +404,6 @@ Room.prototype.updateCreeps = function() {
     this.find(FIND_CREEPS).forEach( function(c) {
         if (c.owner.username == "Source Keeper") {
             cache.keepersPoses.push(c.pos);
-            cache.hostileAttackers.push(c);
         } else if (!c.my && (c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL))) {
             cache.hostileAttackers.push(c);
             memory.hostilesCount++;
