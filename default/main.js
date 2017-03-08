@@ -254,6 +254,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let lastCPU = Game.cpu.getUsed();
     let memory = Memory.rooms[roomName] || {structures : {}};
     let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
+    if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"])
+        return [];
     let builds = (memory.constructions || 0) - (memory.constructionsRoads || 0);
     let repairs = memory.repairs || 0;
     let liteClaimer = memory.type == 'reserved' && memory.reserveEnd - Game.time > 3000 ? 1 : 0;
@@ -282,9 +284,6 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let workerHarvester = sourcesWorkCapacity > 0 ? 1 : 0;
     if (needSpeed)
         console.log(`getNotMyRoomLimits for ${roomName}: needSpeed=${needSpeed}, haveSpeed=${haveSpeed}, needWorkSpeed=${needWorkSpeed}, haveWorkSpeed=${haveWorkSpeed}, needHarvester=${needHarvester}`);
-        
-    if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"])
-        return [];
     
     let limits = [];
     limits.push({

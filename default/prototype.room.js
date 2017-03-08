@@ -355,7 +355,7 @@ Room.prototype.updateStructures = function() {
     )) {
         if (Game.time - (memory.needRoads[key].lastUpdate || 0) > ROADS_TIMEOUT) {
             delete memory.needRoads[key];
-        } else if (memory.constructions < 5) {
+        } else if (memory.constructions < MAX_CONSTRUCTIONS_PER_ROOM) {
             let pos = key.split(',');
             if (pos[0] != 0 && pos[0] != 49 && pos[1] != 0 && pos[1] != 49) {
                 let res = this.createConstructionSite(parseInt(pos[0]), parseInt(pos[1]), STRUCTURE_ROAD);
