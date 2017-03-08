@@ -190,10 +190,11 @@ Room.prototype.getTowers = function() {
 }
 
 Room.prototype.getPairedContainer = function() {
-    let containers = _.filter(
-        (this.memory.structures[STRUCTURE_CONTAINER] || []).concat( 
-        (this.memory.structures[STRUCTURE_LINK] || []) ),
-     c => c.source);
+    let containers = _.filter( [].concat(
+        (this.memory.structures[STRUCTURE_CONTAINER] || []),
+        (this.memory.structures[STRUCTURE_LINK] || []),
+        (this.memory.structures[STRUCTURE_STORAGE] || [])
+    ), c => c.source);
 
      if (!containers.length)
         return null;
@@ -201,7 +202,7 @@ Room.prototype.getPairedContainer = function() {
     let resultContainer;
     let minTicks;
     for (let container of containers) {
-        let ticks = _.sum(_.filter(Game.creeps, c => c.memory.cID == container.id), c => c.ticksToLive);
+        let ticks = _.sum(_.filter(Game.creeps, c => c.memory.cID == container.id && (c.memory.role == "longminer" || c.memory.role == "miner")), c => c.ticksToLive);
         if (minTicks === undefined || ticks < minTicks) {
             resultContainer = container;
             minTicks = ticks;
@@ -290,12 +291,12 @@ Room.prototype.updateStructures = function() {
             if ("energy" in elem)
                 memory.energy += elem.energy;
 
-            if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_LINK) {
+            if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK].indexOf(s.structureType) !== -1) {
                 elem.minersTo = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.cID == s.id);
                 elem.source = _.filter(memory.structures[STRUCTURE_SOURCE], sr => s.pos.inRangeTo(sr.pos, 2))[0];
                 if (elem.source) {
-                    elem.source.betweenPos = _.filter( utils.getRangedPlaces(null, elem.source.pos, 1), p => p.isNearTo(s.pos) )[0];
-                    if (elem.source.betweenPos)
+                    elem.betweenPos = _.filter( utils.getRangedPlaces(null, elem.source.pos, 1), p => p.isNearTo(s.pos) )[0];
+                    if (elem.betweenPos)
                         elem.source.pair = (elem.source.pair || 0) + 1;
                 }
             }

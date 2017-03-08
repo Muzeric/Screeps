@@ -39,7 +39,7 @@ var role = {
 
             creep.memory.cID = container.id;
             creep.memory.energyID = container.source.id;
-            creep.memory.betweenPos = container.source.betweenPos;
+            creep.memory.betweenPos = container.betweenPos;
         }
         
         let betweenPos = new RoomPosition(creep.memory.betweenPos.x, creep.memory.betweenPos.y, creep.memory.betweenPos.roomName);
