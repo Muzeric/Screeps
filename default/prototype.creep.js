@@ -418,7 +418,7 @@ Creep.prototype.checkInRoomAndGo = function () {
         return -1;
     }
 
-    this.moveTo(Memory.rooms[this.memory.roomName].pointPos);
+    this.moveTo(new RoomPosition(Memory.rooms[this.memory.roomName].pointPos.x, Memory.rooms[this.memory.roomName].pointPos.y, Memory.rooms[this.memory.roomName].pointPos.roomName));
 
     return 1;
 }

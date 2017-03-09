@@ -19,16 +19,6 @@ var role = {
         if (creep.room.memory.type == 'lair' && !creep.goFromKeepers())
             return;
 
-        if (creep.room.name != creep.memory.roomName) {
-            let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Source' && f.pos.roomName == creep.memory.roomName);
-            if (!flags.length) {
-                console.log(creep.name + " found no Source.flags with known rooms");
-                return;
-            }
-            creep.moveTo(flags[0]);
-            return;
-        }
-
         if(!creep.memory.cID || !creep.memory.energyID || !creep.memory.betweenPos) {
             let container = creep.room.getPairedContainer();
 

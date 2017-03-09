@@ -4,11 +4,11 @@ const profiler = require('screeps-profiler');
 var role = {
 
     run: function(creep) {
-        if (!utils.checkInRoomAndGo(creep))
+        if (!creep.checkInRoomAndGo())
             return;
 	    
         if (utils.try_attack(creep) <= 0) {
-            let spawn = Game.spawns[this.memory.spawnName];
+            let spawn = Game.spawns[creep.memory.spawnName];
             if (spawn.recycleCreep(creep) == ERR_NOT_IN_RANGE)
                 creep.moveTo(spawn);
             if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL))
