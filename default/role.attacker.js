@@ -2,22 +2,26 @@ var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var role = {
-
     run: function(creep) {
+        let healersCount = (global.cache.creeps["_army"].healers || []).length;
+        let friendsCount = (global.cache.creeps["_army"].attackers || []).length - 1;
+        let underAttack = creep.memory["lastUnderAttack"] ? 1 : 0;
         if (!("lastHits" in creep.memory))
             creep.memory["lastHits"] = creep.hits;
-        let underAttack = creep.memory["lastUnderAttack"] ? 1 : 0;
         if (creep.hits - creep.memory["lastHits"] < 0) {
             creep.say("WTF!");
-            underAttack = 1;
+            underAttack = 2;
             creep.memory["lastUnderAttack"] = 1;
         } else {
             creep.memory["lastUnderAttack"] = 0;
         }
         creep.memory["lastHits"] = creep.hits;
 
-        let healer = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.memory.role == "healer"});
-        if (!creep.getActiveBodyparts(ATTACK) && !healer) {
+        if (
+            (!creep.getActiveBodyparts(ATTACK) && !creep.getActiveBodyparts(RANGED_ATTACK) && healersCount < ARMY_MIN_HEALERS) ||
+            (underAttack && friendsCount < ARMY_MIN_FRIENDS)
+        ) {
+            console.log(creep.name + ": not enough friends (" + friendsCount + ") or healers (" + healersCount + ")");
             creep.moveTo(Game.spawns[creep.memory.spawnName]);
             return;
         }
@@ -26,11 +30,11 @@ var role = {
             console.log(creep.name + ": is under attack (" + creep.hits + "/" + creep.hitsMax + ")");
 
             let target;
-            let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 4, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK)});
+            let hostiles = creep.room.getNearAttackers(creep.pos, 4);
             if (hostiles.length) {
                 target = hostiles.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
             } else {
-                let towers = creep.room.find(FIND_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER && s.energy});
+                let towers = _.filter(creep.room.getTowers(), t => t.energy);
                 if (towers.length)
                     target = towers.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
             }
@@ -41,9 +45,11 @@ var role = {
                 return;
             }
 
-            console.log(creep.name + ": attack from uknown object");
+            if (underAttack > 1)
+                console.log(creep.name + ": attack from uknown object");
         }
 
+        /*
         let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
 	    if(flags.length) {
             let flag = flags.sort()[0];
@@ -74,6 +80,7 @@ var role = {
         } else {
             creep.moveTo(Game.spawns[creep.memory.spawnName]);
         }
+        */
 	},
 	
     create: function(energy) {
