@@ -20,7 +20,11 @@ var role = {
             return;
 
         if(!creep.memory.cID || !creep.memory.energyID || !creep.memory.betweenPos) {
-            let container = creep.room.getPairedContainer();
+            if (!Game.rooms[creep.memory.roomName]) {
+                console.log(creep.name + ": no Game.rooms[" + creep.memory.roomName + "]");
+                return;
+            }
+            let container = Game.rooms[creep.memory.roomName].getPairedContainer();
 
             if (!container) {
                 console.log(creep.name + ": can't get container");

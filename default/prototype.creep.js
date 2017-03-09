@@ -276,24 +276,29 @@ Creep.prototype.findSourceAndGo = function () {
     if (this.room.memory.type == 'lair' && !this.goFromKeepers())
         return;
         
-    if (!this.memory.energyID || Game.time - (this.memory.energyTime || 0) > ENERGY_TIMEOUT) {
-        if (this.findSource() == OK)
-            this.memory.energyTime = Game.time;
+    if (Game.time - (this.memory.energyTime || 0) > ENERGY_TIMEOUT) {
+        this.memory.energyID = null;
+        this.memory.bookedEnergyID = null;
     }
-    if (this.memory.energyID) {
-        this.gotoSource();
-    } else if (Memory.rooms[this.memory.roomName] && Memory.rooms[this.memory.roomName].pointPos) {
-        let pos = Memory.rooms[this.memory.roomName].pointPos;
-        this.moveTo(new RoomPosition(pos.x, pos.y, pos.roomName));
+
+    if (
+        (this.room.name == this.memory.roomName && !this.memory.energyID) ||
+        (this.room.name != this.memory.roomName && !this.memory.energyID && !this.memory.bookedEnergyID)
+    ) {
+        this.findSource();
     }
+
+    this.gotoSource();
 }
 
 Creep.prototype.findSource = function () {
     let memory = Memory.rooms[this.memory.roomName];
     if (!memory) {
         console.log(this.name + ": findSource have no memory of " + this.memory.roomName);
-        return -1;
+        return ERR_NOT_IN_RANGE;
     }
+
+    let booking = (this.room.name != this.memory.roomName);
 
     let targets = _.filter(
         (memory.structures[STRUCTURE_CONTAINER] || []).concat( 
@@ -304,7 +309,7 @@ Creep.prototype.findSource = function () {
 
     if (!targets.length) {
         this.memory.energyID = null;
-        return -1;
+        return ERR_NOT_FOUND;
     }
 
     let energyNeed = this.carryCapacity - _.sum(this.carry);
@@ -312,7 +317,7 @@ Creep.prototype.findSource = function () {
     let minCost;
     for(let target of targets) {
         let placesLeft = target.places - (global.cache.wantEnergy[target.id] ? global.cache.wantEnergy[target.id].creepsCount : 0);
-        if (placesLeft <= 0)
+        if (placesLeft <= 0 && !booking)
             continue;
         let range = this.pos.getRangeTo(target.pos.x, target.pos.y);
         let energyLeft = target.energy - (global.cache.wantEnergy[target.id] ? global.cache.wantEnergy[target.id].energy : 0);
@@ -347,28 +352,53 @@ Creep.prototype.findSource = function () {
     }
     if (!resultTarget) {
         this.memory.energyID = null;
-        return -2;
+        this.memory.bookedEnergyID = null;
+        return ERR_NOT_FOUND;
+    }
+
+    this.memory.energyTime = Game.time;
+    this.memory.energyObj = resultTarget;
+
+    if (booking) {
+        this.memory.bookedEnergyID = resultTarget.id;
+        this.memory.energyID = null;
+        return OK;
     }
 
     global.cache.wantEnergy[resultTarget.id] = global.cache.wantEnergy[resultTarget.id] || {energy : 0, creepsCount : 0};
     global.cache.wantEnergy[resultTarget.id].energy += energyNeed;
     global.cache.wantEnergy[resultTarget.id].creepsCount++;
     
-    this.memory.energyObj = resultTarget;
     this.memory.energyID = resultTarget.id;
-    return 0;
+    this.memory.bookedEnergyID = null;
+    return OK;
 }
     
 Creep.prototype.gotoSource = function() {
-    let source = Game.getObjectById(this.memory.energyID);
+    let source;
+    if (!this.memory.energyID && !this.memory.bookedEnergyID) {
+        if (Memory.rooms[this.memory.roomName] && Memory.rooms[this.memory.roomName].pointPos) {
+            let pos = Memory.rooms[this.memory.roomName].pointPos;
+            return this.moveTo(new RoomPosition(pos.x, pos.y, pos.roomName));
+        } else {
+            console.log(this.name + ": gotoSource no targets and no pointPos in room=" + this.memory.roomName);
+            return ERR_NOT_FOUND;
+        }
+    } else if (this.memory.energyID) {
+        source = Game.getObjectById(this.memory.energyID);
+    } else {
+        source = Game.getObjectById(this.memory.bookedEnergyID);
+    }
+    
     if(!source) {
         //console.log(this.name + " [" + this.room.name + "] can't get source with enegryID=" + this.memory.energyID);
         this.memory.energyObj.energy = 0;
         this.memory.energyID = null;
+        this.memory.bookedEnergyID = null;
         return ERR_INVALID_TARGET;
     }
 
-    if (this.room.name != source.pos.roomName) {
+    if (this.room.name != source.pos.roomName || !this.memory.energyID) {
         this.memory.energyTime = Game.time;
         return this.moveTo(source);
     }
