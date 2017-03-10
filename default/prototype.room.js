@@ -113,6 +113,8 @@ Room.prototype.updateResources = function() {
             continue;
         }
         elem.energy = "energy" in s ? s.energy : ("store" in s ? s.store[RESOURCE_ENERGY] : 0);
+        if (elem.structureType == STRUCTURE_SOURCE && s.ticksToRegeneration == 1)
+            global.cache.stat.updateRoom(this.name, 'lost', elem.energy);
     }
 }
 

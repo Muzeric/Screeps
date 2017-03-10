@@ -10,6 +10,8 @@ Creep.prototype.harvest = function () {
         let was = arguments[0].energy;
 
         global.cache.stat.updateRoom(this.room.name, 'harvest', _.min([can, was]));
+        if (arguments[0].ticksToRegeneration == 1)
+            global.cache.stat.updateRoom(this.name, 'lost', -1 * _.min([can, was]));
     }
     return res;
 }

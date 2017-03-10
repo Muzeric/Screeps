@@ -67,7 +67,7 @@ var stat = {
 
         if (Game.time - Memory.stat.roomSent > 100) {
             Game.notify(
-                "room.2:" + Game.time + ":" + 
+                "room.3:" + Game.time + ":" + 
                 utils.lzw_encode(this.dumpRoomStat()) +
                 "#END#"
             );
@@ -78,7 +78,7 @@ var stat = {
 
     dumpRoomStat : function () {
         let res = '';
-        let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'cpu'];
+        let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu'];
         for (let roomName in Memory.stat.roomHistory) {
             res += roomName;
             for (let key of keys) {
