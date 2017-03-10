@@ -30,7 +30,8 @@ print "Splice to ".scalar(@files)." files\n";
 
 my $info = {};
 my $count = 1;
-my $total_keys = {};
+my $rooms = {};
+my $room_keys = {};
 foreach my $file (@files) {
   open(F, $file)
   or die $@;
@@ -47,7 +48,10 @@ foreach my $file (@files) {
   if (my $hash = eval($jshash) ) {
     $info->{$tick} = $hash;
     foreach my $key (keys %$hash) {
-      $total_keys->{$key} = 1;
+      $rooms->{$key} = 1;
+      foreach my $k (keys %{$hash->{$key}}) {
+        $room_keys->{$k} = 1;
+      }
     }
   } else {
     print "can't eval ($@): ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
@@ -63,18 +67,35 @@ if ($limit) {
 
 open(STAT, ">stat_room.csv")
 or die $@;
-print STAT "tick\t".join("\t", sort keys %$total_keys)."\n";
-my $room_keys = {};
+print STAT "tick\troom\t".join("\t", sort keys %$room_keys)."\n";
+foreach my $tick (@ticks) {
+  my $hash = $info->{$tick};
+  foreach my $key (sort keys %$rooms) {
+    print STAT "$tick\t$key";
+    foreach my $k (keys %{$hash->{$key}}) {
+      my $v = $hash->{$key}->{$k} || 0;
+      $v =~ s/\./,/;
+      print STAT "\t$v";
+    }
+    print STAT "\n";
+  }
+}
+print STAT "\n";
+close(STAT);
+
+
+
+exit;
+print STAT "tick\t".join("\t", sort keys %$rooms)."\n";
 my $total_sum = {};
 my $tc = 0;
 foreach my $tick (@ticks) {
   my $hash = $info->{$tick};
   print STAT $tick;
-  foreach my $key (sort keys %$total_keys) {
+  foreach my $key (sort keys %$rooms) {
     my $sum = 0;
     foreach my $k (keys %{$hash->{$key}}) {
       next if $k eq "cpu";
-      $room_keys->{$k} = 1;
       $sum += $hash->{$key}->{$k};
     }
     $total_sum->{$key} += $sum;
@@ -87,7 +108,7 @@ foreach my $tick (@ticks) {
 }
 print STAT "\n";
 
-foreach my $room (sort keys %$total_keys) {
+foreach my $room (sort keys %$rooms) {
   print STAT "$room\n";
   print STAT "tick\t".join("\t",sort keys %{$room_keys})."\tsum\ttotal\n";
   my $total = 0;
