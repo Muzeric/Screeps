@@ -3,7 +3,7 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        if (Game.roomsHelper.getHostilesCount(roomName) && creep.checkInRoomAndGo())
+        if (Game.roomsHelper.getHostilesCount(creep.memory.roomName) && creep.checkInRoomAndGo())
             return;
 	    
         if (utils.try_attack(creep) <= 0) {
