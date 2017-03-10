@@ -175,6 +175,19 @@ Room.prototype.refreshRoad = function (memory, s) {
     return -2;
 }
 
+Room.prototype.linkAction = function () {
+    let link_to = this.getStoragedLink();
+    if (!link_to)
+        return ERR_NOT_FOUND;
+
+    for (let link_from of this.getUnStoragedLinks()) {
+        if (link_from && !link_from.cooldown && link_from.energy && link_to.energy < link_to.energyCapacity*0.7)
+            link_from.transferEnergy(link_to);
+    }
+
+    return OK;
+}
+
 Room.prototype.getStoragedLink = function() {
     let link = _.filter(this.memory.structures[STRUCTURE_LINK], l => l.storaged)[0];
     if (link)

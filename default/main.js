@@ -164,7 +164,7 @@ profiler.wrap(function() {
 
         if (room && Memory.rooms[roomName].type == 'my') {
             towerAction(room);
-            linkAction(room);
+            room.linkAction();
         }
         global.cache.stat.updateRoom(roomName, 'cpu', Game.cpu.getUsed() - lastCPU);
     });
@@ -233,23 +233,6 @@ profiler.wrap(function() {
     global.cache.stat.finish();
 });
 };
-
-function linkAction (room) {
-    if (!room.storage)
-        return;
-    let links_to = room.storage.pos.findInRange(FIND_STRUCTURES, 2, {filter: s => s.structureType == STRUCTURE_LINK});
-    if (!links_to.length)
-        return;
-    let link_to = links_to[0];
-
-    for (let link_from of room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK})) {
-        //console.log("linkAction: in " + room.name + " " + link_from.id + " -> " + link_to.id);
-        if (link_from.id == link_to.id)
-            continue;
-        if (!link_from.cooldown && link_from.energy && link_to.energy < link_to.energyCapacity*0.7)
-            link_from.transferEnergy(link_to);
-    }
-}
 
 function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let lastCPU = Game.cpu.getUsed();
