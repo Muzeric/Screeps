@@ -441,14 +441,14 @@ Creep.prototype.gotoSource = function() {
 
 Creep.prototype.checkInRoomAndGo = function () {
     if (this.room.name == this.memory.roomName)
-        return 0;
+        return OK;
     
     if (!Memory.rooms[this.memory.roomName] || !Memory.rooms[this.memory.roomName].pointPos) {
         console.log(this.name + ": no pointPos for " + this.memory.roomName);
-        return -1;
+        return ERR_NOT_FOUND;
     }
 
     this.moveTo(new RoomPosition(Memory.rooms[this.memory.roomName].pointPos.x, Memory.rooms[this.memory.roomName].pointPos.y, Memory.rooms[this.memory.roomName].pointPos.roomName));
 
-    return 1;
+    return ERR_NOT_IN_RANGE;
 }

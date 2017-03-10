@@ -4,7 +4,7 @@ const profiler = require('screeps-profiler');
 var role = {
 
     run: function(creep) {
-        if (!creep.checkInRoomAndGo())
+        if (creep.checkInRoomAndGo())
             return;
 	    
         if (utils.try_attack(creep) <= 0) {
