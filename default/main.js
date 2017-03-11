@@ -2,6 +2,7 @@ require('constants');
 require('prototype.creep');
 require('prototype.roomposition');
 var utils = require('utils');
+var travel = require('travel');
 const profiler = require('screeps-profiler');
 // This line monkey patches the global prototypes. 
 profiler.enable();
@@ -138,8 +139,8 @@ profiler.wrap(function() {
                 try {
                     Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders);
                 } catch (e) {
-                    console.log(creep.name + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
-                    Game.notify(creep.name + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
+                    console.log(roomName + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
+                    Game.notify(roomName + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
                 }
                 Memory.limitTime[roomName] = Game.time;
             }
@@ -272,9 +273,9 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
             haveWorkSpeed += carryCapacity / (carryDistance + workTicks);
     });
     let needHarvester = needSpeed > haveSpeed || needWorkSpeed > haveWorkSpeed ? 1 : 0;
-    let workerHarvester = sourcesWorkCapacity > 0 ? 1 : 0;
+    let workerHarvester = needWorkSpeed > haveWorkSpeed ? 1 : 0;
     if (needSpeed)
-        console.log(`getNotMyRoomLimits for ${roomName}: needSpeed=${needSpeed}, haveSpeed=${haveSpeed}, needWorkSpeed=${needWorkSpeed}, haveWorkSpeed=${haveWorkSpeed}, needHarvester=${needHarvester}`);
+        console.log(`getNotMyRoomLimits for ${roomName}: needSpeed=${needSpeed}, haveSpeed=` + _.floor(haveSpeed, 1) + `, needWorkSpeed=${needWorkSpeed}, haveWorkSpeed=` + _.floor(haveWorkSpeed, 1) + `, needHarvester=${needHarvester}`);
     
     let limits = [];
     limits.push({
