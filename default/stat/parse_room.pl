@@ -68,64 +68,35 @@ if ($limit) {
 
 open(STAT, ">stat_room.csv")
 or die $@;
-print STAT "tick\troom\t".join("\t", sort keys %$room_keys)."\n";
+print STAT "tick\troom\teff\t".join("\t", sort keys %$room_keys)."\n";
+my $sum = {};
+my $tc = 1;
 foreach my $tick (@ticks) {
   my $hash = $info->{$tick};
-  foreach my $key (sort keys %$rooms) {
-    print STAT "$tick\t$key";
-    foreach my $k (sort keys %$room_keys) {
-      my $v = $hash->{$key}->{$k} || 0;
-      $v =~ s/\./,/;
-      print STAT "\t$v";
+  foreach my $room (keys %$rooms) {
+    foreach my $k (keys %$room_keys) {
+      $sum->{$room}->{$k} += $hash->{$room}->{$k};
     }
-    print STAT "\n";
   }
-}
-print STAT "\n";
-close(STAT);
 
-
-
-exit;
-print STAT "tick\t".join("\t", sort keys %$rooms)."\n";
-my $total_sum = {};
-my $tc = 0;
-foreach my $tick (@ticks) {
-  my $hash = $info->{$tick};
-  print STAT $tick;
-  foreach my $key (sort keys %$rooms) {
-    my $sum = 0;
-    foreach my $k (keys %{$hash->{$key}}) {
-      next if $k eq "cpu";
-      $sum += $hash->{$key}->{$k};
+  if ($tc % 10 == 0) {
+    foreach my $room (sort keys %$rooms) {
+      my $s = $sum->{$room};
+      my $got = $s->{harvest} + $s->{pickup};
+      my $spent = $s->{create} + $s->{repair} + $s->{upgrade} + $s->{build} + $s->{dead};
+      next if ($got == 0 && $spent == 0);
+      my $eff = $got > 0 ? int(($spent + $got) * 100 / $got) : -100;
+      print STAT "$tick\t$room\t$eff";
+      foreach my $k (sort keys %$room_keys) {
+        my $v = $s->{$k};
+        $v =~ s/\./,/;
+        print STAT "\t$v";
+      }
+      print STAT "\n";
     }
-    $total_sum->{$key} += $sum;
-    #$sum = $total_sum->{$key};
-    $sum =~ s/\./,/;
-    print STAT "\t$sum";
+    $sum = {};
   }
-  print STAT "\n";
   $tc++;
 }
 print STAT "\n";
-
-foreach my $room (sort keys %$rooms) {
-  print STAT "$room\n";
-  print STAT "tick\t".join("\t",sort keys %{$room_keys})."\tsum\ttotal\n";
-  my $total = 0;
-  foreach my $tick (@ticks) {
-    print STAT $tick;
-    my $hash = $info->{$tick}->{$room};
-    my $sum = 0;
-    foreach my $k (sort keys %{$room_keys}) {
-      my $v = $hash->{$k} || 0;
-      $sum += $v;
-      $v =~ s/\./,/;
-      print STAT "\t$v";
-    }
-    $total += $sum;
-    print STAT "\t$sum\t$total\n";
-  }
-  print STAT "\n";
-}
 close(STAT);

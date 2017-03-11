@@ -1,5 +1,6 @@
 const profiler = require('screeps-profiler');
 var utils = require('utils');
+var travel = require('travel');
 
 var roomsHelper = {
     fakeUpdate: function (roomName) {
@@ -70,22 +71,7 @@ Room.prototype.updatePathCache = function() {
     let memory = this.memory;
     memory.pathCache = memory.pathCache || {};
     memory.pathCacheTime = Game.time;
-
-    let allCount = 0;
-    let delCount = 0;
-    for (let target in memory.pathCache) {
-        for (let source in memory.pathCache[target]) {
-            allCount++;
-            if (Game.time - memory.pathCache[target][source].useTime > PATHCACHE_USE_TIMEOUT || Game.time - memory.pathCache[target][source].createTime > PATHCACHE_CREATE_TIMEOUT) {
-                delete memory.pathCache[target][source];
-                delCount++;
-            }
-        }
-        if (!_.keys(memory.pathCache[target]).length)
-            delete memory.pathCache[target];
-    }
-    memory.pathCount = allCount - delCount;
-
+    memory.pathCount = travel.clearPathCache(memory.pathCache);
     //console.log(this.name + ": updatePathCache: " + allCount + " paths, " + delCount + " deleted");
 }
 

@@ -14,7 +14,7 @@ var stat = {
     },
 
     addRoom : function (roomName) {
-        Memory.stat.roomHistory[roomName] = Memory.stat.roomHistory[roomName] || {harvest: 0, create: 0, build: 0, repair: 0, upgrade: 0, pickup: 0, dead: 0, cpu: 0};
+        Memory.stat.roomHistory[roomName] = Memory.stat.roomHistory[roomName] || {};
     },
 
     updateRoom : function (roomName, param, diff) {

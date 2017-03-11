@@ -115,6 +115,7 @@ var travel = {
         if (!Array.isArray(targetPos) && targetKey !== null) {
             if (pathCache[targetKey] && pathCache[targetKey][sourceKey]) {
                 pathCache[targetKey][sourceKey].useTime = Game.time;
+                pathCache[targetKey][sourceKey].useCount = (pathCache[targetKey][sourceKey].useCount || 0) + 1
                 return { path: pathCache[targetKey][sourceKey].path, serialized: 1 };
             }
         }
@@ -150,7 +151,7 @@ var travel = {
         if (pathCache) {
             pathCache[mem.targetKey] = pathCache[mem.targetKey] || {};
             if (!(sourceKey in pathCache[mem.targetKey]))
-                pathCache[mem.targetKey][sourceKey] = {path: mem.path, useTime: Game.time, createTime: Game.time};
+                pathCache[mem.targetKey][sourceKey] = {path: mem.path, useTime: Game.time, createTime: Game.time, useCount: 0};
         }
     },
 
@@ -172,6 +173,23 @@ var travel = {
         return count ? _.parseInt(length / count) : null;
     },
 
+    clearPathCache: function (pathCache) {
+        let allCount = 0;
+        let delCount = 0;
+        for (let target in pathCache) {
+            for (let source in pathCache[target]) {
+                allCount++;
+                if (Game.time - pathCache[target][source].useTime > PATHCACHE_USE_TIMEOUT || Game.time - pathCache[target][source].createTime > PATHCACHE_CREATE_TIMEOUT) {
+                    delete pathCache[target][source];
+                    delCount++;
+                }
+            }
+            if (!_.keys(pathCache[target]).length)
+                delete pathCache[target];
+        }
+
+        return allCount - delCount;
+    },
 };
 
 module.exports = travel;
