@@ -445,7 +445,7 @@ Room.prototype.updateCreeps = function() {
                 global.cache.creeps["_army"][c.memory.role + 's'].push(c);
             }
         } else  {
-            memory.hostileOther.push(c);
+            cache.hostileOther.push(c);
         }
         costs.set(c.pos.x, c.pos.y, 0xff);
     });

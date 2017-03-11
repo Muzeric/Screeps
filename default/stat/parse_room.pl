@@ -48,6 +48,7 @@ foreach my $file (@files) {
   if (my $hash = eval($jshash) ) {
     $info->{$tick} = $hash;
     foreach my $key (keys %$hash) {
+      next if ($key =~ /miner|harvester/);
       $rooms->{$key} = 1;
       foreach my $k (keys %{$hash->{$key}}) {
         $room_keys->{$k} = 1;
@@ -72,7 +73,7 @@ foreach my $tick (@ticks) {
   my $hash = $info->{$tick};
   foreach my $key (sort keys %$rooms) {
     print STAT "$tick\t$key";
-    foreach my $k (keys %{$hash->{$key}}) {
+    foreach my $k (sort keys %$room_keys) {
       my $v = $hash->{$key}->{$k} || 0;
       $v =~ s/\./,/;
       print STAT "\t$v";
