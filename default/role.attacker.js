@@ -17,11 +17,8 @@ var role = {
         }
         creep.memory["lastHits"] = creep.hits;
 
-        if (
-            (!creep.getActiveBodyparts(ATTACK) && !creep.getActiveBodyparts(RANGED_ATTACK) && healersCount < ARMY_MIN_HEALERS) ||
-            (underAttack && friendsCount < ARMY_MIN_FRIENDS)
-        ) {
-            console.log(creep.name + ": not enough friends (" + friendsCount + ") or healers (" + healersCount + ")");
+        if ( (!creep.getActiveBodyparts(ATTACK) && !creep.getActiveBodyparts(RANGED_ATTACK) && !healersCount) ) {
+            console.log(creep.name + ": no attack parts and no healers");
             creep.moveTo(Game.spawns[creep.memory.spawnName]);
             return;
         }
@@ -34,20 +31,31 @@ var role = {
             if (hostiles.length) {
                 target = hostiles.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
             } else {
+                if (underAttack > 1 && (friendsCount < ARMY_MIN_FRIENDS || healersCount < ARMY_MIN_HEALERS)) {
+                    console.log(creep.name + ": not enough friends (" + friendsCount + ") or healers (" + healersCount + ")");
+                    creep.moveTo(Game.spawns[creep.memory.spawnName]);
+                    return;
+                }
                 let towers = _.filter(creep.room.getTowers(), t => t.energy);
                 if (towers.length)
                     target = towers.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
             }
 
             if (target) {
+                console.log(creep.name + ": attacks target: " + JSON.stringify(target));
                 if (creep.attack(target) == ERR_NOT_IN_RANGE)
                     creep.moveTo(target);
                 return;
             }
 
-            if (underAttack > 1)
-                console.log(creep.name + ": attack from uknown object");
+            if (underAttack > 1) {
+                console.log(creep.name + ": attacked from uknown object");
+                creep.moveTo(Game.spawns[creep.memory.spawnName]);
+                return;
+            }
         }
+
+
 
         /*
         let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
