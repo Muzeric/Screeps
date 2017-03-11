@@ -209,7 +209,7 @@ Room.prototype.getPairedContainer = function() {
         (this.memory.structures[STRUCTURE_CONTAINER] || []),
         (this.memory.structures[STRUCTURE_LINK] || []),
         (this.memory.structures[STRUCTURE_STORAGE] || [])
-    ), c => c.source);
+    ), c => c.source && c.betweenPos);
 
      if (!containers.length)
         return null;

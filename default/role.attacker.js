@@ -55,7 +55,10 @@ var role = {
             }
         }
 
-
+        if (friendsCount < ARMY_MIN_FRIENDS || healersCount < ARMY_MIN_HEALERS) {
+            creep.say("Wait pair");
+            return;
+        }
 
         /*
         let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
