@@ -97,7 +97,8 @@ Creep.prototype.trySubPath = function(targetPos, opts) {
     let pf = travel.getPath(this.pos, subpath, null, 1, this.room.memory.pathCache, 300);
     if (pf.incomplete) {
         console.log(this.name + ": moveTo BAD sub path from " + this.pos.getKey(1) + " to " + JSON.stringify(subpath) + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
-        return ERR_NO_PATH;
+        return this.move(Math.floor(Math.random() * 8) + 1);
+        //return ERR_NO_PATH;
     } else if (!pf.path.length) {
         let iter = travel.getIterFromSerializedPath(mem.path, this.pos);
         if (iter === null) { // We are near targetPos
