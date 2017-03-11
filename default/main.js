@@ -254,15 +254,22 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let haveSpeed = 0;
     let haveWorkSpeed = 0;
     _.forEach( _.filter(Game.creeps, c => c.memory.role == "longharvester" && c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), function(c) {
+        if (!c.memory.containerRoomName)
+            return;
+
+        let carryDistance;
+        if (memory.pathCache)
+            carryDistance = travel.getRoomsAvgPathLength(memory.pathCache, c.memory.containerRoomName) * 2;
+        if (!carryDistance)
+            carryDistance = Game.map.getRoomLinearDistance(c.memory.containerRoomName, roomName) * 50 * 2;
+
         let carryCapacity = _.sum(c.body, p => p.type == CARRY) * CARRY_CAPACITY;
         let workParts = _.sum(c.body, p => p.type == WORK);
         let workSpeed = workParts * HARVEST_POWER;
         let workTicks = workParts > 1 && haveWorkSpeed < needWorkSpeed ? carryCapacity/workSpeed : 0;
-        let carryDistance = Game.map.getRoomLinearDistance(c.memory.containerRoomName, roomName) * 50 * 2;
         haveSpeed += carryCapacity / (carryDistance + workTicks);
         if (workParts > 1)
             haveWorkSpeed += carryCapacity / (carryDistance + workTicks);
-        
     });
     let needHarvester = needSpeed > haveSpeed || needWorkSpeed > haveWorkSpeed ? 1 : 0;
     let workerHarvester = sourcesWorkCapacity > 0 ? 1 : 0;
@@ -439,7 +446,7 @@ function getRoomLimits (room, creepsCount) {
             "count" : (builds ? 1 : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)),
             "priority" : 4,
             "wishEnergy" : 1500,
-            "maxEnergy" : builds ? 3000 : 2000,
+            "maxEnergy" : builds ? 3000 : 1500,
             "body" : {
                 "carry" : (builds ? 6 : 0 ) + (repairs > 10 ? 18 : (repairs ? 9 : 0)),
             },

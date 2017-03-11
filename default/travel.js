@@ -154,6 +154,24 @@ var travel = {
         }
     },
 
+    getRoomsAvgPathLength: function (pathCache, roomName) {
+        length = 0;
+        count = 0;
+        for (let key in pathCache) {
+            //45x44W46N4
+            let regex = /^\d+x\d+(\w\d+\w\d+)$/;
+            let match = regex.exec(key);
+            if (match[1] != roomName) 
+                continue;
+            for (let cr in pathCache[key]) {
+                count++;
+                length += this.getLengthOfSerializedPath(pathCache[key][cr].path);
+            }
+        }
+
+        return count ? _.parseInt(length / count) : null;
+    },
+
 };
 
 module.exports = travel;
