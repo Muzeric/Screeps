@@ -165,6 +165,8 @@ var travel = {
             if (match[1] != roomName) 
                 continue;
             for (let cr in pathCache[key]) {
+                if (!pathCache[key][cr].useCount)
+                    continue;
                 count++;
                 length += this.getLengthOfSerializedPath(pathCache[key][cr].path);
             }
