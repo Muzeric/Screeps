@@ -1,4 +1,5 @@
 var utils = require('utils');
+var travel = require('travel');
 const profiler = require('screeps-profiler');
 
 var role = {
