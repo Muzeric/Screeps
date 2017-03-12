@@ -381,7 +381,7 @@ Room.prototype.updateStructures = function() {
         }
     }
 
-    for (let source of _.filter([].concat(memory.structures[STRUCTURE_SOURCE], memory.structures[STRUCTURE_EXTRACTOR]), s => !s.pair && s.rangedPlaces.length)) {
+    for (let source of _.filter([].concat(memory.structures[STRUCTURE_SOURCE], memory.structures[STRUCTURE_EXTRACTOR] || []), s => !s.pair && s.rangedPlaces.length)) {
         let contPos;
         let maxPlaces = 0;
         for (let pos of source.rangedPlaces) {
