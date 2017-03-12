@@ -459,7 +459,7 @@ function getRoomLimits (room, creepsCount) {
             "wishEnergy" : 300,
     },{
             role : "upgrader",
-            "count" : builds ? 1 : sources + extraUpgraders,
+            "count" : (builds ? 1 : sources) + extraUpgraders,
             "priority" : 6,
             "wishEnergy" : 1500,
             "maxEnergy" : 2000,
