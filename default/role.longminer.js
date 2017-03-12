@@ -64,7 +64,8 @@ var role = {
                 creep.repair(container);
                 creep.memory.lastRepair = Game.time;
             } else {
-                if(creep.carry.energy < creep.carryCapacity)
+                //if(creep.carry.energy < creep.carryCapacity)
+                if (_.sum(container.store) < container.storeCapacity || creep.carry.energy < creep.carryCapacity)
                     creep.harvest(source);
                 //creep.transfer(container, RESOURCE_ENERGY);
             }
