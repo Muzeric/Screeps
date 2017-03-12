@@ -296,7 +296,10 @@ Room.prototype.updateStructures = function() {
                 elem.minersTo = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.cID == s.id);
                 elem.source = _.filter(memory.structures[STRUCTURE_SOURCE], sr => s.pos.inRangeTo(sr.pos, 2))[0];
                 if (elem.source) {
-                    elem.betweenPos = _.filter( utils.getRangedPlaces(null, elem.source.pos, 1), p => p.isNearTo(s.pos) )[0];
+                    if (s.structureType == STRUCTURE_CONTAINER && s.pos.isNearTo(elem.source.pos))
+                        elem.betweenPos = s.pos;
+                    else
+                        elem.betweenPos = _.filter( utils.getRangedPlaces(null, elem.source.pos, 1), p => p.isNearTo(s.pos) )[0];
                     if (elem.betweenPos)
                         elem.source.pair = (elem.source.pair || 0) + 1;
                 }
