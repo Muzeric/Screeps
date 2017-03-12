@@ -355,8 +355,16 @@ Room.prototype.updateStructures = function() {
     memory.costMatrix = costs.serialize();
     global.cache.matrix[this.name]["common"] = costs;
 
-    for (let source of _.filter(memory.structures[STRUCTURE_SOURCE], s => !s.pair && s.rangedPlaces.length && s.rangedPlaces.length <= 1)) {
-        let contPos = source.rangedPlaces[0];
+    for (let source of _.filter(memory.structures[STRUCTURE_SOURCE], s => !s.pair && s.rangedPlaces.length)) {
+        let contPos;
+        let maxPlaces = 0;
+        for (let pos of source.rangedPlaces) {
+            let places = utils.getRangedPlaces(null, pos, 1).length;
+            if (places > maxPlaces) {
+                contPos = pos;
+                maxPlaces = places;
+            }
+        }
         if (constructionsContainers[contPos.x + "x" + contPos.y]) {
             source.buildContainerID = constructionsContainers[contPos.x + "x" + contPos.y];
             continue;

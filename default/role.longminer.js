@@ -66,7 +66,7 @@ var role = {
             } else {
                 if(creep.carry.energy < creep.carryCapacity)
                     creep.harvest(source);
-                creep.transfer(container, RESOURCE_ENERGY);
+                //creep.transfer(container, RESOURCE_ENERGY);
             }
         } else {
             creep.moveTo(betweenPos);

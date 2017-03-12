@@ -3,8 +3,12 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
+        //  Prepare
         let healersCount = (global.cache.creeps["_army"].healers || []).length;
         let friendsCount = (global.cache.creeps["_army"].attackers || []).length - 1;
+        let army_ready = friendsCount >= ARMY_MIN_FRIENDS && healersCount >= ARMY_MIN_HEALERS;
+        let canAttack = creep.getActiveBodyparts(ATTACK);
+        let canRanged = creep.getActiveBodyparts(RANGED_ATTACK);
         let underAttack = creep.memory["lastUnderAttack"] ? 1 : 0;
         if (!("lastHits" in creep.memory))
             creep.memory["lastHits"] = creep.hits;
@@ -16,8 +20,10 @@ var role = {
             creep.memory["lastUnderAttack"] = 0;
         }
         creep.memory["lastHits"] = creep.hits;
+        // end of prepare
 
-        if ( (!creep.getActiveBodyparts(ATTACK) && !creep.getActiveBodyparts(RANGED_ATTACK) && !healersCount) ) {
+        // Answer mode
+        if ( (!canAttack && !canRanged && !healersCount) ) {
             console.log(creep.name + ": no attack parts and no healers");
             creep.moveTo(Game.spawns[creep.memory.spawnName]);
             return;
@@ -27,11 +33,11 @@ var role = {
             console.log(creep.name + ": is under attack (" + creep.hits + "/" + creep.hitsMax + ")");
 
             let target;
-            let hostiles = creep.room.getNearAttackers(creep.pos, 4);
+            let hostiles = creep.room.getNearAttackers(creep.pos, 3);
             if (hostiles.length) {
                 target = hostiles.sort(function(a,b){ return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b) || a.hits - b.hits;})[0];
             } else {
-                if (underAttack > 1 && (friendsCount < ARMY_MIN_FRIENDS || healersCount < ARMY_MIN_HEALERS)) {
+                if (underAttack > 1 && !army_ready) {
                     console.log(creep.name + ": not enough friends (" + friendsCount + ") or healers (" + healersCount + ")");
                     creep.moveTo(Game.spawns[creep.memory.spawnName]);
                     return;
@@ -43,7 +49,9 @@ var role = {
 
             if (target) {
                 console.log(creep.name + ": attacks target: " + JSON.stringify(target));
-                if (creep.attack(target) == ERR_NOT_IN_RANGE)
+                if (canRanged)
+                    creep.rangedAttack(target);
+                if (canAttack && creep.attack(target) == ERR_NOT_IN_RANGE)
                     creep.moveTo(target);
                 return;
             }
@@ -54,10 +62,52 @@ var role = {
                 return;
             }
         }
+        // end of answer mode
 
-        if (friendsCount < ARMY_MIN_FRIENDS || healersCount < ARMY_MIN_HEALERS) {
+        // attack mode
+        let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
+        if (!flags.length) {
+            console.log(creep.name + ": no attack flags, go home and recycle");
+            let spawn = Game.spawns[creep.memory.spawnName];
+            if (spawn.recycleCreep(creep) == ERR_NOT_IN_RANGE)
+                creep.moveTo(spawn);
+            return;
+        }
+
+        let flag = flags.sort()[0];
+        if (!army_ready && creep.room.name != flag.pos.roomName) {
             creep.say("Wait pair");
             return;
+        }
+
+        let leader = global.cache.creeps["_army"].attackers.sort((a,b) => a.localeCompare(b))[0];
+
+        if (creep != leader) {
+            if (leader.attackID) {
+                let target = Game.getObjectById(leader.attackID);
+                if (!target) {
+                    console.log(creep.name + ": bad attack object (" + leader.attackID + ") from leader (" + leader.name + ")");
+                    creep.moveTo(leader);
+                    return;
+                }
+                if (target.pos.roomName != creep.room.name || creep.pos.getRangeTo(target) > 3) {
+                    creep.moveTo(target);
+                    return;
+                }
+
+                if (canRanged)
+                    creep.rangedAttack(target);
+                if (canAttack && creep.attack(target) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target);
+                return;
+            } else {
+                creep.moveTo(leader);
+                return;
+            }
+        }
+
+        if (creep.room.name != flag.pos.roomName) {
+            
         }
 
         /*

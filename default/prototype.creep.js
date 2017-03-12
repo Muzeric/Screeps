@@ -380,6 +380,8 @@ Creep.prototype.findSource = function () {
 Creep.prototype.gotoSource = function() {
     let source;
     if (!this.memory.energyID && !this.memory.bookedEnergyID) {
+        if (this.room.name == this.memory.roomName && !this.pos.isBorder())
+            return OK;
         if (Memory.rooms[this.memory.roomName] && Memory.rooms[this.memory.roomName].pointPos) {
             let pos = Memory.rooms[this.memory.roomName].pointPos;
             return this.moveTo(new RoomPosition(pos.x, pos.y, pos.roomName));
@@ -408,7 +410,7 @@ Creep.prototype.gotoSource = function() {
 
     if (this.memory.energyObj.buildContainerID) {
         let container = Game.getObjectById(this.memory.energyObj.buildContainerID);
-        if (container && this.pos.isEqualTo(container.pos) && this.carry.energy >= this.getActiveBodyparts(WORK) * BUILD_POWER) {
+        if (container && container.pos.roomName == this.room.name && this.pos.getRangeTo(container.pos) <= 3 && this.carry.energy >= this.getActiveBodyparts(WORK) * BUILD_POWER) {
             let res = this.build(container);
             //console.log(this.name + ": built container, energy=" + this.carry.energy + ", res=" + res);
             return res;
