@@ -213,6 +213,12 @@ Room.prototype.getPairedContainer = function() {
     return resultContainer;
 }
 
+Room.prototype.getPairedExtractor = function() {
+    if (STRUCTURE_EXTRACTOR in this.memory.structures && this.memory.structures[STRUCTURE_EXTRACTOR].length && this.memory.structures[STRUCTURE_EXTRACTOR][0].pair)
+        return this.memory.structures[STRUCTURE_EXTRACTOR][0];
+    return null;
+}
+
 Room.prototype.updateStructures = function() {
     console.log(this.name + ": updateStructures");
     let room = this;
@@ -271,7 +277,7 @@ Room.prototype.updateStructures = function() {
         } else if (s.structureType == STRUCTURE_ROAD) {
             costs.set(s.pos.x, s.pos.y, 1);
             room.refreshRoad(memory, s);
-        } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_LAB].indexOf(s.structureType) !== -1) {
+        } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_LAB, STRUCTURE_EXTRACTOR].indexOf(s.structureType) !== -1) {
             elem = {
                 structureType : s.structureType,
                 places : utils.getRangedPlaces(null, s.pos, 1).length,
@@ -313,6 +319,9 @@ Room.prototype.updateStructures = function() {
 
             if (s.structureType != STRUCTURE_CONTAINER)
                 costs.set(s.pos.x, s.pos.y, 0xff);
+            
+            if (s.structureType == STRUCTURE_EXTRACTOR)
+                elem.rangedPlaces = utils.getRangedPlaces(null, s.pos, 1);
         } else if ([STRUCTURE_WALL, STRUCTURE_RAMPART].indexOf(s.structureType) !== -1) {
             if (s.hits < s.hitsMax*0.9 && s.hits < REPAIR_LIMIT ) {
                 elem = {
@@ -358,7 +367,16 @@ Room.prototype.updateStructures = function() {
     memory.costMatrix = costs.serialize();
     global.cache.matrix[this.name]["common"] = costs;
 
-    for (let source of _.filter(memory.structures[STRUCTURE_SOURCE], s => !s.pair && s.rangedPlaces.length)) {
+    for (let extractor of memory.structures[STRUCTURE_EXTRACTOR]) {
+        let container = _.filter(memory.structures[STRUCTURE_CONTAINER], c => extractor.pos.inRangeTo(c.pos, 1))[0];
+        if (container) {
+            extractor.pair = 1;
+            extractor.cID = container.id;
+            extractor.betweenPos = container.pos;
+        }
+    }
+
+    for (let source of _.filter([].concat(memory.structures[STRUCTURE_SOURCE], memory.structures[STRUCTURE_EXTRACTOR]), s => !s.pair && s.rangedPlaces.length)) {
         let contPos;
         let maxPlaces = 0;
         for (let pos of source.rangedPlaces) {
@@ -407,6 +425,10 @@ Room.prototype.getNearKeeperPos = function(pos, range) {
 }
 
 Room.prototype.getNearAttackers = function (pos, range = 5) {
+    return _.filter( global.cache.creeps[this.name].hostileAttackers, c => pos.inRangeTo(c.pos, range) );
+}
+
+Room.prototype.getAllAttackers = function (pos, range = 5) {
     return _.filter( global.cache.creeps[this.name].hostileAttackers, c => pos.inRangeTo(c.pos, range) );
 }
 

@@ -6,17 +6,17 @@ var role = {
         if (!utils.checkInRoomAndGo(creep))
             return;
 
-        if(!creep.memory.cID || !creep.memory.energyID || !creep.memory.betweenPos) {
-            let container = creep.room.getPairedContainer();
+        if(!creep.memory.exctractorID || !creep.memory.cID) {
+            let extractor = creep.room.getPairedExtractor();
 
-            if (!container) {
-                console.log(creep.name + ": can't get container");
+            if (!extractor) {
+                console.log(creep.name + ": can't get extractor");
                 return;
             }
 
-            creep.memory.cID = container.id;
-            creep.memory.energyID = container.source.id;
-            creep.memory.betweenPos = container.betweenPos;
+            creep.memory.extractorID = extractor.id;
+            creep.memory.cID = extractor.cID;
+            creep.memory.betweenPos = extractor.betweenPos;
         }
 
         let betweenPos = new RoomPosition(creep.memory.betweenPos.x, creep.memory.betweenPos.y, creep.memory.betweenPos.roomName);
@@ -29,27 +29,15 @@ var role = {
                 return;
             }
 
-            let source = Game.getObjectById(creep.memory.energyID);
+            let source = Game.getObjectById(creep.memory.extractorID);
             if(!source) {
-                console.log(creep.name + " problem getting source by id=" + creep.memory.energyID);
-                creep.memory.energyID = null;
+                console.log(creep.name + " problem getting extractor by id=" + creep.memory.extractorID);
+                creep.memory.extractorID = null;
                 return;
             }
 
-            if (creep.carry.energy && 
-                (
-                    container.hits < container.hitsMax * 0.8 && Game.time - (creep.memory.lastRepair || 0) > 2 ||
-                    container.hits < container.hitsMax * 0.95 && Game.time - (creep.memory.lastRepair || 0) > 10 ||
-                    container.hits < container.hitsMax && container.store[RESOURCE_ENERGY] == container.storeCapacity
-                )
-            ) {
-                creep.repair(container);
-                creep.memory.lastRepair = Game.time;
-            } else {
-                if(creep.carry.energy < creep.carryCapacity)
-                    creep.harvest(source);
-                creep.transfer(container, RESOURCE_ENERGY);
-            }
+            if (!source.cooldown && (_.sum(container.store) < container.storeCapacity || _.sum(creep.carry) < creep.carryCapacity))
+                creep.harvest(source);
         } else {
             let res = creep.moveTo(betweenPos);
             if(res == ERR_NO_PATH) {
@@ -84,4 +72,4 @@ var role = {
 };
 
 module.exports = role;
-profiler.registerObject(role, 'roleMiner');
+profiler.registerObject(role, 'roleMineralMiner');
