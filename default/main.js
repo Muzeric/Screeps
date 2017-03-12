@@ -462,7 +462,7 @@ function getRoomLimits (room, creepsCount) {
             "count" : (builds ? 1 : sources) + extraUpgraders,
             "priority" : 6,
             "wishEnergy" : 1500,
-            "maxEnergy" : 2000,
+            "maxEnergy" : 3000,
     },{
             role : "mineralminer",
             "count" : pairedExtractor,
