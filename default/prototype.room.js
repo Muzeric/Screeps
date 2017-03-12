@@ -7,7 +7,12 @@ var roomsHelper = {
         let lastCPU = Game.cpu.getUsed();
         let res;
         if (Game.rooms[roomName]) {
-            res = Game.rooms[roomName].update();
+            try {
+                res = Game.rooms[roomName].update();
+            } catch (e) {
+                console.log(roomName + " ROOMUPDATE ERROR: " + e.toString() + " => " + e.stack);
+                Game.notify(roomName + " ROOMUPDATE ERROR: " + e.toString() + " => " + e.stack);
+            }
         } else if (!(roomName in Memory.rooms)) {
             res = ERR_NOT_FOUND;
         } else {
@@ -367,7 +372,7 @@ Room.prototype.updateStructures = function() {
     memory.costMatrix = costs.serialize();
     global.cache.matrix[this.name]["common"] = costs;
 
-    for (let extractor of memory.structures[STRUCTURE_EXTRACTOR]) {
+    for (let extractor of (memory.structures[STRUCTURE_EXTRACTOR] || [])) {
         let container = _.filter(memory.structures[STRUCTURE_CONTAINER], c => extractor.pos.inRangeTo(c.pos, 1))[0];
         if (container) {
             extractor.pair = 1;
