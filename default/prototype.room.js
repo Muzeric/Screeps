@@ -325,8 +325,10 @@ Room.prototype.updateStructures = function() {
             if (s.structureType != STRUCTURE_CONTAINER)
                 costs.set(s.pos.x, s.pos.y, 0xff);
             
-            if (s.structureType == STRUCTURE_EXTRACTOR)
+            if (s.structureType == STRUCTURE_EXTRACTOR) {
                 elem.rangedPlaces = utils.getRangedPlaces(null, s.pos, 1);
+                elem.mineralID = s.pos.lookFor(LOOK_MINERALS)[0].id;
+            }
         } else if ([STRUCTURE_WALL, STRUCTURE_RAMPART].indexOf(s.structureType) !== -1) {
             if (s.hits < s.hitsMax*0.9 && s.hits < REPAIR_LIMIT ) {
                 elem = {

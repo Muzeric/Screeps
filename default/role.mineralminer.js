@@ -6,7 +6,7 @@ var role = {
         if (!utils.checkInRoomAndGo(creep))
             return;
 
-        if(!creep.memory.exctractorID || !creep.memory.cID) {
+        if(!creep.memory.exctractorID || !creep.memory.cID || !creep.memory.mineralID) {
             let extractor = creep.room.getPairedExtractor();
 
             if (!extractor) {
@@ -16,6 +16,7 @@ var role = {
 
             creep.memory.extractorID = extractor.id;
             creep.memory.cID = extractor.cID;
+            creep.memory.mineralID = extractor.mineralID;
             creep.memory.betweenPos = extractor.betweenPos;
         }
 
@@ -36,8 +37,15 @@ var role = {
                 return;
             }
 
-            if (!source.cooldown && (_.sum(container.store) < container.storeCapacity || _.sum(creep.carry) < creep.carryCapacity))
-                creep.harvest(source);
+            if (!source.cooldown && (_.sum(container.store) < container.storeCapacity || _.sum(creep.carry) < creep.carryCapacity)) {
+                let mineral = Game.getObjectById(creep.memory.mineralID);
+                if (!mineral) {
+                    console.log(creep.name + " problem getting mineral by id=" + creep.memory.mineralID);
+                    creep.memory.mineralID = null;
+                    return;
+                }
+                creep.harvest(mineral);
+            }
         } else {
             let res = creep.moveTo(betweenPos);
             if(res == ERR_NO_PATH) {
