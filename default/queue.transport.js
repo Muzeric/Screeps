@@ -123,15 +123,16 @@ var queue = {
         let res = {};
         for (let reqID in Memory.transportRequests) {
             let request = Memory.transportRequests[reqID];
-            if (!request.creepID)
-                continue;
-            let creep = Game.getObjectById(request.creepID);
-            if (!creep) {
-                request.creepID = null;
-                continue;
+            let got = 0;
+            if (request.creepID) {
+                let creep = Game.getObjectById(request.creepID);
+                if (!creep)
+                    request.creepID = null;
+                else
+                    got += creep.carry[request.resourceType] || 0;
             }
             res[from.id] = res[from.id] || 0;
-            res[from.id][request.resourceType] = (res[from.id][request.resourceType] || 0) + request.amount - (creep.carry[request.resourceType] || 0);
+            res[from.id][request.resourceType] = (res[from.id][request.resourceType] || 0) + request.amount - got;
         }
 
         return res;
