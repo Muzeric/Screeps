@@ -48,8 +48,8 @@ var role = {
             if (!source.cooldown && (_.sum(container.store) < container.storeCapacity || _.sum(creep.carry) < creep.carryCapacity))
                 creep.harvest(mineral);
 
-            //if (queue.getStoreWithReserved(container, mineral.mineralType) > TRANSPORTER_MIN_CONTAINER_AMOUNT)
-                //queue.addRequest(container, null, mineral.mineralType, TRANSPORTER_MIN_CONTAINER_AMOUNT);
+            if (queue.getStoreWithReserved(container, mineral.mineralType) > TRANSPORTER_MIN_CONTAINER_AMOUNT)
+                queue.addRequest(container, null, mineral.mineralType, TRANSPORTER_MIN_CONTAINER_AMOUNT);
         } else {
             let res = creep.moveTo(betweenPos);
             if(res == ERR_NO_PATH) {
