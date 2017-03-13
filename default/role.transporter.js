@@ -92,7 +92,7 @@ var role = {
         let body = [];
 	    let fat = 0;
 	    while (energy >= 50 && body.length < partsLimit) {
-	        if(fat >= 0 && energy >= 50 && body.length < partsLimit) {
+	        if(energy >= 50 && body.length < partsLimit) {
 	            body.push(MOVE);
 	            energy -= 50;
 	            fat -= 2;

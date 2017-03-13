@@ -474,10 +474,10 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : 700,
     },{
             role : "transporter",
-            "count" : room.name == queueTransport.mainRoomName ? 0 : 0,
+            "count" : room.name == queueTransport.mainRoomName ? 1 : 0,
             "priority" : 8,
-            "wishEnergy" : 700,
-            "maxEnergy" : 700,
+            "wishEnergy" : 1000,
+            "maxEnergy" : 1000,
     },{
             role : "scout",
             "count" : memory.scoutCount || 0,
