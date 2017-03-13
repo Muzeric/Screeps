@@ -52,6 +52,7 @@ var queue = {
             id: req_id,
             got: 0,
             put: 0,
+            createTime: Game.time,
         };
         console.log("queueTransport.addRequest: ADDED: " + JSON.stringify(Memory.transportRequests[req_id]));
 
