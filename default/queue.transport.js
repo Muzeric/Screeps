@@ -131,7 +131,7 @@ var queue = {
                 else
                     got += creep.carry[request.resourceType] || 0;
             }
-            res[request.fromID] = res[request.fromID] || 0;
+            res[request.fromID] = res[request.fromID] || {};
             res[request.fromID][request.resourceType] = (res[request.fromID][request.resourceType] || 0) + request.amount - got;
         }
 
