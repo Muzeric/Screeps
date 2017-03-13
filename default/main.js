@@ -3,6 +3,7 @@ require('prototype.creep');
 require('prototype.roomposition');
 var utils = require('utils');
 var travel = require('travel');
+var queueTransport = require('queue.transport');
 const profiler = require('screeps-profiler');
 // This line monkey patches the global prototypes. 
 profiler.enable();
@@ -18,6 +19,8 @@ profiler.wrap(function() {
     global.cache.wantEnergy = {};
     global.cache.creeps = {};
     global.cache.creeps["_army"] = {};
+    Memory.transportRequests = Memory.transportRequests || {};
+    global.cache.transportReserved = queueTransport.getReserved();
     
     var moveErrors = {};
     var objectCache = {};
@@ -357,7 +360,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "count" : antikeepersCount ? pairedSources : 0,
         "arg" : 1,
         "priority" : 17,
-        "wishEnergy" : 1200,
+        "wishEnergy" : 1450,
         "minEnergy" : 1200,
         "range" : 3,
     },{
@@ -467,6 +470,12 @@ function getRoomLimits (room, creepsCount) {
             role : "mineralminer",
             "count" : pairedExtractor,
             "priority" : 7,
+            "wishEnergy" : 700,
+            "maxEnergy" : 700,
+    },{
+            role : "transporter",
+            "count" : room.name == queueTransport.mainRoomName ? 0 : 0,
+            "priority" : 8,
             "wishEnergy" : 700,
             "maxEnergy" : 700,
     },{

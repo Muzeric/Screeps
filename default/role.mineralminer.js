@@ -1,4 +1,5 @@
 var utils = require('utils');
+var queue = require('queue.transport');
 const profiler = require('screeps-profiler');
 
 var role = {
@@ -37,15 +38,18 @@ var role = {
                 return;
             }
 
-            if (!source.cooldown && (_.sum(container.store) < container.storeCapacity || _.sum(creep.carry) < creep.carryCapacity)) {
-                let mineral = Game.getObjectById(creep.memory.mineralID);
-                if (!mineral) {
-                    console.log(creep.name + " problem getting mineral by id=" + creep.memory.mineralID);
-                    creep.memory.mineralID = null;
-                    return;
-                }
-                creep.harvest(mineral);
+            let mineral = Game.getObjectById(creep.memory.mineralID);
+            if (!mineral) {
+                console.log(creep.name + " problem getting mineral by id=" + creep.memory.mineralID);
+                creep.memory.mineralID = null;
+                return;
             }
+
+            if (!source.cooldown && (_.sum(container.store) < container.storeCapacity || _.sum(creep.carry) < creep.carryCapacity))
+                creep.harvest(mineral);
+
+            //if (queue.getStoreWithReserved(container, mineral.mineralType) > TRANSPORTER_MIN_CONTAINER_AMOUNT)
+                //queue.addRequest(container, null, mineral.mineralType, TRANSPORTER_MIN_CONTAINER_AMOUNT);
         } else {
             let res = creep.moveTo(betweenPos);
             if(res == ERR_NO_PATH) {

@@ -224,6 +224,10 @@ Room.prototype.getPairedExtractor = function() {
     return null;
 }
 
+Room.prototype.getLabs = function () {
+    return this.memory.structures[STRUCTURE_LAB] || [];
+}
+
 Room.prototype.updateStructures = function() {
     console.log(this.name + ": updateStructures");
     let room = this;
@@ -327,7 +331,13 @@ Room.prototype.updateStructures = function() {
             
             if (s.structureType == STRUCTURE_EXTRACTOR) {
                 elem.rangedPlaces = utils.getRangedPlaces(null, s.pos, 1);
-                elem.mineralID = s.pos.lookFor(LOOK_MINERALS)[0].id;
+                let mineral = s.pos.lookFor(LOOK_MINERALS)[0];
+                if (!mineral) {
+                    console.log(room.name + ": no mineral under extractor");
+                } else {
+                    elem.mineralID = mineral.id;
+                    elem.mineralType = mineral.mineralType;
+                }
             }
         } else if ([STRUCTURE_WALL, STRUCTURE_RAMPART].indexOf(s.structureType) !== -1) {
             if (s.hits < s.hitsMax*0.9 && s.hits < REPAIR_LIMIT ) {
