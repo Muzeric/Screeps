@@ -337,6 +337,7 @@ Room.prototype.updateStructures = function() {
                 } else {
                     elem.mineralID = mineral.id;
                     elem.mineralType = mineral.mineralType;
+                    elem.mineralAmount = mineral.mineralAmount;
                 }
             }
         } else if ([STRUCTURE_WALL, STRUCTURE_RAMPART].indexOf(s.structureType) !== -1) {
