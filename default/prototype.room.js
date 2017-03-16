@@ -218,8 +218,12 @@ Room.prototype.getPairedContainer = function() {
     return resultContainer;
 }
 
-Room.prototype.getPairedExtractor = function() {
-    if (STRUCTURE_EXTRACTOR in this.memory.structures && this.memory.structures[STRUCTURE_EXTRACTOR].length && this.memory.structures[STRUCTURE_EXTRACTOR][0].pair)
+Room.prototype.getPairedExtractor = function(withAmount) {
+    if (STRUCTURE_EXTRACTOR in this.memory.structures 
+        && this.memory.structures[STRUCTURE_EXTRACTOR].length
+        && this.memory.structures[STRUCTURE_EXTRACTOR][0].pair 
+        && (!withAmount || this.memory.structures[STRUCTURE_EXTRACTOR][0].mineralAmount > 0)
+    )
         return this.memory.structures[STRUCTURE_EXTRACTOR][0];
     return null;
 }

@@ -402,7 +402,7 @@ function getRoomLimits (room, creepsCount) {
     let countHarvester = _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 15);
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
     let extraUpgraders = utils.clamp( _.floor(memory.energy / UPGRADERS_EXTRA_ENERGY), 0, 4);
-    let pairedExtractor = room.getPairedExtractor() ? 1 : 0;
+    let pairedExtractor = room.getPairedExtractor(1) ? 1 : 0;
     
     let limits = [];
     limits.push({

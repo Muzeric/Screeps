@@ -33,7 +33,7 @@ var minerals = {
     },
 
     searchCombination: function (roomName = "W48N4", elems) { // second+ args - array of elems
-        let res = [];
+        let res = {};
         for (let elem1 of elems) {
             let rt1 = elem1.resourceType;
             if (!(rt1 in REACTIONS))
@@ -41,10 +41,10 @@ var minerals = {
             for (let elem2 of elems) {
                 let rt2 = elem2.resourceType;
                 let amount = _.min([elem1.amount, elem2.amount]);
-                if (rt1 == rt2 || !(rt2 in REACTIONS[rt1]))
+                if (rt1 == rt2 || !(rt2 in REACTIONS[rt1]) || REACTIONS[rt1][rt2] in res)
                     continue;
                 let cost = this.getMaxCost(REACTIONS[rt1][rt2], amount, roomName);
-                res.push({res: REACTIONS[rt1][rt2], resourceTypes: [rt1, rt2], amount, credits: cost.credits, energy: cost.energy});
+                res[REACTIONS[rt1][rt2]] = {resourceTypes: [rt1, rt2], amount, credits: cost.credits, energy: cost.energy};
             }
         }
 
