@@ -71,7 +71,7 @@ var minerals = {
         if (!elems.length)
             return null;
         
-        return searchCombination(roomName, elems);
+        return this.searchCombination(roomName, elems);
     },
 };
 

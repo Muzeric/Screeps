@@ -115,6 +115,7 @@ function setTarget (creep) {
         (creep.room.memory.structures[STRUCTURE_LAB] || []), 
         (creep.room.memory.structures[STRUCTURE_TOWER] || []),
         (creep.room.memory.structures[STRUCTURE_SPAWN] || []),
+        (creep.room.memory.structures[STRUCTURE_TERMINAL] || []),
         (creep.room.memory.structures[STRUCTURE_STORAGE] || []) ),
     t => t.energy < t.energyCapacity);
 
@@ -126,6 +127,8 @@ function setTarget (creep) {
     let minTarget;
     let minCost;
     for(let target of targets) {
+        if (target.structureType == STRUCTURE_TERMINAL && target.energy > MIN_TERMINAL_ENERGY)
+            continue;
         let wantEnergy = target.energyCapacity - target.energy;
         let cpath = creep.pos.getRangeTo(target.pos.x, target.pos.y);
         let wantCarry = global.cache.wantCarry[creep.room.name] ? global.cache.wantCarry[creep.room.name][target.id] || 0 : 0;
