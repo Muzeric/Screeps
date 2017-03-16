@@ -12,6 +12,8 @@ module.exports.loop = function () {
 profiler.wrap(function() {
     Game.roomsHelper = require('prototype.room');
     global.cache = {};
+    global.cahce.minerals = require('minerals');
+    global.cahce.minerals.init();
     global.cache.stat = require('stat');
     global.cache.stat.init();
     global.cache.matrix = {};

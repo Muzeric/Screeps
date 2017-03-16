@@ -55,7 +55,7 @@ foreach my $file (@files) {
       }
     }
   } else {
-    print "can't eval ($@): ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
+    print "can't eval $file ($@): ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
   }
   $count++;
   close(F);
