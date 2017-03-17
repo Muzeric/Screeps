@@ -83,6 +83,8 @@ Room.prototype.updatePathCache = function() {
 Room.prototype.updateResources = function() {
     let memory = this.memory;
     memory.resources = [];
+    memory.energy = 0;
+    memory.store = {};
     memory.resourcesTime = Game.time;
 
     this.find(FIND_DROPPED_ENERGY).forEach( function(r) {
@@ -96,7 +98,7 @@ Room.prototype.updateResources = function() {
         memory.resources.push(elem);
     });
 
-    for ( let elem of _.filter(_.flatten(_.values(memory.structures)), s => "energy" in s) )  {
+    for ( let elem of _.filter(_.flatten(_.values(memory.structures)), s => "energy" in s || "store" in s) )  {
         let s = Game.getObjectById(elem.id);
         if (!s) {
             console.log(this.name + ": no resource object " + elem.id);
@@ -104,6 +106,12 @@ Room.prototype.updateResources = function() {
             continue;
         }
         elem.energy = "energy" in s ? s.energy : ("store" in s ? s.store[RESOURCE_ENERGY] : 0);
+        memory.energy += elem.energy;
+        if ("store" in s) {
+            elem.store = _.clone(s.store);
+            for (let rt in s.store)
+                memory.store[rt] = (memory.store[rt] || 0) + s.store[rt];
+        }
         if (elem.structureType == STRUCTURE_SOURCE && s.ticksToRegeneration == 1)
             global.cache.stat.updateRoom(this.name, 'lost', elem.energy);
     }
@@ -245,7 +253,6 @@ Room.prototype.updateStructures = function() {
     if (!("needRoads" in memory))
         memory.needRoads = {};
     memory.pointPos = Game.flags["PointPos." + this.name] ? Game.flags["PointPos." + this.name].pos : null;
-    memory.energy = 0;
     let costs = new PathFinder.CostMatrix;
         
     this.find(FIND_SOURCES).forEach( function(s) {
@@ -298,18 +305,17 @@ Room.prototype.updateStructures = function() {
                 hitsMax : s.hitsMax, 
             };
 
-            if ("energy" in s)
+            if ("energy" in s) {
                 elem.energy = s.energy;
-            else if ("store" in s)
+            } else if ("store" in s) {
                 elem.energy = s.store[RESOURCE_ENERGY];
+                elem.store = _.clone(s.store);
+            }
             
             if ("energyCapacity" in s)
                 elem.energyCapacity = s.energyCapacity;
             else if ("storeCapacity" in s)
                 elem.energyCapacity = s.storeCapacity;
-            
-            if ("energy" in elem)
-                memory.energy += elem.energy;
 
             if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK].indexOf(s.structureType) !== -1) {
                 elem.minersTo = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.cID == s.id);

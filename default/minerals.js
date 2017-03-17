@@ -2,6 +2,11 @@ var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var minerals = {
+    needList: {
+        "W48N4": {
+            "LO": 10000,
+        },
+    },
     library: {},
     orders: null,
 
@@ -29,7 +34,7 @@ var minerals = {
             energy += Game.market.calcTransactionCost(curAmount, order.roomName, roomName); 
         }
 
-        return {credits, energy};
+        return {credits, energy, amount: amount - leftAmount};
     },
 
     searchCombination: function (roomName = "W48N4", elems) { // second+ args - array of elems
@@ -44,7 +49,7 @@ var minerals = {
                 if (rt1 == rt2 || !(rt2 in REACTIONS[rt1]) || REACTIONS[rt1][rt2] in res)
                     continue;
                 let cost = this.getMaxCost(REACTIONS[rt1][rt2], amount, roomName);
-                res[REACTIONS[rt1][rt2]] = {resourceTypes: [rt1, rt2], amount, credits: cost.credits, energy: cost.energy};
+                res[REACTIONS[rt1][rt2]] = {resourceTypes: [rt1, rt2], amount: cost.amount, credits: cost.credits, energy: cost.energy};
             }
         }
 
@@ -52,9 +57,11 @@ var minerals = {
     },
 
     calcSelling: function (roomName) {
-        if (!Game.rooms[roomName])
+        let room = Game.rooms[roomName];
+        if (!room)
             return null;
-        let storage = Game.rooms[roomName].storage;
+        
+        let storage = room.storage;
         if (!storage)
             return null;
         
@@ -72,6 +79,34 @@ var minerals = {
             return null;
         
         return this.searchCombination(roomName, elems);
+    },
+
+    needList: function (roomName) {
+        let room = Game.rooms[roomName];
+        if (!room)
+            return null;
+        let storage = room.storage;
+        if (!storage)
+            return null;
+        let terminal = room.terminal;
+        if (!terminal)
+            return null;
+        
+        
+    },
+
+    checkLabs: function (roomName) {
+        let room = Game.rooms[roomName];
+        if (!room)
+            return null;
+        let storage = room.storage;
+        if (!storage)
+            return null;
+        let labs = room.getLabs();
+        if (!labs.length)
+            return null;
+        
+
     },
 };
 
