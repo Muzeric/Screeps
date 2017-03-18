@@ -4,7 +4,7 @@ const profiler = require('screeps-profiler');
 var minerals = {
     needList: {
         "W48N4": {
-            "LO": 10000,
+            "LO": 100,
         },
     },
     library: {},
@@ -16,6 +16,43 @@ var minerals = {
                 this.library[REACTIONS[rt1][rt2]] = {
                     resourceTypes: [rt1, rt2],
                 };
+        Memory.labRequests = Memory.labRequests || {};
+        global.cache.labReserved = this.getReserved();
+    },
+
+    getReserved: function () {
+        let res = {};
+        for (let reqID in Memory.labRequests) {
+            let request = Memory.labRequests[reqID];
+            res[request.roomName] = res[request.roomName] || {};
+            res[request.roomName][request.rt] = res[request.roomName][request.rt] + request.amount;
+        }
+        return res;
+    },
+
+    addRequest: function (roomName, rt, amount = LAB_REQUEST_AMOUNT) {
+        if (!roomName || !rt) {
+            console.log(`minerals.addRequest: no roomName (${roomName}) or rt (${rt})`);
+            return null;
+        }
+        let reqID = _.ceil(Math.random() * 1000000);
+        if (reqID in Memory.labRequests) {
+            console.log(`minerals.addRequest: req_id (${reqID}) already exists`);
+            return null;
+        }
+
+        Memory.labRequests[reqID] = {
+            id: reqID,
+            roomName,
+            resourceType: rt,
+            amount,
+            reacted: 0,
+            createTime: Game.time,
+        };
+
+        console.log("minerals.addRequest: ADDED: " + JSON.stringify(Memory.labRequests[reqID]));
+
+        return reqID;
     },
 
     getMaxCost: function (resourceType, amount = 1000, roomName = "W48N4") {
@@ -81,7 +118,7 @@ var minerals = {
         return this.searchCombination(roomName, elems);
     },
 
-    needList: function (roomName) {
+    getNeeds: function (roomName) {
         let room = Game.rooms[roomName];
         if (!room)
             return null;
@@ -91,8 +128,16 @@ var minerals = {
         let terminal = room.terminal;
         if (!terminal)
             return null;
+        if (!(roomName in this.needList))
+            return null;
         
-        
+        for (let rt in this.needList[roomName]) {
+            let amount = (storage.store[rt] || 0) + (termiinal.store[rt] || 0) + (global.cache.labReserved[roomName][rt] || 0);
+            if (amount > this.needList[roomName][rt])
+                continue;
+            
+            this.addRequest(roomName, rt, _.min([this.needList[roomName][rt] - amount, LAB_REQUEST_AMOUNT]));
+        }
     },
 
     checkLabs: function (roomName) {

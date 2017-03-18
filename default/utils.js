@@ -2,10 +2,10 @@ const profiler = require('screeps-profiler');
 
 function _addPosition (creep, res, pos, x, y) {
     let newx = parseInt(pos.x) + parseInt(x);
-    if (newx < 0 || newx > 49)
+    if (newx < 1 || newx > 48)
         return;
     let newy = parseInt(pos.y) + parseInt(y);
-    if (newy < 0 || newy > 49)
+    if (newy < 1 || newy > 48)
         return;
     let npos = new RoomPosition(newx, newy, pos.roomName);
     for (let t of npos.lookFor(LOOK_TERRAIN)) {

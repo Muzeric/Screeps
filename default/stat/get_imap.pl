@@ -99,7 +99,7 @@ foreach my $msg (@msgs) {
         }
         $room_out .= "},";
       }
-      $room_out .= "}";
+      $room_out .= "}\n";
       $good = 1;
     } else {
       #print "not parsed: ".substr($str, 0, 50)." ... ".substr($str, -50)."\n";
