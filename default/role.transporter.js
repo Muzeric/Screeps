@@ -1,6 +1,5 @@
 var utils = require('utils');
 var travel = require('travel');
-var queue = require('queue.transport');
 const profiler = require('screeps-profiler');
 
 var role = {
@@ -10,6 +9,8 @@ var role = {
 			creep.moveTo(Game.spawns[creep.memory.spawnName].room.controller);
 			return;
 		}
+
+        let queue = global.cache.queueTransport;
 
         let terminal = queue.getDefaultStorage();
         let storage =  queue.getDefaultTerminal();

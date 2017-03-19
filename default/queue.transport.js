@@ -3,6 +3,12 @@ const profiler = require('screeps-profiler');
 
 var queue = {
     mainRoomName: "W48N4",
+    transportReserved: {},
+
+    init: function () {
+        Memory.transportRequests = Memory.transportRequests || {};
+        this.transportReserved = this.getReserved();
+    },
 
     getDefaultStorage: function (point) {
         return Game.rooms[this.mainRoomName].storage;
@@ -141,8 +147,8 @@ var queue = {
 
     getStoreWithReserved: function (object, resourceType) {
         let reserved = 0;
-        if (global.cache.transportReserved[object.id] && global.cache.transportReserved[object.id][resourceType])
-            reserved = global.cache.transportReserved[object.id][resourceType];
+        if (this.transportReserved[object.id] && this.transportReserved[object.id][resourceType])
+            reserved = this.transportReserved[object.id][resourceType];
         return (object.store[resourceType] || 0) - reserved;
     },
 };

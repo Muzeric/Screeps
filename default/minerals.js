@@ -9,6 +9,7 @@ var minerals = {
     },
     library: {},
     orders: null,
+    labCache: {},
 
     init: function () {
         for (let rt1 in REACTIONS)
@@ -16,43 +17,6 @@ var minerals = {
                 this.library[REACTIONS[rt1][rt2]] = {
                     resourceTypes: [rt1, rt2],
                 };
-        Memory.labRequests = Memory.labRequests || {};
-        global.cache.labReserved = this.getReserved();
-    },
-
-    getReserved: function () {
-        let res = {};
-        for (let reqID in Memory.labRequests) {
-            let request = Memory.labRequests[reqID];
-            res[request.roomName] = res[request.roomName] || {};
-            res[request.roomName][request.rt] = res[request.roomName][request.rt] + request.amount;
-        }
-        return res;
-    },
-
-    addRequest: function (roomName, rt, amount = LAB_REQUEST_AMOUNT) {
-        if (!roomName || !rt) {
-            console.log(`minerals.addRequest: no roomName (${roomName}) or rt (${rt})`);
-            return null;
-        }
-        let reqID = _.ceil(Math.random() * 1000000);
-        if (reqID in Memory.labRequests) {
-            console.log(`minerals.addRequest: req_id (${reqID}) already exists`);
-            return null;
-        }
-
-        Memory.labRequests[reqID] = {
-            id: reqID,
-            roomName,
-            resourceType: rt,
-            amount,
-            reacted: 0,
-            createTime: Game.time,
-        };
-
-        console.log("minerals.addRequest: ADDED: " + JSON.stringify(Memory.labRequests[reqID]));
-
-        return reqID;
     },
 
     getMaxCost: function (resourceType, amount = 1000, roomName = "W48N4") {
@@ -118,7 +82,9 @@ var minerals = {
         return this.searchCombination(roomName, elems);
     },
 
-    getNeeds: function (roomName) {
+    checkNeeds: function (roomName) {
+        if (!(roomName in this.needList))
+            return null;
         let room = Game.rooms[roomName];
         if (!room)
             return null;
@@ -128,16 +94,25 @@ var minerals = {
         let terminal = room.terminal;
         if (!terminal)
             return null;
-        if (!(roomName in this.needList))
-            return null;
         
         for (let rt in this.needList[roomName]) {
-            let amount = (storage.store[rt] || 0) + (termiinal.store[rt] || 0) + (global.cache.labReserved[roomName][rt] || 0);
+            let amount = (storage.store[rt] || 0) + (termiinal.store[rt] || 0) + global.cache.queueLab.getReserved(roomName, rt);
             if (amount > this.needList[roomName][rt])
                 continue;
             
-            this.addRequest(roomName, rt, _.min([this.needList[roomName][rt] - amount, LAB_REQUEST_AMOUNT]));
+            global.cache.queueLab.addRequest(roomName, rt, _.min([this.needList[roomName][rt] - amount, LAB_REQUEST_AMOUNT]), LAB_REQUEST_TYPE_TERMINAL);
         }
+    },
+
+    loadLabs: function () {
+        let res = [];
+        for (let i =0; i < arguments.length; i++) {
+            let labID = arguments[i];
+            if (!(labID in this.labCache))
+                    this.labCache[labID] = Game.getObjectById(labID);
+            res.push(this.labCache[labID]);
+        }
+        return res;
     },
 
     checkLabs: function (roomName) {
@@ -147,11 +122,26 @@ var minerals = {
         let storage = room.storage;
         if (!storage)
             return null;
+        let terminal = room.terminal;
+        if (!terminal)
+            return null;
         let labs = room.getLabs();
         if (!labs.length)
             return null;
         
-
+        for (let request of _.filter(Memory.labRequests, r => r.roomName == roomName).sort((a,b) => b.stage - a.stage || a.type - b.type)) {
+            if (request.stage == LAB_REQUEST_STAGE_PROCCESSING) {
+                let lab1 = this.loadLabs(request.lab1ID);
+                let lab2 = this.loadLabs(request.lab2ID);
+                if (!lab1 || !lab2) {
+                    console.log(`checkLabs: roomName=${roomName}, lab1=${lab1}, lab2=${lab2}, ID=${request.id}`);
+                    request.lab1ID = null;
+                    request.lab2ID = null;
+                    request.stage = LAB_REQUEST_STAGE_CREATED;
+                    continue;
+                }
+            }
+        }
     },
 };
 

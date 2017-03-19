@@ -3,26 +3,27 @@ require('prototype.creep');
 require('prototype.roomposition');
 var utils = require('utils');
 var travel = require('travel');
-var queueTransport = require('queue.transport');
 const profiler = require('screeps-profiler');
 // This line monkey patches the global prototypes. 
 profiler.enable();
 
 module.exports.loop = function () {
 profiler.wrap(function() {
-    Game.roomsHelper = require('prototype.room');
-    global.cache = {};
-    global.cache.minerals = require('minerals');
-    global.cache.minerals.init();
     global.cache.stat = require('stat');
     global.cache.stat.init();
+    Game.roomsHelper = require('prototype.room');
+    global.cache = {};
+    global.cache.queueLab = require('queue.lab');
+    global.cache.queueLab.init();
+    global.cache.queueTransport = require('queue.transport');
+    global.cache.queueTransport.init();
+    global.cache.minerals = require('minerals');
+    global.cache.minerals.init();
     global.cache.matrix = {};
     global.cache.wantCarry = {};
     global.cache.wantEnergy = {};
     global.cache.creeps = {};
     global.cache.creeps["_army"] = {};
-    Memory.transportRequests = Memory.transportRequests || {};
-    global.cache.transportReserved = queueTransport.getReserved();
     
     var moveErrors = {};
     var objectCache = {};
@@ -476,7 +477,7 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : 700,
     },{
             role : "transporter",
-            "count" : room.name == queueTransport.mainRoomName ? 1 : 0,
+            "count" : room.name == global.cache.queueTransport.mainRoomName ? 1 : 0,
             "priority" : 8,
             "wishEnergy" : 1000,
             "maxEnergy" : 1000,
