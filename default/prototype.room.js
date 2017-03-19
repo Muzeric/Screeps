@@ -80,6 +80,10 @@ Room.prototype.updatePathCache = function() {
     //console.log(this.name + ": updatePathCache: " + allCount + " paths, " + delCount + " deleted");
 }
 
+Room.prototype.getAmount = function (rt) {
+    return memory.store[rt] || 0;
+}
+
 Room.prototype.updateResources = function() {
     let memory = this.memory;
     memory.resources = [];
@@ -180,8 +184,11 @@ Room.prototype.linkAction = function () {
         return ERR_NOT_FOUND;
 
     for (let link_from of this.getUnStoragedLinks()) {
-        if (link_from && !link_from.cooldown && link_from.energy && link_to.energy < link_to.energyCapacity*0.7)
-            link_from.transferEnergy(link_to);
+        let space = link_to.energyCapacity - link_to.energy;
+        if (link_from && !link_from.cooldown && link_from.energy && link_from.energy <= space) {
+            if (link_from.transferEnergy(link_to) == OK)
+                space -= link_from.energy;
+        }
     }
 
     return OK;

@@ -15,15 +15,15 @@ var minerals = {
         for (let rt1 in REACTIONS)
             for (let rt2 in REACTIONS)
                 this.library[REACTIONS[rt1][rt2]] = {
-                    inputResourceTypes: [rt1, rt2],
+                    inputTypes: [rt1, rt2],
                 };
     },
 
-    getInputResourceTypes: function (rt) {
+    getInputTypes: function (rt) {
         if (!(rt in this.library))
             return null;
         
-        return this.library[rt].inputResourceTypes;
+        return this.library[rt].inputTypes;
     },
 
     getMaxCost: function (resourceType, amount = 1000, roomName = "W48N4") {
@@ -103,7 +103,7 @@ var minerals = {
             return null;
         
         for (let rt in this.needList[roomName]) {
-            let amount = (storage.store[rt] || 0) + (terminal.store[rt] || 0) + global.cache.queueLab.getReserved(roomName, rt);
+            let amount = (storage.store[rt] || 0) + (terminal.store[rt] || 0) + global.cache.queueLab.getProducing(roomName, rt);
             if (amount > this.needList[roomName][rt])
                 continue;
             
@@ -150,14 +150,14 @@ var minerals = {
                 if (!lab1.mineralAmount || !lab2.mineralAmount)
                     continue;
 
-                if (   lab1.mineralType != this.library[request.resourceType].inputResourceTypes[0]
-                    || lab2.mineralType != this.library[request.resourceType].inputResourceTypes[1]
+                if (   lab1.mineralType != request.inputType1
+                    || lab2.mineralType != request.inputType2
                 ) {
                     console.log(`checkLabs: bad mineralType, roomName=${roomName}, lab1=${lab1.id} with ${lab1.mineralType} lab2=${lab2.id} with ${lab2.mineralType}, ID=${request.id}`);
                     continue;
                 }
 
-                for (let labID in request.outputLabs) {
+                for (let labID of request.outputLabs) {
                     let lab = this.loadLabs(labID);
                     if (!lab) {
                         console.log(`checkLabs: bad output lab (${labID}) in reqID=${request.id}`);
@@ -165,29 +165,42 @@ var minerals = {
                         continue;
                     }
 
-                    if (lab.mineralType != request.resourceType) {
-                        console.log(`checkLabs: bad output mineralType, roomName=${roomName}, output lab=${labID} with ${lab.mineralType} instead of ${request.resourceType}, ID=${request.id}`);
+                    if (lab.mineralType != request.outputType) {
+                        console.log(`checkLabs: bad output mineralType, roomName=${roomName}, output lab=${labID} with ${lab.mineralType} instead of ${request.outputType}, ID=${request.id}`);
                         continue;
                     }
 
                     //let res = lab.runReaction(lab1, lab2);
-                    console.log(`checkLabs: runReaction(lab1, lab2)`);
+                    console.log(`checkLabs: runReaction(lab1, lab2) for reqID=${request.id}`);
                 }
+            } else if (request.stage == LAB_REQUEST_STAGE_PREPARE) {
+
             } else if (request.stage == LAB_REQUEST_STAGE_CREATED) {
-                let inputResourceTypes = this.getInputResourceTypes(request.resourceType);
-                if (!inputResourceTypes.length) {
-                    console.log(`checkLabs: no inputResourceTypes for ${request.resourceType}`);
-                    continue;
+                let wait = 0;
+                let roomAmount1 = room.getAmount(request.inputType1) + global.cache.queueLab.getFreeAmount(roomName, request.inputType1);
+                if (roomAmount1 < request.amount) {
+                    global.cache.queueLab.addRequest(roomName, request.inputType1, request.amount - roomAmount1, LAB_REQUEST_TYPE_REACTION);
+                    wait = 1;
                 }
-                let lab1ID = global.cache.queueLab.searchLabs(roomName, inputResourceTypes[0]) || global.cache.queueLab.getFreeLabs(room)[0];
-                let lab2ID = global.cache.queueLab.searchLabs(roomName, inputResourceTypes[1]) || global.cache.queueLab.getFreeLabs(room, [lab1ID])[0];
-                let outputLabID = global.cache.queueLab.searchLabs(roomName, request.resourceType) || global.cache.queueLab.getFreeLabs(room, [lab1ID, lab2ID])[0];
-                if (!lab1ID || !lab2ID || outputLabID) {
+                let roomAmount2 = room.getAmount(request.inputType2) + global.cache.queueLab.getFreeAmount(roomName, request.inputType2);
+                if (roomAmount2 < request.amount) {
+                    global.cache.queueLab.addRequest(roomName, request.inputType2, request.amount - roomAmount2, LAB_REQUEST_TYPE_REACTION);
+                    wait = 1;
+                }
+                
+                if (wait)
+                    continue;
+
+                let lab1ID = global.cache.queueLab.searchLabs(roomName, request.inputType1)[0] || global.cache.queueLab.getFreeLab(room);
+                let lab2ID = global.cache.queueLab.searchLabs(roomName, request.inputType2)[0] || global.cache.queueLab.getFreeLab(room, [lab1ID]);
+                let outputLabID = global.cache.queueLab.searchLabs(roomName, request.outputType)[0] || global.cache.queueLab.getFreeLab(room, [lab1ID, lab2ID]);
+                if (!lab1ID || !lab2ID || !outputLabID) {
                     console.log(`checkLabs: not enough labs lab1=${lab1ID}, lab2=${lab2ID}, output=${outputLabID}`);
                     continue;
                 }
 
                 global.cache.queueLab.setRequestLabs(request.id, lab1ID, lab2ID, outputLabID);
+                console.log(`checkLabs: setRequestLabs for reqID=${request.id}`);
             }
         }
     },
