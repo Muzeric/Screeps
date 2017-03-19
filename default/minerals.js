@@ -3,7 +3,7 @@ const profiler = require('screeps-profiler');
 
 var minerals = {
     needList: {
-        "W48N4": {
+        "sim": {
             "LO": 100,
         },
     },
@@ -17,6 +17,13 @@ var minerals = {
                 this.library[REACTIONS[rt1][rt2]] = {
                     inputResourceTypes: [rt1, rt2],
                 };
+    },
+
+    getInputResourceTypes: function (rt) {
+        if (!(rt in this.library))
+            return null;
+        
+        return this.library[rt].inputResourceTypes;
     },
 
     getMaxCost: function (resourceType, amount = 1000, roomName = "W48N4") {
@@ -96,12 +103,14 @@ var minerals = {
             return null;
         
         for (let rt in this.needList[roomName]) {
-            let amount = (storage.store[rt] || 0) + (termiinal.store[rt] || 0) + global.cache.queueLab.getReserved(roomName, rt);
+            let amount = (storage.store[rt] || 0) + (terminal.store[rt] || 0) + global.cache.queueLab.getReserved(roomName, rt);
             if (amount > this.needList[roomName][rt])
                 continue;
             
             global.cache.queueLab.addRequest(roomName, rt, _.min([this.needList[roomName][rt] - amount, LAB_REQUEST_AMOUNT]), LAB_REQUEST_TYPE_TERMINAL);
         }
+
+        return OK;
     },
 
     loadLabs: function () {
@@ -165,7 +174,20 @@ var minerals = {
                     console.log(`checkLabs: runReaction(lab1, lab2)`);
                 }
             } else if (request.stage == LAB_REQUEST_STAGE_CREATED) {
-                
+                let inputResourceTypes = this.getInputResourceTypes(request.resourceType);
+                if (!inputResourceTypes.length) {
+                    console.log(`checkLabs: no inputResourceTypes for ${request.resourceType}`);
+                    continue;
+                }
+                let lab1ID = global.cache.queueLab.searchLabs(roomName, inputResourceTypes[0]) || global.cache.queueLab.getFreeLabs(room)[0];
+                let lab2ID = global.cache.queueLab.searchLabs(roomName, inputResourceTypes[1]) || global.cache.queueLab.getFreeLabs(room, [lab1ID])[0];
+                let outputLabID = global.cache.queueLab.searchLabs(roomName, request.resourceType) || global.cache.queueLab.getFreeLabs(room, [lab1ID, lab2ID])[0];
+                if (!lab1ID || !lab2ID || outputLabID) {
+                    console.log(`checkLabs: not enough labs lab1=${lab1ID}, lab2=${lab2ID}, output=${outputLabID}`);
+                    continue;
+                }
+
+                global.cache.queueLab.setRequestLabs(request.id, lab1ID, lab2ID, outputLabID);
             }
         }
     },
