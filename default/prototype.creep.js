@@ -73,10 +73,10 @@ Creep.prototype.moveToPos = function (a, b, c) {
         return [new RoomPosition(a, b, this.room.name), c];
     } else if (_.isObject(a)) {
         b = b || {};
-        if (a instanceof global.RoomPosition) {
+        if (a instanceof RoomPosition) {
             b.withCreeps = 0;
             return [a, b];
-        } else if (a.pos && a.pos instanceof global.RoomPosition) {
+        } else if (a.pos && a.pos instanceof RoomPosition) {
             b.withCreeps = a instanceof Creep ? 1 : 0;
             return [a.pos, b];
         }

@@ -15,7 +15,7 @@ var minerals = {
         for (let rt1 in REACTIONS)
             for (let rt2 in REACTIONS)
                 this.library[REACTIONS[rt1][rt2]] = {
-                    resourceTypes: [rt1, rt2],
+                    inputResourceTypes: [rt1, rt2],
                 };
     },
 
@@ -135,11 +135,37 @@ var minerals = {
                 let lab2 = this.loadLabs(request.lab2ID);
                 if (!lab1 || !lab2) {
                     console.log(`checkLabs: roomName=${roomName}, lab1=${lab1}, lab2=${lab2}, ID=${request.id}`);
-                    request.lab1ID = null;
-                    request.lab2ID = null;
-                    request.stage = LAB_REQUEST_STAGE_CREATED;
+                    global.cache.queueLab.badRequest(request.id);
                     continue;
                 }
+                if (!lab1.mineralAmount || !lab2.mineralAmount)
+                    continue;
+
+                if (   lab1.mineralType != this.library[request.resourceType].inputResourceTypes[0]
+                    || lab2.mineralType != this.library[request.resourceType].inputResourceTypes[1]
+                ) {
+                    console.log(`checkLabs: bad mineralType, roomName=${roomName}, lab1=${lab1.id} with ${lab1.mineralType} lab2=${lab2.id} with ${lab2.mineralType}, ID=${request.id}`);
+                    continue;
+                }
+
+                for (let labID in request.outputLabs) {
+                    let lab = this.loadLabs(labID);
+                    if (!lab) {
+                        console.log(`checkLabs: bad output lab (${labID}) in reqID=${request.id}`);
+                        global.cache.queueLab.badRequest(request.id);
+                        continue;
+                    }
+
+                    if (lab.mineralType != request.resourceType) {
+                        console.log(`checkLabs: bad output mineralType, roomName=${roomName}, output lab=${labID} with ${lab.mineralType} instead of ${request.resourceType}, ID=${request.id}`);
+                        continue;
+                    }
+
+                    //let res = lab.runReaction(lab1, lab2);
+                    console.log(`checkLabs: runReaction(lab1, lab2)`);
+                }
+            } else if (request.stage == LAB_REQUEST_STAGE_CREATED) {
+                
             }
         }
     },

@@ -2,31 +2,26 @@ var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var queue = {
-    labReserved: {},
+    resourceReservedByLabs: {},
+    labsReserved: {},
 
     init: function () {
         Memory.labRequests = Memory.labRequests || {};
-        this.labReserved = this.genReserved();
-    },
-
-    genReserved: function () {
-        let res = {};
         for (let reqID in Memory.labRequests) {
             let request = Memory.labRequests[reqID];
-            res[request.roomName] = res[request.roomName] || {};
-            res[request.roomName][request.rt] = res[request.roomName][request.rt] + request.amount;
+            this.resourceReservedByLabs[request.roomName] = this.resourceReservedByLabs[request.roomName] || {};
+            this.resourceReservedByLabs[request.roomName][request.rt] = this.resourceReservedByLabs[request.roomName][request.rt] + request.amount;
+            //if (request.lab1ID)
+            //    this.labsReserved[request.lab1ID] = ;
         }
-        return res;
+        
     },
 
     getReserved: function (roomName, rt) {
-        if (!(roomName in this.labReserved))
+        if (!(roomName in this.resourceReservedByLabs))
             return 0;
         
-        if (!(rt in this.labReserved[roomName]))
-            return 0;
-        
-        return this.labReserved[roomName][rt];
+        return this.resourceReservedByLabs[roomName][rt] || 0;
     },
 
     addRequest: function (roomName, rt, amount = LAB_REQUEST_AMOUNT, type = LAB_REQUEST_TYPE_TERMINAL) {
@@ -59,6 +54,19 @@ var queue = {
 
         return reqID;
     },
+
+    badRequest: function (reqID) {
+        let request = Memory.labRequests[reqID];
+        if (!request)
+            return OK;
+
+        request.lab1ID = null;
+        request.lab2ID = null;
+        request.outputLabs = [];
+        request.stage = LAB_REQUEST_STAGE_CREATED;
+
+        return OK;
+    }
 };
 
 module.exports = queue;
