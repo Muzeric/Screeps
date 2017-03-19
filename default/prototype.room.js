@@ -186,8 +186,8 @@ Room.prototype.linkAction = function () {
     for (let link_from of this.getUnStoragedLinks()) {
         let space = link_to.energyCapacity - link_to.energy;
         if (link_from && !link_from.cooldown && link_from.energy && link_from.energy <= space) {
-            if (link_from.transferEnergy(link_to) == OK)
-                space -= link_from.energy;
+            space -= link_from.energy;
+            link_from.transferEnergy(link_to);
         }
     }
 
