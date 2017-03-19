@@ -9,10 +9,10 @@ profiler.enable();
 
 module.exports.loop = function () {
 profiler.wrap(function() {
-    global.cache.stat = require('stat');
-    global.cache.stat.init();
     Game.roomsHelper = require('prototype.room');
     global.cache = {};
+    global.cache.stat = require('stat');
+    global.cache.stat.init();
     global.cache.queueLab = require('queue.lab');
     global.cache.queueLab.init();
     global.cache.queueTransport = require('queue.transport');
