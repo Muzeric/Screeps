@@ -4,26 +4,41 @@ const profiler = require('screeps-profiler');
 var queue = {
     producing: {},
     reserved: {},
-    busyLabs: {},
     
     init: function () {
         Memory.labRequests = Memory.labRequests || {};
-        for (let reqID in Memory.labRequests) {
-            let request = Memory.labRequests[reqID];
-            this.producing[request.roomName] = this.producing[request.roomName] || {};
-            this.producing[request.roomName][request.outputType] = this.producing[request.roomName][request.outputType] + request.amount;
-            if (request.stage > LAB_REQUEST_STAGE_PREPARE) {
-                this.busyLabs[request.roomName] = this.busyLabs[request.roomName] || {};
-                if (request.lab1ID && request.lab2ID) {
-                    this.busyLabs[request.roomName][request.lab1ID] = request.inputType1;
-                    this.busyLabs[request.roomName][request.lab2ID] = request.inputType2;
-                    this.reserved[request.roomName][request.inputType1] = request.amount;
-                    this.reserved[request.roomName][request.inputType2] = request.amount;
+        for (let request of Memory.labRequests) {
+            if (request.stage < LAB_REQUEST_STAGE_PREPARE)
+                continue;
+
+            if (request.lab1ID && request.lab2ID) {
+                if (this.reserveLab(request.lab1ID, request.inputType1, -1 * request.amount) != OK || this.reserveLab(request.lab2ID, request.inputType2, -1 * request.amount) != OK) {
+                    this.badRequest(request.id);
+                    continue;
                 }
-                for (let labID of request.outputLabs)
-                    this.busyLabs[request.roomName][request.labID] = request.outputType;
+            }
+
+            for (let labID of request.outputLabs) {
+                if (this.reserveLab(labID, request.outputType, request.amount) != OK) {
+                    this.badRequest(request.id);
+                    continue;
+                }
             }
         }
+    },
+
+    reserveLab: function(labID, rt, amount) {
+        if (labID in this.reserved) {
+            if (this.reserved[labID].resourceType == rt) {
+                this.reserved[labID].amount += amount;
+            } else {
+                console.log("minerals.reserveLab: diff types in labID=" + labID + ", reserved=" + this.reserved[labID].resourceType + ", request=" + rt);
+                return ERR_INVALID_TARGET;
+            }
+        } else {
+            this.reserved[labID] = {amount: amount, resourceType: rt};
+        }
+        return OK;
     },
 
     setRequestLabs: function (reqID, lab1ID, lab2ID, outputLabID) {
@@ -33,60 +48,23 @@ var queue = {
         request.lab1ID = lab1ID;
         request.lab2ID = lab2ID;
         request.outputLabs = [outputLabID];
-        this.busyLabs[request.roomName][request.lab1ID] = request.inputType1;
-        this.busyLabs[request.roomName][request.lab2ID] = request.inputType2;
-        this.busyLabs[request.roomName][outputLabID] = request.outputType;
+        if (   this.reserveLab(request.lab1ID, request.inputType1, -1 * request.amount) != OK
+            || this.reserveLab(request.lab2ID, request.inputType2, -1 * request.amount) != OK
+            || this.reserveLab(outputLabID,    request.outputType,      request.amount) != OK
+        ) {
+            this.badRequest(request.id);
+            return ERR_INVALID_ARGSl
+        }
         request.stage = LAB_REQUEST_STAGE_PREPARE;
 
         return OK;
     },
 
-    searchLabs: function (roomName, rt) {
-        let res = [];
-        for (let request of _.filter(Memory.labRequests, r => r.roomName == roomName && r.stage > LAB_REQUEST_STAGE_CREATED)) {
-            if (rt == request.inputType1)
-                res.push(request.lab1ID);
-            else if (rt == request.inputType2)
-                res.push(request.lab2ID);
-            else if (rt == request.outputType)
-                res.concat(request.outputLabs);
-        }
-
-        return res;
+    getReserved: function (labID) {
+        return this.reserved[labID] || {amount: 0};
     },
 
-    getFreeLab: function (room, exclude = []) {
-        let roomName = room.name;
-        let freeLabs = {};
-        this.busyLabs[roomName] = this.busyLabs[roomName] || {};
-
-        for (let labID of _.map( room.getLabs(), l => l.id)) {
-            if (!(labID in this.busyLabs[roomName]) && exclude.indexOf(labID) == -1)
-                return labID;
-        }
-
-        return null;
-    },
-
-    getProducing: function (roomName, rt) {
-        if (!(roomName in this.producing))
-            return 0;
-        
-        return this.producing[roomName][rt] || 0;
-    },
-
-    getReserved: function (roomName, rt) {
-        if (!(roomName in this.reserved))
-            return 0;
-        
-        return this.reserved[roomName][rt] || 0;
-    },
-
-    getFreeAmount: function (roomName, rt) {
-        return this.getProducing(roomName, rt) - this.getReserved(roomName, rt);
-    },
-
-    addRequest: function (roomName, rt, amount = LAB_REQUEST_AMOUNT, type = LAB_REQUEST_TYPE_TERMINAL) {
+    addRequest: function (roomName, rt, amount = LAB_REQUEST_AMOUNT, type = LAB_REQUEST_TYPE_TERMINAL, chainID) {
         if (!roomName || !rt) {
             console.log(`minerals.addRequest: no roomName (${roomName}) or rt (${rt})`);
             return null;
@@ -105,6 +83,7 @@ var queue = {
 
         Memory.labRequests[reqID] = {
             id: reqID,
+            chainID,
             roomName,
             type,
             outputType: rt,

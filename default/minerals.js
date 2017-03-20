@@ -124,6 +124,26 @@ var minerals = {
         return res;
     },
 
+    searchLab: function (room, rt, amount) {
+        for (let lab of _.filter(room.getLabs(), l => !l.mineralType || l.mineralType == rt)) {
+            let reserved = global.cache.queueLab.getReserved(lab.id);
+            if (reserved.resourceType && reserved.resourceType != rt)
+                continue;
+            let left = lab.mineralAmount + reserved.amount + amount;
+            if (left >= 0 && left <= lab.mineralCapacity)
+                return lab.id;
+        }
+    },
+
+    searchFreeLab: function (room, chainID) {
+        // TODO: working with chainID
+        let lab = _.filter(room.getLabs(), l => !global.cache.queueLab.getReserved(l.id))[0];
+        if (lab)
+            return lab.id;
+        
+        return null;
+    },
+
     checkLabs: function (roomName) {
         let room = Game.rooms[roomName];
         if (!room)
@@ -176,29 +196,31 @@ var minerals = {
             } else if (request.stage == LAB_REQUEST_STAGE_PREPARE) {
 
             } else if (request.stage == LAB_REQUEST_STAGE_CREATED) {
-                let wait = 0;
-                let roomAmount1 = room.getAmount(request.inputType1) + global.cache.queueLab.getFreeAmount(roomName, request.inputType1);
-                if (roomAmount1 < request.amount) {
-                    global.cache.queueLab.addRequest(roomName, request.inputType1, request.amount - roomAmount1, LAB_REQUEST_TYPE_REACTION);
-                    wait = 1;
-                }
-                let roomAmount2 = room.getAmount(request.inputType2) + global.cache.queueLab.getFreeAmount(roomName, request.inputType2);
-                if (roomAmount2 < request.amount) {
-                    global.cache.queueLab.addRequest(roomName, request.inputType2, request.amount - roomAmount2, LAB_REQUEST_TYPE_REACTION);
-                    wait = 1;
+                // search lab: ready or transfer or react
+                // ready -> reserve
+                // transfer -> search free
+                                // yes -> request -> reserve
+                                // no -> search free from chain -> 
+                                        // yes -> request empty -> request fill -> reserve
+                                        // no -> oops, return
+                // react -> request -> reserve
+
+                let lab1ID = this.searchLab(room, request.inputType1, -1 * request.amount);
+                if (!lab1ID) {
+                    if (room.getAmount(request.inputType1) >= request.amount) {
+                        lab1ID = this.searchFreeLab(room, request.chainID);
+                        if (!lab1ID) {
+                            console.log(`checkLabs: can't find free lab for chainID=${request.chainID}`);
+                            continue;
+                        }
+                        //global.cache.queueTransport.addRequest(null, lab1ID, request.inputType1, request.amount);
+                    } else if (this.getInputTypes(request.inputType1)) {
+                        let reqID = global.cache.queueLab.addRequest(roomName, request.inputType1, request.amount, LAB_REQUEST_TYPE_REACTION, request.chainID || request.id);
+                    } else {
+                        // Buy it
+                    }
                 }
                 
-                if (wait)
-                    continue;
-
-                let lab1ID = global.cache.queueLab.searchLabs(roomName, request.inputType1)[0] || global.cache.queueLab.getFreeLab(room);
-                let lab2ID = global.cache.queueLab.searchLabs(roomName, request.inputType2)[0] || global.cache.queueLab.getFreeLab(room, [lab1ID]);
-                let outputLabID = global.cache.queueLab.searchLabs(roomName, request.outputType)[0] || global.cache.queueLab.getFreeLab(room, [lab1ID, lab2ID]);
-                if (!lab1ID || !lab2ID || !outputLabID) {
-                    console.log(`checkLabs: not enough labs lab1=${lab1ID}, lab2=${lab2ID}, output=${outputLabID}`);
-                    continue;
-                }
-
                 global.cache.queueLab.setRequestLabs(request.id, lab1ID, lab2ID, outputLabID);
                 console.log(`checkLabs: setRequestLabs for reqID=${request.id}`);
             }
