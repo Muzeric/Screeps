@@ -118,6 +118,10 @@ Room.prototype.updateResources = function() {
         }
         if (elem.structureType == STRUCTURE_SOURCE && s.ticksToRegeneration == 1)
             global.cache.stat.updateRoom(this.name, 'lost', elem.energy);
+        if (elem.structureType == STRUCTURE_LAB) {
+            elem.mineralType = s.mineralType;
+            elem.mineralAmount = s.mineralAmount;
+        }
     }
 }
 
@@ -341,12 +345,9 @@ Room.prototype.updateStructures = function() {
                 elem.minersFrom = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.energyID == s.id);
                 if (room.storage && s.pos.inRangeTo(room.storage.pos, 2))
                     elem.storaged = 1;
-            }
-
-            if (s.structureType != STRUCTURE_CONTAINER)
+            } else if (s.structureType != STRUCTURE_CONTAINER) {
                 costs.set(s.pos.x, s.pos.y, 0xff);
-            
-            if (s.structureType == STRUCTURE_EXTRACTOR) {
+            } else if (s.structureType == STRUCTURE_EXTRACTOR) {
                 elem.rangedPlaces = utils.getRangedPlaces(null, s.pos, 1);
                 let mineral = s.pos.lookFor(LOOK_MINERALS)[0];
                 if (!mineral) {
@@ -356,7 +357,12 @@ Room.prototype.updateStructures = function() {
                     elem.mineralType = mineral.mineralType;
                     elem.mineralAmount = mineral.mineralAmount;
                 }
+            } else if (s.structureType == STRUCTURE_LAB) {
+                elem.mineralType = s.mineralType;
+                elem.mineralAmount = s.mineralAmount;
             }
+
+            
         } else if ([STRUCTURE_WALL, STRUCTURE_RAMPART].indexOf(s.structureType) !== -1) {
             if (s.hits < s.hitsMax*0.9 && s.hits < REPAIR_LIMIT ) {
                 elem = {
