@@ -252,6 +252,10 @@ Room.prototype.getLabs = function () {
     return this.memory.structures[STRUCTURE_LAB] || [];
 }
 
+Room.prototype.getRapairLimit = function () {
+    return this.memory.energy > REPAIR_ENERGY_LIMIT ? REPAIR_LIMIT_HIGH : REPAIR_LIMIT;
+}
+
 Room.prototype.updateStructures = function() {
     console.log(this.name + ": updateStructures");
     let room = this;
@@ -365,7 +369,7 @@ Room.prototype.updateStructures = function() {
                 costs.set(s.pos.x, s.pos.y, 0xff);
             
         } else if ([STRUCTURE_WALL, STRUCTURE_RAMPART].indexOf(s.structureType) !== -1) {
-            if (s.hits < s.hitsMax*0.9 && s.hits < REPAIR_LIMIT ) {
+            if (s.hits < s.hitsMax*0.9 && s.hits < room.getRapairLimit() ) {
                 elem = {
                     hits : s.hits,
                     hitsMax : s.hitsMax, 
@@ -386,7 +390,7 @@ Room.prototype.updateStructures = function() {
             elem.pos = s.pos;
             memory.structures[s.structureType] = memory.structures[s.structureType] || [];
             memory.structures[s.structureType].push(elem);
-            if (elem.hits < elem.hitsMax * 0.9 && elem.hits < REPAIR_LIMIT)
+            if (elem.hits < elem.hitsMax * 0.9 && elem.hits < room.getRapairLimit())
                 memory.repairs++;
         }
     });
