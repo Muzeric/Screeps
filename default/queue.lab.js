@@ -7,7 +7,8 @@ var queue = {
     
     init: function () {
         Memory.labRequests = Memory.labRequests || {};
-        for (let request of Memory.labRequests) {
+        for (let reqID in Memory.labRequests) {
+            let request = Memory.labRequests[reqID];
             if (request.stage < LAB_REQUEST_STAGE_PREPARE)
                 continue;
 
