@@ -345,8 +345,6 @@ Room.prototype.updateStructures = function() {
                 elem.minersFrom = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.energyID == s.id);
                 if (room.storage && s.pos.inRangeTo(room.storage.pos, 2))
                     elem.storaged = 1;
-            } else if (s.structureType != STRUCTURE_CONTAINER) {
-                costs.set(s.pos.x, s.pos.y, 0xff);
             } else if (s.structureType == STRUCTURE_EXTRACTOR) {
                 elem.rangedPlaces = utils.getRangedPlaces(null, s.pos, 1);
                 let mineral = s.pos.lookFor(LOOK_MINERALS)[0];
@@ -362,6 +360,8 @@ Room.prototype.updateStructures = function() {
                 elem.mineralAmount = s.mineralAmount;
             }
 
+            if (s.structureType != STRUCTURE_CONTAINER) {
+                costs.set(s.pos.x, s.pos.y, 0xff);
             
         } else if ([STRUCTURE_WALL, STRUCTURE_RAMPART].indexOf(s.structureType) !== -1) {
             if (s.hits < s.hitsMax*0.9 && s.hits < REPAIR_LIMIT ) {
