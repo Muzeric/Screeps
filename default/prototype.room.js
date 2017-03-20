@@ -360,7 +360,7 @@ Room.prototype.updateStructures = function() {
                 elem.mineralAmount = s.mineralAmount;
             }
 
-            if (s.structureType != STRUCTURE_CONTAINER) {
+            if (s.structureType != STRUCTURE_CONTAINER)
                 costs.set(s.pos.x, s.pos.y, 0xff);
             
         } else if ([STRUCTURE_WALL, STRUCTURE_RAMPART].indexOf(s.structureType) !== -1) {
