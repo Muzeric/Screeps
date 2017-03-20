@@ -97,7 +97,7 @@ function getTarget (creep) {
     
     if (!target || 
         (target.energyCapacity && target.energy == target.energyCapacity) ||                
-        (target.storeCapacity && target.store[RESOURCE_ENERGY] == target.storeCapacity)
+        (target.storeCapacity && _.sum(target.store) == target.storeCapacity)
     ) {
         if (creep.memory.targetObj)
             creep.memory.targetObj.energy = creep.memory.targetObj.energyCapacity;
