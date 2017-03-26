@@ -419,7 +419,7 @@ Room.prototype.updateStructures = function() {
         if (s.structureType == STRUCTURE_ROAD) {
             if( room.refreshRoad(memory, s) < 0) {
                 s.remove();
-                continue;
+                return;
             } else {
                 memory.constructionsRoads++;
             }
