@@ -121,7 +121,6 @@ Room.prototype.updateResources = function() {
         if (elem.structureType == STRUCTURE_LAB) {
             elem.mineralType = s.mineralType;
             elem.mineralAmount = s.mineralAmount;
-            elem.mineralCapacity = s.mineralCapacity;
         }
     }
 }
@@ -361,8 +360,7 @@ Room.prototype.updateStructures = function() {
                     elem.mineralAmount = mineral.mineralAmount;
                 }
             } else if (s.structureType == STRUCTURE_LAB) {
-                elem.mineralType = s.mineralType;
-                elem.mineralAmount = s.mineralAmount;
+                elem.mineralCapacity = s.mineralCapacity;
             }
 
             if (s.structureType != STRUCTURE_CONTAINER)
