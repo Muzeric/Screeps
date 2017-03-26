@@ -255,6 +255,26 @@ Room.prototype.getRapairLimit = function () {
     return this.memory.energy > REPAIR_ENERGY_LIMIT ? REPAIR_LIMIT_HIGH : REPAIR_LIMIT;
 }
 
+Room.prototype.getConstructions = function () {
+    return _.filter( this.memory.structures[FIND_MY_CONSTRUCTION_SITES] || [], s => !s.finished);
+}
+
+Room.prototype.getRepairs = function () {
+    return _.filter( _.flatten(_.values(this.memory.structures)), s => !s.finished && s.hits < s.hitsMax*0.9 && s.hits < this.getRapairLimit() );
+}
+
+Room.prototype.finishBuildRepair = function (targetID) {
+    for (let key in this.memory.structures) {
+        for (let i = 0; i < this.memory.structures[key].length; i++) {
+            let s = this.memory.structures[key][i];
+            if (s.id == targetID) {
+                s.finished = 1;
+                return;
+            }
+        }
+    }
+}
+
 Room.prototype.updateStructures = function() {
     console.log(this.name + ": updateStructures");
     let room = this;
@@ -397,15 +417,24 @@ Room.prototype.updateStructures = function() {
     this.find(FIND_MY_CONSTRUCTION_SITES).forEach( function(s) {
         memory.constructions++;
         if (s.structureType == STRUCTURE_ROAD) {
-            if( room.refreshRoad(memory, s) < 0)
+            if( room.refreshRoad(memory, s) < 0) {
                 s.remove();
-            else
+                continue;
+            } else {
                 memory.constructionsRoads++;
+            }
         } else if ((s.structureType != STRUCTURE_RAMPART || !s.my) && s.structureType != STRUCTURE_CONTAINER) {
             costs.set(s.pos.x, s.pos.y, 0xff);
         } else if (s.structureType == STRUCTURE_CONTAINER) {
             constructionsContainers[s.pos.getKey()] = s.id;
         }
+        let elem = {
+            structureType: FIND_MY_CONSTRUCTION_SITES,
+            constructionStructureType : s.structureType,
+            progress : s.progress,
+            progressTotal: s.progressTotal, 
+        };
+        memory.structures[FIND_MY_CONSTRUCTION_SITES].push(elem);
     });
 
     memory.costMatrix = costs.serialize();

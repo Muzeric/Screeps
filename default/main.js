@@ -451,13 +451,10 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : 2000,
     },{
             "role" : "builder",
-            "count" : (builds ? 1 : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)),
+            "count" : (builds ? 1 : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)) + (repairs > 20 && room.controller.level >= 8 ? 2 : 0),
             "priority" : 4,
             "wishEnergy" : 1500,
-            "maxEnergy" : builds ? 3000 : 1500,
-            "body" : {
-                "carry" : (builds ? 6 : 0 ) + (repairs > 10 ? 18 : (repairs ? 9 : 0)),
-            },
+            "maxEnergy" : builds || repairs > 10 ? 5000 : 1500,
     },{
             "role" : "shortminer",
             "count" : storagedLink ? 1 : 0, // TODO: harvester count
