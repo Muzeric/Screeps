@@ -3,9 +3,6 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        if (!creep.memory.targetID && !utils.checkInRoomAndGo(creep))
-            return;
-
 	    if(creep.memory.building && creep.carry.energy == 0) {
             creep.memory.building = false;
             creep.memory.targetID = null;
@@ -18,6 +15,8 @@ var role = {
 	    if(creep.memory.building) {
             if(!creep.memory.targetID)
                 creep.memory.targetID = getBuilderTargets(creep);
+            if(!creep.memory.targetID)
+                return;
             
             let target = Game.getObjectById(creep.memory.targetID);
             if (!target || "hits" in target && (target.hits == target.hitsMax || target.hits >= creep.room.getRepairLimit())) {
@@ -63,7 +62,10 @@ var role = {
 };
 
 function getBuilderTargets (creep) {
-    let targets = creep.room.getConstructions().concat(creep.room.getRepairs());
+    let room = Game.rooms[creep.memory.roomName];
+    if (!room)
+        return null;
+    let targets = room.getConstructions().concat(room.getRepairs());
     if (!targets.length)
         return null;
     let minCost;
