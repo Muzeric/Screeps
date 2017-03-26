@@ -75,8 +75,10 @@ function getBuilderTargets (creep) {
         let cost = ("hits" in target ? target.hits / 1000 : 0) + creep.pos.getRangeTo(pos);
         if (cost <= 1)
             return target.id;
-        else if (minCost === undefined || cost < minCost)
+        if (minCost === undefined || cost < minCost) {
             targetID = target.id;
+            minCost = cost;
+        }
     }
 
     return targetID;
