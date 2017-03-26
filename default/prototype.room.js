@@ -434,6 +434,7 @@ Room.prototype.updateStructures = function() {
             progress : s.progress,
             progressTotal: s.progressTotal, 
         };
+        memory.structures[FIND_MY_CONSTRUCTION_SITES] = memory.structures[FIND_MY_CONSTRUCTION_SITES] || [];
         memory.structures[FIND_MY_CONSTRUCTION_SITES].push(elem);
     });
 
