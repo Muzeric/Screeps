@@ -20,7 +20,7 @@ var role = {
                 creep.memory.targetID = getBuilderTargets(creep);
             
             let target = Game.getObjectById(creep.memory.targetID);
-            if (!target || "hits" in target && (target.hits == target.hitsMax || target.hits >= creep.rooom.getRapairLimit())) {
+            if (!target || "hits" in target && (target.hits == target.hitsMax || target.hits >= creep.room.getRapairLimit())) {
                 creep.room.finishBuildRepair(creep.memory.targetID);
                 creep.memory.targetID = null;
                 return;
