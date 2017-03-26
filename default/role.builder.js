@@ -3,6 +3,9 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
+        let room = Game.rooms[creep.memory.roomName];
+        if (!room)
+            return null;
 	    if(creep.memory.building && creep.carry.energy == 0) {
             creep.memory.building = false;
             creep.memory.targetID = null;
@@ -14,13 +17,13 @@ var role = {
 
 	    if(creep.memory.building) {
             if(!creep.memory.targetID)
-                creep.memory.targetID = getBuilderTargets(creep);
+                creep.memory.targetID = getBuilderTargets(creep, room);
             if(!creep.memory.targetID)
                 return;
             
             let target = Game.getObjectById(creep.memory.targetID);
-            if (!target || "hits" in target && (target.hits == target.hitsMax || target.hits >= creep.room.getRepairLimit())) {
-                creep.room.finishBuildRepair(creep.memory.targetID);
+            if (!target || "hits" in target && (target.hits == target.hitsMax || target.hits >= room.getRepairLimit())) {
+                room.finishBuildRepair(creep.memory.targetID);
                 creep.memory.targetID = null;
                 return;
             }
@@ -61,10 +64,7 @@ var role = {
 	},
 };
 
-function getBuilderTargets (creep) {
-    let room = Game.rooms[creep.memory.roomName];
-    if (!room)
-        return null;
+function getBuilderTargets (creep, room) {
     let targets = room.getConstructions().concat(room.getRepairs());
     if (!targets.length)
         return null;
@@ -72,7 +72,7 @@ function getBuilderTargets (creep) {
     let targetID;
     for (let target of targets) {
         let pos = new RoomPosition(target.pos.x, target.pos.y, target.pos.roomName);
-        let cost = ("hits" in target ? target.hits / 1000 : 0) + creep.pos.getRangeTo(pos);
+        let cost = ("hits" in target ? target.hits / 1000 : 0) + (creep.pos.getRangeTo(pos) || 0);
         if (cost <= 1)
             return target.id;
         if (minCost === undefined || cost < minCost) {

@@ -429,6 +429,8 @@ Room.prototype.updateStructures = function() {
             constructionsContainers[s.pos.getKey()] = s.id;
         }
         let elem = {
+            id: s.id,
+            pos: s.pos,
             structureType: FIND_MY_CONSTRUCTION_SITES,
             constructionStructureType : s.structureType,
             progress : s.progress,
