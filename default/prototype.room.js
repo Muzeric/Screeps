@@ -285,6 +285,7 @@ Room.prototype.updateStructures = function() {
     memory.constructions = 0;
     memory.constructionsRoads = 0;
     memory.repairs = 0;
+    memory.repairHits = 0;
     if (!("needRoads" in memory))
         memory.needRoads = {};
     memory.pointPos = Game.flags["PointPos." + this.name] ? Game.flags["PointPos." + this.name].pos : null;
@@ -408,8 +409,10 @@ Room.prototype.updateStructures = function() {
             elem.pos = s.pos;
             memory.structures[s.structureType] = memory.structures[s.structureType] || [];
             memory.structures[s.structureType].push(elem);
-            if (elem.hits < elem.hitsMax * 0.9 && elem.hits < room.getRepairLimit())
+            if (elem.hits < elem.hitsMax * 0.9 && elem.hits < room.getRepairLimit()) {
                 memory.repairs++;
+                memory.repairHits += _.min([elem.hitsMax * 0.9, room.getRepairLimit()]) - elem.hits;
+            }
         }
     });
 
