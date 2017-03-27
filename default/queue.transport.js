@@ -139,7 +139,10 @@ var queue = {
                     got += creep.carry[request.resourceType] || 0;
             }
             res[request.fromID] = res[request.fromID] || {};
-            res[request.fromID][request.resourceType] = (res[request.fromID][request.resourceType] || 0) + request.amount - got;
+            res[request.toID] = res[request.toID] || {};
+            // res[request.fromID][request.resourceType] = (res[request.fromID][request.resourceType] || 0) + request.amount - got;
+            res[request.fromID][request.resourceType] = (res[request.fromID][request.resourceType] || 0) - request.amount + got;
+            res[request.toID][request.resourceType] = (res[request.toID][request.resourceType] || 0) + request.amount;
         }
 
         return res;
@@ -149,8 +152,12 @@ var queue = {
         let reserved = 0;
         if (this.transportReserved[object.id] && this.transportReserved[object.id][resourceType])
             reserved = this.transportReserved[object.id][resourceType];
-        return (object.store[resourceType] || 0) - reserved;
+        return (object.store[resourceType] || 0) + reserved;
     },
+
+    getTypeAndAmount: function (objectID) {
+        return this.transportReserved[objectID];
+    }
 };
 
 module.exports = queue;

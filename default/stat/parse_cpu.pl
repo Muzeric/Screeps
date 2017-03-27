@@ -66,14 +66,17 @@ my $extra = {
     return ($_[0] || 0) * 100;
   },
   energy => sub {
-    return int(($_[0] || 0) / 10);
+    return int(($_[0] || 0) / 100);
   },
   gcl => sub {
     return $_[0] || $_[1]->{glc} || 0; # This fix of start typo: 'glc' instead of 'gcl'
   },
   paths => sub {
     return ($_[0] || 0) * 10;
-  }
+  },
+  repairs => sub {
+    return int(($_[0] || 0) / 10000);
+  },
 };
 open(STAT, ">stat_total.csv")
 or die $@;
