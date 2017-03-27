@@ -138,7 +138,7 @@ var minerals = {
             if (lab.reacted)
                 continue;
             if (
-                   (lab.mineralType == outputType && (outputLabID === undefined || labInfo[outputLabID].mineralType === null) && lab.amountCapacity - lab.mineralAmount)
+                   (lab.mineralType == outputType && (outputLabID === undefined || labInfo[outputLabID].mineralType === null) && lab.mineralCapacity - lab.mineralAmount)
                 || (lab.mineralType === null && outputLabID === undefined)
             ) {
                 outputLabID = labID;
@@ -246,7 +246,7 @@ var minerals = {
             return null;
         
         let labInfo = {}; //{"__free": []};
-        for (let lab in labs) {
+        for (let lab of labs) {
             let mineralType = lab.mineralType;
             let transportAmount = 0;
             let transportInfo = global.cache.queueTransport.getTypeAndAmount(lab.id);
@@ -263,7 +263,7 @@ var minerals = {
                 }
             }
             labInfo[lab.id] = {
-                amountCapacity: lab.amountCapacity,
+                mineralCapacity: lab.mineralCapacity,
                 mineralAmount: lab.mineralAmount,
                 mineralType,
                 transportAmount,
@@ -281,15 +281,20 @@ var minerals = {
         for (let reqID in Memory.labRequests) {
             let request = Memory.labRequests[reqID];
             let labs = this.searchLabs(labInfo, request.inputType1, request.inputType2, request.outputType);
-            if (!labs)
+            if (!labs || labInfo[lab[2]].cooldown > 0)
                 continue;
             let check = this.checkAndRequestAmount(labInfo, labs, request, storage);
             if (check == OK) {
-                let labsObj = this.loadLabs(labs);
-                let res;// = outputLabObj.runReaction(lab1Obj, lab2Obj);
-                console.log(`checkLabs: runReaction(lab1, lab2) for reqID=${request.id} with res=${res}`);
+                let labsObj = this.loadLabs.apply(this, labs);
+                let res = labsObj[2].runReaction(labsObj[0], labsObj[1]);
+                console.log(`checkLabs: ${labs[2]}.runReaction(${labs[0]},${labs[1]}) for reqID=${request.id} with res=${res}`);
                 if (res == OK) {
-                    let amount = 1;
+                    let amount = _.min([
+                        labInfo[labs[0]].mineralAmount - labInfo[labs[0]].usedAmount, 
+                        labInfo[labs[1]].mineralAmount - labInfo[labs[1]].usedAmount, 
+                        labInfo[labs[2]].mineralCapacity - labInfo[labs[2]].mineralAmount,
+                        LAB_REACTION_AMOUNT
+                    ]);
                     labInfo[labs[0]].usedAmount += amount;
                     labInfo[labs[1]].usedAmount += amount;
                     labInfo[labs[2]].reacted = 1;
@@ -302,7 +307,7 @@ var minerals = {
             let lab = labInfo[labID];
             let needAmount = lab.wantedAmount - lab.mineralAmount - lab.transportAmount;
             let transportableAmount = global.cache.queueTransport.getStoreWithReserved(storage, lab.mineralType);
-            if (transportableAmount)
+            if (needAmount > 0 && transportableAmount > 0)
                  global.cache.queueTransport.addRequest(storage, lab, lab.mineralType, _.min([transportableAmount, needAmount]));
         }
     },

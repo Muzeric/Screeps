@@ -411,6 +411,7 @@ function getRoomLimits (room, creepsCount) {
             "count" : 1,
             "arg" : unminerSources ? 1 : 0,
             "priority" : 1,
+            "minEnergy" : 300,
             "wishEnergy" : 300,
     },{
             "role" : "miner",

@@ -8,17 +8,17 @@ var queue = {
         Memory.labRequests = Memory.labRequests || {};
         for (let reqID in Memory.labRequests) {
             let request = Memory.labRequests[reqID];
-            producing[roomName] = producing[roomName] || {};
-            producing[roomName][request.type] = producing[roomName][request.type] || {};
-            producing[roomName][request.type][request.outputType] = (producing[roomName][request.type][request.outputType] || 0) + request.amount;
+            this.producing[request.roomName] = this.producing[request.roomName] || {};
+            this.producing[request.roomName][request.type] = this.producing[request.roomName][request.type] || {};
+            this.producing[request.roomName][request.type][request.outputType] = (this.producing[request.roomName][request.type][request.outputType] || 0) + request.amount;
         }
     },
 
     getProducing: function (roomName, type, rt) {
-        if (!roomName || !type || !rt || !(roomName in producing) || !(type in producing[roomName]) || !(rt in producing[roomName][type]))
+        if (!roomName || !type || !rt || !(roomName in this.producing) || !(type in this.producing[roomName]) || !(rt in this.producing[roomName][type]))
             return 0;
         
-        return producing[roomName][type][rt];
+        return this.producing[roomName][type][rt];
     },
 
     addRequest: function (roomName, rt, amount = LAB_REQUEST_AMOUNT, type = LAB_REQUEST_TYPE_TERMINAL, chainID) {
@@ -45,7 +45,6 @@ var queue = {
             type,
             outputType: rt,
             amount,
-            reacted: 0,
             startTime: 0,
             inputType1: inputTypes[0],
             inputType2: inputTypes[1],

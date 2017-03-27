@@ -121,6 +121,7 @@ Room.prototype.updateResources = function() {
         if (elem.structureType == STRUCTURE_LAB) {
             elem.mineralType = s.mineralType;
             elem.mineralAmount = s.mineralAmount;
+            elem.cooldown = s.cooldown;
         }
     }
 }
