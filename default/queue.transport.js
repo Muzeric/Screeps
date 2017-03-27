@@ -152,7 +152,13 @@ var queue = {
         let reserved = 0;
         if (this.transportReserved[object.id] && this.transportReserved[object.id][resourceType])
             reserved = this.transportReserved[object.id][resourceType];
-        return (object.store[resourceType] || 0) + reserved;
+        let store = reserved;
+        if ("store" in object) {
+            store += object.store[resourceType] || 0;
+        } else if ("mineralType" in object && object.mineralType == resourceType) {
+            store += object.mineralAmount;
+        }
+        return store;
     },
 
     getTypeAndAmount: function (objectID) {

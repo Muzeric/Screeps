@@ -55,7 +55,7 @@ var role = {
             if (!creep.pos.isNearTo(from))
                 return creep.moveTo(from);
 
-            let amount = _.min([request.amount - (creep.carry[request.resourceType] || 0), creep.carryCapacity - _.sum(creep.carry), from.store[request.resourceType]]);
+            let amount = _.min([request.amount - (creep.carry[request.resourceType] || 0), creep.carryCapacity - _.sum(creep.carry), "mineralType" in from ? from.mineralAmount : from.store[request.resourceType]]);
             if (!amount)
                 return;
             let res = creep.withdraw(from, request.resourceType, amount);
@@ -76,7 +76,7 @@ var role = {
             if (!creep.pos.isNearTo(to))
                 return creep.moveTo(to);
             
-            let amount = _.min([request.amount, creep.carry[request.resourceType] || 0, to.storeCapacity - _.sum(to.store)]);
+            let amount = _.min([request.amount, creep.carry[request.resourceType] || 0, "mineralType" in to ? to.mineralCapacity - to.mineralAmount : to.storeCapacity - _.sum(to.store)]);
             if (!amount)
                 return;
             

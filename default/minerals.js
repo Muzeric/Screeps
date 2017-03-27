@@ -263,6 +263,7 @@ var minerals = {
                 }
             }
             labInfo[lab.id] = {
+                id: lab.id,
                 mineralCapacity: lab.mineralCapacity,
                 mineralAmount: lab.mineralAmount,
                 cooldown: lab.cooldown,
@@ -309,7 +310,9 @@ var minerals = {
             let needAmount = lab.wantedAmount - lab.mineralAmount - lab.transportAmount;
             let transportableAmount = global.cache.queueTransport.getStoreWithReserved(storage, lab.mineralType);
             if (needAmount > 0 && transportableAmount > 0)
-                 global.cache.queueTransport.addRequest(storage, lab, lab.mineralType, _.min([transportableAmount, needAmount]));
+                global.cache.queueTransport.addRequest(storage, lab, lab.mineralType, _.min([transportableAmount, needAmount]));
+            else if (!lab.wantedAmount && lab.mineralAmount && global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) > 0)
+                global.cache.queueTransport.addRequest(lab, null, lab.mineralType, global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) );
         }
     },
 };
