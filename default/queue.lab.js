@@ -8,6 +8,8 @@ var queue = {
         Memory.labRequests = Memory.labRequests || {};
         for (let reqID in Memory.labRequests) {
             let request = Memory.labRequests[reqID];
+            if (request.amount < LAB_REACTION_AMOUNT)
+                request.amount = LAB_REACTION_AMOUNT;
             this.producing[request.roomName] = this.producing[request.roomName] || {};
             this.producing[request.roomName][request.type] = this.producing[request.roomName][request.type] || {};
             this.producing[request.roomName][request.type][request.outputType] = (this.producing[request.roomName][request.type][request.outputType] || 0) + request.amount;
@@ -65,6 +67,8 @@ var queue = {
             console.log("queueLab: finished request: " + JSON.stringify(request));
             delete Memory.labRequests[reqID];
             return null;
+        } else if ( request.amount < LAB_REACTION_AMOUNT) {
+            request.amount = LAB_REACTION_AMOUNT;
         }
 
         return request.amount;

@@ -291,12 +291,7 @@ var minerals = {
                 let res = labsObj[2].runReaction(labsObj[0], labsObj[1]);
                 console.log(`checkLabs: ${labs[2]}.runReaction(${labs[0]},${labs[1]}) for reqID=${request.id} with res=${res}`);
                 if (res == OK) {
-                    let amount = _.min([
-                        labInfo[labs[0]].mineralAmount - labInfo[labs[0]].usedAmount, 
-                        labInfo[labs[1]].mineralAmount - labInfo[labs[1]].usedAmount, 
-                        labInfo[labs[2]].mineralCapacity - labInfo[labs[2]].mineralAmount,
-                        LAB_REACTION_AMOUNT
-                    ]);
+                    let amount = LAB_REACTION_AMOUNT;
                     labInfo[labs[0]].usedAmount += amount;
                     labInfo[labs[1]].usedAmount += amount;
                     labInfo[labs[2]].reacted = 1;
