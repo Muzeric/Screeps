@@ -265,6 +265,7 @@ var minerals = {
             labInfo[lab.id] = {
                 mineralCapacity: lab.mineralCapacity,
                 mineralAmount: lab.mineralAmount,
+                cooldown: lab.cooldown,
                 mineralType,
                 transportAmount,
                 usedAmount: 0,
