@@ -283,10 +283,10 @@ var minerals = {
         for (let reqID in Memory.labRequests) {
             let request = Memory.labRequests[reqID];
             let labs = this.searchLabs(labInfo, request.inputType1, request.inputType2, request.outputType);
-            if (!labs || labInfo[labs[2]].cooldown > 0)
+            if (!labs)
                 continue;
             let check = this.checkAndRequestAmount(labInfo, labs, request, storage);
-            if (check == OK) {
+            if (check == OK && !labInfo[labs[2]].cooldown) {
                 let labsObj = this.loadLabs.apply(this, labs);
                 let res = labsObj[2].runReaction(labsObj[0], labsObj[1]);
                 console.log(`checkLabs: ${labs[2]}.runReaction(${labs[0]},${labs[1]}) for reqID=${request.id} with res=${res}`);
