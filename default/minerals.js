@@ -245,7 +245,7 @@ var minerals = {
         if (!labs.length)
             return null;
         
-        let labInfo = {}; //{"__free": []};
+        let labInfo = {};
         for (let lab of labs) {
             let mineralType = lab.mineralType;
             let transportAmount = 0;
