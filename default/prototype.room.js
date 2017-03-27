@@ -122,6 +122,8 @@ Room.prototype.updateResources = function() {
             elem.mineralType = s.mineralType;
             elem.mineralAmount = s.mineralAmount;
             elem.cooldown = s.cooldown;
+            if (s.mineralType)
+                memory.store[s.mineralType] = (memory.store[s.mineralType] || 0) + s.mineralAmount;
         }
     }
 }
