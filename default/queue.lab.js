@@ -56,6 +56,20 @@ var queue = {
         return reqID;
     },
 
+    produceAmount: function (reqID, amount) {
+        let request = Memory.labRequests[reqID];
+        if (!request)
+            return null;
+        request.amount -= amount;
+        if (request.amount <= 0) {
+            console.log("queueLab: finished request: " + JSON.stringify(request));
+            delete Memory.labRequests[reqID];
+            return null;
+        }
+
+        return request.amount;
+    },
+
     badRequest: function (reqID) {
         if (reqID in Memory.labRequests) {
             console.log("queueLab.badRequest: " + JSON.stringify(Memory.labRequests[reqID]));

@@ -300,7 +300,7 @@ var minerals = {
                     labInfo[labs[0]].usedAmount += amount;
                     labInfo[labs[1]].usedAmount += amount;
                     labInfo[labs[2]].reacted = 1;
-                    request.amount -= amount;
+                    global.cache.queueLab.produceAmount(reqID, amount);
                 }    
             }       
         }
