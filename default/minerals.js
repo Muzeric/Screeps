@@ -281,7 +281,7 @@ var minerals = {
         for (let reqID in Memory.labRequests) {
             let request = Memory.labRequests[reqID];
             let labs = this.searchLabs(labInfo, request.inputType1, request.inputType2, request.outputType);
-            if (!labs || labInfo[lab[2]].cooldown > 0)
+            if (!labs || labInfo[labs[2]].cooldown > 0)
                 continue;
             let check = this.checkAndRequestAmount(labInfo, labs, request, storage);
             if (check == OK) {
