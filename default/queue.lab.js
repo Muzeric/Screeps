@@ -40,6 +40,8 @@ var queue = {
             return null;
         }
 
+        amount = utils.clamp(amount, 0, LAB_REQUEST_AMOUNT);
+
         Memory.labRequests[reqID] = {
             id: reqID,
             chainID,

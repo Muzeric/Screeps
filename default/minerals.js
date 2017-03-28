@@ -206,8 +206,8 @@ var minerals = {
         let transportableAmount2 = global.cache.queueTransport.getStoreWithReserved(storage, request.inputType2);
 
         if (
-               (freeAmount1 + futureAmount1 + transportableAmount1 >= request.amount)
-            && (freeAmount2 + futureAmount2 + transportableAmount2 >= request.amount)
+               (freeAmount1 + futureAmount1 + transportableAmount1 >= request.amount) && (freeAmount1 + futureAmount1 + request.amount <= labInfo[labs[0]].mineralCapacity)
+            && (freeAmount2 + futureAmount2 + transportableAmount2 >= request.amount) && (freeAmount2 + futureAmount2 + request.amount <= labInfo[labs[1]].mineralCapacity)
         ) {
             labInfo[labs[0]].mineralType = request.inputType1;
             labInfo[labs[0]].wantedAmount += request.amount;
@@ -312,7 +312,7 @@ var minerals = {
             let transportableAmount = global.cache.queueTransport.getStoreWithReserved(storage, lab.mineralType);
             if (needAmount > 0 && transportableAmount > 0)
                 global.cache.queueTransport.addRequest(storage, lab, lab.mineralType, _.min([transportableAmount, needAmount]));
-            else if (!lab.wantedAmount && lab.mineralAmount >= TRANSPORTER_MIN_CONTAINER_AMOUNT && global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) > 0)
+            else if (!lab.wantedAmount && lab.mineralAmount >= LAB_REQUEST_AMOUNT && global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) > 0)
                 global.cache.queueTransport.addRequest(lab, null, lab.mineralType, global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) );
         }
     },

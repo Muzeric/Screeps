@@ -19,7 +19,7 @@ var role = {
             return;
         }
 
-        if (!creep.memory.reqID && _.sum(creep.carry) > 0) {
+        if (!queue.checkRequest(creep.id) && _.sum(creep.carry) > 0) {
             if (creep.pos.isNearTo(storage)) {
                 let res = 0;
                 for(let resourceType in creep.carry)
@@ -31,14 +31,10 @@ var role = {
             }
         }
 
-        let request = queue.getRequest(creep.memory.reqID, creep.id);
-        if (!request) {
-            creep.memory.reqID = null;
+        let request = queue.getRequest(creep.id);
+        if (!request)
             return;
-        } else {
-            creep.memory.reqID = request.id;
-        }
-
+        
         let stage = 1;
         if (_.sum(creep.carry) == creep.carryCapacity || creep.carry[request.resourceType] >= request.amount)
             stage = 2;
@@ -47,8 +43,7 @@ var role = {
             let from = Game.getObjectById(request.fromID);
             if (!from) {
                 console.log(creep.name + ": can't get from by id=" + request.fromID);
-                queue.badRequest(creep.memory.reqID);
-                creep.memory.reqID = null;
+                queue.badRequest(request.id);
                 return;
             }
 
@@ -62,21 +57,26 @@ var role = {
             if (res < 0)
                 console.log(creep.name + ": withdraw from (" + from.id + ") with res=" + res);
             else
-                queue.gotResource(creep.memory.reqID, amount);
+                queue.gotResource(request.id, amount);
 
         } else if (stage == 2) { // go to dest and transfer
             let to = Game.getObjectById(request.toID);
             if (!to) {
                 console.log(creep.name + ": can't get to by id=" + request.toID);
-                queue.badRequest(creep.memory.reqID);
-                creep.memory.reqID = null;
+                queue.badRequest(request.id);
+                return;
+            }
+
+            let toSpaceLeft = "mineralType" in to ? to.mineralCapacity - to.mineralAmount : to.storeCapacity - _.sum(to.store);
+            if (!toSpaceLeft) {
+                queue.unbindRequest(request.id);
                 return;
             }
 
             if (!creep.pos.isNearTo(to))
                 return creep.moveTo(to);
             
-            let amount = _.min([request.amount, creep.carry[request.resourceType] || 0, "mineralType" in to ? to.mineralCapacity - to.mineralAmount : to.storeCapacity - _.sum(to.store)]);
+            let amount = _.min([request.amount, creep.carry[request.resourceType] || 0, toSpaceLeft]);
             if (!amount)
                 return;
             
@@ -84,7 +84,7 @@ var role = {
             if (res < 0)
                 console.log(creep.name + ": transfer to (" + to.id + ") with res=" + res);
             else
-                creep.memory.reqID = queue.putResource(creep.memory.reqID, amount);
+                queue.putResource(request.id, amount);
         }
 	},
 	

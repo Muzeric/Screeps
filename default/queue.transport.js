@@ -4,6 +4,7 @@ const profiler = require('screeps-profiler');
 var queue = {
     mainRoomName: Game.rooms["sim"] ? "sim" : "W48N4",
     transportReserved: {},
+    indexByCreep: {},
 
     init: function () {
         Memory.transportRequests = Memory.transportRequests || {};
@@ -38,8 +39,8 @@ var queue = {
             console.log(`queueTransport.addRequest: can't calc any of these: from=${req_from}, to=${req_to}`);
             return null;
         }
-        let req_resourceType = resourceType || _.filter(Object.keys(req_from.store), k => req_from.store[k])[0];
-        let req_amount = amount || req_from.store[req_resourceType];
+        let req_resourceType = resourceType || ("store" in req_from ? _.filter(Object.keys(req_from.store), k => req_from.store[k])[0] : req_from.mineralType);
+        let req_amount = amount || ("store" in req_from ? req_from.store[req_resourceType] : req_from.mineralAmount);
         if (!req_resourceType || !req_amount) {
             console.log(`queueTransport.addRequest: can't calc any of these: resourceType=${req_resourceType}, amount=${req_amount}`);
             return null;
@@ -59,48 +60,75 @@ var queue = {
             got: 0,
             put: 0,
             createTime: Game.time,
+            creepID: null,
         };
         console.log("queueTransport.addRequest: ADDED: " + JSON.stringify(Memory.transportRequests[req_id]));
 
         return req_id;
     },
 
-    getRequest: function (reqID, creepID) {
-        if (!reqID) {
-            let request = this.getNewRequest(creepID);
-            if (creepID && request)
-                request.creepID = creepID;
-            return request;
-        }
-
+    loadRequest: function (reqID) {
         if (!(reqID in Memory.transportRequests)) {
-            console.log("queueTransport.getRequest: no request with id=" + reqID);
+            console.log("queueTransport.loadRequest: no request with id=" + reqID);
             return null;
         }
 
         let request = Memory.transportRequests[reqID];
-        if (creepID && request.creepID != creepID) {
-            console.log("queueTransport.getRequest: request (" + reqID + ") belongs to " + request.creepID + " instead of " + creepID);
-            return null;
-        }
-
         return request;
     },
 
-    getNewRequest: function (creepID) {
-        return _.filter(Memory.transportRequests, r => !r.creepID || r.creepID == creepID)[0];
+    checkRequest: function (creepID) {
+        return creepID in this.indexByCreep;
+    },
+
+    unbindRequest: function (reqID) {
+        let request = this.loadRequest(reqID);
+        if (!request)
+            return null;
+        
+        delete this.indexByCreep[request.creepID];
+        request.creepID = null;
+    },
+
+    getRequest: function (creepID) {
+        if (creepID in this.indexByCreep)
+            return this.loadRequest(this.indexByCreep[creepID]);
+        
+        let minCost;
+        let minRequest;
+        for (let request of _.filter(Memory.transportRequests, r => !r.creepID)) {
+            let to = Game.getObjectById(request.toID);
+            if (!to) {
+                this.badRequest(request.id);
+                continue;
+            }
+            if ("mineralAmount" in to && to.mineralAmount + request.amount >= to.mineralCapacity || "store" in to && _.sum(to.store) + request.amount >= to.storeCapacity)
+                continue;
+            if (minCost === undefined || request.createTime < minCost) {
+                minCost = request.createTime;
+                minRequest = request;
+            }
+        }
+
+        if (minRequest) {
+            minRequest.creepID = creepID;
+            this.indexByCreep[creepID] = minRequest.id;
+        }
+
+        return minRequest;
     },
 
     badRequest: function (reqID) {
         if (reqID in Memory.transportRequests) {
             console.log("queueTransport.badRequest: " + JSON.stringify(Memory.transportRequests[reqID]));
+            delete this.indexByCreep[Memory.transportRequests[reqID].creepID];
             delete Memory.transportRequests[reqID];
         }
         return;
     },
 
     gotResource: function (reqID, amount) {
-        let request = this.getRequest(reqID);
+        let request = this.loadRequest(reqID);
         if (!request)
             return null;
         
@@ -108,7 +136,7 @@ var queue = {
     },
 
     putResource: function (reqID, amount) {
-        let request = this.getRequest(reqID);
+        let request = this.loadRequest(reqID);
         if (!request)
             return null;
         
@@ -119,6 +147,7 @@ var queue = {
         request.amount -= amount;
         if (request.amount <= 0) {
             console.log("queueTransport: finished request: " + JSON.stringify(request));
+            delete this.indexByCreep[request.creepID];
             delete Memory.transportRequests[reqID];
             return null;
         }
@@ -133,16 +162,22 @@ var queue = {
             let got = 0;
             if (request.creepID) {
                 let creep = Game.getObjectById(request.creepID);
-                if (!creep)
+                if (!creep) {
                     request.creepID = null;
-                else
+                } else {
                     got += creep.carry[request.resourceType] || 0;
+                    if (request.creepID in this.indexByCreep)
+                        console.log("queueTransport: getReserved double (reqID=" + this.indexByCreep[request.creepID] + ") index for request=" + JSON.stringify(request));
+                    else
+                        this.indexByCreep[request.creepID] = reqID;
+                }
             }
             res[request.fromID] = res[request.fromID] || {};
             res[request.toID] = res[request.toID] || {};
-            // res[request.fromID][request.resourceType] = (res[request.fromID][request.resourceType] || 0) + request.amount - got;
-            res[request.fromID][request.resourceType] = (res[request.fromID][request.resourceType] || 0) - request.amount + got;
-            res[request.toID][request.resourceType] = (res[request.toID][request.resourceType] || 0) + request.amount;
+            if (got - request.amount)
+                res[request.fromID][request.resourceType] = (res[request.fromID][request.resourceType] || 0) - request.amount + got;
+            if (request.amount)
+                res[request.toID][request.resourceType] = (res[request.toID][request.resourceType] || 0) + request.amount;
         }
 
         return res;
