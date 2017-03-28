@@ -145,7 +145,7 @@ function setTarget (creep) {
         else if (target.structureType == STRUCTURE_TOWER && target.energy > target.energyCapacity * 0.9)
             cpriority = -30;
         else if (target.structureType == STRUCTURE_NUKER)
-            cpriority = -100;
+            cpriority = -49;
 
         let cost = cpath * 1.2 - cpriority;
         if (minCost === undefined || cost < minCost) {
