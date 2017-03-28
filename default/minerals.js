@@ -113,7 +113,7 @@ var minerals = {
         for (let type in this.needList[roomName]) {
             for (let rt in this.needList[roomName][type]) {
                 let amount = (storage.store[rt] || 0) + (terminal.store[rt] || 0) + global.cache.queueLab.getProducing(roomName, type, rt);
-                if (amount > this.needList[roomName][type][rt])
+                if (amount >= this.needList[roomName][type][rt])
                     continue;
                 
                 global.cache.queueLab.addRequest(roomName, rt, _.min([this.needList[roomName][type][rt] - amount, LAB_REQUEST_AMOUNT]), type);
