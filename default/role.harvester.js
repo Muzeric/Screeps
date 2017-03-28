@@ -139,7 +139,7 @@ function setTarget (creep) {
         if (wantCarry >= wantEnergy)
             cpriority = -100;
         else if (target.structureType == STRUCTURE_STORAGE)
-            cpriority = -50;
+            cpriority = -100;
         else if (target.structureType == STRUCTURE_TOWER && target.energy < target.energyCapacity * 0.9)
             cpriority = 100;
         else if (target.structureType == STRUCTURE_TOWER && target.energy > target.energyCapacity * 0.9)
