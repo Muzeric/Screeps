@@ -116,7 +116,8 @@ function setTarget (creep) {
         (creep.room.memory.structures[STRUCTURE_TOWER] || []),
         (creep.room.memory.structures[STRUCTURE_SPAWN] || []),
         (creep.room.memory.structures[STRUCTURE_TERMINAL] || []),
-        (creep.room.memory.structures[STRUCTURE_STORAGE] || []) ),
+        (creep.room.memory.structures[STRUCTURE_STORAGE] || []),
+        (creep.room.memory.structures[STRUCTURE_NUKER] || []) ),
     t => t.energy < t.energyCapacity);
 
     if (!targets.length) {
@@ -128,6 +129,8 @@ function setTarget (creep) {
     let minCost;
     for(let target of targets) {
         if (target.structureType == STRUCTURE_TERMINAL && target.energy > MIN_TERMINAL_ENERGY)
+            continue;
+        else if (target.structureType == STRUCTURE_NUKER && creep.room.memory.energy < REPAIR_ENERGY_LIMIT)
             continue;
         let wantEnergy = target.energyCapacity - target.energy;
         let cpath = creep.pos.getRangeTo(target.pos.x, target.pos.y);
@@ -141,6 +144,8 @@ function setTarget (creep) {
             cpriority = 100;
         else if (target.structureType == STRUCTURE_TOWER && target.energy > target.energyCapacity * 0.9)
             cpriority = -30;
+        else if (target.structureType == STRUCTURE_NUKER)
+            cpriority = 100;
 
         let cost = cpath * 1.2 - cpriority;
         if (minCost === undefined || cost < minCost) {

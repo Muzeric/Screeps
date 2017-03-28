@@ -336,7 +336,7 @@ Room.prototype.updateStructures = function() {
         } else if (s.structureType == STRUCTURE_ROAD) {
             costs.set(s.pos.x, s.pos.y, 1);
             room.refreshRoad(memory, s);
-        } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_LAB, STRUCTURE_EXTRACTOR, STRUCTURE_TERMINAL].indexOf(s.structureType) !== -1) {
+        } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_LAB, STRUCTURE_EXTRACTOR, STRUCTURE_TERMINAL, STRUCTURE_NUKER].indexOf(s.structureType) !== -1) {
             elem = {
                 structureType : s.structureType,
                 places : utils.getRangedPlaces(null, s.pos, 1).length,
