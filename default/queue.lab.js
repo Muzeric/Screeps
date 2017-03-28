@@ -6,6 +6,7 @@ var queue = {
 
     init: function () {
         Memory.labRequests = Memory.labRequests || {};
+        this.producing = {};
         for (let reqID in Memory.labRequests) {
             let request = Memory.labRequests[reqID];
             if (request.amount < LAB_REACTION_AMOUNT)

@@ -206,8 +206,8 @@ var minerals = {
         let transportableAmount2 = global.cache.queueTransport.getStoreWithReserved(storage, request.inputType2);
 
         if (
-               (freeAmount1 + futureAmount1 + transportableAmount1 >= request.amount) && (freeAmount1 + futureAmount1 + request.amount <= labInfo[labs[0]].mineralCapacity)
-            && (freeAmount2 + futureAmount2 + transportableAmount2 >= request.amount) && (freeAmount2 + futureAmount2 + request.amount <= labInfo[labs[1]].mineralCapacity)
+               (freeAmount1 + futureAmount1 + transportableAmount1 >= request.amount) && (labInfo[labs[0]].wantedAmount + request.amount <= labInfo[labs[0]].mineralCapacity)
+            && (freeAmount2 + futureAmount2 + transportableAmount2 >= request.amount) && (labInfo[labs[1]].wantedAmount + request.amount <= labInfo[labs[1]].mineralCapacity)
         ) {
             labInfo[labs[0]].mineralType = request.inputType1;
             labInfo[labs[0]].wantedAmount += request.amount;

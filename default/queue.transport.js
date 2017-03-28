@@ -8,6 +8,7 @@ var queue = {
 
     init: function () {
         Memory.transportRequests = Memory.transportRequests || {};
+        this.indexByCreep = {};
         this.transportReserved = this.getReserved();
     },
 
