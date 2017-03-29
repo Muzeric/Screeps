@@ -216,7 +216,6 @@ profiler.wrap(function() {
                 "spawnName": spawn.name,
                 "roomName" : need.roomName,
                 "energy" : energy - leftEnergy,
-                "body" : body,
                 "arg" : need.arg,
                 "countName": need.countName,
                 /*

@@ -117,7 +117,9 @@ function setTarget (creep) {
         (creep.room.memory.structures[STRUCTURE_SPAWN] || []),
         (creep.room.memory.structures[STRUCTURE_TERMINAL] || []),
         (creep.room.memory.structures[STRUCTURE_STORAGE] || []),
-        (creep.room.memory.structures[STRUCTURE_NUKER] || []) ),
+        (creep.room.memory.structures[STRUCTURE_NUKER] || []),
+        (creep.room.memory.structures[STRUCTURE_POWER_SPAWN] || [])
+    ),
     t => t.energy < t.energyCapacity);
 
     if (!targets.length) {
