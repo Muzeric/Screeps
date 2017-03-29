@@ -313,7 +313,7 @@ var minerals = {
             let transportableAmount = global.cache.queueTransport.getStoreWithReserved(storage, lab.mineralType);
             if (needAmount > 0 && transportableAmount > 0)
                 global.cache.queueTransport.addRequest(storage, lab, lab.mineralType, _.min([transportableAmount, needAmount]));
-            else if (!lab.wantedAmount && lab.mineralAmount >= LAB_REQUEST_AMOUNT && global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) > 0)
+            else if (!lab.wantedAmount && global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) > LAB_REQUEST_AMOUNT)
                 global.cache.queueTransport.addRequest(lab, null, lab.mineralType, global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) );
         }
     },
