@@ -178,12 +178,14 @@ var queue = {
                         this.indexByCreep[request.creepID] = reqID;
                 }
             }
-            res[request.fromID] = res[request.fromID] || {};
-            res[request.toID] = res[request.toID] || {};
-            if (got - request.amount)
+            if (got - request.amount) {
+                res[request.fromID] = res[request.fromID] || {};
                 res[request.fromID][request.resourceType] = (res[request.fromID][request.resourceType] || 0) - request.amount + got;
-            if (request.amount)
+            }
+            if (request.amount) {
+                res[request.toID] = res[request.toID] || {};
                 res[request.toID][request.resourceType] = (res[request.toID][request.resourceType] || 0) + request.amount;
+            }
         }
 
         return res;
