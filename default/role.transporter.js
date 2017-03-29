@@ -47,12 +47,17 @@ var role = {
                 return;
             }
 
+            let fromAmount = "mineralType" in from ? from.mineralAmount : from.store[request.resourceType];
+
             if (!creep.pos.isNearTo(from))
                 return creep.moveTo(from);
 
-            let amount = _.min([request.amount - (creep.carry[request.resourceType] || 0), creep.carryCapacity - _.sum(creep.carry), "mineralType" in from ? from.mineralAmount : from.store[request.resourceType]]);
-            if (!amount)
+            let amount = _.min([request.amount - (creep.carry[request.resourceType] || 0), creep.carryCapacity - _.sum(creep.carry), fromAmount]);
+            if (!amount) {
+                queue.unbindRequest(request.id);
                 return;
+            }
+
             let res = creep.withdraw(from, request.resourceType, amount);
             if (res < 0)
                 console.log(creep.name + ": withdraw from (" + from.id + ") with res=" + res);

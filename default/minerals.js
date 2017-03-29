@@ -10,8 +10,8 @@ var minerals = {
         },
         "W48N4": {
             "terminal": {
-                "LO": 5000,
-                "UL": 5000,
+                "LO": 50000,
+                "UL": 50000,
             },
         },
     },
@@ -214,7 +214,8 @@ var minerals = {
             labInfo[labs[1]].mineralType = request.inputType2;
             labInfo[labs[1]].wantedAmount += request.amount;
 
-            if (freeAmount1 && freeAmount2)
+            if (    freeAmount1 > LAB_REACTION_AMOUNT && freeAmount1 + labInfo[labs[0]].transportAmount > LAB_REACTION_AMOUNT 
+                 && freeAmount2 > LAB_REACTION_AMOUNT && freeAmount2 + labInfo[labs[1]].transportAmount > LAB_REACTION_AMOUNT)
                 return OK;
         } else {
             if (freeAmount1 + futureAmount1 + transportableAmount1 < request.amount) {

@@ -98,12 +98,17 @@ var queue = {
         let minCost;
         let minRequest;
         for (let request of _.filter(Memory.transportRequests, r => !r.creepID)) {
+            let from = Game.getObjectById(request.fromID);
             let to = Game.getObjectById(request.toID);
-            if (!to) {
+            if (!from || !to) {
                 this.badRequest(request.id);
                 continue;
             }
-            if ("mineralAmount" in to && to.mineralAmount + request.amount >= to.mineralCapacity || "store" in to && _.sum(to.store) + request.amount >= to.storeCapacity)
+            if ("mineralAmount" in to && to.mineralAmount + request.amount >= to.mineralCapacity
+                || "store" in to && _.sum(to.store) + request.amount >= to.storeCapacity
+                || "mineralAmount" in from && from.mineralAmount < request.amount
+                || "store" in from && from.store[request.resourceType] < request.amount
+            )
                 continue;
             if (minCost === undefined || request.createTime < minCost) {
                 minCost = request.createTime;
