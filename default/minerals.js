@@ -287,8 +287,9 @@ var minerals = {
         // deal nneds
 
         let labNeeds = {};
-        for (let reqID in Memory.labRequests) {
-            let request = Memory.labRequests[reqID];
+        //for (let reqID in Memory.labRequests) {
+        //    let request = Memory.labRequests[reqID];
+        for (let request of _.sortBy(Memory.labRequests, r => r.createTime)) {
             let labs = this.searchLabs(labInfo, request.inputType1, request.inputType2, request.outputType);
             if (!labs)
                 continue;
@@ -302,7 +303,7 @@ var minerals = {
                     labInfo[labs[0]].usedAmount += amount;
                     labInfo[labs[1]].usedAmount += amount;
                     labInfo[labs[2]].reacted = 1;
-                    global.cache.queueLab.produceAmount(reqID, amount);
+                    global.cache.queueLab.produceAmount(request.id, amount);
                 }    
             }       
         }
@@ -311,10 +312,12 @@ var minerals = {
             let lab = labInfo[labID];
             let needAmount = lab.wantedAmount - lab.mineralAmount - lab.transportAmount;
             let transportableAmount = global.cache.queueTransport.getStoreWithReserved(storage, lab.mineralType);
-            if (needAmount > 0 && transportableAmount > 0)
+            if (needAmount > 0 && transportableAmount > 0) {
+                //console.log(`${labID}: wantedAmount=${lab.wantedAmount}, mineralAmount=${lab.mineralAmount}, transportAmount=${lab.transportAmount}, transportableAmount=${transportableAmount}, usedAmount=${lab.usedAmount}`);
                 global.cache.queueTransport.addRequest(storage, lab, lab.mineralType, _.min([transportableAmount, needAmount]));
-            else if (!lab.wantedAmount && global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) > LAB_REQUEST_AMOUNT)
+            } else if (!lab.wantedAmount && global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) > LAB_REQUEST_AMOUNT) {
                 global.cache.queueTransport.addRequest(lab, null, lab.mineralType, global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) );
+            }
         }
     },
 };
