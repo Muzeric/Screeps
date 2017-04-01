@@ -303,10 +303,10 @@ var minerals = {
                     labInfo[labs[1]].usedAmount += amount;
                     labInfo[labs[2]].reacted = 1;
                     global.cache.queueLab.produceAmount(request.id, amount);
-                    labGot[request.resourceType] = 1;
-                } else {
-                    labNeed[request.resourceType] = 1;
+                    labGot[request.outputType] = 1;
                 }
+            } else if (check == ERR_NOT_ENOUGH_RESOURCES) {
+                labNeed[request.outputType] = 1;
             }
         }
 
