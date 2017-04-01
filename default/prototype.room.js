@@ -456,6 +456,7 @@ Room.prototype.updateStructures = function() {
     for (let extractor of (memory.structures[STRUCTURE_EXTRACTOR] || [])) {
         let container = _.filter(memory.structures[STRUCTURE_CONTAINER], c => extractor.pos.inRangeTo(c.pos, 1))[0];
         if (container) {
+            extractor.pair = 1;
             extractor.cID = container.id;
             extractor.betweenPos = container.pos;
         }
