@@ -286,13 +286,8 @@ var minerals = {
             };
         }
 
-        // Get requests
-        // sum needs
-        // deal nneds
-
-        let labNeeds = {};
-        //for (let reqID in Memory.labRequests) {
-        //    let request = Memory.labRequests[reqID];
+        let labGot = {};
+        let labNeed = {};
         for (let request of _.sortBy(Memory.labRequests, r => r.createTime)) {
             let labs = this.searchLabs(labInfo, request.inputType1, request.inputType2, request.outputType);
             if (!labs)
@@ -308,8 +303,17 @@ var minerals = {
                     labInfo[labs[1]].usedAmount += amount;
                     labInfo[labs[2]].reacted = 1;
                     global.cache.queueLab.produceAmount(request.id, amount);
-                }    
-            }       
+                    labGot[request.resourceType] = 1;
+                } else {
+                    labNeed[request.resourceType] = 1;
+                }
+            }
+        }
+
+        let labNeedCount = 0;
+        for (let rt in labNeed) {
+            if (!(rt in labGot))
+                labNeedCount++;
         }
 
         for (let labID in labInfo) {
@@ -319,8 +323,11 @@ var minerals = {
             if (needAmount > 0 && transportableAmount > 0) {
                 //console.log(`${labID}: wantedAmount=${lab.wantedAmount}, mineralAmount=${lab.mineralAmount}, transportAmount=${lab.transportAmount}, transportableAmount=${transportableAmount}, usedAmount=${lab.usedAmount}`);
                 global.cache.queueTransport.addRequest(storage, lab, lab.mineralType, _.min([transportableAmount, needAmount]));
-            } else if (!lab.wantedAmount && global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) > LAB_REQUEST_AMOUNT) {
+                if (!lab.mineralAmount && labNeedCount > 0)
+                    labNeedCount--;
+            } else if (!lab.wantedAmount && global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) > (labNeedCount > 0 ? 0 : LAB_REQUEST_AMOUNT)) {
                 global.cache.queueTransport.addRequest(lab, null, lab.mineralType, global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) );
+                labNeedCount--;
             }
         }
     },
