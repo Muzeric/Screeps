@@ -293,6 +293,11 @@ var minerals = {
             if (!labs)
                 continue;
             let check = this.checkAndRequestAmount(labInfo, labs, request, storage);
+            if (check == OK)
+                labGot[request.outputType] = 1;
+            else
+                labNeed[request.outputType] = 1;
+
             if (check == OK && !labInfo[labs[2]].cooldown) {
                 let labsObj = this.loadLabs.apply(this, labs);
                 let res = labsObj[2].runReaction(labsObj[0], labsObj[1]);
@@ -303,10 +308,7 @@ var minerals = {
                     labInfo[labs[1]].usedAmount += amount;
                     labInfo[labs[2]].reacted = 1;
                     global.cache.queueLab.produceAmount(request.id, amount);
-                    labGot[request.outputType] = 1;
                 }
-            } else if (check == ERR_NOT_ENOUGH_RESOURCES) {
-                labNeed[request.outputType] = 1;
             }
         }
 
@@ -315,6 +317,8 @@ var minerals = {
             if (!(rt in labGot))
                 labNeedCount++;
         }
+
+        //console.log("need=" + JSON.stringify(labNeed) + ", got=" + JSON.stringify(labGot) + ", count=" + labNeedCount);
 
         for (let labID in labInfo) {
             let lab = labInfo[labID];
