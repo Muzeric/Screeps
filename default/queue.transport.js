@@ -108,6 +108,7 @@ var queue = {
                 || "store" in to && _.sum(to.store) + request.amount >= to.storeCapacity
                 || "mineralAmount" in from && from.mineralAmount < request.amount
                 || "store" in from && from.store[request.resourceType] < request.amount
+                || "mineralType" in to && to.mineralType && to.mineralType != request.resourceType
             )
                 continue;
             if (minCost === undefined || request.createTime < minCost) {

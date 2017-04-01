@@ -59,18 +59,26 @@ var role = {
         }
 	},
 	
-    create: function(energy) {
-        energy -= 50;
-        let body = [CARRY];
+    create: function(energy, long) {
+        let body = [];
+        let clim = long ? 5 : 1;
         let wlim = 5;
-        let fat = 1;
-        while (energy >= 100 && wlim) {
-            if (energy >= 100) {
+        let fat = 0;
+        while (energy >= 100 && (wlim || clim)) {
+            if (energy >= 100 && wlim) {
 	            body.push(WORK);
 	            wlim--;
                 fat++;
 	            energy -= 100;
 	        }
+
+            while (energy >= 50 && clim) {
+                body.push(CARRY);
+                clim--;
+                fat++;
+                energy -= 50;
+            }
+
             if (fat > 0 && energy >= 50) {
                 body.push(MOVE);
 	            energy -= 50;
