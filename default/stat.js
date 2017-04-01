@@ -56,7 +56,7 @@ var stat = {
             Memory.stat.CPUHistory["_total"].energy = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.energy);
             Memory.stat.CPUHistory["_total"].gcl = Game.gcl.progress - Memory.stat.lastGcl;
             Memory.stat.CPUHistory["_total"].paths = _.sum(Memory.rooms, r => r.pathCount || 0);
-            Memory.stat.CPUHistory["_total"].repairs = _.sum(Memory.rooms, r => r.repairHits || 0);
+            Memory.stat.CPUHistory["_total"].repairs = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.repairHits || 0);
             Game.notify(
                 "CPUHistory:" + Game.time + ":" + 
                 utils.lzw_encode(JSON.stringify(Memory.stat.CPUHistory, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} )) +
