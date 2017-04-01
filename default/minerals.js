@@ -258,15 +258,19 @@ var minerals = {
             let transportAmount = 0;
             let transportInfo = global.cache.queueTransport.getTypeAndAmount(lab.id);
             if (transportInfo) {
-                let arr = _.map(transportInfo, (v,k) => [k,v]);
-                if (arr.length > 1)
-                    console.log(`${roomName}: checkLabs got lab ${lab.id} with >1 resourceType transportInfo: ` + JSON.stringify(transportInfo));
+                //let arr = _.map(transportInfo, (v,k) => [k,v]);
+                //if (arr.length > 1)
+                    //console.log(`${roomName}: checkLabs got lab ${lab.id} with >1 resourceType transportInfo: ` + JSON.stringify(transportInfo));
 
-                if (mineralType && mineralType != arr[0][0] && arr[0][1] > 0) {
-                    console.log(`${roomName}: checkLabs got lab ${lab.id} with mineralType=${mineralType} and transport req with mineralType=${arr[0][0]}`);
-                } else if (arr[0][1] > 0) {
-                    mineralType = arr[0][0];
-                    transportAmount = arr[0][1];
+                for (let mt in transportInfo) {
+                    let am = transportInfo[mt];
+                
+                    if (mineralType && mineralType == mt || !mineralType & am > 0) {
+                        mineralType = mt;
+                        transportAmount += am;
+                    } else if (mineralType && mineralType != mt && am > 0) {
+                        console.log(`${roomName}: checkLabs got lab ${lab.id} with mineralType=${mineralType} and transport req with mineralType=${mt}`);
+                    }
                 }
             }
             labInfo[lab.id] = {
