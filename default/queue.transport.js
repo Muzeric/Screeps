@@ -164,6 +164,7 @@ var queue = {
 
     getReserved: function () {
         let res = {};
+        let cache = {};
         for (let reqID in Memory.transportRequests) {
             let request = Memory.transportRequests[reqID];
             let got = 0;
@@ -177,6 +178,20 @@ var queue = {
                         console.log("queueTransport: getReserved double (reqID=" + this.indexByCreep[request.creepID] + ") index for request=" + JSON.stringify(request));
                     else
                         this.indexByCreep[request.creepID] = reqID;
+                }
+            } else {
+                let key = request.resourceType + "-" + request.fromID + "-" + request.toID;
+                if (key in cache) {
+                    let cachedRequest = this.loadRequest(cache[key]);
+                    if (cachedRequest.amount + request.amount > MERGE_TRANSPORT_AMOUNT) {
+                        cache[key] = reqID;
+                    } else {
+                        //cachedRequest.amount += request.amount;
+                        console.log("Merged transport request: " + JSON.stringify(request) + " to " + JSON.stringify(cachedRequest));
+                        //this.badRequest(request.id);
+                    }
+                } else {
+                    cache[key] = reqID;
                 }
             }
             if (got - request.amount) {

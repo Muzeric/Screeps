@@ -33,3 +33,4 @@ global.LAB_REQUEST_AMOUNT = 1000;
 global.LAB_REQUEST_TYPE_TERMINAL = "terminal";
 global.LAB_REQUEST_TYPE_REACTION = "reaction";
 global.LAB_REQUEST_TYPE_BOOST = "boost";
+global.MERGE_TRANSPORT_AMOUNT = 500;
