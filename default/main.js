@@ -256,6 +256,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let sourcesWorkCapacity = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom ? s.energyCapacity : 0);
     let antikeepersCount = (creepsCount["antikeeper-a"] || 0) + (creepsCount["antikeeper-r"] || 0);
     let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
+    let pairedExtractor = room.getPairedExtractor(1);
 
     let needSpeed = sourcesCapacity / ENERGY_REGEN_TIME;
     let needWorkSpeed = sourcesWorkCapacity / ENERGY_REGEN_TIME;
@@ -368,10 +369,19 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "minEnergy" : 1200,
         "range" : 3,
     },{
+        role : "mineralminer",
+        "count" : antikeepersCount && pairedExtractor ? 1 : 0,
+        "arg": pairedExtractor.buildContainerID ? 1 : 0,
+        "priority" : 18,
+        "minEnergy": 700,
+        "wishEnergy" : pairedExtractor.buildContainerID ? 1000 : 700,
+        "maxEnergy" : pairedExtractor.buildContainerID ? 1000 : 700,
+        "range": 3,
+    },{
         "role" : "longharvester",
         "count" : antikeepersCount && needHarvester ? (creepsCount["longharvester"] || 0) + 1 : 0,
         "arg" : {work: workerHarvester, attack: 0},
-        "priority" : 18,
+        "priority" : 19,
         "minEnergy" : 550,
         "wishEnergy" : 1500,
         "range" : 3,
@@ -404,7 +414,7 @@ function getRoomLimits (room, creepsCount) {
     let countHarvester = _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 15);
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
     let extraUpgraders = utils.clamp( _.floor(memory.energy / UPGRADERS_EXTRA_ENERGY), 0, 4);
-    let pairedExtractor = room.getPairedExtractor(1) ? 1 : 0;
+    let pairedExtractor = room.getPairedExtractor(1);
     
     let limits = [];
     limits.push({
@@ -470,10 +480,12 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : 3000,
     },{
             role : "mineralminer",
-            "count" : pairedExtractor,
+            "count" : pairedExtractor ? 1 : 0,
+            "arg": pairedExtractor.buildContainerID ? 1 : 0,
             "priority" : 7,
-            "wishEnergy" : 700,
-            "maxEnergy" : 700,
+            "minEnergy": 700,
+            "wishEnergy" : pairedExtractor.buildContainerID ? 1000 : 700,
+            "maxEnergy" : pairedExtractor.buildContainerID ? 1000 : 700,
     },{
             role : "transporter",
             "count" : room.name == global.cache.queueTransport.mainRoomName ? 1 : 0,

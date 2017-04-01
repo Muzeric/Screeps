@@ -245,7 +245,7 @@ Room.prototype.getPairedContainer = function() {
 Room.prototype.getPairedExtractor = function(withAmount) {
     if (STRUCTURE_EXTRACTOR in this.memory.structures 
         && this.memory.structures[STRUCTURE_EXTRACTOR].length
-        && this.memory.structures[STRUCTURE_EXTRACTOR][0].pair 
+        && (this.memory.structures[STRUCTURE_EXTRACTOR][0].cID || this.memory.structures[STRUCTURE_EXTRACTOR][0].buildContainerID)
         && (!withAmount || this.memory.structures[STRUCTURE_EXTRACTOR][0].mineralAmount > 0)
     )
         return this.memory.structures[STRUCTURE_EXTRACTOR][0];
@@ -456,13 +456,12 @@ Room.prototype.updateStructures = function() {
     for (let extractor of (memory.structures[STRUCTURE_EXTRACTOR] || [])) {
         let container = _.filter(memory.structures[STRUCTURE_CONTAINER], c => extractor.pos.inRangeTo(c.pos, 1))[0];
         if (container) {
-            extractor.pair = 1;
             extractor.cID = container.id;
             extractor.betweenPos = container.pos;
         }
     }
 
-    for (let source of _.filter([].concat(memory.structures[STRUCTURE_SOURCE], memory.structures[STRUCTURE_EXTRACTOR] || []), s => !s.pair && s.rangedPlaces.length)) {
+    for (let source of _.filter([].concat(memory.structures[STRUCTURE_SOURCE] || [], memory.structures[STRUCTURE_EXTRACTOR] || []), s => !s.pair && s.rangedPlaces.length)) {
         let contPos;
         let maxPlaces = 0;
         for (let pos of source.rangedPlaces) {

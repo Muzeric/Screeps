@@ -3,14 +3,22 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        if (!utils.checkInRoomAndGo(creep))
+        let room = Game.rooms[creep.memory.roomName];
+        if (!room) {
+            console.log(creep.name + ": no Game.rooms[" + creep.memory.roomName + "]");
             return;
+        }
 
         if(!creep.memory.exctractorID || !creep.memory.cID || !creep.memory.mineralID) {
-            let extractor = creep.room.getPairedExtractor();
+            let extractor = room.getPairedExtractor();
 
             if (!extractor) {
                 console.log(creep.name + ": can't get extractor");
+                return;
+            }
+
+            if (!extractor.cID && extractor.buildContainerID) {
+                buildContainer(creep, extractor.buildContainerID);
                 return;
             }
 
@@ -59,9 +67,9 @@ var role = {
         }
 	},
 	
-    create: function(energy, long) {
+    create: function(energy, build) {
         let body = [];
-        let clim = long ? 5 : 1;
+        let clim = build ? 5 : 1;
         let wlim = 5;
         let fat = 0;
         while (energy >= 100 && (wlim || clim)) {
@@ -89,6 +97,28 @@ var role = {
 	    return [body, energy];
 	},
 };
+
+function buildContainer (creep, buildContainerID) {
+    let target = Game.getObjectById(buildContainerID);
+    if (!target || !("progress" in target))
+        return ERR_INVALID_TARGET;
+    
+    if (creep.memory.building && creep.carry.energy == 0) {
+        creep.memory.building = false;
+    } else if (!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
+        creep.memory.building = true;
+        creep.memory.energyID = null;
+    }
+
+    if (creep.memory.building) {
+        if (creep.build(target) == ERR_NOT_IN_RANGE)
+            creep.moveTo(target);
+    } else {
+        creep.findSourceAndGo();
+    }
+
+    return OK;
+}
 
 module.exports = role;
 profiler.registerObject(role, 'roleMineralMiner');
