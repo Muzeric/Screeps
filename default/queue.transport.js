@@ -186,9 +186,9 @@ var queue = {
                     if (cachedRequest.amount + request.amount > MERGE_TRANSPORT_AMOUNT) {
                         cache[key] = reqID;
                     } else {
-                        //cachedRequest.amount += request.amount;
+                        cachedRequest.amount += request.amount;
                         console.log("Merged transport request: " + JSON.stringify(request) + " to " + JSON.stringify(cachedRequest));
-                        //this.badRequest(request.id);
+                        this.badRequest(request.id);
                     }
                 } else {
                     cache[key] = reqID;
