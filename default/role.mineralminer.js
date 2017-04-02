@@ -5,14 +5,14 @@ var role = {
     run: function(creep) {
         if (Game.roomsHelper.getHostilesCount(creep.room.name) > 0) {
 			creep.say("AAA");
-			creep.moveTo(Game.spawns[creep.memory.spawnName].room.controller);
+			creep.moveTo(Game.rooms[creep.memory.roomName].controller);
 			return;
 		}
 
         if (Game.roomsHelper.getHostilesCount(creep.memory.roomName) > 0) {
             creep.say("AAA");
             if (creep.pos.isBorder())
-                creep.moveTo(Game.spawns[creep.memory.spawnName].room.controller);
+                creep.moveTo(Game.rooms[creep.memory.roomName].controller);
             return;
         }
 
