@@ -375,8 +375,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "arg": pairedExtractor && pairedExtractor.buildContainerID ? 1 : 0,
         "priority" : 18,
         "minEnergy": 700,
-        "wishEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 1900 : 700,
-        "maxEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 1900 : 700,
+        "wishEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 3150 : 3950,
+        "maxEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 3150 : 3950,
         "range": 3,
     },{
         "role" : "longharvester",
@@ -485,8 +485,8 @@ function getRoomLimits (room, creepsCount) {
             "arg": pairedExtractor && pairedExtractor.buildContainerID ? 1 : 0,
             "priority" : 7,
             "minEnergy": 700,
-            "wishEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 1900 : 700,
-            "maxEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 1900 : 700,
+            "wishEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 3150 : 3950,
+            "maxEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 3150 : 3950,
     },{
             role : "transporter",
             "count" : room.name == global.cache.queueTransport.mainRoomName ? 1 : 0,

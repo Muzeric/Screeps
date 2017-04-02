@@ -86,7 +86,7 @@ var role = {
     create: function(energy, build) {
         let body = [];
         let clim = build ? 17 : 1;
-        let wlim = 5;
+        let wlim = build ? 15 : 31;
         let fat = 0;
         while (energy >= 100 && (wlim || clim)) {
             if (energy >= 100 && wlim) {
