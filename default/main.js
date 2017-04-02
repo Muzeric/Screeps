@@ -42,7 +42,7 @@ profiler.wrap(function() {
 
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
-            console.log(name + " DEAD (" + Memory.creeps[name].roomName + ")");
+            //console.log(name + " DEAD (" + Memory.creeps[name].roomName + ")");
             global.cache.stat.die(name);
             delete Memory.creeps[name];
         } else if (Game.creeps[name].memory.errors > 0) {
