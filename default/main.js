@@ -489,7 +489,7 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 3150 : 3950,
     },{
             role : "transporter",
-            "count" : room.name == global.cache.queueTransport.mainRoomName ? 3 : 0,
+            "count" : room.name == global.cache.queueTransport.mainRoomName ? _.ceil(_.keys(Memory.transportRequests).length / 8) : 0,
             "priority" : 8,
             "wishEnergy" : 1000,
             "maxEnergy" : 1000,
