@@ -28,7 +28,7 @@ var role = {
         if (room.memory.type != 'my') {
             if (!creep.memory.filled && creep.carry.energy > 0 && _.sum(creep.carry) == creep.carryCapacity) {
                 creep.memory.filled = 1;
-            } else if (!creep.memory.filled) {
+            } else if (!creep.memory.filled && _.sum(creep.carry) < creep.carryCapacity) {
                 creep.findSourceAndGo();
                 return;
             }
