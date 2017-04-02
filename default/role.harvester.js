@@ -16,30 +16,8 @@ var role = {
 	    }
 	    
 	    if(!creep.memory.transfering) {
-            //creep.memory.needRepair = 0;
             creep.findSourceAndGo();
         } else {
-            /*
-            if (creep.ticksToLive < 500)
-                creep.memory.needRepair = 1;
-            else if (creep.ticksToLive > 1200)
-                creep.memory.needRepair = 0;
-
-            if (creep.memory.needRepair) {
-                let spawns = creep.room.find(FIND_MY_SPAWNS);
-                if (!spawns.length) {
-                    console.log(creep.name + ": needRepair, but no spawns in room");
-                    return;
-                }
-                let spawn = spawns.sort(function(a,b) {return (a.spawning ? a.spawning.remainingTime : 0) - (b.spawning ? b.spawning.remainingTime : 0);})[0];
-                if (spawn.energy < spawn.energyCapacity)
-                    creep.transfer(spawn, RESOURCE_ENERGY);
-                if(spawn.renewCreep(creep) == ERR_NOT_IN_RANGE)
-                    creep.moveTo(spawn);
-                return;
-            }
-            */
-
             let target = getTarget(creep);
             if(!target) {
                 console.log(creep.name + ": target "+ creep.memory.targetID +" dead");
@@ -49,7 +27,6 @@ var role = {
 
             if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 var res = creep.moveTo(target);
-                //console.log(creep.name + " go to "+ target.pos.x + "," + target.pos.y +" res=" + res);
                 if(res == ERR_NO_PATH) {
                     creep.memory.errors++;
                 } else if (res == OK) {
