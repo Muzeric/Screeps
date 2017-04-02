@@ -317,12 +317,13 @@ var minerals = {
             let lab = labInfo[labID];
             let needAmount = lab.wantedAmount - lab.mineralAmount - lab.transportAmount;
             let transportableAmount = global.cache.queueTransport.getStoreWithReserved(storage, lab.mineralType);
+            let stored = global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType);
             if (needAmount > 0 && transportableAmount > 0) {
                 //console.log(`${labID}: wantedAmount=${lab.wantedAmount}, mineralAmount=${lab.mineralAmount}, transportAmount=${lab.transportAmount}, transportableAmount=${transportableAmount}, usedAmount=${lab.usedAmount}`);
                 global.cache.queueTransport.addRequest(storage, lab, lab.mineralType, _.min([transportableAmount, needAmount]));
-            } else if (!lab.wantedAmount && !lab.cooldown && global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) >= (lab.need ? LAB_REQUEST_AMOUNT : 0)) {
-                console.log(`id=${lab.id}, need=${lab.need}, amount=` + global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType));
-                global.cache.queueTransport.addRequest(lab, null, lab.mineralType, global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType) );
+            } else if (!lab.wantedAmount && !lab.cooldown && (lab.need ? stored >= LAB_REQUEST_AMOUNT : stored > 0)) {
+                console.log(`id=${lab.id}, need=${lab.need}, amount=` + stored);
+                global.cache.queueTransport.addRequest(lab, null, lab.mineralType, stored );
             }
         }
     },
