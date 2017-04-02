@@ -77,6 +77,9 @@ my $extra = {
   repairs => sub {
     return int(($_[0] || 0) / 10000);
   },
+  store => sub {
+    return int(($_[0] || 0) / 100);
+  },
 };
 open(STAT, ">stat_total.csv")
 or die $@;

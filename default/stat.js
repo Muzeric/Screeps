@@ -54,6 +54,7 @@ var stat = {
             Memory.stat.CPUHistory["_total"].bucket = Game.cpu.bucket;
             Memory.stat.CPUHistory["_total"].creeps = _.keys(Game.creeps).length;
             Memory.stat.CPUHistory["_total"].energy = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.energy);
+            Memory.stat.CPUHistory["_total"].store = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => _.sum(r.store, (v,k) => k == "energy" ? 0 : v));
             Memory.stat.CPUHistory["_total"].gcl = Game.gcl.progress - Memory.stat.lastGcl;
             Memory.stat.CPUHistory["_total"].paths = _.sum(Memory.rooms, r => r.pathCount || 0);
             Memory.stat.CPUHistory["_total"].repairs = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.repairHits || 0);
