@@ -12,7 +12,7 @@ var role = {
         let underAttack = creep.memory["lastUnderAttack"] ? 1 : 0;
         if (!("lastHits" in creep.memory))
             creep.memory["lastHits"] = creep.hits;
-        if (creep.hits - creep.memory["lastHits"] < 0) {
+        if (creep.hits < creep.memory["lastHits"]) {
             creep.say("WTF!");
             underAttack = 2;
             creep.memory["lastUnderAttack"] = 1;

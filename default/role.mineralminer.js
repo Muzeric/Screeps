@@ -25,6 +25,15 @@ var role = {
             return;
         }
 
+        if (room.memory.type != 'my') {
+            if (!creep.memory.filled && creep.carry.energy > 0 && _.sum(creep.carry) == creep.carryCapacity) {
+                creep.memory.filled = 1;
+            } else if (!creep.memory.filled) {
+                creep.findSourceAndGo();
+                return;
+            }
+        }
+
         if(!creep.memory.exctractorID || !creep.memory.cID || !creep.memory.mineralID) {
             let extractor = room.getPairedExtractor();
 
@@ -52,6 +61,18 @@ var role = {
                 console.log(creep.name + " problem getting container by id=" + creep.memory.cID);
                 creep.memory.cID = null;
                 return;
+            }
+
+            if (room.memory.type != 'my') {
+                if (container.hits < container.hitsMax && creep.carry.energy > 0) {
+                    creep.repair(container);
+                    return;
+                } else if (container.hits < container.hitsMax * 0.6 && creep.carry.energy == 0) {
+                    for (let rt in creep.carry)
+                        creep.transfer(container, rt);
+                    creep.memory.filled = 0;
+                    return;
+                }
             }
 
             let source = Game.getObjectById(creep.memory.extractorID);
@@ -121,7 +142,7 @@ function buildContainer (creep, buildContainerID) {
     
     if (creep.memory.building && creep.carry.energy == 0) {
         creep.memory.building = false;
-    } else if (!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
+    } else if (!creep.memory.building && creep.carry.energy > 0 && _.sum(creep.carry) == creep.carryCapacity) {
         creep.memory.building = true;
         creep.memory.energyID = null;
     }

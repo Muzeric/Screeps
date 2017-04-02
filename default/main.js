@@ -372,11 +372,11 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     },{
         role : "mineralminer",
         "count" : antikeepersCount && pairedExtractor ? 1 : 0,
-        "arg": pairedExtractor && pairedExtractor.buildContainerID ? 1 : 0,
+        "arg": pairedExtractor ? 1 : 0,
         "priority" : 18,
         "minEnergy": 700,
-        "wishEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 3150 : 3950,
-        "maxEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 3150 : 3950,
+        "wishEnergy" : 3150,
+        "maxEnergy" : 3150,
         "range": 3,
     },{
         "role" : "longharvester",
