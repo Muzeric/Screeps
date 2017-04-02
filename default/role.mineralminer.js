@@ -96,7 +96,7 @@ var role = {
 	            energy -= 100;
 	        }
 
-            while (energy >= 50 && clim) {
+            if (energy >= 50 && clim) {
                 body.push(CARRY);
                 clim--;
                 fat++;
