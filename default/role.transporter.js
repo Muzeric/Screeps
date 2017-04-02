@@ -29,6 +29,11 @@ var role = {
             } else {
                 return creep.moveTo(storage);
             }
+        } else if (_.sum(creep.carry) == 0 && creep.ticksToLive < ALIVE_TICKS) {
+            let spawn = Game.spawns[creep.memory.spawnName];
+            if (spawn.recycleCreep(creep) == ERR_NOT_IN_RANGE)
+                creep.moveTo(spawn);
+            return;
         }
 
         let request = queue.getRequest(creep.id);
