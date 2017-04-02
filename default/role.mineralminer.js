@@ -89,7 +89,9 @@ var role = {
                 return;
             }
 
-            if (!source.cooldown && (_.sum(container.store) < container.storeCapacity || _.sum(creep.carry) < creep.carryCapacity))
+            if (creep.carry[mineral.mineralType] > MINERALMINER_CARRY_LIMIT || creep.carry[mineral.mineralType] > 0 && creep.ticksToLive < KEEPLAIR_LEAVE_TIME * 2)
+                creep.transfer(container, mineral.mineralType);
+            else if (!source.cooldown && (_.sum(container.store) < container.storeCapacity || _.sum(creep.carry) < creep.carryCapacity))
                 creep.harvest(mineral);
 
             if (global.cache.queueTransport.getStoreWithReserved(container, mineral.mineralType) > TRANSPORTER_MIN_CONTAINER_AMOUNT)
