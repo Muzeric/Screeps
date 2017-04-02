@@ -10,6 +10,9 @@ var role = {
 			return;
 		}
 
+        if (creep.room.memory.type == 'lair' && !creep.goFromKeepers())
+            return;
+
         let queue = global.cache.queueTransport;
 
         let terminal = queue.getDefaultStorage();
