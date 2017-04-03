@@ -123,9 +123,6 @@ var minerals = {
         let storage = room.storage;
         if (!storage)
             return null;
-        let terminal = room.terminal;
-        if (!terminal)
-            return null;
         
         for (let type in this.needList[roomName]) {
             for (let rt in this.needList[roomName][type]) {
