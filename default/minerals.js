@@ -262,9 +262,6 @@ var minerals = {
         let storage = room.storage;
         if (!storage)
             return null;
-        let terminal = room.terminal;
-        if (!terminal)
-            return null;
         let labs = room.getLabs();
         if (!labs.length)
             return null;
