@@ -43,7 +43,10 @@ var minerals = {
         let credits = 0;
         let energy = 0;
         let leftAmount = amount;
-        for (let order of _.filter(this.orders, o => o.resourceType == resourceType).sort((a,b) => b.price - a.price)) {
+        for (let order of _.filter(this.orders, o => o.resourceType == resourceType).sort((a,b) =>
+            (b.price - Game.market.calcTransactionCost(_.min([b.remainingAmount, amount]), b.roomName, roomName) * 0.01)
+            - (a.price - Game.market.calcTransactionCost(_.min([a.remainingAmount, amount]), a.roomName, roomName) * 0.01)
+        )) {
             if (leftAmount <= 0)
                 break;
             let curAmount = _.min([leftAmount, order.remainingAmount]);
@@ -59,8 +62,11 @@ var minerals = {
         let res = {};
         for (let elem1 of elems) {
             let rt1 = elem1.resourceType;
-            if (!(rt1 in REACTIONS))
+            if (!(rt1 in REACTIONS)) {
+                let cost = this.getMaxCost(rt1, elem1.amount, roomName);
+                res[rt1] = {resourceTypes: null, amount: cost.amount, credits: cost.credits, energy: cost.energy};
                 continue;
+            }
             for (let elem2 of elems) {
                 let rt2 = elem2.resourceType;
                 let amount = _.min([elem1.amount, elem2.amount]);
