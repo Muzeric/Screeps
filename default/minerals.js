@@ -62,9 +62,11 @@ var minerals = {
         let res = {};
         for (let elem1 of elems) {
             let rt1 = elem1.resourceType;
-            if (!(rt1 in REACTIONS)) {
+            if (!(rt1 in this.library)) {
                 let cost = this.getMaxCost(rt1, elem1.amount, roomName);
                 res[rt1] = {resourceTypes: null, amount: cost.amount, credits: cost.credits, energy: cost.energy};
+                continue;
+            } else if (!(rt1 in REACTIONS)) {
                 continue;
             }
             for (let elem2 of elems) {
