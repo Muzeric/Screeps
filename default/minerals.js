@@ -16,6 +16,12 @@ var minerals = {
                 "OH": 2000,
             },
         },
+        "W46N3": {
+            "terminal": {
+                "LH": 2000,
+                "OH": 2000,
+            },
+        },
     },
     library: {},
     orders: null,
@@ -332,7 +338,7 @@ var minerals = {
                 global.cache.queueTransport.addRequest(storage, lab, lab.mineralType, _.min([transportableAmount, needAmount]));
             } else if (!lab.wantedAmount && !lab.cooldown && (lab.need ? stored >= LAB_REQUEST_AMOUNT : stored > 0)) {
                 console.log(`id=${lab.id}, need=${lab.need}, amount=` + stored);
-                global.cache.queueTransport.addRequest(lab, null, lab.mineralType, stored );
+                global.cache.queueTransport.addRequest(lab, storage, lab.mineralType, stored );
             }
         }
     },
