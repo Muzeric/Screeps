@@ -16,12 +16,6 @@ var minerals = {
                 "OH": 2000,
             },
         },
-        "W46N3": {
-            "terminal": {
-                "LH": 2000,
-                "OH": 2000,
-            },
-        },
     },
     library: {},
     orders: null,

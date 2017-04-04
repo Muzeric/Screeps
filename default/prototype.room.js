@@ -257,7 +257,7 @@ Room.prototype.getLabs = function () {
 }
 
 Room.prototype.getRepairLimit = function () {
-    return this.memory.energy > REPAIR_ENERGY_LIMIT ? REPAIR_LIMIT_HIGH : REPAIR_LIMIT;
+    return this.storage && this.storage.store.energy > REPAIR_ENERGY_LIMIT ? REPAIR_LIMIT_HIGH : REPAIR_LIMIT;
 }
 
 Room.prototype.getConstructions = function () {
