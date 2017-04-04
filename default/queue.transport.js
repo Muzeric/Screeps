@@ -104,8 +104,8 @@ var queue = {
                 this.badRequest(request.id);
                 continue;
             }
-            if ("mineralAmount" in to && to.mineralAmount + request.amount >= to.mineralCapacity
-                || "store" in to && _.sum(to.store) + request.amount >= to.storeCapacity
+            if ("mineralAmount" in to && to.mineralAmount + request.amount > to.mineralCapacity
+                || "store" in to && _.sum(to.store) + request.amount > to.storeCapacity
                 || "mineralAmount" in from && from.mineralAmount < request.amount
                 || "store" in from && from.store[request.resourceType] < request.amount
                 || "mineralType" in to && to.mineralType && to.mineralType != request.resourceType
