@@ -293,7 +293,7 @@ var minerals = {
         }
 
         let labGot = {};
-        for (let request of _.sortBy(Memory.labRequests, r => r.createTime && r.roomName == roomName)) {
+        for (let request of _.sortBy(_.filter(Memory.labRequests, r => r.roomName == roomName), r => r.createTime)) {
             let labs = this.searchLabs(labInfo, request.inputType1, request.inputType2, request.outputType);
             if (!labs)
                 continue;
