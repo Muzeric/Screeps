@@ -471,11 +471,14 @@ Room.prototype.updateStructures = function() {
                 contPos = pos;
                 maxPlaces = places;
             }
+            
+            if (constructionsContainers[pos.x + "x" + pos.y]) {
+                source.buildContainerID = constructionsContainers[pos.x + "x" + pos.y];
+                break;
+            }
         }
-        if (constructionsContainers[contPos.x + "x" + contPos.y]) {
-            source.buildContainerID = constructionsContainers[contPos.x + "x" + contPos.y];
+        if (source.buildContainerID)
             continue;
-        }
         let res = this.createConstructionSite(contPos.x, contPos.y, STRUCTURE_CONTAINER);
         console.log(this.name + ": BUILT (" + res + ") container at " + contPos.x + "x" + contPos.y);
         if (res == OK)
