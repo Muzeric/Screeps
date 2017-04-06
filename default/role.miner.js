@@ -7,7 +7,7 @@ var role = {
             return;
 
         if(!creep.memory.cID || !creep.memory.energyID || !creep.memory.betweenPos) {
-            let container = creep.room.getPairedContainer();
+            let container = creep.room.getPairedContainer(creep.pos);
 
             if (!container) {
                 console.log(creep.name + ": can't get container");

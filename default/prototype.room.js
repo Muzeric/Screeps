@@ -219,7 +219,7 @@ Room.prototype.getTowers = function() {
     return _.map( this.memory.structures[STRUCTURE_TOWER], t => Game.getObjectById(t.id) );
 }
 
-Room.prototype.getPairedContainer = function() {
+Room.prototype.getPairedContainer = function(pos) {
     let containers = _.filter( [].concat(
         (this.memory.structures[STRUCTURE_CONTAINER] || []),
         (this.memory.structures[STRUCTURE_LINK] || []),
@@ -231,11 +231,18 @@ Room.prototype.getPairedContainer = function() {
     
     let resultContainer;
     let minTicks;
+    let minRange;
     for (let container of containers) {
         let ticks = _.sum(_.filter(Game.creeps, c => c.memory.cID == container.id && (c.memory.role == "longminer" || c.memory.role == "miner")), c => c.ticksToLive);
-        if (minTicks === undefined || ticks < minTicks) {
+        let range = 0;
+        if (pos) {
+            let cPos = new RoomPosition(container.pos.x, container.pos.y, container.pos.roomName);
+            range = cPos.getRangeTo(pos);
+        }
+        if (minTicks === undefined || ticks < minTicks || (ticks == minTicks && range < minRange)) {
             resultContainer = container;
             minTicks = ticks;
+            minRange = range;
         }
     }
 
