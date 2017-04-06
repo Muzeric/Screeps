@@ -520,8 +520,7 @@ function getSpawnForCreate (need, skipSpawnNames, skipRoomNames, reservedEnergy)
         (Game.map.getRoomLinearDistance(s.room.name, need.roomName) || 0) <= need.range &&
         !s.spawning && 
         !(s.name in skipSpawnNames) && 
-        !(s.room.name in skipRoomNames) &&
-        !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(s) && c.memory.needRepair)  
+        !(s.room.name in skipRoomNames) 
     );
     
     if (!spawnsInRange.length)
