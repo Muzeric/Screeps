@@ -72,7 +72,7 @@ function getBuilderTargets (creep, room) {
     let targetID;
     for (let target of targets) {
         let pos = new RoomPosition(target.pos.x, target.pos.y, target.pos.roomName);
-        let cost = ("hits" in target ? target.hits / 1000 : 0) + (creep.pos.getRangeTo(pos) || 0);
+        let cost = ("hits" in target ? target.hits / 1000 : 0) + (creep.pos.getRangeTo(pos) || 0) + (target.structureType == STRUCTURE_EXTENSION ? -10 : 0);
         if (cost <= 1)
             return target.id;
         if (minCost === undefined || cost < minCost) {
