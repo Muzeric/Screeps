@@ -415,7 +415,7 @@ function getRoomLimits (room, creepsCount) {
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
     let extraUpgraders = utils.clamp( _.floor(memory.energy / UPGRADERS_EXTRA_ENERGY), 0, 4);
     let pairedExtractor = room.getPairedExtractor(1);
-    let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 1000);
+    let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 700);
     
     let limits = [];
     limits.push({
