@@ -88,6 +88,7 @@ Room.prototype.updateResources = function() {
     let memory = this.memory;
     memory.resources = [];
     memory.energy = 0;
+    memory.freeEnergy = 0;
     memory.store = {};
     memory.resourcesTime = Game.time;
 
@@ -111,6 +112,8 @@ Room.prototype.updateResources = function() {
         }
         elem.energy = "energy" in s ? s.energy : ("store" in s ? s.store[RESOURCE_ENERGY] : 0);
         memory.energy += elem.energy;
+        if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE].indexOf(s.structureType) !== -1)
+            memory.freeEnergy += elem.energy;
         if ("store" in s) {
             elem.store = _.clone(s.store);
             for (let rt in s.store)
@@ -295,6 +298,7 @@ Room.prototype.updateStructures = function() {
     memory.type = 'other';
     memory.structuresTime = Game.time;
     memory.constructions = 0;
+    memory.constructionHits = 0;
     memory.constructionsRoads = 0;
     memory.repairs = 0;
     memory.repairHits = 0;

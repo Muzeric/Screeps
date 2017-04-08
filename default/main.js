@@ -415,6 +415,7 @@ function getRoomLimits (room, creepsCount) {
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
     let extraUpgraders = utils.clamp( _.floor(memory.energy / UPGRADERS_EXTRA_ENERGY), 0, 4);
     let pairedExtractor = room.getPairedExtractor(1);
+    let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 1000);
     
     let limits = [];
     limits.push({
@@ -456,10 +457,14 @@ function getRoomLimits (room, creepsCount) {
             "wishEnergy" : 700,
     },{
             role : "upgrader",
-            "count" : room.controller.level < 8 ? 3 : 1,
+            "count" : room.controller.level < 8 ? 10 : 1,
             "priority" : 3,
             "wishEnergy" : 1500,
             "maxEnergy" : 2000,
+            "body" : {
+                "work" : 3*freeEnergyCount,
+                "carry" : 3*freeEnergyCount,
+            },
     },{
             "role" : "builder",
             "count" : (builds ? 1 : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)) + (repairs > 20 && room.controller.level >= 8 ? 2 : 0),
