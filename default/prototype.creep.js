@@ -318,6 +318,7 @@ Creep.prototype.findSource = function () {
     let energyNeed = this.carryCapacity - _.sum(this.carry);
     let resultTarget;
     let minCost;
+    let resultEnergyLeft;
     for(let target of targets) {
         let placesLeft = target.places - (global.cache.wantEnergy[target.id] ? global.cache.wantEnergy[target.id].creepsCount : 0);
         if (placesLeft <= 0 && !booking)
@@ -346,9 +347,10 @@ Creep.prototype.findSource = function () {
             energyTicks = 0;
 
         let cost = range * 1.2 + energyTicks - 100 * cpriority;
-        if (minCost === undefined || cost < minCost) {
+        if (minCost === undefined || cost < minCost || (cost == minCost && energyLeft > resultEnergyLeft)) {
             resultTarget = target;
             minCost = cost;
+            resultEnergyLeft = energyLeft;
         }
         //if (this.room.name == "W46N4")
         //   console.log(this.name + " [" + this.room.name + "]: targetID=" + target.id + ", range=" + range + ", energyTicks=" + energyTicks + ", energyLeft=" + energyLeft + ", cpriotiy=" + cpriority + ", energyNeed=" + energyNeed + ", cost=" + cost + ", result=" + (resultTarget ? resultTarget.id : 0));
