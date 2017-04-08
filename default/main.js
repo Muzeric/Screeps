@@ -188,8 +188,7 @@ profiler.wrap(function() {
         if (!_.filter(Game.spawns, s => 
                 !s.spawning && 
                 !(s.name in skipSpawnNames) && 
-                !(s.room.name in skipRoomNames) &&
-                !_.some(Game.creeps, c => c.memory.role == "harvester" && c.pos.isNearTo(s) && c.ticksToLive < 1000)  
+                !(s.room.name in skipRoomNames)
         ).length) {
             //console.log("All spawns are spawning");
             break;
@@ -454,7 +453,6 @@ function getRoomLimits (room, creepsCount) {
             "role" : "miner",
             "count" : pairedSources,
             "priority" : 2,
-            "minEnergy" : 700,
             "wishEnergy" : 700,
     },{
             role : "upgrader",
