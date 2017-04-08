@@ -20,7 +20,7 @@ var role = {
         } else {
             let target = getTarget(creep);
             if(!target) {
-                console.log(creep.name + ": target "+ creep.memory.targetID +" dead");
+                //console.log(creep.name + ": target "+ creep.memory.targetID +" dead");
                 creep.memory.targetID = null;
                 return;
             }
