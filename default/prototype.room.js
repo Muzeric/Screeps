@@ -473,27 +473,29 @@ Room.prototype.updateStructures = function() {
         }
     }
 
-    for (let source of _.filter([].concat(memory.structures[STRUCTURE_SOURCE] || [], memory.structures[STRUCTURE_EXTRACTOR] || []), s => !s.pair && s.rangedPlaces.length)) {
-        let contPos;
-        let maxPlaces = 0;
-        for (let pos of source.rangedPlaces) {
-            let places = utils.getRangedPlaces(null, pos, 1).length;
-            if (places > maxPlaces) {
-                contPos = pos;
-                maxPlaces = places;
+    if (memory.type == 'my' || memory.type == 'lair' || memory.type == 'reserved') {
+        for (let source of _.filter([].concat(memory.structures[STRUCTURE_SOURCE] || [], memory.structures[STRUCTURE_EXTRACTOR] || []), s => !s.pair && s.rangedPlaces.length)) {
+            let contPos;
+            let maxPlaces = 0;
+            for (let pos of source.rangedPlaces) {
+                let places = utils.getRangedPlaces(null, pos, 1).length;
+                if (places > maxPlaces) {
+                    contPos = pos;
+                    maxPlaces = places;
+                }
+                
+                if (constructionsContainers[pos.x + "x" + pos.y]) {
+                    source.buildContainerID = constructionsContainers[pos.x + "x" + pos.y];
+                    break;
+                }
             }
-            
-            if (constructionsContainers[pos.x + "x" + pos.y]) {
-                source.buildContainerID = constructionsContainers[pos.x + "x" + pos.y];
-                break;
-            }
+            if (source.buildContainerID)
+                continue;
+            let res = this.createConstructionSite(contPos.x, contPos.y, STRUCTURE_CONTAINER);
+            console.log(this.name + ": BUILT (" + res + ") container at " + contPos.x + "x" + contPos.y);
+            if (res == OK)
+                memory.constructions++;
         }
-        if (source.buildContainerID)
-            continue;
-        let res = this.createConstructionSite(contPos.x, contPos.y, STRUCTURE_CONTAINER);
-        console.log(this.name + ": BUILT (" + res + ") container at " + contPos.x + "x" + contPos.y);
-        if (res == OK)
-            memory.constructions++;
     }
 
     for (let key of _.filter(Object.keys(memory.needRoads), r => 

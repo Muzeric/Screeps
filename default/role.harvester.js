@@ -3,9 +3,6 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        if (!utils.checkInRoomAndGo(creep))
-            return;
-
         if(creep.carry.energy == 0 && creep.memory.transfering) {
 	        creep.memory.transfering = false;
             creep.memory.targetID = null;
@@ -76,8 +73,6 @@ function getTarget (creep) {
         (target.energyCapacity && target.energy == target.energyCapacity) ||                
         (target.storeCapacity && _.sum(target.store) == target.storeCapacity)
     ) {
-        if (creep.memory.targetObj)
-            creep.memory.targetObj.energy = creep.memory.targetObj.energyCapacity;
         setTarget(creep);
     }
     target = Game.getObjectById(creep.memory.targetID);
@@ -86,22 +81,28 @@ function getTarget (creep) {
 }
 
 function setTarget (creep) {
+    let memory = Memory.rooms[creep.memory.roomName];
+    if (!memory) {
+        console.log(creep.name + ": setTarget have no memory of " + creep.memory.roomName);
+        return ERR_NOT_IN_RANGE;
+    }
+
     creep.memory.targetID = null;
     let targets = _.filter(
-        (creep.room.memory.structures[STRUCTURE_EXTENSION] || []).concat( 
-        (creep.room.memory.structures[STRUCTURE_LAB] || []), 
-        (creep.room.memory.structures[STRUCTURE_TOWER] || []),
-        (creep.room.memory.structures[STRUCTURE_SPAWN] || []),
-        (creep.room.memory.structures[STRUCTURE_TERMINAL] || []),
-        (creep.room.memory.structures[STRUCTURE_STORAGE] || []),
-        (creep.room.memory.structures[STRUCTURE_NUKER] || []),
-        (creep.room.memory.structures[STRUCTURE_POWER_SPAWN] || [])
+        (memory.structures[STRUCTURE_EXTENSION] || []).concat( 
+        (memory.structures[STRUCTURE_LAB] || []), 
+        (memory.structures[STRUCTURE_TOWER] || []),
+        (memory.structures[STRUCTURE_SPAWN] || []),
+        (memory.structures[STRUCTURE_TERMINAL] || []),
+        (memory.structures[STRUCTURE_STORAGE] || []),
+        (memory.structures[STRUCTURE_NUKER] || []),
+        (memory.structures[STRUCTURE_POWER_SPAWN] || [])
     ),
     t => t.energy < t.energyCapacity);
 
     if (!targets.length) {
         //console.log(creep.name + ": no any container for energy");
-        return;
+        return ERR_NOT_FOUND;
     }
 
     let minTarget;
@@ -135,7 +136,8 @@ function setTarget (creep) {
         //   console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + wantCarry + " wantCarry and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " cost=" + cost + ", targetID=" + minTarget.id);
     }
     creep.memory.targetID = minTarget.id;
-    creep.memory.targetObj = minTarget;
+
+    return OK;
 }
 
 module.exports = role;
