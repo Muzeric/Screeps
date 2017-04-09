@@ -307,8 +307,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "count" : fcount["Controller"],
         "arg" : liteClaimer,
         "priority" : 11,
-        "minEnergy" : liteClaimer ? 650 : 1300,
-        "wishEnergy" : 1300,
+        "minEnergy" : 650,
+        "wishEnergy" : liteClaimer ? 650 : 1300,
         "range" : 2,
     },{
         "role" : "longminer",
