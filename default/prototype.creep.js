@@ -94,7 +94,7 @@ Creep.prototype.trySubPath = function(targetPos, opts) {
     if (!subpath.length)
         return ERR_INVALID_ARGS;
 
-    let pf = travel.getPath(this.pos, subpath, null, 1, this.room.memory.pathCache, 300);
+    let pf = travel.getPath(this.pos, subpath, null, 1, this.room.memory.pathCache, 300, opts.ignoreHostiled);
     if (pf.incomplete) {
         console.log(this.name + ": moveTo BAD sub path from " + this.pos.getKey(1) + " to " + JSON.stringify(subpath) + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         return this.move(Math.floor(Math.random() * 8) + 1);
@@ -219,7 +219,7 @@ Creep.prototype.travelTo = function (targetPos, opts) {
     if (opts.withCreeps)
         addCreeps = 1;
 
-    let pf = travel.getPath(this.pos, {pos: targetPos, range: 1}, targetKey, addCreeps, this.room.memory.pathCache, maxOps);
+    let pf = travel.getPath(this.pos, {pos: targetPos, range: 1}, targetKey, addCreeps, this.room.memory.pathCache, maxOps, opts.ignoreHostiled);
     if (pf.incomplete) {
         console.log(this.name + ": moveTo BAD path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         Game.notify(this.name + ": moveTo BAD path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);

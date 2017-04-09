@@ -110,7 +110,7 @@ var travel = {
         return path.length - pi;
     },
 
-    getPath: function(sourcePos, targetPos, targetKey = null, addCreeps, pathCache, limit = PATH_OPS_LIMIT_LONG) {
+    getPath: function(sourcePos, targetPos, targetKey = null, addCreeps, pathCache, limit = PATH_OPS_LIMIT_LONG, ignoreHostiled) {
         let sourceKey = sourcePos.getKey();
         if (!Array.isArray(targetPos) && targetKey !== null) {
             if (pathCache[targetKey] && pathCache[targetKey][sourceKey]) {
@@ -128,7 +128,7 @@ var travel = {
                 swampCost: 10,
                 maxOps: limit,
                 roomCallback: function(roomName) { 
-                    if (!(roomName in Memory.rooms) || Memory.rooms[roomName].type == 'hostiled' || !global.cache.matrix[roomName])
+                    if (!(roomName in Memory.rooms) || (Memory.rooms[roomName].type == 'hostiled' && !ignoreHostiled) || !global.cache.matrix[roomName])
                         return false;
                     
                     if (addCreeps)
