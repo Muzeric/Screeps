@@ -18,10 +18,10 @@ var role = {
         if (!creep.attackNearHostile()) {
             return;
         } else {
-            if(creep.carry.energy == 0 && creep.memory.transfering) {
+            if(_.sum(creep.carry) < creep.carryCapacity * 0.5 && creep.memory.transfering) {
                 creep.memory.transfering = false;
                 creep.memory.cID = null;
-            } else if (creep.carry.energy == creep.carryCapacity && !creep.memory.transfering) {
+            } else if (_.sum(creep.carry) == creep.carryCapacity && !creep.memory.transfering) {
                 creep.memory.transfering = true;
                 creep.memory.energyID = null;
             }

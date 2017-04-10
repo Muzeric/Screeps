@@ -76,7 +76,7 @@ foreach my $tick (@ticks) {
   my $hash = $info->{$tick};
   foreach my $room (keys %$rooms) {
     foreach my $k (keys %$room_keys) {
-      $sum->{$room}->{$k} += $hash->{$room}->{$k};
+      $sum->{$room}->{$k} += $hash->{$room}->{$k} || 0;
     }
   }
 
