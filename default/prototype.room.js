@@ -87,9 +87,9 @@ Room.prototype.updatePathCache = function() {
             if (Memory.rooms[roomName] && Memory.rooms[roomName].pointPos && memory.pointPos) {
                 let ps = memory.pointPos;
                 let pt = Memory.rooms[roomName].pointPos;
-                let path = travel.getPath(new RoomPosition(ps.x, ps.y, ps.roomName), new RoomPosition(pt.x, pt.y, pt.roomName), null, 0, null, PATH_OPS_LIMIT_LONG);
-                if (path.length && !path.incomplete)
-                    memory.pathToRooms[roomName] = path.length;
+                let path = travel.getPath(new RoomPosition(ps.x, ps.y, ps.roomName), {pos: new RoomPosition(pt.x, pt.y, pt.roomName), range: 2}, null, 0, null, PATH_OPS_LIMIT_LONG * 2);
+                if (path.path.length && !path.incomplete)
+                    memory.pathToRooms[roomName] = path.path.length;
             } else {
                 memory.pathToRooms[roomName] = Game.map.getRoomLinearDistance(this.name, roomName) || null;
             }
