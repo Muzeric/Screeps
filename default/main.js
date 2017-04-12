@@ -27,7 +27,7 @@ profiler.wrap(function() {
     
     var moveErrors = {};
     var objectCache = {};
-    var roomNames = _.filter( _.uniq( [].concat( 
+    global.cache.roomNames = _.filter( _.uniq( [].concat( 
         _.map(Game.flags, 'pos.roomName'), 
         _.map( Game.rooms, 'name' ), 
         Object.keys(Memory.rooms) 
@@ -53,7 +53,7 @@ profiler.wrap(function() {
 
     global.cache.stat.addCPU("memory");
 
-    _.forEach(roomNames, function(roomName) {
+    _.forEach(global.cache.roomNames, function(roomName) {
         Game.roomsHelper.fakeUpdate(roomName);
     });
     
@@ -134,7 +134,7 @@ profiler.wrap(function() {
     let longbuilders = _.filter(Game.creeps, c => c.memory.role == "longbuilder" && (c.ticksToLive > ALIVE_TICKS || c.spawning)).length;
     let buildFlags = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build').length;
     let stopLongBuilders = longbuilders * 1.5 >= buildFlags;
-    _.forEach(roomNames, function(roomName) {
+    _.forEach(global.cache.roomNames, function(roomName) {
         let lastCPU = Game.cpu.getUsed();
         let room = Game.rooms[roomName];
 

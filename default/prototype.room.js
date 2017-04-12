@@ -78,6 +78,21 @@ Room.prototype.updatePathCache = function() {
     memory.pathCacheTime = Game.time;
     memory.pathCount = travel.clearPathCache(memory.pathCache);
     //console.log(this.name + ": updatePathCache: " + allCount + " paths, " + delCount + " deleted");
+    memory.pathToRooms = {};
+    for (let roomName of global.cache.roomNames) {
+        if (roomName == this.name)
+            continue;
+        memory.pathToRooms[roomName] = travel.getRoomsAvgPathLength(memory.pathCache, roomName);
+        if (!memory.pathToRooms[roomName]) {
+            if (Memory.rooms[roomName] && Memory.rooms[roomName].pointPos) {
+                let path = travel.getPath(s.pos, Memory.rooms[need.roomName].pointPos, null, 0, null, PATH_OPS_LIMIT_LONG);
+                if (path.length && !path.incomplete)
+                    memory.pathToRooms[roomName] = path.length;
+            } else {
+                memory.pathToRooms[roomName] = Game.map.getRoomLinearDistance(this.name, roomName) || null;
+            }
+        }
+    }
 }
 
 Room.prototype.getAmount = function (rt) {
@@ -329,6 +344,8 @@ Room.prototype.updateStructures = function() {
             elem = {
                 ticksToSpawn : s.ticksToSpawn,
             };
+            if (!memory.pointPos)
+                memory.pointPos = s.pos;
         } else if (s.structureType == STRUCTURE_CONTROLLER) {
             if (s.my) {
                 memory.type = 'my';
