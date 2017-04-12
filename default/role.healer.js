@@ -5,28 +5,40 @@ var testmode = 1;
 var role = {
 
     run: function(creep) {
-        let targetPos;
-
+        let attacker = Game.getObjectById(creep.memory.attackerID);
+        if (!attacker) {
+            creep.memory.attackerID = null;
+            let attackers = _.filter(Game.creeps, c => c.memory.role == 'attacker' && !_.some(Game.creeps, h => h.memory.role == "healer" && h.memory.attackerID == c.id));
+            if (!attackers.length) {
+                console.log(creep.name + ": no attackers");
+                creep.moveTo(Game.spawns[creep.memory.spawnName]);
+                return;
+            }
+            attacker = attackers.sort((a,b) => a.pos.getRangeTo(creep.pos) - b.pos.getRangeTo(creep.pos))[0];
+            creep.memory.attackerID = attacker.id;
+        }
         let healed = 0;
+        let moved = 0;
         let seeked;
-        let attacker;
         if (creep.hits < creep.hitsMax) {
             creep.heal(creep);
             healed = 1;
         }
 
-        if (seeked = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: c => c.hits < c.hitsMax}) ) {
+        if (!creep.pos.isNearTo(attacker)) {
+            creep.moveTo(attacker);
+            moved = 1;
+        }
+
+        seeked = creeo.pos.findInRange(FIND_MY_CREEPS, 3, {filter: c => c.hits < c.hitsMax})[0];
+        if (!healed && seeked) {
             if (creep.pos.isNearTo(seeked)) {
-                if (!healed)
-                    creep.heal(seeked);
+                creep.heal(seeked);
             } else {
-                creep.moveTo(seeked);
+                if (!moved)
+                    creep.moveTo(seeked);
                 creep.rangedHeal(seeked);
             }
-        } else if (attacker = _.filter(Game.creeps, c => c.memory.role == 'attacker').sort()[0] ) {
-            creep.moveTo(attacker);
-        } else {
-            creep.moveTo(Game.spawns[creep.memory.spawnName]);
         }
 	},
 	

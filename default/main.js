@@ -89,7 +89,8 @@ profiler.wrap(function() {
         
         try {
             creep.memory.carryEnergy = creep.carry.energy;
-            objectCache[role].run(creep);
+            if (!creep.memory.stop)
+                objectCache[role].run(creep);
         } catch (e) {
             console.log(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
             Game.notify(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);

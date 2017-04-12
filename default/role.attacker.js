@@ -3,6 +3,7 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
+        /*
         //  Prepare
         let healersCount = (global.cache.creeps["_army"].healers || []).length;
         let friendsCount = (global.cache.creeps["_army"].attackers || []).length - 1;
@@ -109,8 +110,9 @@ var role = {
         if (creep.room.name != flag.pos.roomName) {
             
         }
+        */
 
-        /*
+        let healer = _.filter(Game.creeps, c => c.memory.role == "healer" && c.memory.attackerID == creep.id);
         let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
 	    if(flags.length) {
             let flag = flags.sort()[0];
@@ -141,7 +143,7 @@ var role = {
         } else {
             creep.moveTo(Game.spawns[creep.memory.spawnName]);
         }
-        */
+        
 	},
 	
     create: function(energy) {
