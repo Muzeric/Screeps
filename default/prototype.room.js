@@ -86,7 +86,7 @@ Room.prototype.updatePathCache = function() {
         if (!memory.pathToRooms[roomName]) {
             if (Memory.rooms[roomName] && Memory.rooms[roomName].pointPos && memory.pointPos) {
                 let ps = memory.pointPos;
-                let pt = Memory.rooms[need.roomName].pointPos;
+                let pt = Memory.rooms[roomName].pointPos;
                 let path = travel.getPath(new RoomPosition(ps.x, ps.y, ps.roomName), new RoomPosition(pt.x, pt.y, pt.roomName), null, 0, null, PATH_OPS_LIMIT_LONG);
                 if (path.length && !path.incomplete)
                     memory.pathToRooms[roomName] = path.length;
