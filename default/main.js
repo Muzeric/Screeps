@@ -56,6 +56,10 @@ profiler.wrap(function() {
     _.forEach(global.cache.roomNames, function(roomName) {
         Game.roomsHelper.fakeUpdate(roomName);
     });
+
+    _.forEach(global.cache.roomNames, function(roomName) {
+        Game.roomsHelper.fakeUpdate2(roomName);
+    });
     
     global.cache.stat.addCPU("roomUpdate");
 

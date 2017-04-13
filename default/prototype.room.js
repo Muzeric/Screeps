@@ -29,6 +29,21 @@ var roomsHelper = {
         return res;
     },
 
+    fakeUpdate2: function (roomName) {
+        let lastCPU = Game.cpu.getUsed();
+        let res;
+        if (Game.rooms[roomName]) {
+            try {
+                res = Game.rooms[roomName].update2();
+            } catch (e) {
+                console.log(roomName + " ROOMUPDATE2 ERROR: " + e.toString() + " => " + e.stack);
+                Game.notify(roomName + " ROOMUPDATE2 ERROR: " + e.toString() + " => " + e.stack);
+            }
+        }
+        global.cache.stat.updateRoom(roomName, 'cpu', Game.cpu.getUsed() - lastCPU);
+        return res;
+    },
+
     getHostilesCount: function (roomName, timeout = HOSTILES_DEAD_TIMEOUT) {
         if (!(roomName in Memory.rooms))
             return null;
@@ -54,7 +69,7 @@ Room.prototype.update = function() {
     this.updateCreeps();
     if (!("resources" in this.memory) || Game.time - (this.memory.resourcesTime || 0) >= UPDATE_INTERVAL_RESOURCES)
         this.updateResources();
-
+    
     /*
     for (let key of _.filter(Object.keys(this.memory.needRoads), r => this.memory.needRoads[r].wanted > ROADS_REPAIR_WANTED)) {
         let color = 'green';
@@ -72,12 +87,14 @@ Room.prototype.update = function() {
     return OK;
 }
 
-Room.prototype.updatePathCache = function() {
-    let memory = this.memory;
-    memory.pathCache = memory.pathCache || {};
-    memory.pathCacheTime = Game.time;
-    memory.pathCount = travel.clearPathCache(memory.pathCache);
-    //console.log(this.name + ": updatePathCache: " + allCount + " paths, " + delCount + " deleted");
+Room.prototype.update2 = function() {
+    if (!("pathToRoomsTime" in this.memory) || Game.time - (this.memory.pathToRoomsTime || 0) >= UPDATE_INTERVAL_PATHCACHE)
+        this.updatePathToRooms();
+
+    return OK;
+}
+
+Room.prototype.updatePathToRooms = function () {
     memory.pathToRooms = {};
     for (let roomName of global.cache.roomNames) {
         if (roomName == this.name)
@@ -91,10 +108,20 @@ Room.prototype.updatePathCache = function() {
                 if (path.path.length && !path.incomplete)
                     memory.pathToRooms[roomName] = path.path.length;
             } else {
-                memory.pathToRooms[roomName] = Game.map.getRoomLinearDistance(this.name, roomName) || null;
+                memory.pathToRooms[roomName] = Game.map.getRoomLinearDistance(this.name, roomName) * 50 || null;
             }
         }
     }
+
+    memory.pathToRoomsTime = Game.time;
+}
+
+Room.prototype.updatePathCache = function() {
+    let memory = this.memory;
+    memory.pathCache = memory.pathCache || {};
+    memory.pathCount = travel.clearPathCache(memory.pathCache);
+    //console.log(this.name + ": updatePathCache: " + allCount + " paths, " + delCount + " deleted");
+    memory.pathCacheTime = Game.time;
 }
 
 Room.prototype.getAmount = function (rt) {
@@ -107,7 +134,6 @@ Room.prototype.updateResources = function() {
     memory.energy = 0;
     memory.freeEnergy = 0;
     memory.store = {};
-    memory.resourcesTime = Game.time;
 
     this.find(FIND_DROPPED_ENERGY).forEach( function(r) {
         let elem = {
@@ -148,6 +174,7 @@ Room.prototype.updateResources = function() {
             elem.power = s.power;
         }
     }
+    memory.resourcesTime = Game.time;
 }
 
 Room.prototype.getNearComingLairPos = function(pos, range, leftTime) {
@@ -313,7 +340,6 @@ Room.prototype.updateStructures = function() {
     let memory = this.memory;
     memory.structures = {};
     memory.type = 'other';
-    memory.structuresTime = Game.time;
     memory.constructions = 0;
     memory.constructionHits = 0;
     memory.constructionsRoads = 0;
@@ -539,6 +565,8 @@ Room.prototype.updateStructures = function() {
         if (flag)
             memory.pointPos = flag.pos;
     }
+
+    memory.structuresTime = Game.time;
 }
 
 Room.prototype.getNearKeeperPos = function(pos, range) {
