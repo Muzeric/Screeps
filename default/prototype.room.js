@@ -95,6 +95,7 @@ Room.prototype.update2 = function() {
 }
 
 Room.prototype.updatePathToRooms = function () {
+    let memory = this.memory;
     memory.pathToRooms = {};
     for (let roomName of global.cache.roomNames) {
         if (roomName == this.name)
