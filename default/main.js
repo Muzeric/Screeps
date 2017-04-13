@@ -528,7 +528,7 @@ function getSpawnForCreate (need, skipSpawnNames, skipRoomNames, reservedEnergy)
         !s.spawning && 
         !(s.name in skipSpawnNames) && 
         !(s.room.name in skipRoomNames) &&
-        s.room.getPathToRoom(need.roomName) && s.room.getPathToRoom(need.roomName) < need.range * 50
+        (s.room.getPathToRoom(need.roomName) && s.room.getPathToRoom(need.roomName) < need.range * 50 || s.room.name == need.roomName)
     );
     
     if (!spawnsInRange.length)
