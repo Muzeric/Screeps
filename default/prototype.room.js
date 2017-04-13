@@ -94,6 +94,11 @@ Room.prototype.update2 = function() {
     return OK;
 }
 
+Room.prototype.getPathToRoom = function (roomName) {
+    let memory = this.memory;
+    return memory.pathToRooms[roomName];
+}
+
 Room.prototype.updatePathToRooms = function () {
     let memory = this.memory;
     memory.pathToRooms = {};

@@ -525,11 +525,10 @@ function getRoomLimits (room, creepsCount) {
 
 function getSpawnForCreate (need, skipSpawnNames, skipRoomNames, reservedEnergy) {
     let spawnsInRange = _.filter(Game.spawns, s => 
-        (Game.map.getRoomLinearDistance(s.room.name, need.roomName) || 0) <= need.range &&
         !s.spawning && 
         !(s.name in skipSpawnNames) && 
         !(s.room.name in skipRoomNames) &&
-        (travel.getRoomsAvgPathLength(s.room.memory.pathCache, need.roomName) || travel.getPath(s.pos, Memory.rooms[need.roomName] ? Memory.rooms[need.roomName].pointPos : null, null, 0, null, PATH_OPS_LIMIT_LONG).path.length || need.range * 50) < need.range * 50
+        s.room.getPathToRoom(need.roomName) && s.room.getPathToRoom(need.roomName) < need.range * 50
     );
     
     if (!spawnsInRange.length)
