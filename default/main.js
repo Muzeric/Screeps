@@ -420,7 +420,7 @@ function getRoomLimits (room, creepsCount) {
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
     let extraUpgraders = utils.clamp( _.floor(memory.energy / UPGRADERS_EXTRA_ENERGY), 0, 4);
     let pairedExtractor = room.getPairedExtractor(1);
-    let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 700);
+    let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 1000);
     
     let limits = [];
     limits.push({
@@ -481,12 +481,6 @@ function getRoomLimits (room, creepsCount) {
             "count" : storagedLink ? 1 : 0, // TODO: harvester count
             "priority" : 5,
             "wishEnergy" : 300,
-    },{
-            role : "upgrader",
-            "count" : room.controller.level < 8 ? (builds ? 1 : sources) + extraUpgraders : 0,
-            "priority" : 6,
-            "wishEnergy" : 1500,
-            "maxEnergy" : 3000,
     },{
             role : "mineralminer",
             "count" : pairedExtractor ? 1 : 0,
