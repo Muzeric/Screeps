@@ -11,7 +11,7 @@ var role = {
             let attackers = _.filter(Game.creeps, c => c.memory.role == 'attacker' && !_.some(Game.creeps, h => h.memory.role == "healer" && h.memory.attackerID == c.id));
             if (!attackers.length) {
                 console.log(creep.name + ": no attackers");
-                creep.moveTo(Game.spawns[creep.memory.spawnName]);
+                creep.moveTo(Game.spawns[creep.memory.spawnName], {ignoreHostiled: 1});
                 return;
             }
             attacker = attackers.sort((a,b) => a.pos.getRangeTo(creep.pos) - b.pos.getRangeTo(creep.pos))[0];
@@ -26,7 +26,7 @@ var role = {
         }
 
         if (!creep.pos.isNearTo(attacker)) {
-            creep.moveTo(attacker);
+            creep.moveTo(attacker, {ignoreHostiled: 1});
             moved = 1;
         }
 
@@ -36,7 +36,7 @@ var role = {
                 creep.heal(seeked);
             } else {
                 if (!moved)
-                    creep.moveTo(seeked);
+                    creep.moveTo(seeked, {ignoreHostiled: 1});
                 creep.rangedHeal(seeked);
             }
         }

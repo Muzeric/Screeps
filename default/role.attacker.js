@@ -118,9 +118,9 @@ var role = {
             let flag = flags.sort()[0];
             if (creep.room.name != flag.pos.roomName) {
                 if (healer && creep.pos.getRangeTo(healer) < 3 || creep.pos.x == 0 || creep.pos.y == 0)
-                    creep.moveTo(flag);
+                    creep.moveTo(flag, {ignoreHostiled: 1});
                 else if (healer)
-                    creep.moveTo(healer);
+                    creep.moveTo(healer, {ignoreHostiled: 1});
                 return;
             } else {
                 let target = 
@@ -135,13 +135,13 @@ var role = {
                 if (target) {
                     //Memory.targets[creep.room.name] = target.id;
                     if (creep.attack(target) == ERR_NOT_IN_RANGE)
-                        creep.moveTo(target);
+                        creep.moveTo(target, {ignoreHostiled: 1});
                 } else {
-                    creep.moveTo(flag);
+                    creep.moveTo(flag, {ignoreHostiled: 1});
                 }
             }
         } else {
-            creep.moveTo(Game.spawns[creep.memory.spawnName]);
+            creep.moveTo(Game.spawns[creep.memory.spawnName], {ignoreHostiled: 1});
         }
         
 	},

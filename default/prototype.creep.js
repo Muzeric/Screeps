@@ -446,7 +446,7 @@ Creep.prototype.gotoSource = function() {
     return res;
 }
 
-Creep.prototype.checkInRoomAndGo = function () {
+Creep.prototype.checkInRoomAndGo = function (opts) {
     if (this.room.name == this.memory.roomName)
         return OK;
     
@@ -455,7 +455,7 @@ Creep.prototype.checkInRoomAndGo = function () {
         return ERR_NOT_FOUND;
     }
 
-    this.moveTo(new RoomPosition(Memory.rooms[this.memory.roomName].pointPos.x, Memory.rooms[this.memory.roomName].pointPos.y, Memory.rooms[this.memory.roomName].pointPos.roomName));
+    this.moveTo(new RoomPosition(Memory.rooms[this.memory.roomName].pointPos.x, Memory.rooms[this.memory.roomName].pointPos.y, Memory.rooms[this.memory.roomName].pointPos.roomName), opts);
 
     return ERR_NOT_IN_RANGE;
 }

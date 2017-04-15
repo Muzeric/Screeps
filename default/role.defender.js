@@ -3,13 +3,13 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        if (Game.roomsHelper.getHostilesCount(creep.memory.roomName) && creep.checkInRoomAndGo())
+        if (Game.roomsHelper.getHostilesCount(creep.memory.roomName) && creep.checkInRoomAndGo({ignoreHostiled: 1}))
             return;
 	    
         if (utils.try_attack(creep) <= 0) {
             let spawn = Game.spawns[creep.memory.spawnName];
             if (spawn.recycleCreep(creep) == ERR_NOT_IN_RANGE)
-                creep.moveTo(spawn);
+                creep.moveTo(spawn, {ignoreHostiled: 1});
             if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL))
                     creep.heal(creep);
         }
