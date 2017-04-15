@@ -131,7 +131,17 @@ Room.prototype.updatePathCache = function() {
 }
 
 Room.prototype.getAmount = function (rt) {
-    return memory.store[rt] || 0;
+    return this.memory.store[rt] || 0;
+}
+
+Room.prototype.canBuildContainers = function () {
+    let memory = this.memory;
+    if (memory.type == "my" && memory.structures[STRUCTURE_SPAWN] || 
+        memory.type == "reserved" && (global.cache.creeps[this.name]["longharvester"] || []).length > 1
+    )
+        return 1;
+    
+    return 0;
 }
 
 Room.prototype.updateResources = function() {
@@ -595,6 +605,7 @@ Room.prototype.updateCreeps = function() {
         keepersPoses: [],
         hostileAttackers: [],
         hostileOther: [],
+        mine: [],
     };
     let cache = global.cache.creeps[this.name];
     memory.hostilesCount = 0;
@@ -612,6 +623,8 @@ Room.prototype.updateCreeps = function() {
             if (Game.time + c.ticksToLive > memory.hostilesDeadTime)
                 memory.hostilesDeadTime = Game.time + c.ticksToLive;
         } else if (c.my) {
+            cache.mine[c.role] = cache.mine[c.role] || [];
+            cache.mine[c.role].push(c);
             if (c.memory.role == "harvester" && c.memory.targetID) {
                 global.cache.wantCarry[roomName][c.memory.targetID] = (global.cache.wantCarry[roomName][c.memory.targetID] || 0) + c.carry.energy;
             } else if (c.memory.role == "attacker" || c.memory.role == "healer") {

@@ -410,7 +410,7 @@ Creep.prototype.gotoSource = function() {
         return this.moveTo(source);
     }
 
-    if (this.memory.energyObj.buildContainerID) {
+    if (this.memory.energyObj.buildContainerID && this.room.canBuildContainers()) {
         let container = Game.getObjectById(this.memory.energyObj.buildContainerID);
         if (container && container.pos.roomName == this.room.name && this.pos.getRangeTo(container.pos) <= 3 && this.carry.energy >= this.getActiveBodyparts(WORK) * BUILD_POWER) {
             let res = this.build(container);

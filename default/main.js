@@ -426,7 +426,7 @@ function getRoomLimits (room, creepsCount) {
     let limits = [];
     limits.push({
             "role" : "harvester",
-            "count" : 1,
+            "count" : memory.structures[STRUCTURE_SPAWN] ? 1 : 0,
             "arg" : unminerSources ? 1 : 0,
             "priority" : 1,
             "minEnergy" : 300,
@@ -448,7 +448,7 @@ function getRoomLimits (room, creepsCount) {
             "minEnergy" : 1500,
     },{
             "role" : "harvester",
-            "count" : countHarvester,
+            "count" : memory.structures[STRUCTURE_SPAWN] ? countHarvester : 0,
             "arg" : unminerSources ? 1 : 0,
             "priority" : 2,
             "wishEnergy" : 1350,
