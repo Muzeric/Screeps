@@ -489,6 +489,7 @@ Room.prototype.updateStructures = function() {
         if (elem) {
             elem.id = s.id;
             elem.pos = s.pos;
+            elem.structureType = s.structureType;
             memory.structures[s.structureType] = memory.structures[s.structureType] || [];
             memory.structures[s.structureType].push(elem);
             if (elem.hits < elem.hitsMax * 0.9 && elem.hits < room.getRepairLimit()) {
