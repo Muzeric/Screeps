@@ -141,7 +141,12 @@ var role = {
                 }
             }
         } else {
-            creep.moveTo(Game.spawns[creep.memory.spawnName], {ignoreHostiled: 1});
+            let spawn = Game.spawns[creep.memory.spawnName];
+            if (creep.pos.isNearTo(spawn))
+                if (creep.hits < creep.hitsMax * 0.95)
+                    spawn.renewCreep(creep);
+            else 
+                creep.moveTo(spawn, {ignoreHostiled: 1});
         }
         
 	},
