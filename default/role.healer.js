@@ -35,7 +35,7 @@ var role = {
             moved = 1;
         }
 
-        seeked = creeo.pos.findInRange(FIND_MY_CREEPS, 3, {filter: c => c.hits < c.hitsMax})[0];
+        seeked = creep.pos.findInRange(FIND_MY_CREEPS, 3, {filter: c => c.hits < c.hitsMax})[0];
         if (!healed && seeked) {
             if (creep.pos.isNearTo(seeked)) {
                 creep.heal(seeked);
