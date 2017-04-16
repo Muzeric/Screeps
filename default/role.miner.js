@@ -3,11 +3,12 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        if (!utils.checkInRoomAndGo(creep))
-            return;
-
         if(!creep.memory.cID || !creep.memory.energyID || !creep.memory.betweenPos) {
-            let container = creep.room.getPairedContainer(creep.pos);
+            if (!Game.rooms[creep.memory.roomName]) {
+                console.log(creep.name + ": no Game.rooms[" + creep.memory.roomName + "]");
+                return;
+            }
+            let container = Game.rooms[creep.memory.roomName].getPairedContainer(creep.room.name == creep.memory.roomName ? creep.pos : null);
 
             if (!container) {
                 console.log(creep.name + ": can't get container");

@@ -131,7 +131,8 @@ Creep.prototype.usePath = function(memory, memkey, targetPos, opts) {
             //console.log(this.name + ": moveTo BUT got inverted pos, iter=" + border_iter + "; travel=" + JSON.stringify(this.memory.travel));
             return OK;
         } else {
-            let key = travel.getPosFromSerializedPath(mem.path, mem.iter).getKey(1);
+            let pos = travel.getPosFromSerializedPath(mem.path, mem.iter);
+            let key = pos ? pos.getKey(1) : 'uknown';
             console.log(this.name + ": moveTo " + memkey + " (time=" + Game.time + ") mem.iter=" + mem.iter + " (" + key + "), iter="+ iter + " (" + this.pos.getKey(1) + "); travel=" + JSON.stringify(this.memory.travel));
         }
         return null;
