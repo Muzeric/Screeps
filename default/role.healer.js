@@ -1,6 +1,5 @@
 var utils = require('utils');
 const profiler = require('screeps-profiler');
-var testmode = 1;
 
 var role = {
 
