@@ -502,6 +502,16 @@ function getRoomLimits (room, creepsCount) {
             "count" : memory.scoutCount || 0,
             "priority" : 1,
             "wishEnergy" : 50,
+    },{
+            role : "attacker",
+            "count" : memory.attackerCount || 0,
+            "priority" : 1,
+            "wishEnergy" : 5000,
+    },{
+            role : "healer",
+            "count" : memory.healerCount || 0,
+            "priority" : 1,
+            "wishEnergy" : 5000,
     });
 
     for (let limit of limits) {

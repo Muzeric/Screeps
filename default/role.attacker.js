@@ -117,7 +117,7 @@ var role = {
 	    if(flags.length) {
             let flag = flags.sort()[0];
             if (creep.room.name != flag.pos.roomName) {
-                if (healer && creep.pos.getRangeTo(healer) < 3 || creep.pos.x == 0 || creep.pos.y == 0)
+                if (healer && creep.pos.getRangeTo(healer) < 3 || creep.pos.isBorder())
                     creep.moveTo(flag, {ignoreHostiled: 1});
                 else if (healer)
                     creep.moveTo(healer, {ignoreHostiled: 1});
@@ -148,7 +148,7 @@ var role = {
 	
     create: function(energy) {
         let body = [];
-        let tnum = 0;
+        let tnum = 5;
         while(tnum-- > 0 && energy >= 60) {
             body.push(TOUGH);
             energy -= 10;
