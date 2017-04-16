@@ -30,7 +30,7 @@ var role = {
             healed = 1;
         }
 
-        if (!creep.pos.isNearTo(attacker)) {
+        if (!creep.pos.isNearTo(attacker) || creep.pos.isBorder()) {
             creep.moveTo(attacker, {ignoreHostiled: 1});
             moved = 1;
         }
