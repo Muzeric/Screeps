@@ -419,6 +419,7 @@ function getRoomLimits (room, creepsCount) {
     let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
     let countHarvester = _.max([unminerSources, _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 15)]);
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
+    let unStoragedLinks = (room.getUnStoragedLinks() || []).length;
     let extraUpgraders = utils.clamp( _.floor(memory.energy / UPGRADERS_EXTRA_ENERGY), 0, 4);
     let pairedExtractor = room.getPairedExtractor(1);
     let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 1000);
@@ -481,8 +482,8 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : builds || repairs > 10 ? 5000 : 1500,
     },{
             "role" : "shortminer",
-            "count" : storagedLink ? 1 : 0, // TODO: harvester count
-            "priority" : 5,
+            "count" : storagedLink && unStoragedLinks ? 1 : 0,
+            "priority" : (creepsCount["miner"] || 0) >= pairedSources ? 2 : 5,
             "wishEnergy" : 300,
     },{
             role : "mineralminer",
