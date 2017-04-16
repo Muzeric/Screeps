@@ -126,7 +126,7 @@ var role = {
                 let target = 
                     //Game.getObjectById(Memory.targets[creep.room.name]) ||
                     _.filter(flag.pos.lookFor(LOOK_STRUCTURES), s => s.structureType != "road")[0] ||
-                    creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK)}) ||
+                    creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL) }) ||
                     creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}) ||
                     creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS) ||
                     creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS) ||
@@ -154,9 +154,12 @@ var role = {
     create: function(energy) {
         let body = [];
         let tnum = 5;
-        while(tnum-- > 0 && energy >= 60) {
+        let mnum = tnum;
+        while(tnum-- > 0 && energy >= 10) {
             body.push(TOUGH);
             energy -= 10;
+        }
+        while(mnum-- > 0 && energy >= 50) {
             body.push(MOVE);
             energy -= 50;
         }
