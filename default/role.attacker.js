@@ -164,7 +164,7 @@ var role = {
             energy -= 50;
         }
         
-        let mnum = Math.floor(energy / (50+80));
+        mnum = Math.floor(energy / (50+80));
         if (mnum * 2 + body.length > 50) // Body parts limit
             mnum = Math.floor((50 - body.length - 2) / 2);
         let anum = mnum;
