@@ -29,10 +29,9 @@ var role = {
             healed = 1;
         }
 
-        if (!creep.pos.isNearTo(attacker) || creep.pos.isBorder()) {
-            creep.moveTo(attacker, {ignoreHostiled: 1});
+        //if (!creep.pos.isNearTo(attacker) || creep.pos.isBorder()) {
+        if (creep.moveTo(attacker, {ignoreHostiled: 1}) == OK)
             moved = 1;
-        }
 
         seeked = creep.pos.findInRange(FIND_MY_CREEPS, 3, {filter: c => c.hits < c.hitsMax})[0];
         if (!healed && seeked) {
