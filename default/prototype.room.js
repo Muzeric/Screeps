@@ -623,7 +623,7 @@ Room.prototype.updateCreeps = function() {
     this.find(FIND_CREEPS).forEach( function(c) {
         if (c.owner.username == "Source Keeper") {
             cache.keepersPoses.push(c.pos);
-        } else if (!c.my && (c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL))) {
+        } else if (!c.my && (1 || c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL))) {
             cache.hostileAttackers.push(c);
             memory.hostilesCount++;
             if (Game.time + c.ticksToLive > memory.hostilesDeadTime)
