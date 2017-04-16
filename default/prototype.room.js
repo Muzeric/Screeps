@@ -344,6 +344,8 @@ Room.prototype.finishBuildRepair = function (targetID) {
             let s = this.memory.structures[key][i];
             if (s.id == targetID) {
                 s.finished = 1;
+                if (s.structureType == FIND_MY_CONSTRUCTION_SITES)
+                    this.memory.structuresTime = 0;
                 return;
             }
         }
