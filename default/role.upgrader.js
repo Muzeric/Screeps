@@ -3,8 +3,11 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-		if (!utils.checkInRoomAndGo(creep))
-            return;
+		let room = Game.rooms[creep.memory.roomName];
+		if (!room) {
+			console.log(creep.name + ": no Game.rooms[" + creep.memory.roomName + "]");
+			return;
+		}
 
 	    if(creep.carry.energy == 0 && creep.memory.upgrading) {
 			creep.memory.upgrading = false;
@@ -17,8 +20,8 @@ var role = {
 	    if(!creep.memory.upgrading) {
 	        creep.findSourceAndGo();
         } else {
-            if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                var res = creep.moveTo(creep.room.controller);
+            if(creep.upgradeController(room.controller) == ERR_NOT_IN_RANGE) {
+                var res = creep.moveTo(room.controller);
                 //console.log(creep.name + " go res=" + res);
                 if(res == ERR_NO_PATH) {
                     creep.memory.errors++;
