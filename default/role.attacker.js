@@ -112,7 +112,7 @@ var role = {
         }
         */
 
-        let healer = _.filter(Game.creeps, c => c.memory.role == "healer" && c.memory.attackerID == creep.id);
+        let healer = _.filter(Game.creeps, c => c.memory.role == "healer" && c.memory.attackerID == creep.id)[0];
         let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
 	    if(flags.length) {
             let flag = flags.sort()[0];
