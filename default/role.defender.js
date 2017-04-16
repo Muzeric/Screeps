@@ -5,13 +5,17 @@ var role = {
     run: function(creep) {
         if (Game.roomsHelper.getHostilesCount(creep.memory.roomName) && creep.checkInRoomAndGo({ignoreHostiled: 1}))
             return;
-	    
-        if (utils.try_attack(creep) <= 0) {
+        
+        let mark = {};
+        let res = creep.attackNearHostile(50, mark);
+
+        if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL) && !mark["attacked"])
+            creep.heal(creep);
+
+        if (res != OK) {
             let spawn = Game.spawns[creep.memory.spawnName];
             if (spawn.recycleCreep(creep) == ERR_NOT_IN_RANGE)
                 creep.moveTo(spawn, {ignoreHostiled: 1});
-            if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL))
-                    creep.heal(creep);
         }
 	},
 	

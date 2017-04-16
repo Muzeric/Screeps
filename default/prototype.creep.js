@@ -257,7 +257,7 @@ Creep.prototype.goFromKeepers = function() {
     return this.moveTo(safePlace ? safePlace : Game.spawns[this.memory.spawnName].room.controller); 
 }
 
-Creep.prototype.attackNearHostile = function(range) {
+Creep.prototype.attackNearHostile = function(range, mark) {
     if (!this.getActiveBodyparts(ATTACK))
         return ERR_NO_BODYPART;
 
@@ -265,14 +265,18 @@ Creep.prototype.attackNearHostile = function(range) {
     if (!targets.length)
         return ERR_NOT_FOUND;
         
-    let target = Game.getObjectById(targets[0].id);
+    let target = Game.getObjectById(targets.sort((a,b) => this.pos.getRangeTo(a.pos) - this.pos.getRangeTo(b.pos))[0].id);
     if (!target)
         return ERR_INVALID_TARGET;
 
     console.log(this.name + ": attackNearHostile, pos=" + this.pos.getKey(1) + ", hits=" + target.hits + ", owner=" + target.owner.username);
 
-    if (this.attack(target) == ERR_NOT_IN_RANGE)
+    let res = this.attack(target);
+    if (res == ERR_NOT_IN_RANGE)
         this.moveTo(target);
+    else if (res == OK && mark)
+        mark.attacked = 1;
+    
     return OK;
 }
 
