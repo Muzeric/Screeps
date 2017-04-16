@@ -381,6 +381,9 @@ Room.prototype.updateStructures = function() {
         memory.structures[STRUCTURE_SOURCE].push(elem);
     });
 
+    for (let key of _.filter(Object.keys(memory.needRoads), r => memory.needRoads[r].id ))
+        memory.needRoads[key].id = null; // Renew id's, if hostile or manual removed object
+
     this.find(FIND_STRUCTURES).forEach( function(s) {
         let elem;
         if (s.structureType == STRUCTURE_KEEPER_LAIR) {
