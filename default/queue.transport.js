@@ -2,7 +2,7 @@ var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var queue = {
-    mainRoomName: Game.rooms["sim"] ? "sim" : "W48N4",
+    mainRoomName: Game.rooms["sim"] ? "sim" : "E82S88",
     transportReserved: {},
     indexByCreep: {},
 
