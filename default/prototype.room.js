@@ -536,7 +536,10 @@ Room.prototype.updateStructures = function() {
         if (container) {
             extractor.pair = 1;
             extractor.cID = container.id;
-            extractor.betweenPos = container.pos;
+            if (extractor.pos.isNearTo(container.pos))
+                extractor.betweenPos = container.pos;
+            else
+                extractor.betweenPos = _.filter( utils.getRangedPlaces(null, extractor.pos, 1), p => p.isNearTo(container.pos) )[0];
         }
     }
 
