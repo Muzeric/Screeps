@@ -532,7 +532,7 @@ Room.prototype.updateStructures = function() {
     global.cache.matrix[this.name]["common"] = costs;
 
     for (let extractor of (memory.structures[STRUCTURE_EXTRACTOR] || [])) {
-        let container = _.filter(memory.structures[STRUCTURE_CONTAINER], c => extractor.pos.inRangeTo(c.pos, 1))[0];
+        let container = _.filter(memory.structures[STRUCTURE_CONTAINER], c => extractor.pos.inRangeTo(c.pos, 2))[0];
         if (container) {
             extractor.pair = 1;
             extractor.cID = container.id;
@@ -613,7 +613,7 @@ Room.prototype.updateCreeps = function() {
         hostileOther: [],
         mine: [],
     };
-    let cache = global.cache.creeps[this.name];
+    let creepCache = global.cache.creeps[this.name];
     memory.hostilesCount = 0;
     memory.hostilesDeadTime = 0;
     if (!("common" in global.cache.matrix[this.name]))
@@ -622,15 +622,15 @@ Room.prototype.updateCreeps = function() {
 
     this.find(FIND_CREEPS).forEach( function(c) {
         if (c.owner.username == "Source Keeper") {
-            cache.keepersPoses.push(c.pos);
+            creepCache.keepersPoses.push(c.pos);
         } else if (!c.my && (1 || c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL))) {
-            cache.hostileAttackers.push(c);
+            creepCache.hostileAttackers.push(c);
             memory.hostilesCount++;
             if (Game.time + c.ticksToLive > memory.hostilesDeadTime)
                 memory.hostilesDeadTime = Game.time + c.ticksToLive;
         } else if (c.my) {
-            cache.mine[c.memory.role] = cache.mine[c.memory.role] || [];
-            cache.mine[c.memory.role].push(c);
+            creepCache.mine[c.memory.role] = creepCache.mine[c.memory.role] || [];
+            creepCache.mine[c.memory.role].push(c);
             if (c.memory.role == "harvester" && c.memory.targetID) {
                 global.cache.wantCarry[roomName][c.memory.targetID] = (global.cache.wantCarry[roomName][c.memory.targetID] || 0) + c.carry.energy;
             } else if (c.memory.role == "attacker" || c.memory.role == "healer") {
@@ -638,7 +638,7 @@ Room.prototype.updateCreeps = function() {
                 global.cache.creeps["_army"][c.memory.role + 's'].push(c);
             }
         } else  {
-            cache.hostileOther.push(c);
+            creepCache.hostileOther.push(c);
         }
         costs.set(c.pos.x, c.pos.y, 0xff);
     });
