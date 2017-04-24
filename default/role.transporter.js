@@ -6,7 +6,7 @@ var role = {
     run: function(creep) {
         if (Game.roomsHelper.getHostilesCount(creep.room.name) > 1) {
 			creep.say("AAA");
-			creep.moveTo(Game.spawns[creep.memory.spawnName].room.controller);
+			creep.moveTo(Game.spawns[creep.memory.spawnName].room.controller, {ignoreHostiled: 1});
 			return;
 		}
 
@@ -30,12 +30,12 @@ var role = {
                 if (res < 0) // Not all carry transfered
                     return;
             } else {
-                return creep.moveTo(storage);
+                return creep.moveTo(storage, {ignoreHostiled: 1});
             }
         } else if (_.sum(creep.carry) == 0 && creep.ticksToLive < ALIVE_TICKS) {
             let spawn = Game.spawns[creep.memory.spawnName];
             if (spawn.recycleCreep(creep) == ERR_NOT_IN_RANGE)
-                creep.moveTo(spawn);
+                creep.moveTo(spawn, {ignoreHostiled: 1});
             return;
         }
 
@@ -58,7 +58,7 @@ var role = {
             let fromAmount = "mineralType" in from ? from.mineralAmount : from.store[request.resourceType];
 
             if (!creep.pos.isNearTo(from))
-                return creep.moveTo(from);
+                return creep.moveTo(from, {ignoreHostiled: 1});
 
             let amount = _.min([request.amount - (creep.carry[request.resourceType] || 0), creep.carryCapacity - _.sum(creep.carry), fromAmount]);
             if (!amount) {
@@ -87,7 +87,7 @@ var role = {
             }
 
             if (!creep.pos.isNearTo(to))
-                return creep.moveTo(to);
+                return creep.moveTo(to, {ignoreHostiled: 1});
             
             let amount = _.min([request.amount, creep.carry[request.resourceType] || 0, toSpaceLeft]);
             if (!amount)
