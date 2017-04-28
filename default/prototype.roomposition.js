@@ -67,3 +67,59 @@ RoomPosition.prototype.getDirectionTo = function (pos) {
     }
     return dir;
 }
+
+RoomPosition.prototype.move = function (dir) {
+    let x = this.x;
+    let y = this.y;
+    let roomName = this.roomName;
+
+    switch (_.parseInt(dir)) {
+        case LEFT:
+            x--;
+            break;
+        case RIGHT:
+            x++;
+            break;
+        case TOP:
+            y--;
+            break;
+        case BOTTOM:
+            y++;
+            break;
+        case TOP_LEFT:
+            x--;
+            y--;
+            break;
+        case TOP_RIGHT:
+            x++;
+            y--;
+            break;
+        case BOTTOM_LEFT:
+            x--;
+            y++;
+            break;
+        case BOTTOM_RIGHT:
+            x++;
+            y++;
+            break;
+        default:
+            console.log("RoomPosition.move: unknown dir=" + dir);
+    }
+
+    let exits = Game.map.describeExits(this.roomName);
+    if (x <= 0) {
+        x = 49;
+        roomName = exits[LEFT];
+    } else if (x >= 49) {
+        x = 0;
+        roomName = exits[RIGHT];
+    } else if (y <= 0) {
+        y = 49;
+        roomName = exits[TOP];
+    } else if (y >= 49) {
+        y = 0;
+        roomName = exits[BOTTOM];
+    }
+
+    return new RoomPosition(x, y, roomName);
+}

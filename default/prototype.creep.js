@@ -249,6 +249,17 @@ Creep.prototype.moveTo = function() {
     return res;
 }
 
+let origMove = Creep.prototype.move;
+Creep.prototype.move = function() {
+    let res = origMove.apply(this, arguments);
+    if (res == OK) {
+        this.memory.newPosTime = Game.time;
+        this.memory.newPos = this.pos.move(arguments[0]);
+    }
+    return res;
+}
+
+
 Creep.prototype.goFromKeepers = function() {
     let targetPos = this.room.getNearKeeperPos(this.pos, 5) || this.room.getNearComingLairPos(this.pos, 5);
     if (!targetPos)

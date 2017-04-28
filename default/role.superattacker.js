@@ -4,40 +4,44 @@ const profiler = require('screeps-profiler');
 var role = {
     run: function(creep) {
         let healers = _.filter(Game.creeps, c => c.memory.role == "superhealer" && c.memory.attackerID == creep.id);
-        let flags = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack');
-	    if(flags.length) {
-            let flag = flags.sort()[0];
-            if (creep.room.name != flag.pos.roomName) {
-                if (healer && creep.pos.getRangeTo(healer) < 3 || creep.pos.isBorder())
-                    creep.moveTo(flag, {ignoreHostiled: 1});
-                else if (healer)
-                    creep.moveTo(healer, {ignoreHostiled: 1});
-                return;
-            } else {
-                let target = 
-                    //Game.getObjectById(Memory.targets[creep.room.name]) ||
-                    _.filter(flag.pos.lookFor(LOOK_STRUCTURES), s => s.structureType != "road")[0] ||
-                    creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL) }) ||
-                    creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}) ||
-                    creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS) ||
-                    creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS) ||
-                    creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType != STRUCTURE_CONTROLLER})
-                ;
-                if (target) {
-                    //Memory.targets[creep.room.name] = target.id;
-                    if (creep.attack(target) == ERR_NOT_IN_RANGE)
-                        creep.moveTo(target, {ignoreHostiled: 1});
-                } else {
-                    creep.moveTo(flag, {ignoreHostiled: 1});
-                }
-            }
-        } else {
+        let flag = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack').sort()[0];
+
+        if(!flag || creep.room.name != flag.pos.roomName && healers.length < SUPER_HEALER_MINCOUNT) {
             let spawn = Game.spawns[creep.memory.spawnName];
             if (creep.pos.isNearTo(spawn))
                 if (creep.hits < creep.hitsMax * 0.95)
                     spawn.renewCreep(creep);
             else 
                 creep.moveTo(spawn, {ignoreHostiled: 1});
+            
+            return;
+        }
+
+        let healersOK = 0;
+        let places = utils.getRangedPlaces(null, creep.pos, 1);
+
+
+        if (creep.room.name != flag.pos.roomName) {
+            if (healersOK || creep.pos.isBorder())
+                creep.moveTo(flag, {ignoreHostiled: 1});
+            return;
+        } else {
+            let target = 
+                //Game.getObjectById(Memory.targets[creep.room.name]) ||
+                _.filter(flag.pos.lookFor(LOOK_STRUCTURES), s => s.structureType != "road")[0] ||
+                creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL) }) ||
+                creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}) ||
+                creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS) ||
+                creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS) ||
+                creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType != STRUCTURE_CONTROLLER})
+            ;
+            if (target) {
+                //Memory.targets[creep.room.name] = target.id;
+                if (creep.attack(target) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target, {ignoreHostiled: 1});
+            } else {
+                creep.moveTo(flag, {ignoreHostiled: 1});
+            }
         }
         
 	},
