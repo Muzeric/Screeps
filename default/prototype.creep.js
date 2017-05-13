@@ -254,6 +254,7 @@ Creep.prototype.move = function() {
     let res = origMove.apply(this, arguments);
     if (res == OK) {
         this.memory.newPosTime = Game.time;
+        this.memory.newPosDir = arguments[0];
         this.memory.newPos = this.pos.move(arguments[0]);
     }
     return res;

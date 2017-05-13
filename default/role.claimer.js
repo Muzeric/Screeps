@@ -10,7 +10,14 @@ var role = {
                 !(STRUCTURE_CONTROLLER in Memory.rooms[creep.memory.roomName].structures) ||
                 !Memory.rooms[creep.memory.roomName].structures[STRUCTURE_CONTROLLER].length
             ) {
-                console.log(creep.name + ": no controller info for " + creep.memory.roomName);
+                
+                let flag = _.filter(Game.flags, f => f.pos.roomName == creep.memory.roomName && f.name.substring(0,f.name.indexOf('.')) == "Controller" )[0];
+                if (flag) {
+                    creep.moveTo(flag, {ignoreHostiled: 1});
+                    console.log(creep.name + ": goto flag");
+                } else {
+                    console.log(creep.name + ": no controller info for " + creep.memory.roomName);
+                }
                 return;
             }
 
