@@ -510,6 +510,7 @@ Room.prototype.updateStructures = function() {
                 return;
             } else {
                 memory.constructionsRoads++;
+                costs.set(s.pos.x, s.pos.y, 1);
             }
         } else if ((s.structureType != STRUCTURE_RAMPART || !s.my) && s.structureType != STRUCTURE_CONTAINER) {
             costs.set(s.pos.x, s.pos.y, 0xff);
