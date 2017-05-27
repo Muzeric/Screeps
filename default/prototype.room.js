@@ -151,7 +151,7 @@ Room.prototype.updateResources = function() {
     memory.freeEnergy = 0;
     memory.store = {};
 
-    this.find(FIND_DROPPED_ENERGY).forEach( function(r) {
+    this.find(FIND_DROPPED_RESOURCES).forEach( function(r) {
         let elem = {
             id : r.id,
             pos : r.pos,

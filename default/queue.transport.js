@@ -2,7 +2,7 @@ var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var queue = {
-    mainRoomName: Game.rooms["sim"] ? "sim" : "E82S88",
+    mainRoomName: Game.rooms["sim"] ? "sim" : "W69N78",
     transportReserved: {},
     indexByCreep: {},
 
@@ -35,7 +35,7 @@ var queue = {
         }
         
         let req_from = from || this.getDefaultStorage();
-        let req_to = to || this.getDefaultStorage();
+        let req_to = to || this.getDefaultTerminal();
         if (!req_from || !req_to) {
             console.log(`queueTransport.addRequest: can't calc any of these: from=${req_from}, to=${req_to}`);
             return null;
