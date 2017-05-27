@@ -9,6 +9,8 @@ var role = {
 			return;
 		}
 
+		//if (creep.getUnboostedBodyparts(WORK) && creep.room.my)
+
 	    if(creep.carry.energy == 0 && creep.memory.upgrading) {
 			creep.memory.upgrading = false;
 	    } else if (creep.carry.energy == creep.carryCapacity && !creep.memory.upgrading) {

@@ -1,7 +1,7 @@
-
 require('constants');
 require('prototype.creep');
 require('prototype.roomposition');
+require('prototype.structure');
 var utils = require('utils');
 var travel = require('travel');
 const profiler = require('screeps-profiler');

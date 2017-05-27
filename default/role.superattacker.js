@@ -18,7 +18,11 @@ var role = {
         }
 
         let healersOK = 0;
+        let healerI = 0;
         let places = utils.getRangedPlaces(null, creep.pos, 1);
+        for (let place of places) {
+            
+        }
 
 
         if (creep.room.name != flag.pos.roomName) {
