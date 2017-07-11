@@ -135,6 +135,9 @@ function setTarget (creep) {
         //if (creep.name == "harvester.0.999")
         //   console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + wantCarry + " wantCarry and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " cost=" + cost + ", targetID=" + minTarget.id);
     }
+    if (minTarget === undefined)
+        return ERR_NOT_FOUND;
+        
     creep.memory.targetID = minTarget.id;
 
     return OK;
