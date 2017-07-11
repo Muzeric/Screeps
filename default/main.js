@@ -315,7 +315,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "priority" : 11,
         "minEnergy" : 650,
         "wishEnergy" : liteClaimer ? 650 : 1300,
-        "range" : 2,
+        "range" : 3,
     },{
         "role" : "longminer",
         "count" : memory.type == 'lair' ? 0 : pairedSources,
