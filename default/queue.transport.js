@@ -35,7 +35,7 @@ var queue = {
         }
         
         let req_from = from || this.getDefaultStorage();
-        let req_to = to || this.getDefaultTerminal();
+        let req_to = to || this.getDefaultStorage();
         if (!req_from || !req_to) {
             console.log(`queueTransport.addRequest: can't calc any of these: from=${req_from}, to=${req_to}`);
             return null;
