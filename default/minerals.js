@@ -10,7 +10,7 @@ var minerals = {
         },
         "W69N78": {
             "terminal": {
-                "ZO": 10000,
+                "OH": 10000,
             },
         },
     },
