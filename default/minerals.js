@@ -230,7 +230,7 @@ var minerals = {
                     // buy
                 }
             }
-            if (freeAmount1 + futureAmount1 + transportableAmount1 < request.amount) {
+            if (freeAmount2 + futureAmount2 + transportableAmount2 < request.amount) {
                 if (this.getInputTypes(request.inputType2)) {
                     this.addNeedList(request.roomName, LAB_REQUEST_TYPE_REACTION, request.inputType2, request.amount - (freeAmount2 + futureAmount2 + transportableAmount2));
                 } else {
