@@ -195,9 +195,9 @@ var minerals = {
     },
 
     addNeedList: function (roomName, type, rt, amount) {
-        this.needList[request.roomName] = this.needList[request.roomName] || {};
-        this.needList[request.roomName][type] = this.needList[request.roomName][type] || {};
-        this.needList[request.roomName][type][rt] = (this.needList[request.roomName][type][rt] || 0) + amount;
+        this.needList[roomName] = this.needList[roomName] || {};
+        this.needList[roomName][type] = this.needList[roomName][type] || {};
+        this.needList[roomName][type][rt] = (this.needList[roomName][type][rt] || 0) + amount;
     },
 
     checkAndRequestAmount: function (labInfo, labs, request, storage) {
@@ -210,6 +210,7 @@ var minerals = {
         let transportableAmount1 = global.cache.queueTransport.getStoreWithReserved(storage, request.inputType1);
         let transportableAmount2 = global.cache.queueTransport.getStoreWithReserved(storage, request.inputType2);
 
+        //console.log(`check: ${request.id}: freeAmount1=${freeAmount1}, freeAmount2=${freeAmount2}, futureAmount1=${futureAmount1}, futureAmount2=${futureAmount2}, request.amount=${request.amount}`);
         if (
                (freeAmount1 + futureAmount1 + transportableAmount1 >= request.amount) && (labInfo[labs[0]].wantedAmount + request.amount <= labInfo[labs[0]].mineralCapacity)
             && (freeAmount2 + futureAmount2 + transportableAmount2 >= request.amount) && (labInfo[labs[1]].wantedAmount + request.amount <= labInfo[labs[1]].mineralCapacity)
@@ -318,6 +319,7 @@ var minerals = {
             let needAmount = lab.wantedAmount - lab.mineralAmount - lab.transportAmount;
             let transportableAmount = global.cache.queueTransport.getStoreWithReserved(storage, lab.mineralType);
             let stored = global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType);
+            //console.log(`LAB S{labID}: needAmount=${needAmount}, wantedAmount=${lab.wantedAmount}, mineralAmount=${lab.mineralAmount}, transportAmount=${lab.transportAmount}, transportableAmount=${transportableAmount}, usedAmount=${lab.usedAmount}`);
             if (needAmount > 0 && transportableAmount > 0) {
                 //console.log(`${labID}: wantedAmount=${lab.wantedAmount}, mineralAmount=${lab.mineralAmount}, transportAmount=${lab.transportAmount}, transportableAmount=${transportableAmount}, usedAmount=${lab.usedAmount}`);
                 global.cache.queueTransport.addRequest(storage, lab, lab.mineralType, _.min([transportableAmount, needAmount]));

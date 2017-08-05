@@ -2,7 +2,7 @@ var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var queue = {
-    mainRoomName: Game.rooms["sim"] ? "sim" : "W69N78",
+    mainRoomName: Game.rooms["sim"] ? "sim" : "W69N79",
     transportReserved: {},
     indexByCreep: {},
 
@@ -109,6 +109,7 @@ var queue = {
                 || "mineralAmount" in from && from.mineralAmount < request.amount
                 || "store" in from && from.store[request.resourceType] < request.amount
                 || "mineralType" in to && to.mineralType && to.mineralType != request.resourceType
+                || to.structureType == STRUCTURE_NUKER && request.resourceType == "G" && to.ghodium + request.amount > to.ghodiumCapacity
             )
                 continue;
             if (minCost === undefined || request.createTime < minCost) {

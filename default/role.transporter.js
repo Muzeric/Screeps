@@ -82,7 +82,9 @@ var role = {
                 return;
             }
 
-            let toSpaceLeft = "mineralType" in to ? to.mineralCapacity - to.mineralAmount : to.storeCapacity - _.sum(to.store);
+            let toSpaceLeft = "mineralType" in to ? to.mineralCapacity - to.mineralAmount :
+                    (to.structureType == STRUCTURE_NUKER && request.resourceType == "G" ? to.ghodiumCapacity - to.ghodium : to.storeCapacity - _.sum(to.store))
+            ;
             if (!toSpaceLeft || "mineralType" in to && to.mineralType && to.mineralType != request.resourceType) {
                 queue.unbindRequest(request.id);
                 return;
