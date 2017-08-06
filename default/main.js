@@ -412,6 +412,7 @@ function getRoomLimits (room, creepsCount) {
     let lastCPU = Game.cpu.getUsed();
     let memory = Memory.rooms[room.name] || {structures : {}};
 
+    let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
     let builds = (memory.constructions || 0) - (memory.constructionsRoads || 0);
     let repairs = memory.repairs || 0;
     let unminerSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom);
@@ -514,6 +515,11 @@ function getRoomLimits (room, creepsCount) {
             "count" : memory.healerCount || 0,
             "priority" : 1,
             "wishEnergy" : 5000,
+    },{
+            role : "dismantler",
+            "count" : fcount["Dismantle"] ? 1 : 0,
+            "priority" : 9,
+            "wishEnergy" : 1500,
     });
 
     for (let limit of limits) {
