@@ -136,7 +136,7 @@ Room.prototype.getAmount = function (rt) {
 
 Room.prototype.canBuildContainers = function () {
     let memory = this.memory;
-    if (memory.type == "my" && memory.structures[STRUCTURE_SPAWN] || 
+    if (memory.type == "my" && memory.structures[STRUCTURE_SPAWN].length && memory.structures[STRUCTURE_EXTENSION].length || 
         memory.type == "reserved" && (global.cache.creeps[this.name].mine["longharvester"] || []).length > 1
     )
         return 1;
