@@ -478,7 +478,7 @@ function getRoomLimits (room, creepsCount) {
             },
     },{
             "role" : "builder",
-            "count" : (builds ? (builds > 5 && room.controller.level >= 8 ? 3 : 1) : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)) + (repairs > 20 && room.controller.level >= 8 ? 2 : 0),
+            "count" : (builds ? (builds > 5 && room.controller.level >= 8 ? 3 : (builds < 5 ? _.ceil(builds/2) : 3)) : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)) + (repairs > 20 && room.controller.level >= 8 ? 2 : 0),
             "priority" : 4,
             "wishEnergy" : 1500,
             "maxEnergy" : builds || repairs > 10 ? 5000 : 1500,

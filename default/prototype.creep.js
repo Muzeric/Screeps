@@ -354,8 +354,11 @@ Creep.prototype.findSource = function () {
                 continue;
             else
                 cpriority = 2;
-        } else if (target.structureType == STRUCTURE_CONTAINER && energyNeed <= energyLeft) {
-            cpriority = 2;
+        } else if (target.structureType == STRUCTURE_CONTAINER) {
+                if (energyNeed <= energyLeft)
+                    cpriority = 2;
+                else if (!target.minersTo)
+                    continue;
         } else if (target.structureType == STRUCTURE_SOURCE) { // Source
             if (target.minersFrom)
                 continue;
