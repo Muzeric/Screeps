@@ -189,6 +189,12 @@ Room.prototype.updateResources = function() {
         } else if (elem.structureType == STRUCTURE_POWER_SPAWN) {
             elem.power = s.power;
         }
+
+        if (s.structureType == STRUCTURE_SPAWN && s.hits < s.hitsMax * 0.5 && s.my && !room.controller.safeMode && !room.controller.safeModeCooldown && room.controller.safeModeAvailable) {
+            let res = room.controller.activateSafeMode();
+            console.log(room.name + ": ACTIVATING SAFE MODE: " + res);
+            Game.notify(room.name + ": ACTIVATING SAFE MODE: " + res);
+        }
     }
     memory.resourcesTime = Game.time;
 }
