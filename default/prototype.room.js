@@ -589,7 +589,7 @@ Room.prototype.updateStructures = function() {
             let pos = key.split(',');
             if (pos[0] != 0 && pos[0] != 49 && pos[1] != 0 && pos[1] != 49) {
                 let res = this.createConstructionSite(parseInt(pos[0]), parseInt(pos[1]), STRUCTURE_ROAD);
-                console.log(this.name + " BUILT (" + res + ") road at " + key);
+                console.log(this.name + ": BUILT (" + res + ") road at " + key);
                 memory.constructions++;
                 memory.constructionsRoads++;
             }
@@ -617,8 +617,9 @@ Room.prototype.updateStructures = function() {
                             let newPos = basePos.change(xdiff, ydiff, 1);
                             if (utils.checkPosForExtension(newPos, costs)) {
                                 newCount++;
-                                memory.visuals.push(newPos);
-                                //this.createConstructionSite(newPos, STRUCTURE_EXTENSION);
+                                //memory.visuals.push(newPos);
+                                let res = this.createConstructionSite(newPos, STRUCTURE_EXTENSION);
+                                console.log(this.name + ": BUILT (" + res + ") extension at " + pos.getKey());
                                 if (curCount + newCount >= maxCount)
                                     break SEARCHING;
                             }
