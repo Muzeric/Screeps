@@ -1,3 +1,5 @@
+var utils = require('utils');
+
 RoomPosition.prototype.isBorder = function () {
     return (this.x == 0 || this.x == 49 || this.y == 0 || this.y == 49) ? true : false;
 }

@@ -70,6 +70,9 @@ Room.prototype.update = function() {
     if (!("resources" in this.memory) || Game.time - (this.memory.resourcesTime || 0) >= UPDATE_INTERVAL_RESOURCES)
         this.updateResources();
     
+    for (let pos of this.memory.visuals) {
+        this.visual.circle(pos, {fill: 'red'});
+    }
     /*
     for (let key of _.filter(Object.keys(this.memory.needRoads), r => this.memory.needRoads[r].wanted > ROADS_REPAIR_WANTED)) {
         let color = 'green';
@@ -603,20 +606,26 @@ Room.prototype.updateStructures = function() {
         let maxCount = CONTROLLER_STRUCTURES["extension"][room.controller.level] || 0;
         let curCount = (memory.structures[STRUCTURE_EXTENSION] || []).length;
         if (maxCount > curCount) {
-            let basePos = memory.structures[STRUCTURE_EXTENSION][0].pos;
-            let diff = 1;
+            let basePos = memory.structures[STRUCTURE_SPAWN][0].pos;
+            let sum = 2;
             let newCount = 0;
-            while (curCount + newCount < maxCount && diff < 10) {
-                for (let xdiff of [-1 * diff, diff]) {
-                    for (let ydiff of [-1 * diff, diff]) {
-                        let newPos = basePos.change(xdiff, ydiff, 1);
-                        if (utils.checkPosForExtension(newPos, costs)) {
-                            newCount++;
-                            memory.visuals.push(newPos);
+            SEARCHING: while (curCount + newCount < maxCount && sum < 10) {
+                for (let xmod = 0; xmod <= sum; xmod++) {
+                    let ymod = sum - xmod;
+                    for (let xdiff of xmod ? [-1 * xmod, xmod] : [0]) {
+                        for (let ydiff of ymod ? [-1 * ymod, ymod] : [0]) {
+                            let newPos = basePos.change(xdiff, ydiff, 1);
+                            if (utils.checkPosForExtension(newPos, costs)) {
+                                newCount++;
+                                memory.visuals.push(newPos);
+                                //this.createConstructionSite(newPos, STRUCTURE_EXTENSION);
+                                if (curCount + newCount >= maxCount)
+                                    break SEARCHING;
+                            }
                         }
                     }
                 }
-                diff++;
+                sum += 2;
             }
         }
     }

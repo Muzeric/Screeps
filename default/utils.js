@@ -41,6 +41,7 @@ function _checkPosFree (pos, costs, ext) {
             if ([STRUCTURE_EXTENSION, STRUCTURE_ROAD, STRUCTURE_RAMPART].indexOf(s.structureType) == -1)
                 return false;
         }
+        return true;
     }
 
     for (let s of pos.lookFor(LOOK_STRUCTURES)) {
