@@ -602,10 +602,10 @@ Room.prototype.updateStructures = function() {
             memory.pointPos = flag.pos;
     }
 
-    if (memory.type == 'my' ) {
+    if (memory.type == 'my') {
         let maxCount = CONTROLLER_STRUCTURES["extension"][room.controller.level] || 0;
         let curCount = (memory.structures[STRUCTURE_EXTENSION] || []).length;
-        if (maxCount > curCount) {
+        if (maxCount > curCount && (memory.structures[STRUCTURE_SPAWN] || []).length) {
             let basePos = memory.structures[STRUCTURE_SPAWN][0].pos;
             let sum = 2;
             let newCount = 0;
@@ -619,7 +619,7 @@ Room.prototype.updateStructures = function() {
                                 newCount++;
                                 //memory.visuals.push(newPos);
                                 let res = this.createConstructionSite(newPos, STRUCTURE_EXTENSION);
-                                console.log(this.name + ": BUILT (" + res + ") extension at " + pos.getKey());
+                                console.log(this.name + ": BUILT (" + res + ") extension at " + newPos.getKey());
                                 if (curCount + newCount >= maxCount)
                                     break SEARCHING;
                             }
