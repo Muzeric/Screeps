@@ -8,11 +8,6 @@ var minerals = {
                 "LO": 100,
             },
         },
-        "W69N78": {
-            "terminal": {
-                "OH": 10000,
-            },
-        },
     },
     library: {},
     orders: null,
