@@ -525,10 +525,10 @@ Room.prototype.updateStructures = function() {
             }
         } else if ((s.structureType != STRUCTURE_RAMPART || !s.my) && s.structureType != STRUCTURE_CONTAINER) {
             costs.set(s.pos.x, s.pos.y, 0xff);
+            if (s.structureType == STRUCTURE_EXTENSION)
+                extensionConstructionCount++;
         } else if (s.structureType == STRUCTURE_CONTAINER) {
             constructionsContainers[s.pos.getKey()] = s.id;
-        } else if (s.structureType == STRUCTURE_EXTENSION) {
-            extensionConstructionCount++;
         }
         let elem = {
             id: s.id,
