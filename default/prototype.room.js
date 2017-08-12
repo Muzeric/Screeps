@@ -512,6 +512,7 @@ Room.prototype.updateStructures = function() {
     });
 
     let constructionsContainers = {};
+    let extensionConstructionCount = 0;
     this.find(FIND_MY_CONSTRUCTION_SITES).forEach( function(s) {
         memory.constructions++;
         if (s.structureType == STRUCTURE_ROAD) {
@@ -526,6 +527,8 @@ Room.prototype.updateStructures = function() {
             costs.set(s.pos.x, s.pos.y, 0xff);
         } else if (s.structureType == STRUCTURE_CONTAINER) {
             constructionsContainers[s.pos.getKey()] = s.id;
+        } else if (s.structureType == STRUCTURE_EXTENSION) {
+            extensionConstructionCount++;
         }
         let elem = {
             id: s.id,
@@ -604,7 +607,7 @@ Room.prototype.updateStructures = function() {
 
     if (memory.type == 'my') {
         let maxCount = CONTROLLER_STRUCTURES["extension"][room.controller.level] || 0;
-        let curCount = (memory.structures[STRUCTURE_EXTENSION] || []).length;
+        let curCount = (memory.structures[STRUCTURE_EXTENSION] || []).length + extensionConstructionCount;
         if (maxCount > curCount && (memory.structures[STRUCTURE_SPAWN] || []).length) {
             let basePos = memory.structures[STRUCTURE_SPAWN][0].pos;
             let sum = 2;
