@@ -369,6 +369,7 @@ Room.prototype.updateStructures = function() {
     memory.constructionsRoads = 0;
     memory.repairs = 0;
     memory.repairHits = 0;
+    memory.visuals = [];
     if (!("needRoads" in memory))
         memory.needRoads = {};
     memory.pointPos = Game.flags["PointPos." + this.name] ? Game.flags["PointPos." + this.name].pos : null;
@@ -596,6 +597,28 @@ Room.prototype.updateStructures = function() {
         let flag = _.filter(Game.flags, f => f.pos.roomName == this.name)[0];
         if (flag)
             memory.pointPos = flag.pos;
+    }
+
+    if (memory.type == 'my' ) {
+        let maxCount = CONTROLLER_STRUCTURES["extension"][room.controller.level] || 0;
+        let curCount = (memory.structures[STRUCTURE_EXTENSION] || []).length;
+        if (maxCount > curCount) {
+            let basePos = memory.structures[STRUCTURE_EXTENSION][0].pos;
+            let diff = 1;
+            let newCount = 0;
+            while (curCount + newCount < maxCount && diff < 10) {
+                for (let xdiff of [-1 * diff, diff]) {
+                    for (let ydiff of [-1 * diff, diff]) {
+                        let newPos = basePos.change(xdiff, ydiff, 1);
+                        if (utils.checkPosForExtension(newPos, costs)) {
+                            newCount++;
+                            memory.visuals.push(newPos);
+                        }
+                    }
+                }
+                diff++;
+            }
+        }
     }
 
     memory.structuresTime = Game.time;

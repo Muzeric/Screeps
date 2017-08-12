@@ -223,8 +223,12 @@ Creep.prototype.travelTo = function (targetPos, opts) {
     }
     if (opts.withCreeps)
         addCreeps = 1;
+    
+    let range = 1;
+    if (opts.range !== undefined)
+        range = opts.range;
 
-    let pf = travel.getPath(this.pos, {pos: targetPos, range: 1}, targetKey, addCreeps, this.room.memory.pathCache, maxOps, opts.ignoreHostiled);
+    let pf = travel.getPath(this.pos, {pos: targetPos, range: range}, targetKey, addCreeps, this.room.memory.pathCache, maxOps, opts.ignoreHostiled);
     if (pf.incomplete) {
         console.log(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         Game.notify(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);

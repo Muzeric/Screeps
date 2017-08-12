@@ -123,3 +123,34 @@ RoomPosition.prototype.move = function (dir) {
 
     return new RoomPosition(x, y, roomName);
 }
+
+RoomPosition.prototype.change = function (diffx, diffy, inRoom) {
+    let x = this.x;
+    let y = this.y;
+    let roomName = this.roomName;
+
+    x += _.parseInt(diffx);
+    y += _.parseInt(diffy);
+
+    if (inRoom) {
+        x = utils.clamp(x, 0, 49);
+        y = utils.clamp(y, 0, 49);
+    } else {
+        let exits = Game.map.describeExits(this.roomName);
+        if (x <= 0) {
+            x = 49;
+            roomName = exits[LEFT];
+        } else if (x >= 49) {
+            x = 0;
+            roomName = exits[RIGHT];
+        } else if (y <= 0) {
+            y = 49;
+            roomName = exits[TOP];
+        } else if (y >= 49) {
+            y = 0;
+            roomName = exits[BOTTOM];
+        }
+    }
+
+    return new RoomPosition(x, y, roomName);
+}

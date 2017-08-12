@@ -23,7 +23,7 @@ var role = {
 	        creep.findSourceAndGo();
         } else {
             if(creep.upgradeController(room.controller) == ERR_NOT_IN_RANGE) {
-                var res = creep.moveTo(room.controller);
+                var res = creep.moveTo(room.controller, {range: 2});
                 //console.log(creep.name + " go res=" + res);
                 if(res == ERR_NO_PATH) {
                     creep.memory.errors++;

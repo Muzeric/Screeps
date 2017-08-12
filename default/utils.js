@@ -12,6 +12,10 @@ function _addPosition (creep, res, pos, x, y) {
         if (t == "wall")
             return;
     }
+    for (let s of npos.lookFor(LOOK_STRUCTURES)) {
+        if ([STRUCTURE_CONTAINER, STRUCTURE_ROAD, STRUCTURE_RAMPART].indexOf(s.structureType) == -1)
+            return;
+    }
     if (creep) {
         for (let c of npos.lookFor(LOOK_CREEPS)) {
             if (c != creep)
@@ -21,7 +25,49 @@ function _addPosition (creep, res, pos, x, y) {
     res.push(npos);
 }
 
+function _checkPosFree (pos, costs, ext) {
+    if (pos.x < 2 || pos.x > 47 || pos.y < 2 || pos.y > 47)
+        return false;
+
+    for (let t of pos.lookFor(LOOK_TERRAIN)) {
+        if (t == "wall")
+            return false;
+    }
+
+    if (costs.get(pos.x, pos.y) == 0xff) {
+        if (!ext)
+            return false;
+        for (let s of pos.lookFor(LOOK_STRUCTURES)) {
+            if ([STRUCTURE_EXTENSION, STRUCTURE_ROAD, STRUCTURE_RAMPART].indexOf(s.structureType) == -1)
+                return false;
+        }
+    }
+
+    for (let s of pos.lookFor(LOOK_STRUCTURES)) {
+        if ([STRUCTURE_ROAD, STRUCTURE_RAMPART].indexOf(s.structureType) == -1)
+            return false;
+    }
+    
+    return true;
+}
+
 var utils = {
+    checkPosForExtension : function (pos, costs) {
+        if (!_checkPosFree(pos, costs) || 
+            !_checkPosFree(pos.change(-1, 0, 1), costs) ||
+            !_checkPosFree(pos.change(1, 0, 1), costs) ||
+            !_checkPosFree(pos.change(0, -1, 1), costs) ||
+            !_checkPosFree(pos.change(0, 1, 1), costs) ||
+            !_checkPosFree(pos.change(-1, -1, 1), costs, 1) ||
+            !_checkPosFree(pos.change(1, -1, 1), costs, 1) ||
+            !_checkPosFree(pos.change(-1, 1, 1), costs, 1) ||
+            !_checkPosFree(pos.change(1, 1, 1), costs, 1)
+        )
+            return false;
+        
+        return true;
+    },
+
     clamp : function (n, min, max) {
         return n < min ? min : (n > max ? max : n);
     },
