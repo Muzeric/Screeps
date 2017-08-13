@@ -60,8 +60,9 @@ var role = {
             if (target) {
                 creep.rangedAttack(target);
                 //Memory.targets[creep.room.name] = target.id;
-                if (creep.attack(target) == ERR_NOT_IN_RANGE)
-                    creep.moveTo(target, {ignoreHostiled: 1});
+                if (creep.attack(target) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target, {ignoreHostiled: 1, range: "body" in target ? 3 : 1});
+                }
             } else {
                 creep.moveTo(flag, {ignoreHostiled: 1});
             }
