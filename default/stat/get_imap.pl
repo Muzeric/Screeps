@@ -68,7 +68,7 @@ foreach my $msg (@msgs) {
   my $room_out = '';
   my ($tick, $comp, $version);
   foreach my $str (split(/\n/, $content)) {
-    if ($str =~ /\d+ notifications? received:\s*|\[msg\]|^$/) {
+    if ($str =~ /\d+ notifications? received on.*shard|\[msg\]|^$/) {
       ;
     } elsif (($tick, $comp) = $str =~ /CPUHistory:(\d+):(.+)#END#/g) {
       my $jshash = lzw_decode($comp);

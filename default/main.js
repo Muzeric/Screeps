@@ -257,7 +257,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         return [];
     let builds = (memory.constructions || 0) - (memory.constructionsRoads || 0);
     let repairs = memory.repairs || 0;
-    let liteClaimer = memory.type == 'reserved' && memory.reserveEnd - Game.time > 3000 ? 1 : 0;
+    let liteClaimer = memory.type == 'reserved' && memory.reserveEnd - Game.time > 3000 || Memory.claimRoom == roomName ? 1 : 0;
     let sourcesForWork = (memory.structures[STRUCTURE_SOURCE] || []).length;
     let sourcesCapacity = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.energyCapacity);
     let sourcesWorkCapacity = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom ? s.energyCapacity : 0);
