@@ -42,8 +42,11 @@ var role = {
         }
 
         let request = queue.getRequest(creep.id);
-        if (!request)
+        if (!request) {
+            if (terminal)
+                creep.moveTo(terminal);
             return;
+        }
         
         let stage = 1;
         if (creep.carry[request.resourceType] >= 0)
