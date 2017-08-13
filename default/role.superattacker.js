@@ -74,13 +74,13 @@ var role = {
         energy -= 50;
         return [body, energy];
         */
-        // 10 * 5 + 80 * 6 + 150 * 6 + 50 * (5+6+6) = 2280
+        // 10 * 6 + 80 * 8 + 150 * 7 + 50 * (6+8+7) / 2 = 2280
 
         // 10 * 6 + 150 * 20 + 250 * 3 + 50 * 15 = 4560
         // 10 * 6 + 80 * 22  + 250 * 5 + 50 * 17 = 3920
-        let tnum = 5;
-        let anum = 6;
-        let rnum = 6;
+        let tnum = 6;
+        let anum = 8;
+        let rnum = 7;
         let mnum = Math.ceil((tnum + anum + rnum)/2);
         energy -= 10 * tnum + 80 * anum + 150 * rnum + 50 * mnum;
         
