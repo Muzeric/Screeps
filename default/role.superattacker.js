@@ -3,7 +3,7 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        let healers = _.filter(Game.creeps, c => c.memory.role == "superhealer" && c.memory.attackerID == creep.id);
+        let healers = _.filter(Game.creeps, c => c.memory.role == "superhealer" && c.memory.attackerID == creep.id).sort();
         let flag = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack').sort()[0];
 
         if(!flag || creep.room.name != flag.pos.roomName && healers.length < SUPER_HEALER_MINCOUNT) {
@@ -17,17 +17,29 @@ var role = {
             return;
         }
 
-        let healersOK = 0;
-        let healerI = 0;
         let places = utils.getRangedPlaces(null, creep.pos, 1);
-        for (let place of places) {
-            
-        }
-
+        let healersOK = _.sum(healers, c => c.pos.inRangeTo(creep.pos, 1)) >= places.length ? 1 : 0;
 
         if (creep.room.name != flag.pos.roomName) {
-            if (healersOK || creep.pos.isBorder())
-                creep.moveTo(flag, {ignoreHostiled: 1});
+            if (healersOK || creep.pos.isBorder()) {
+                if (creep.moveTo(flag, {ignoreHostiled: 1}) == OK) {
+                    let dir = creep.memory.newPosDir;
+                    for (let i = 0; i < healers.length; i++) {
+                        let healer = healers[i];
+                        let near = healer.pos.inRangeTo(creep.pos, 1);
+                        let res = -1;
+                        if (near)
+                            res = healer.move(dir);
+                        if (!near || res != OK)
+                            healers[i].moveTo(creep.pos, {ignoreHostiled: 1, range: 1});
+                    }
+                }
+            } else {
+                for (let i = 0; i < healers.length; i++) {
+                    let healer = healers[i];
+                    healers[i].moveTo(creep.pos, {ignoreHostiled: 1, range: 1});
+                }
+            }
             return;
         } else {
             let target = 
@@ -40,11 +52,16 @@ var role = {
                 creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType != STRUCTURE_CONTROLLER})
             ;
             if (target) {
+                creep.rangedAttack(target);
                 //Memory.targets[creep.room.name] = target.id;
                 if (creep.attack(target) == ERR_NOT_IN_RANGE)
                     creep.moveTo(target, {ignoreHostiled: 1});
             } else {
                 creep.moveTo(flag, {ignoreHostiled: 1});
+            }
+            for (let i = 0; i < healers.length; i++) {
+                let healer = healers[i];
+                healers[i].moveTo(creep.pos, {ignoreHostiled: 1, range: 1});
             }
         }
         

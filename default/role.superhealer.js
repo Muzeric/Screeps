@@ -30,16 +30,17 @@ var role = {
         }
 
         //if (!creep.pos.isNearTo(attacker) || creep.pos.isBorder()) {
-        if (creep.moveTo(attacker, {ignoreHostiled: 1}) == OK)
-            moved = 1;
+        
+        //if (creep.moveTo(attacker, {ignoreHostiled: 1}) == OK)
+        //    moved = 1;
 
         seeked = creep.pos.findInRange(FIND_MY_CREEPS, 3, {filter: c => c.hits < c.hitsMax})[0];
         if (!healed && seeked) {
             if (creep.pos.isNearTo(seeked)) {
                 creep.heal(seeked);
             } else {
-                if (!moved)
-                    creep.moveTo(seeked, {ignoreHostiled: 1});
+                //if (!moved)
+                //    creep.moveTo(seeked, {ignoreHostiled: 1});
                 creep.rangedHeal(seeked);
             }
         }
