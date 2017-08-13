@@ -22,7 +22,6 @@ var role = {
 	    }
 	    if(!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
 	        creep.memory.building = true;
-	        creep.memory.errors = 0;
 	        creep.memory.energyID = null;
 	    }
 

@@ -15,19 +15,27 @@ var role = {
 	    if(!creep.memory.transfering) {
             creep.findSourceAndGo();
         } else {
-            let target = getTarget(creep);
-            if(!target) {
-                //console.log(creep.name + ": target "+ creep.memory.targetID +" dead");
-                creep.memory.targetID = null;
+            let target = getTarget(creep, creep.carry.energy);
+            if(!target)
                 return;
-            }
-
-            if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            
+            let tres = creep.transfer(target, RESOURCE_ENERGY);
+            if (tres == ERR_NOT_IN_RANGE) {
                 var res = creep.moveTo(target);
                 if(res == ERR_NO_PATH) {
                     creep.memory.errors++;
                 } else if (res == OK) {
                     creep.memory.errors = 0;
+                }
+            } else if (tres == OK) {
+                let estEnergy = creep.carry.energy - (target.energyCapacity ? target.energyCapacity - target.energy : target.storeCapacity - _.sum(target.store));
+                if (estEnergy) {
+                    let target = getTarget(creep, estEnergy, 1);
+                    if(!target)
+                        return;
+                    creep.moveTo(target);
+                } else {
+                    creep.findSourceAndGo();
                 }
             }
         }
@@ -66,14 +74,14 @@ var role = {
 	},
 };
 
-function getTarget (creep) {
-    let target = Game.getObjectById(creep.memory.targetID);
+function getTarget (creep, estEnergy, renew) {
+    let target = renew ? null : Game.getObjectById(creep.memory.targetID);
     
     if (!target || 
         (target.energyCapacity && target.energy == target.energyCapacity) ||                
         (target.storeCapacity && _.sum(target.store) == target.storeCapacity)
     ) {
-        setTarget(creep);
+        setTarget(creep, estEnergy);
     } else {
         return target;
     }
@@ -82,7 +90,7 @@ function getTarget (creep) {
     return target;
 }
 
-function setTarget (creep) {
+function setTarget (creep, estEnergy) {
     let memory = Memory.rooms[creep.memory.roomName];
     if (!memory) {
         console.log(creep.name + ": setTarget have no memory of " + creep.memory.roomName);
@@ -119,7 +127,7 @@ function setTarget (creep) {
         let wantCarry = global.cache.wantCarry[creep.room.name] ? global.cache.wantCarry[creep.room.name][target.id] || 0 : 0;
         let cpriority = 0;
         if (wantCarry >= wantEnergy)
-            cpriority = -100;
+            continue;
         else if (target.structureType == STRUCTURE_STORAGE)
             cpriority = -100;
         else if (target.structureType == STRUCTURE_TOWER && target.energy < target.energyCapacity * 0.9)
@@ -141,6 +149,7 @@ function setTarget (creep) {
         return ERR_NOT_FOUND;
         
     creep.memory.targetID = minTarget.id;
+    global.cache.wantCarry[creep.room.name][creep.memory.targetID] = (global.cache.wantCarry[creep.room.name][creep.memory.targetID] || 0) + estEnergy;
 
     return OK;
 }
