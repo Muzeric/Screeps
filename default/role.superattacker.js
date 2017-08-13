@@ -14,6 +14,11 @@ var role = {
             } else {
                 creep.moveTo(spawn, {ignoreHostiled: 1});
             }
+            for (let i = 0; i < healers.length; i++) {
+                let healer = healers[i];
+                healer.moveTo(spawn, {ignoreHostiled: 1});
+                spawn.renewCreep(healer);
+            }
             
             return;
         }
@@ -32,13 +37,13 @@ var role = {
                         if (near)
                             res = healer.move(dir);
                         if (!near || res != OK)
-                            healers[i].moveTo(creep.pos, {ignoreHostiled: 1, range: 1});
+                            healer.moveTo(creep.pos, {ignoreHostiled: 1, range: 1});
                     }
                 }
             } else {
                 for (let i = 0; i < healers.length; i++) {
                     let healer = healers[i];
-                    healers[i].moveTo(creep.pos, {ignoreHostiled: 1, range: 1});
+                    healer.moveTo(creep.pos, {ignoreHostiled: 1, range: 1});
                 }
             }
             return;
@@ -62,7 +67,7 @@ var role = {
             }
             for (let i = 0; i < healers.length; i++) {
                 let healer = healers[i];
-                healers[i].moveTo(creep.pos, {ignoreHostiled: 1, range: 1});
+                healer.moveTo(creep.pos, {ignoreHostiled: 1, range: 1});
             }
         }
         
