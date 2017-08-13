@@ -57,7 +57,8 @@ foreach my $file (@files) {
 }
 
 my @ticks = sort {$a <=> $b} keys %$info;
-if ($limit) {
+print "Got ".scalar(@ticks)." ticks\n";
+if ($limit && scalar(@ticks) > $limit) {
   @ticks = splice(@ticks, -$limit);
 }
 my $extra = {

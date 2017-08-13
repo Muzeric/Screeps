@@ -18,7 +18,7 @@ var role = {
         if (!creep.attackNearHostile()) {
             return;
         } else {
-            if(_.sum(creep.carry) < creep.carryCapacity * 0.5 && creep.memory.transfering) {
+            if(_.sum(creep.carry) < creep.carryCapacity * (creep.getActiveBodyparts(WORK) > 1 ? 0.5 : 0.2) && creep.memory.transfering) {
                 creep.memory.transfering = false;
                 creep.memory.cID = null;
             } else if (_.sum(creep.carry) == creep.carryCapacity && !creep.memory.transfering) {
