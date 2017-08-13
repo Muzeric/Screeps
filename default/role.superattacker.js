@@ -18,7 +18,7 @@ var role = {
         }
 
         let places = utils.getRangedPlaces(null, creep.pos, 1);
-        let healersOK = _.sum(healers, c => c.pos.inRangeTo(creep.pos, 1)) >= places.length ? 1 : 0;
+        let healersOK = _.sum(healers, c => c.pos.inRangeTo(creep.pos, 1)) >= _.min([places.length, healers.length]) ? 1 : 0;
 
         if (creep.room.name != flag.pos.roomName) {
             if (healersOK || creep.pos.isBorder()) {
@@ -68,35 +68,35 @@ var role = {
 	},
 	
     create: function(energy) {
+        /*
         let body = [];
         body.push(MOVE);
         energy -= 50;
         return [body, energy];
-        
-        let tnum = 5;
-        let mnum = tnum;
-        while(tnum-- > 0 && energy >= 10) {
-            body.push(TOUGH);
-            energy -= 10;
-        }
-        while(mnum-- > 0 && energy >= 50) {
-            body.push(MOVE);
-            energy -= 50;
-        }
-        
-        mnum = Math.floor(energy / (50+80));
-        if (mnum * 2 + body.length > 50) // Body parts limit
-            mnum = Math.floor((50 - body.length - 2) / 2);
-        let anum = mnum;
-        while (energy >= 50 && mnum-- > 0) {
-            body.push(MOVE);
-            energy -= 50;
-        }
-        while (energy >= 80 && anum-- > 0) {
-            body.push(ATTACK);
-            energy -= 80;
-        }
+        */
+        // 10 * 5 + 80 * 6 + 150 * 6 + 50 * (5+6+6) = 2280
 
+        // 10 * 6 + 150 * 20 + 250 * 3 + 50 * 15 = 4560
+        // 10 * 6 + 80 * 22  + 250 * 5 + 50 * 17 = 3920
+        let tnum = 5;
+        let anum = 6;
+        let rnum = 6;
+        let mnum = Math.ceil((tnum + anum + rnum)/2);
+        energy -= 10 * tnum + 80 * anum + 150 * rnum + 50 * mnum;
+        
+        let body = [];
+        
+        while (tnum-- > 0)
+            body.push(TOUGH);
+        while (mnum-- > 1)
+            body.push(MOVE);
+        while (anum-- > 0)
+            body.push(ATTACK);
+        while (rnum-- > 0)
+            body.push(RANGED_ATTACK);
+        while (mnum-- > -1)
+            body.push(MOVE);
+        
         return [body, energy];
 	},
 };

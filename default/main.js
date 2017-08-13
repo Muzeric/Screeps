@@ -525,19 +525,22 @@ function getRoomLimits (room, creepsCount) {
     },{
             role : "superhealer",
             "count" : memory.superhealerCount || 0,
-            "priority" : 1,
-            "wishEnergy" : 1500,
+            "priority" : 3,
+            "minEnergy" : 2300,
+            "range": 1,
     },{
             role : "superattacker",
             "count" : memory.superattackerCount || 0,
-            "priority" : 1,
-            "wishEnergy" : 1500,
+            "priority" : 3,
+            "minEnergy" : 2300,
+            "range": 1,
     });
 
     for (let limit of limits) {
         limit["roomName"] = room.name;
         limit["originalEnergyCapacity"] = room.energyCapacityAvailable;
-        limit["range"] = 3;
+        if (!("range" in limit))
+            limit["range"] = 3;
         if (!("minEnergy" in limit))
             limit["minEnergy"] = 0;
         if (!("countName" in limit))

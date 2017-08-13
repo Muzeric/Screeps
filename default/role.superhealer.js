@@ -11,11 +11,12 @@ var role = {
             if (!attackers.length) {
                 console.log(creep.name + ": no attackers");
                 let spawn = Game.spawns[creep.memory.spawnName];
-                if (creep.pos.isNearTo(spawn))
+                if (creep.pos.isNearTo(spawn)) {
                     if (creep.hits < creep.hitsMax * 0.95)
                         spawn.renewCreep(creep);
-                else
+                } else {
                     creep.moveTo(spawn, {ignoreHostiled: 1});
+                }
                 return;
             }
             attacker = attackers.sort((a,b) => a.pos.getRangeTo(creep.pos) - b.pos.getRangeTo(creep.pos))[0];
@@ -49,10 +50,11 @@ var role = {
     create: function(energy) {
         let body = [];
         
+        /*
         body.push(MOVE);
         energy -= 50;
         return [body, energy];
-
+        */
         let hnum = Math.floor(energy / 300);
         energy -= 300 * hnum;
         mnum = hnum;
