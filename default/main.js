@@ -525,12 +525,12 @@ function getRoomLimits (room, creepsCount) {
     },{
             role : "superhealer",
             "count" : memory.superhealerCount || 0,
-            "priority" : 9,
+            "priority" : 1,
             "wishEnergy" : 1500,
     },{
             role : "superattacker",
             "count" : memory.superattackerCount || 0,
-            "priority" : 9,
+            "priority" : 1,
             "wishEnergy" : 1500,
     });
 
