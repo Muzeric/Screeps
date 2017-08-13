@@ -425,6 +425,7 @@ function getRoomLimits (room, creepsCount) {
     let extraUpgraders = utils.clamp( _.floor(memory.energy / UPGRADERS_EXTRA_ENERGY), 0, 4);
     let pairedExtractor = room.getPairedExtractor(1);
     let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 1000);
+    let transportAmount = _.sum(_.filter(Memory.transportRequests, r => Game.getObjectById(r.toID).room.name == room.name), r => r.amount);
     
     let limits = [];
     limits.push({
@@ -497,7 +498,7 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 3150 : 3950,
     },{
             role : "transporter",
-            "count" : room.name == global.cache.queueTransport.mainRoomName ? utils.clamp(_.ceil(_.sum(Memory.transportRequests, r => r.amount) / 3000), 0, 6) : 0,
+            "count" : utils.clamp(_.ceil(transportAmount / 10000), 0, 6),
             "priority" : 8,
             "wishEnergy" : 1500,
             "maxEnergy" : 1500,
