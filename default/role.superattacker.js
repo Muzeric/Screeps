@@ -17,7 +17,8 @@ var role = {
             for (let i = 0; i < healers.length; i++) {
                 let healer = healers[i];
                 healer.moveTo(spawn, {ignoreHostiled: 1});
-                spawn.renewCreep(healer);
+                if (healer.hits < healer.hitsMax * 0.95)
+                    spawn.renewCreep(healer);
             }
             
             return;
