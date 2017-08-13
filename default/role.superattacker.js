@@ -9,7 +9,7 @@ var role = {
         if(!flag || creep.room.name != flag.pos.roomName && healers.length < SUPER_HEALER_MINCOUNT) {
             let spawn = Game.spawns[creep.memory.spawnName];
             if (creep.pos.isNearTo(spawn)) {
-                if (creep.hits < creep.hitsMax * 0.95)
+                if (creep.ticksToLive < 1450)
                     spawn.renewCreep(creep);
             } else {
                 creep.moveTo(spawn, {ignoreHostiled: 1});
@@ -17,7 +17,7 @@ var role = {
             for (let i = 0; i < healers.length; i++) {
                 let healer = healers[i];
                 healer.moveTo(spawn, {ignoreHostiled: 1});
-                if (healer.hits < healer.hitsMax * 0.95)
+                if (healer.ticksToLive < 1450)
                     spawn.renewCreep(healer);
             }
             
