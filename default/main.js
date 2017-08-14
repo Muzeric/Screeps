@@ -7,7 +7,7 @@ var utils = require('utils');
 var travel = require('travel');
 const profiler = require('screeps-profiler');
 // This line monkey patches the global prototypes. 
-profiler.enable();
+// profiler.enable();
 
 module.exports.loop = function () {
 profiler.wrap(function() {
@@ -526,7 +526,7 @@ function getRoomLimits (room, creepsCount) {
             role : "superhealer",
             "count" : memory.superhealerCount || 0,
             "priority" : 3,
-            "minEnergy" : 2300,
+            "minEnergy" : 2100,
             "range": 1,
     },{
             role : "superattacker",

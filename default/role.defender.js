@@ -3,8 +3,11 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        if (Game.roomsHelper.getHostilesCount(creep.memory.roomName) && creep.checkInRoomAndGo({ignoreHostiled: 1}))
+        if (Game.roomsHelper.getHostilesCount(creep.memory.roomName) && creep.checkInRoomAndGo({ignoreHostiled: 1})) {
+            if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL))
+                creep.heal(creep);
             return;
+        }
         
         let mark = {};
         let res = creep.attackNearHostile(50, mark);

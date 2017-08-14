@@ -25,10 +25,11 @@ var role = {
         }
 
         let places = utils.getRangedPlaces(null, creep.pos, 1);
-        let healersOK = _.sum(healers, c => c.pos.inRangeTo(creep.pos, 1)) >= _.min([places.length, healers.length]) ? 1 : 0;
+        let healersOK = _.sum(healers, c => c.pos.inRangeTo(creep.pos, 2)) >= _.min([places.length, healers.length]) ? 1 : 0;
+        let healersBorder = _.sum(healers, c => c.pos.isBorder());
 
         if (creep.room.name != flag.pos.roomName) {
-            if (healersOK || creep.pos.isBorder()) {
+            if (healersOK || creep.pos.isBorder() || healersBorder) {
                 if (creep.moveTo(flag, {ignoreHostiled: 1}) == OK) {
                     let dir = creep.memory.newPosDir;
                     for (let i = 0; i < healers.length; i++) {
@@ -52,7 +53,7 @@ var role = {
             let target = 
                 //Game.getObjectById(Memory.targets[creep.room.name]) ||
                 _.filter(flag.pos.lookFor(LOOK_STRUCTURES), s => s.structureType != "road")[0] ||
-                creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL) }) ||
+                creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL) || c.hits < c.hitsMax}) ||
                 creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}) ||
                 creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS) ||
                 creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS) ||
