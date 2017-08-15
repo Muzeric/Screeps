@@ -62,10 +62,19 @@ let origUpgrade = Creep.prototype.upgradeController;
 Creep.prototype.upgradeController = function () {
     let res = origUpgrade.apply(this, arguments);
     if (res == OK && arguments[0] instanceof StructureController) {
-        let can = this.getActiveBodyparts(WORK);
-        let got = this.carry.energy;
+        let sum = 0;
+        let est = this.carry.energy;
+        for (let part of _.filter(this.body, p => p.type == WORK && p.hits)) {
+            if (est <= 0)
+                break;
+            if (part.boost && part.boost in BOOSTS["work"] && "upgradeController" in BOOSTS["work"][part.boost])
+                sum += BOOSTS["work"][part.boost]["upgradeController"];
+            else
+                sum++;
+            est--;
+        }
         
-        global.cache.stat.updateRoom(this.room.name, 'upgrade', -1 * _.min([can, got]));
+        global.cache.stat.updateRoom(this.room.name, 'upgrade', -1 * sum);
     }
     return res;
 }
