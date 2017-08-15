@@ -50,6 +50,7 @@ var queue = {
             type,
             outputType: rt,
             amount,
+            done: 0,
             startTime: 0,
             inputType1: inputTypes[0],
             inputType2: inputTypes[1],
@@ -66,6 +67,7 @@ var queue = {
         if (!request)
             return null;
         request.amount -= amount;
+        request.done += amount;
         if (request.amount <= 0) {
             console.log("queueLab: finished request: " + JSON.stringify(request));
             delete Memory.labRequests[reqID];

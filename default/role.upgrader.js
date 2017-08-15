@@ -11,7 +11,7 @@ var role = {
 
 		let unboostedCount = creep.getUnboostedBodyparts(WORK);
 		let bt = "GH2O";
-		while (0 && unboostedCount && (room.storage.store[bt] >= LAB_BOOST_MINERAL || creep.carry[bt] >= LAB_BOOST_MINERAL)) {
+		while (0 && unboostedCount && (room.storage && room.storage.store[bt] >= LAB_BOOST_MINERAL || creep.carry[bt] >= LAB_BOOST_MINERAL)) {
 			let lab = room.getFreeLab(unboostedCount * LAB_BOOST_ENERGY);
 			if (!lab)
 				break;
