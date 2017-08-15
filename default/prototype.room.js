@@ -335,6 +335,14 @@ Room.prototype.getLabs = function () {
     return this.memory.structures[STRUCTURE_LAB] || [];
 }
 
+Room.prototype.getFreeLab = function (needEnergy) {
+    let lab = _.filter(this.memory.structures[STRUCTURE_LAB] || [], l => l.mineralType === null && (!needEnergy || lab.energy >= needEnergy))[0];
+    if (lab)
+        return Game.getObjectById(lab.id);
+    
+    return null;
+}
+
 Room.prototype.getRepairLimit = function () {
     return this.storage && this.storage.store.energy > REPAIR_ENERGY_LIMIT ? REPAIR_LIMIT_HIGH : REPAIR_LIMIT;
 }
