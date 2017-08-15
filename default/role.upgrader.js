@@ -12,23 +12,27 @@ var role = {
 		let unboostedCount = creep.getUnboostedBodyparts(WORK);
 		let bt = "GH2O";
 		while (0 && unboostedCount && (room.storage && room.storage.store[bt] >= LAB_BOOST_MINERAL || creep.carry[bt] >= LAB_BOOST_MINERAL)) {
-			let lab = room.getFreeLab(unboostedCount * LAB_BOOST_ENERGY);
+			if (creep.ticksToLive % 5 == 0)
+		        console.log(creep.name + ": want boosting");
+			let lab = Game.getObjectById(creep.memory.boostLabID) || room.getFreeLab(unboostedCount * LAB_BOOST_ENERGY);
 			if (!lab)
 				break;
-			let need = LAB_BOOST_ENERGY * unboostedCount;
-			let got = creep.carry[bt];
+			let need = LAB_BOOST_MINERAL * unboostedCount;
+			let got = creep.carry[bt] || 0;
 			let free = creep.carryCapacity - _.sum(creep.carry);
-			let able = rooms.storage.store[bt];
-			if (got >= LAB_BOOST_MINERAL && (got >= need || free < LAB_BOOST_MINERAL)) {
+			let able = room.storage.store[bt];
+			if (got >= LAB_BOOST_MINERAL && (got >= need || free < LAB_BOOST_MINERAL) || creep.memory.boostLabID == lab.id) {
+				creep.memory.boostLabID = lab.id;
 				// boosting stage
-				if (creep.isNearTo(lab)) {
+				if (creep.pos.isNearTo(lab)) {
 					creep.transfer(lab, bt);
 					let res = lab.boostCreep(creep);
-					console.log(creep.name + ": BOOSTED (res)");
+					console.log(creep.name + ": BOOSTED (" + res + ")");
 				} else {
 					creep.moveTo(lab);
 				}
 			} else {
+				creep.memory.boostLabID = 0;
 				// getting stage
 				if (creep.withdraw(room.storage, bt, _.floor( _.min([need - got, free, able]) / LAB_BOOST_MINERAL) * LAB_BOOST_MINERAL ) == ERR_NOT_IN_RANGE) {
 					creep.moveTo(room.storage);

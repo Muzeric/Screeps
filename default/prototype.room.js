@@ -336,7 +336,7 @@ Room.prototype.getLabs = function () {
 }
 
 Room.prototype.getFreeLab = function (needEnergy) {
-    let lab = _.filter(this.memory.structures[STRUCTURE_LAB] || [], l => l.mineralType === null && (!needEnergy || lab.energy >= needEnergy))[0];
+    let lab = _.filter(this.memory.structures[STRUCTURE_LAB] || [], l => l.mineralType === null && (!needEnergy || l.energy >= needEnergy))[0];
     if (lab)
         return Game.getObjectById(lab.id);
     
