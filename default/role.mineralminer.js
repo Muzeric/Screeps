@@ -95,7 +95,7 @@ var role = {
                 creep.harvest(mineral);
 
             if (global.cache.queueTransport.getStoreWithReserved(container, mineral.mineralType) >= TRANSPORTER_MIN_CONTAINER_AMOUNT)
-                global.cache.queueTransport.addRequest(container, null, mineral.mineralType, TRANSPORTER_MIN_CONTAINER_AMOUNT);
+                global.cache.queueTransport.addRequest(container, room.storage, mineral.mineralType, TRANSPORTER_MIN_CONTAINER_AMOUNT);
         } else {
             let res = creep.moveTo(betweenPos);
             if(res == ERR_NO_PATH) {
