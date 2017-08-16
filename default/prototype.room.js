@@ -521,6 +521,7 @@ Room.prototype.updateStructures = function() {
 
     let constructionsContainers = {};
     let extensionConstructionCount = 0;
+    let extractorConstructionCount = 0;
     this.find(FIND_MY_CONSTRUCTION_SITES).forEach( function(s) {
         memory.constructions++;
         if (s.structureType == STRUCTURE_ROAD) {
@@ -535,6 +536,8 @@ Room.prototype.updateStructures = function() {
             costs.set(s.pos.x, s.pos.y, 0xff);
             if (s.structureType == STRUCTURE_EXTENSION)
                 extensionConstructionCount++;
+            else if (s.structureType == STRUCTURE_EXTRACTOR)
+                extractorConstructionCount++;
         } else if (s.structureType == STRUCTURE_CONTAINER) {
             constructionsContainers[s.pos.getKey()] = s.id;
         }
@@ -620,7 +623,7 @@ Room.prototype.updateStructures = function() {
             let basePos = memory.structures[STRUCTURE_SPAWN][0].pos;
             let sum = 2;
             let newCount = 0;
-            SEARCHING: while (curCount + newCount < maxCount && sum < 10) {
+            SEARCHING: while (curCount + newCount < maxCount && sum < 12) {
                 for (let xmod = 0; xmod <= sum; xmod++) {
                     let ymod = sum - xmod;
                     for (let xdiff of xmod ? [-1 * xmod, xmod] : [0]) {
@@ -638,6 +641,14 @@ Room.prototype.updateStructures = function() {
                     }
                 }
                 sum += 2;
+            }
+        }
+
+        if (CONTROLLER_STRUCTURES["extractor"][room.controller.level] && !(memory.structures[STRUCTURE_EXTRACTOR] || []).length && !extractorConstructionCount) {
+            let mineral = this.find(FIND_MINERALS)[0];
+            if (mineral) {
+                let res = this.createConstructionSite(mineral.pos, STRUCTURE_EXTRACTOR);
+                console.log(this.name + ": BUILT (" + res + ") extractor");
             }
         }
     }
