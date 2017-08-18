@@ -472,7 +472,6 @@ function getRoomLimits (room, creepsCount) {
             "count" : room.controller.level < 8 ? 10 : 1,
             "priority" : 3,
             "wishEnergy" : 1500,
-            "maxEnergy" : 2000,
             "body" : {
                 "work" : 3*freeEnergyCount,
                 "carry" : 3*freeEnergyCount,
