@@ -93,6 +93,8 @@ Room.prototype.update = function() {
 Room.prototype.update2 = function() {
     if (!("pathToRoomsTime" in this.memory) || Game.time - (this.memory.pathToRoomsTime || 0) >= UPDATE_INTERVAL_PATHCACHE)
         this.updatePathToRooms();
+    if (!("balanceTime" in this.memory) || Game.time - (this.memory.balanceTime || 0) >= UPDATE_INTERVAL_BALANCE)
+        this.balanceStore();
 
     return OK;
 }
@@ -123,6 +125,31 @@ Room.prototype.updatePathToRooms = function () {
     }
 
     memory.pathToRoomsTime = Game.time;
+}
+
+Room.prototype.balanceStore = function () {
+    let memory = this.memory;
+
+    if (this.storage) {
+        let store = this.storage.store;
+        for (let rt in store) {
+            if (rt == "energy" || store[rt] < BALANCE_MAX || global.cache.queueTransport.getStoreWithReserved(this.storage, rt) < BALANCE_MAX)
+                continue;
+            let est = BALANCE_MAX - global.cache.queueTransport.getStoreWithReserved(this.storage, rt);
+            for (let room of Game.rooms) {
+                if (room.name == this.name || !room.my || !room.storage || global.cache.queueTransport.getStoreWithReserved(room.storage, rt) > BALANCE_MIN)
+                    continue;
+                let amount = _.min([est, BALANCE_MIN - global.cache.queueTransport.getStoreWithReserved(room.storage, rt)]);
+                console.log(`${this.name}: balance ${amount} of ${rt} to ${room.name}`);
+                //global.cache.queueTransport.addRequest(this.storage, room.storage, rt, amount);
+                est -= amount;
+                if (est <= 0)
+                    break;
+            }
+        }
+    }
+
+    memory.balanceTime = Game.time;
 }
 
 Room.prototype.updatePathCache = function() {
