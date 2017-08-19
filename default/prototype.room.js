@@ -144,9 +144,11 @@ Room.prototype.balanceStore = function () {
                 if (roomName == this.name || !room.controller || !room.controller.my || !room.storage || global.cache.queueTransport.getStoreWithReserved(room.storage, rt) >= BALANCE_MIN)
                     continue;
                 let amount = _.min([est, BALANCE_MIN - global.cache.queueTransport.getStoreWithReserved(room.storage, rt)]);
-                console.log(`${this.name}: balance ${amount} of ${rt} to ${room.name}`);
-                global.cache.queueTransport.addRequest(this.storage, room.storage, rt, amount);
-                est -= amount;
+                if (amount > 0) {
+                    console.log(`${this.name}: balance ${amount} of ${rt} to ${room.name}`);
+                    global.cache.queueTransport.addRequest(this.storage, room.storage, rt, amount);
+                    est -= amount;
+                }
             }
             if (est > 0 && this.terminal) {
                 console.log(`${this.name}: balance other ${rt} to terminal`);
