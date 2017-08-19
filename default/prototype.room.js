@@ -148,6 +148,10 @@ Room.prototype.balanceStore = function () {
                 global.cache.queueTransport.addRequest(this.storage, room.storage, rt, amount);
                 est -= amount;
             }
+            if (est > 0 && this.terminal) {
+                console.log(`${this.name}: balance other ${rt} to terminal`);
+                global.cache.queueTransport.addRequest(this.storage, this.terminal, rt, _.min(est, this.terminal.storeCapacity - _.sum(this.terminal.store)));
+            }
         }
     }
 
