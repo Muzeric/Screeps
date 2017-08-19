@@ -265,8 +265,8 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
     let pairedExtractor = room ? room.getPairedExtractor(1) : null;
 
-    let needSpeed = sourcesCapacity / ENERGY_REGEN_TIME;
-    let needWorkSpeed = sourcesWorkCapacity / ENERGY_REGEN_TIME;
+    let needSpeed = sourcesCapacity / ENERGY_REGEN_TIME * (memory.type == 'lair' ? 1.2 : 1);
+    let needWorkSpeed = sourcesWorkCapacity / ENERGY_REGEN_TIME * (memory.type == 'lair' ? 1.2 : 1);
     let haveSpeed = 0;
     let haveWorkSpeed = 0;
     _.forEach( _.filter(Game.creeps, c => c.memory.role == "longharvester" && c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), function(c) {
