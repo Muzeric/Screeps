@@ -135,10 +135,11 @@ Room.prototype.balanceStore = function () {
         for (let rt in store) {
             if (rt == "energy" || store[rt] < BALANCE_MAX || global.cache.queueTransport.getStoreWithReserved(this.storage, rt) < BALANCE_MAX)
                 continue;
-            let est = BALANCE_MAX - global.cache.queueTransport.getStoreWithReserved(this.storage, rt);
+            let est = global.cache.queueTransport.getStoreWithReserved(this.storage, rt) - BALANCE_MAX;
+            //console.log(`${this.name}: has ${store[rt]} of ${rt} and est = ${est}`);
             for (let roomName in Game.rooms) {
                 let room = Game.rooms[roomName];
-                if (room.name == this.name || !room.my || !room.storage || global.cache.queueTransport.getStoreWithReserved(room.storage, rt) > BALANCE_MIN)
+                if (room.name == this.name || !room.my || !room.storage || global.cache.queueTransport.getStoreWithReserved(room.storage, rt) >= BALANCE_MIN)
                     continue;
                 let amount = _.min([est, BALANCE_MIN - global.cache.queueTransport.getStoreWithReserved(room.storage, rt)]);
                 console.log(`${this.name}: balance ${amount} of ${rt} to ${room.name}`);
