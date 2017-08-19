@@ -136,7 +136,8 @@ Room.prototype.balanceStore = function () {
             if (rt == "energy" || store[rt] < BALANCE_MAX || global.cache.queueTransport.getStoreWithReserved(this.storage, rt) < BALANCE_MAX)
                 continue;
             let est = BALANCE_MAX - global.cache.queueTransport.getStoreWithReserved(this.storage, rt);
-            for (let room of Game.rooms) {
+            for (let roomName in Game.rooms) {
+                let room = Game.rooms[roomName];
                 if (room.name == this.name || !room.my || !room.storage || global.cache.queueTransport.getStoreWithReserved(room.storage, rt) > BALANCE_MIN)
                     continue;
                 let amount = _.min([est, BALANCE_MIN - global.cache.queueTransport.getStoreWithReserved(room.storage, rt)]);
