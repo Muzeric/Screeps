@@ -157,6 +157,8 @@ Room.prototype.balanceStore = function () {
         }
     }
 
+    global.cache.minerals.checkNeeds(this);
+
     memory.balanceTime = Game.time;
 }
 

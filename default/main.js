@@ -180,7 +180,6 @@ profiler.wrap(function() {
             towerAction(room);
             room.linkAction();
             global.cache.minerals.checkLabs(roomName);
-            //global.cache.minerals.checkNeeds(roomName);
         }
         global.cache.stat.updateRoom(roomName, 'cpu', Game.cpu.getUsed() - lastCPU);
     });

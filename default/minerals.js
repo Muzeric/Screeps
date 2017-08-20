@@ -93,10 +93,8 @@ var minerals = {
         return this.searchCombination(roomName, elems);
     },
 
-    checkNeeds: function (roomName) {
-        let room = Game.rooms[roomName];
-        if (!room)
-            return null;
+    checkNeeds: function (room) {
+        let roomName = room.name;
         let storage = room.storage;
         if (!storage)
             return null;
@@ -105,16 +103,18 @@ var minerals = {
         
         for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
             let elem = this.library[outputType];
-            let in1 = storage.store[elem.inputType1] || 0;
-            let in2 = storage.store[elem.inputType2] || 0;
+            let in1 = storage.store[elem.inputTypes[0]] || 0;
+            let in2 = storage.store[elem.inputTypes[0]] || 0;
             let out = storage.store[elem.outputType] || 0;
             let producing = global.cache.queueLab.getProducing(roomName, LAB_REQUEST_TYPE_TERMINAL, outputType);
+            //console.log(`${roomName}: checNeeds for ${outputType} in1=${in1}, in2=${in2}, out=${out}, producing=${producing}`);
             if (in1 < BALANCE_LAB_MIN || in2 < BALANCE_LAB_MIN || out + producing >= BALANCE_MAX)
                 continue;
             
             let amount = _.min([BALANCE_MAX - out - producing, in1, in2, LAB_REQUEST_AMOUNT]);
             console.log(`${roomName}: checNeeds added request for ${amount} of ${outputType}`);
-            //global.cache.queueLab.addRequest(roomName, outputType, amount);
+            global.cache.queueLab.addRequest(roomName, outputType, amount);
+            break;
         }
 
         return OK;

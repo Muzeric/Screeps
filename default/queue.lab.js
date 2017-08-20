@@ -57,6 +57,10 @@ var queue = {
             createTime: Game.time,
         };
 
+        this.producing[roomName] = this.producing[roomName] || {};
+        this.producing[roomName][type] = this.producing[roomName][type] || {};
+        this.producing[roomName][type][rt] = (this.producing[roomName][type][rt] || 0) + amount;
+
         console.log("queueLab.addRequest: ADDED: " + JSON.stringify(Memory.labRequests[reqID]));
 
         return reqID;
