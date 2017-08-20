@@ -41,7 +41,7 @@ var role = {
             return;
         }
 
-        let request = queue.getRequest(creep.id);
+        let request = queue.getRequest(creep.id, creep.pos);
         if (!request) {
             if (terminal)
                 creep.moveTo(terminal);

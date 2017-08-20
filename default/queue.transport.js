@@ -91,7 +91,7 @@ var queue = {
         request.creepID = null;
     },
 
-    getRequest: function (creepID) {
+    getRequest: function (creepID, creepPos) {
         if (creepID in this.indexByCreep)
             return this.loadRequest(this.indexByCreep[creepID]);
         
@@ -112,8 +112,9 @@ var queue = {
                 || to.structureType == STRUCTURE_NUKER && request.resourceType == "G" && to.ghodium + request.amount > to.ghodiumCapacity
             )
                 continue;
-            if (minCost === undefined || request.createTime < minCost) {
-                minCost = request.createTime;
+            let range = (creepPos.roomName == from.pos.roomName ? creepPos.getRangeTo(from) : (from.room.getPathToRoom(creepPos.roomName) || undefined));
+            if (minCost === undefined || (range && range < minCost)) {
+                minCost = range; //request.createTime;
                 minRequest = request;
             }
         }
