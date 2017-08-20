@@ -29,11 +29,6 @@ var queue = {
             console.log(`queueLab.addRequest: no roomName (${roomName}) or rt (${rt})`);
             return null;
         }
-        let reqID = _.ceil(Math.random() * 1000000);
-        if (reqID in Memory.labRequests) {
-            console.log(`queueLab.addRequest: req_id (${reqID}) already exists`);
-            return null;
-        }
 
         let inputTypes = global.cache.minerals.getInputTypes(rt);
         if (inputTypes.length != 2) {
@@ -41,7 +36,13 @@ var queue = {
             return null;
         }
 
+        let count = 0;
         while (amountTotal > 0) {
+            let reqID = _.ceil(Math.random() * 1000000);
+            if (reqID in Memory.labRequests) {
+                console.log(`queueLab.addRequest: req_id (${reqID}) already exists`);
+                return null;
+            }
             let amount = utils.clamp(amountTotal, 0, LAB_REQUEST_AMOUNT);
             amountTotal -= amount;
 
@@ -64,9 +65,10 @@ var queue = {
             this.producing[roomName][type][rt] = (this.producing[roomName][type][rt] || 0) + amount;
 
             console.log("queueLab.addRequest: ADDED: " + JSON.stringify(Memory.labRequests[reqID]));
+            count++;
         }
 
-        return reqID;
+        return count;
     },
 
     produceAmount: function (reqID, amount) {
