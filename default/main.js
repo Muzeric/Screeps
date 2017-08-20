@@ -425,6 +425,7 @@ function getRoomLimits (room, creepsCount) {
     let pairedExtractor = room.getPairedExtractor(1);
     let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 1000);
     let transportAmount = _.sum(_.filter(Memory.transportRequests, r => Game.getObjectById(r.toID).room.name == room.name), r => r.amount);
+    let builderCount = (builds ? (builds > 5 && room.controller.level >= 8 ? 3 : (builds < 5 ? _.ceil(builds/2) : 3)) : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)) + (repairs > 20 && room.controller.level >= 8 ? 2 : 0);
     
     let limits = [];
     limits.push({
@@ -477,10 +478,13 @@ function getRoomLimits (room, creepsCount) {
             },
     },{
             "role" : "builder",
-            "count" : (builds ? (builds > 5 && room.controller.level >= 8 ? 3 : (builds < 5 ? _.ceil(builds/2) : 3)) : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)) + (repairs > 20 && room.controller.level >= 8 ? 2 : 0),
+            "count" : builderCount,
             "priority" : 4,
             "wishEnergy" : 1500,
             "maxEnergy" : builds || repairs > 10 ? 5000 : 1500,
+            "body" : {
+                "work" : 10 * builderCount,
+            },
     },{
             "role" : "shortminer",
             "count" : storagedLink && unStoragedLinks ? 1 : 0,
