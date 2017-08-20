@@ -104,7 +104,7 @@ var minerals = {
         for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
             let elem = this.library[outputType];
             let in1 = storage.store[elem.inputTypes[0]] || 0;
-            let in2 = storage.store[elem.inputTypes[0]] || 0;
+            let in2 = storage.store[elem.inputTypes[1]] || 0;
             let out = storage.store[elem.outputType] || 0;
             let producing = global.cache.queueLab.getProducing(roomName, LAB_REQUEST_TYPE_TERMINAL, outputType);
             //console.log(`${roomName}: checNeeds for ${outputType} in1=${in1}, in2=${in2}, out=${out}, producing=${producing}`);
