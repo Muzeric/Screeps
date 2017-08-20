@@ -66,7 +66,7 @@ profiler.wrap(function() {
     global.cache.stat.addCPU("roomUpdate");
 
     let creepsCPUStat = {};
-    for(let creep_name in Game.creeps) {
+    for (creep_name of _.keys(Game.creeps).sort()) {
         let creep = Game.creeps[creep_name];
         
         let role = creep.memory.role;
