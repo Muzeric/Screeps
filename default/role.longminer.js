@@ -3,13 +3,13 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        if (Game.roomsHelper.getHostilesCount(creep.room.name) > 1) {
+        if (Game.roomsHelper.getHostilesCount(creep.room.name) > 2) {
 			creep.say("AAA");
 			creep.moveTo(Game.spawns[creep.memory.spawnName].room.controller);
 			return;
         }
 
-		if (Game.roomsHelper.getHostilesCount(creep.memory.roomName) > 1) {
+		if (Game.roomsHelper.getHostilesCount(creep.memory.roomName) > 2) {
 			creep.say("AAA");
 			if (creep.pos.isBorder())
 				creep.moveTo(Game.spawns[creep.memory.spawnName].room.controller);
