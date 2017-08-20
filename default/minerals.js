@@ -111,7 +111,7 @@ var minerals = {
             if (in1 < BALANCE_LAB_MIN || in2 < BALANCE_LAB_MIN || out + producing >= BALANCE_MAX)
                 continue;
             
-            let amount = _.min([BALANCE_MAX - out - producing, in1, in2, LAB_REQUEST_AMOUNT]);
+            let amount = _.min([BALANCE_MAX - out - producing, in1, in2]);
             console.log(`${roomName}: checNeeds added request for ${amount} of ${outputType}`);
             global.cache.queueLab.addRequest(roomName, outputType, amount);
             break;
