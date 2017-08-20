@@ -24,7 +24,7 @@ var queue = {
         return this.producing[roomName][type][rt];
     },
 
-    addRequest: function (roomName, rt, amount = LAB_REQUEST_AMOUNT, type = LAB_REQUEST_TYPE_TERMINAL, chainID) {
+    addRequest: function (roomName, rt, amountTotal = LAB_REQUEST_AMOUNT, type = LAB_REQUEST_TYPE_TERMINAL, chainID) {
         if (!roomName || !rt) {
             console.log(`queueLab.addRequest: no roomName (${roomName}) or rt (${rt})`);
             return null;
@@ -41,27 +41,30 @@ var queue = {
             return null;
         }
 
-        amount = utils.clamp(amount, 0, LAB_REQUEST_AMOUNT);
+        while (amountTotal > 0) {
+            let amount = utils.clamp(amountTotal, 0, LAB_REQUEST_AMOUNT);
+            amountTotal -= amount;
 
-        Memory.labRequests[reqID] = {
-            id: reqID,
-            chainID,
-            roomName,
-            type,
-            outputType: rt,
-            amount,
-            done: 0,
-            startTime: 0,
-            inputType1: inputTypes[0],
-            inputType2: inputTypes[1],
-            createTime: Game.time,
-        };
+            Memory.labRequests[reqID] = {
+                id: reqID,
+                chainID,
+                roomName,
+                type,
+                outputType: rt,
+                amount,
+                done: 0,
+                startTime: 0,
+                inputType1: inputTypes[0],
+                inputType2: inputTypes[1],
+                createTime: Game.time,
+            };
 
-        this.producing[roomName] = this.producing[roomName] || {};
-        this.producing[roomName][type] = this.producing[roomName][type] || {};
-        this.producing[roomName][type][rt] = (this.producing[roomName][type][rt] || 0) + amount;
+            this.producing[roomName] = this.producing[roomName] || {};
+            this.producing[roomName][type] = this.producing[roomName][type] || {};
+            this.producing[roomName][type][rt] = (this.producing[roomName][type][rt] || 0) + amount;
 
-        console.log("queueLab.addRequest: ADDED: " + JSON.stringify(Memory.labRequests[reqID]));
+            console.log("queueLab.addRequest: ADDED: " + JSON.stringify(Memory.labRequests[reqID]));
+        }
 
         return reqID;
     },
