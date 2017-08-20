@@ -2,13 +2,6 @@ var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var minerals = {
-    needList: {
-        "sim": {
-            "terminal": {
-                "LO": 100,
-            },
-        },
-    },
     library: {},
     orders: null,
     labCache: {},
@@ -101,23 +94,27 @@ var minerals = {
     },
 
     checkNeeds: function (roomName) {
-        if (!(roomName in this.needList))
-            return null;
         let room = Game.rooms[roomName];
         if (!room)
             return null;
         let storage = room.storage;
         if (!storage)
             return null;
+        if (!room.getFreeLab())
+            return null;
         
-        for (let type in this.needList[roomName]) {
-            for (let rt in this.needList[roomName][type]) {
-                let amount = (room.memory.store[rt] || 0) + global.cache.queueLab.getProducing(roomName, type, rt);
-                if (amount >= this.needList[roomName][type][rt])
-                    continue;
-                
-                global.cache.queueLab.addRequest(roomName, rt, _.min([this.needList[roomName][type][rt] - amount, LAB_REQUEST_AMOUNT]), type);
-            }
+        for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
+            let elem = this.library[outputType];
+            let in1 = storage.store[elem.inputType1] || 0;
+            let in2 = storage.store[elem.inputType2] || 0;
+            let out = storage.store[elem.outputType] || 0;
+            let producing = global.cache.queueLab.getProducing(roomName, LAB_REQUEST_TYPE_TERMINAL, outputType);
+            if (in1 < BALANCE_LAB_MIN || in2 < BALANCE_LAB_MIN || out + producing >= BALANCE_MAX)
+                continue;
+            
+            let amount = _.min([BALANCE_MAX - out - producing, in1, in2, LAB_REQUEST_AMOUNT]);
+            console.log(`${roomName}: checNeeds added request for ${amount} of ${outputType}`);
+            //global.cache.queueLab.addRequest(roomName, outputType, amount);
         }
 
         return OK;
@@ -189,12 +186,6 @@ var minerals = {
         return [lab1ID, lab2ID, outputLabID];
     },
 
-    addNeedList: function (roomName, type, rt, amount) {
-        this.needList[roomName] = this.needList[roomName] || {};
-        this.needList[roomName][type] = this.needList[roomName][type] || {};
-        this.needList[roomName][type][rt] = (this.needList[roomName][type][rt] || 0) + amount;
-    },
-
     checkAndRequestAmount: function (labInfo, labs, request, storage) {
         let freeAmount1 = labInfo[labs[0]].mineralAmount - labInfo[labs[0]].usedAmount;
         let freeAmount2 = labInfo[labs[1]].mineralAmount - labInfo[labs[1]].usedAmount;
@@ -219,20 +210,22 @@ var minerals = {
                  && freeAmount2 >= LAB_REACTION_AMOUNT && freeAmount2 + labInfo[labs[1]].transportAmount >= LAB_REACTION_AMOUNT)
                 return OK;
         } else {
+            /*
             if (freeAmount1 + futureAmount1 + transportableAmount1 < request.amount) {
                 if (this.getInputTypes(request.inputType1)) {
-                    this.addNeedList(request.roomName, LAB_REQUEST_TYPE_REACTION, request.inputType1, request.amount - (freeAmount1 + futureAmount1 + transportableAmount1));
+                    //this.addNeedList(request.roomName, LAB_REQUEST_TYPE_REACTION, request.inputType1, request.amount - (freeAmount1 + futureAmount1 + transportableAmount1));
                 } else {
                     // buy
                 }
             }
             if (freeAmount2 + futureAmount2 + transportableAmount2 < request.amount) {
                 if (this.getInputTypes(request.inputType2)) {
-                    this.addNeedList(request.roomName, LAB_REQUEST_TYPE_REACTION, request.inputType2, request.amount - (freeAmount2 + futureAmount2 + transportableAmount2));
+                    //this.addNeedList(request.roomName, LAB_REQUEST_TYPE_REACTION, request.inputType2, request.amount - (freeAmount2 + futureAmount2 + transportableAmount2));
                 } else {
                     // buy
                 }
             }
+            */
         }
 
 
