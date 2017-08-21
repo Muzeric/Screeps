@@ -605,7 +605,11 @@ Room.prototype.updateStructures = function() {
         }
     }
 
-    if (memory.type == 'my' || memory.type == 'lair' || memory.type == 'reserved') {
+    if (memory.type == "other" && (memory.structures[STRUCTURE_SOURCE] || []).length) {
+        memory.type = "central";
+    }
+
+    if (memory.type == 'my' || memory.type == 'lair' || memory.type == 'reserved' || memory.type == "central") {
         for (let source of _.filter([].concat(memory.structures[STRUCTURE_SOURCE] || [], memory.structures[STRUCTURE_EXTRACTOR] || []), s => !s.pair && s.rangedPlaces.length)) {
             let contPos;
             let maxPlaces = 0;
