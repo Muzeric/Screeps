@@ -108,7 +108,7 @@ Room.prototype.updatePathToRooms = function () {
     let memory = this.memory;
     memory.pathToRooms = {};
     for (let roomName of global.cache.roomNames) {
-        if (roomName == this.name)
+        if (roomName == this.name || (Memory.rooms[roomName].structuresTime > 0 && Memory.rooms[roomName].structuresTime < memory.pathToRoomsTime))
             continue;
         memory.pathToRooms[roomName] = travel.getRoomsAvgPathLength(memory.pathCache, roomName);
         if (!memory.pathToRooms[roomName]) {

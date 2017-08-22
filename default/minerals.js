@@ -297,6 +297,7 @@ var minerals = {
                     labInfo[labs[2]].reacted = 1;
                     global.cache.queueLab.produceAmount(request.id, amount);
                 } else {
+                    console.log("checkLabs: " + labsObj[2].id + ":" + labsObj[0].id + ":" + labsObj[1].id);
                     console.log(`checkLabs: ${labs[2]}.runReaction(${labs[0]},${labs[1]}) for reqID=${request.id} with res=${res}`);
                 }
             }
@@ -312,7 +313,7 @@ var minerals = {
                 //console.log(`${labID}: wantedAmount=${lab.wantedAmount}, mineralAmount=${lab.mineralAmount}, transportAmount=${lab.transportAmount}, transportableAmount=${transportableAmount}, usedAmount=${lab.usedAmount}`);
                 global.cache.queueTransport.addRequest(storage, lab, lab.mineralType, _.min([transportableAmount, needAmount]));
             } else if (!lab.wantedAmount && !lab.cooldown && (lab.need ? stored >= LAB_REQUEST_AMOUNT : stored > 0)) {
-                console.log(`id=${lab.id}, need=${lab.need}, amount=` + stored);
+                //console.log(`id=${lab.id}, need=${lab.need}, amount=` + stored);
                 global.cache.queueTransport.addRequest(lab, storage, lab.mineralType, stored );
             }
         }
