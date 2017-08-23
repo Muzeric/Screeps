@@ -74,10 +74,10 @@ var role = {
         }
 	},
 	
-    create: function(energy, skarea) {
+    create: function(energy, opts) {
         energy -= 50; // CARRY
         let body = [];
-        let wlim = skarea ? 11 : 6;
+        let wlim = opts.long ? 11 : 6;
         let fat = 1;
         while (energy >= 100 && wlim) {
             if (energy >= 100) {
@@ -92,7 +92,7 @@ var role = {
                 fat -= 2;
             }
         }
-        if(!skarea && energy >= 80*2 + 50) {
+        if(opts.attack && energy >= 80*2 + 50) {
             body.push(MOVE,ATTACK,ATTACK);
             energy -= 80*2 + 50;
         }
