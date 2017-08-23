@@ -107,7 +107,7 @@ var queue = {
             if ("mineralAmount" in to && to.mineralAmount + request.amount > to.mineralCapacity
                 || "store" in to && _.sum(to.store) + request.amount > to.storeCapacity
                 || "mineralAmount" in from && from.mineralAmount < request.amount
-                || "store" in from && from.store[request.resourceType] < request.amount
+                || "store" in from && (from.store[request.resourceType] || 0) < request.amount
                 || "mineralType" in to && to.mineralType && to.mineralType != request.resourceType
                 || to.structureType == STRUCTURE_NUKER && request.resourceType == "G" && to.ghodium + request.amount > to.ghodiumCapacity
             )
