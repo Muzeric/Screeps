@@ -108,10 +108,10 @@ var minerals = {
             let out = storage.store[elem.outputType] || 0;
             let producing = global.cache.queueLab.getProducing(roomName, LAB_REQUEST_TYPE_TERMINAL, outputType);
             //console.log(`${roomName}: checNeeds for ${outputType} in1=${in1}, in2=${in2}, out=${out}, producing=${producing}`);
-            if (in1 < BALANCE_LAB_MIN || in2 < BALANCE_LAB_MIN || out + producing >= BALANCE_MAX)
+            if (in1 < BALANCE_LAB_MIN || in2 < BALANCE_LAB_MIN || out + producing >= BALANCE_MIN)
                 continue;
             
-            let amount = _.min([BALANCE_MAX - out - producing, in1, in2]);
+            let amount = _.min([BALANCE_MIN - out - producing, in1, in2]);
             console.log(`${roomName}: checNeeds added request for ${amount} of ${outputType}`);
             global.cache.queueLab.addRequest(roomName, outputType, amount);
             break;
