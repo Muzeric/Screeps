@@ -60,7 +60,7 @@ var role = {
                 return;
             }
 
-            let fromAmount = "mineralType" in from ? from.mineralAmount : from.store[request.resourceType];
+            let fromAmount = ("mineralType" in from ? from.mineralAmount : from.store[request.resourceType]) || 0;
 
             if (!creep.pos.isNearTo(from))
                 return creep.moveTo(from, {ignoreHostiled: 1});
