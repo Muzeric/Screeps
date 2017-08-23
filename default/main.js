@@ -294,7 +294,7 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
     let limits = [];
     limits.push({
         "role" : "defender",
-        "count" : memory.type != 'lair' && memory.type != 'central' && Game.roomsHelper.getHostilesCount(roomName) > 1 ? 1 : 0,
+        "count" : memory.type != 'lair' && Game.roomsHelper.getHostilesCount(roomName) > 1 ? 1 : 0,
         "priority" : 3,
         "wishEnergy" : 1500,
         "minEnergy" : 1500,
