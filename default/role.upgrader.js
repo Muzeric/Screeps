@@ -11,7 +11,7 @@ var role = {
 
 		let unboostedCount = creep.getUnboostedBodyparts(WORK);
 		let bt = "XGH2O";
-		while (0 && unboostedCount && (room.storage && room.storage.store[bt] >= LAB_BOOST_MINERAL || creep.carry[bt] >= LAB_BOOST_MINERAL)) {
+		while (creep.ticksToLive > 1200 && unboostedCount && (room.storage && room.storage.store[bt] >= LAB_BOOST_MINERAL && _.sum(creep.carry) == 0 || creep.carry[bt] >= LAB_BOOST_MINERAL)) {
 			if (creep.ticksToLive % 5 == 0)
 		        console.log(creep.name + ": want boosting");
 			let lab = Game.getObjectById(creep.memory.boostLabID) || room.getFreeLab(unboostedCount * LAB_BOOST_ENERGY);
