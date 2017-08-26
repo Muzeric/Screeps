@@ -194,6 +194,10 @@ var queue = {
                     else
                         this.indexByCreep[request.creepID] = reqID;
                 }
+            } else if (Game.time - request.createTime > TRANSPORT_REQUEST_TIMEOUT && request.state > 0) {
+                console.log("Timeout transport request: " + JSON.stringify(request));
+                this.badRequest(request.id);
+                continue;
             } else {
                 let key = request.resourceType + "-" + request.fromID + "-" + request.toID;
                 if (key in cache) {
