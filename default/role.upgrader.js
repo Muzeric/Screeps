@@ -10,7 +10,7 @@ var role = {
 		}
 
 		let unboostedCount = creep.getUnboostedBodyparts(WORK);
-		let bt = "GH2O";
+		let bt = "XGH2O";
 		while (0 && unboostedCount && (room.storage && room.storage.store[bt] >= LAB_BOOST_MINERAL || creep.carry[bt] >= LAB_BOOST_MINERAL)) {
 			if (creep.ticksToLive % 5 == 0)
 		        console.log(creep.name + ": want boosting");
@@ -28,6 +28,8 @@ var role = {
 					creep.transfer(lab, bt);
 					let res = lab.boostCreep(creep);
 					console.log(creep.name + ": BOOSTED (" + res + ")");
+					if (res == OK)
+						creep.memory.boostLabID = 0;
 				} else {
 					creep.moveTo(lab);
 				}
