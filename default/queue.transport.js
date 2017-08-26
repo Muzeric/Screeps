@@ -62,6 +62,7 @@ var queue = {
             put: 0,
             createTime: Game.time,
             creepID: null,
+            state: 0,
         };
         console.log("queueTransport.addRequest: ADDED: " + JSON.stringify(Memory.transportRequests[req_id]));
 
@@ -111,8 +112,11 @@ var queue = {
                 || "mineralType" in to && to.mineralType && to.mineralType != request.resourceType
                 || "mineralType" in from && from.mineralType && from.mineralType != request.resourceType
                 || to.structureType == STRUCTURE_NUKER && request.resourceType == "G" && to.ghodium + request.amount > to.ghodiumCapacity
-            )
+            ) {
+                changeState(request.id, 1);
                 continue;
+            }
+            changeState(request.id, 0);
             let range = (creepPos.roomName == from.pos.roomName ? creepPos.getRangeTo(from) : (from.room.getPathToRoom(creepPos.roomName) || undefined));
             if (minCost === undefined || (range && range < minCost)) {
                 minCost = range; //request.createTime;
@@ -126,6 +130,14 @@ var queue = {
         }
 
         return minRequest;
+    },
+
+    changeState: function (reqID, state) {
+        let request = this.loadRequest(reqID);
+        if (!request)
+            return null;
+        
+        return request.state = state;
     },
 
     badRequest: function (reqID) {
