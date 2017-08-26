@@ -113,10 +113,10 @@ var queue = {
                 || "mineralType" in from && from.mineralType && from.mineralType != request.resourceType
                 || to.structureType == STRUCTURE_NUKER && request.resourceType == "G" && to.ghodium + request.amount > to.ghodiumCapacity
             ) {
-                changeState(request.id, 1);
+                this.changeState(request.id, 1);
                 continue;
             }
-            changeState(request.id, 0);
+            this.changeState(request.id, 0);
             let range = (creepPos.roomName == from.pos.roomName ? creepPos.getRangeTo(from) : (from.room.getPathToRoom(creepPos.roomName) || undefined));
             if (minCost === undefined || (range && range < minCost)) {
                 minCost = range; //request.createTime;
