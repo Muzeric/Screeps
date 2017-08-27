@@ -298,13 +298,13 @@ var minerals = {
             if (!request.labs || this.checkLabs(labInfo, request))
                 request.labs = this.searchLabs(labInfo, request.inputType1, request.inputType2, request.outputType);
             if (!request.labs) {
-                global.cache.queueLab.progress(request, 0);
+                global.cache.queueLab.progress(request.id, 0);
                 continue;
             }
             let check = this.checkAndRequestAmount(labInfo, request, storage);
             if (check == OK || check == ERR_NOT_ENOUGH_RESOURCES) {
                 labInfo[request.labs[2]].need = 1;
-                global.cache.queueLab.progress(request, 1);
+                global.cache.queueLab.progress(request.id, 1);
             }
 
             if (check == OK && !labInfo[request.labs[2]].cooldown) {
