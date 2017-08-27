@@ -58,6 +58,8 @@ var queue = {
                 inputType1: inputTypes[0],
                 inputType2: inputTypes[1],
                 createTime: Game.time,
+                inprogress: false,
+                labs: null,
             };
 
             this.producing[roomName] = this.producing[roomName] || {};
@@ -69,6 +71,15 @@ var queue = {
         }
 
         return count;
+    },
+
+    progress: function (reqID, inprogress = false) {
+        let request = Memory.labRequests[reqID];
+        if (!request)
+            return null;
+        
+        request.inprogress = inprogress;
+        return OK;
     },
 
     produceAmount: function (reqID, amount) {

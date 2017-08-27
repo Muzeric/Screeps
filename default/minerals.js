@@ -186,7 +186,21 @@ var minerals = {
         return [lab1ID, lab2ID, outputLabID];
     },
 
-    checkAndRequestAmount: function (labInfo, labs, request, storage) {
+    checkLabs: function (labInfo, request) {
+        let labs = request.labs;
+        if (!labInfo[labs[0]] || !labInfo[labs[1]] || !labInfo[labs[2]]
+            || labInfo[labs[0]].mineralType && labInfo[labs[0]].mineralType != request.inputType1
+            || labInfo[labs[1]].mineralType && labInfo[labs[1]].mineralType != request.inputType2
+            || labInfo[labs[2]].mineralType && labInfo[labs[2]].mineralType != request.outputType
+        ) {
+            return 1;
+        }
+
+        return OK;
+    },
+
+    checkAndRequestAmount: function (labInfo, request, storage) {
+        let labs = request.labs;
         let freeAmount1 = labInfo[labs[0]].mineralAmount - labInfo[labs[0]].usedAmount;
         let freeAmount2 = labInfo[labs[1]].mineralAmount - labInfo[labs[1]].usedAmount;
 
@@ -209,8 +223,10 @@ var minerals = {
             if (    freeAmount1 >= LAB_REACTION_AMOUNT && freeAmount1 + labInfo[labs[0]].transportAmount >= LAB_REACTION_AMOUNT 
                  && freeAmount2 >= LAB_REACTION_AMOUNT && freeAmount2 + labInfo[labs[1]].transportAmount >= LAB_REACTION_AMOUNT)
                 return OK;
-        } else {
-            /*
+            else
+                return ERR_NOT_ENOUGH_RESOURCES;
+        } /*else {
+            
             if (freeAmount1 + futureAmount1 + transportableAmount1 < request.amount) {
                 if (this.getInputTypes(request.inputType1)) {
                     //this.addNeedList(request.roomName, LAB_REQUEST_TYPE_REACTION, request.inputType1, request.amount - (freeAmount1 + futureAmount1 + transportableAmount1));
@@ -225,14 +241,13 @@ var minerals = {
                     // buy
                 }
             }
-            */
-        }
+        }*/
 
 
-        return ERR_NOT_ENOUGH_RESOURCES;
+        return ERR_NOT_FOUND;
     },
 
-    checkLabs: function (roomName) {
+    runLabs: function (roomName) {
         let room = Game.rooms[roomName];
         if (!room)
             return null;
@@ -279,26 +294,30 @@ var minerals = {
         }
 
         let labGot = {};
-        for (let request of _.sortBy(_.filter(Memory.labRequests, r => r.roomName == roomName), r => r.createTime)) {
-            let labs = this.searchLabs(labInfo, request.inputType1, request.inputType2, request.outputType);
-            if (!labs)
+        for (let request of _.sortBy(_.filter(Memory.labRequests, r => r.roomName == roomName), r => -1 * r.inprogress || r.createTime)) {
+            if (!request.labs || this.checkLabs(labInfo, request))
+                request.labs = this.searchLabs(labInfo, request.inputType1, request.inputType2, request.outputType);
+            if (!request.labs) {
+                global.cache.queueLab.progress(request, 0);
                 continue;
-            let check = this.checkAndRequestAmount(labInfo, labs, request, storage);
-            if (check == OK)
-                labInfo[labs[2]].need = 1;              
+            }
+            let check = this.checkAndRequestAmount(labInfo, request, storage);
+            if (check == OK || check == ERR_NOT_ENOUGH_RESOURCES) {
+                labInfo[request.labs[2]].need = 1;
+                global.cache.queueLab.progress(request, 1);
+            }
 
-            if (check == OK && !labInfo[labs[2]].cooldown) {
-                let labsObj = this.loadLabs.apply(this, labs);
+            if (check == OK && !labInfo[request.labs[2]].cooldown) {
+                let labsObj = this.loadLabs.apply(this, request.labs);
                 let res = labsObj[2].runReaction(labsObj[0], labsObj[1]);
                 if (res == OK) {
                     let amount = LAB_REACTION_AMOUNT;
-                    labInfo[labs[0]].usedAmount += amount;
-                    labInfo[labs[1]].usedAmount += amount;
-                    labInfo[labs[2]].reacted = 1;
+                    labInfo[request.labs[0]].usedAmount += amount;
+                    labInfo[request.labs[1]].usedAmount += amount;
+                    labInfo[request.labs[2]].reacted = 1;
                     global.cache.queueLab.produceAmount(request.id, amount);
                 } else {
-                    console.log("checkLabs: " + labsObj[2].id + ":" + labsObj[0].id + ":" + labsObj[1].id);
-                    console.log(`checkLabs: ${labs[2]}.runReaction(${labs[0]},${labs[1]}) for reqID=${request.id} with res=${res}`);
+                    console.log(`runLabs: ${request.labs[2]}.runReaction(${request.labs[0]},${request.labs[1]}) for reqID=${request.id} with res=${res}`);
                 }
             }
         }

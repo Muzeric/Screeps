@@ -95,7 +95,7 @@ function getLongBuilderTargets(creep) {
 		if (creep.room.name == buildf.room.name)
 			object = creep;
 			
-		let target = object.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES, { filter : s => s.structureType != STRUCTURE_ROAD && !_.some(Game.creeps, c => c.memory.role == "longbuilder" && c.memory.targetID == s.id) });
+		let target = object.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES, { filter : s => !_.some(Game.creeps, c => c.memory.role == "longbuilder" && c.memory.targetID == s.id) });
 		if(target)
 			return target.id;
 	}
