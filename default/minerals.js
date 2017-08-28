@@ -98,7 +98,7 @@ var minerals = {
         let storage = room.storage;
         if (!storage)
             return null;
-        if (_.filter(Memory.labRequests, r => r.roomName == roomName && r.inprogress).length)
+        if (!room.getFreeLab() || _.filter(Memory.labRequests, r => r.roomName == roomName && r.inprogress).length > 3)
             return null;
         
         for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
