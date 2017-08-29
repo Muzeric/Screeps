@@ -305,6 +305,10 @@ var minerals = {
             if (check == OK || check == ERR_NOT_ENOUGH_RESOURCES) {
                 labInfo[request.labs[2]].need = 1;
                 global.cache.queueLab.progress(request.id, 1);
+            } else {
+                request.labs = null;
+                global.cache.queueLab.progress(request.id, 0);
+                continue;
             }
 
             if (check == OK && !labInfo[request.labs[2]].cooldown) {
