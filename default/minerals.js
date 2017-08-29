@@ -98,14 +98,14 @@ var minerals = {
         let storage = room.storage;
         if (!storage)
             return null;
-        if (_.filter(Memory.labRequests, r => r.roomName == roomName && r.inprogress).length)
+        if (!room.getFreeLab() || _.filter(Memory.labRequests, r => r.roomName == roomName && r.inprogress).length > 3)
             return null;
         
         for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
             let elem = this.library[outputType];
             let in1 = storage.store[elem.inputTypes[0]] || 0;
             let in2 = storage.store[elem.inputTypes[1]] || 0;
-            let out = storage.store[elem.outputType] || 0;
+            let out = storage.store[outputType] || 0;
             let producing = global.cache.queueLab.getProducing(roomName, LAB_REQUEST_TYPE_TERMINAL, outputType);
             //console.log(`${roomName}: checNeeds for ${outputType} in1=${in1}, in2=${in2}, out=${out}, producing=${producing}`);
             if (in1 < BALANCE_LAB_MIN || in2 < BALANCE_LAB_MIN || out + producing >= BALANCE_MIN)
