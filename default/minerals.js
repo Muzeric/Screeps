@@ -155,6 +155,8 @@ var minerals = {
             let lab = inputLabs[i++];
             let futureAmount = global.cache.queueTransport.getStoreWithReserved(lab, inputType);
             let transportableAmount = global.cache.queueTransport.getStoreWithReserved(storage, inputType);
+            if (lab.mineralType == inputType && lab.mineralAmount >= LAB_REACTION_AMOUNT)
+                ready++;
             if ((lab.mineralType == inputType || !lab.mineralType) && futureAmount < request.amount) {
                 if (transportableAmount < request.amount - futureAmount) {
                     room.memory.labRequestID = null;
@@ -163,8 +165,6 @@ var minerals = {
                     global.cache.queueTransport.addRequest(storage, lab, inputType, request.amount - futureAmount);
                 }
 
-                if (lab.mineralAmount >= LAB_REACTION_AMOUNT)
-                    ready++;
             } else if (lab.mineralType && lab.mineralType != inputType) {
                 let stored = global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType);
                 if (stored > 0)
