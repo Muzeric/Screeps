@@ -234,7 +234,7 @@ var queue = {
         if ("store" in object) {
             store += object.store[resourceType] || 0;
         } else if ("mineralType" in object && object.mineralType == resourceType) {
-            store += object.mineralAmount;
+            store += object.mineralAmount || 0;
         }
         return store;
     },

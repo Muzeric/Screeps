@@ -120,133 +120,6 @@ var minerals = {
         return OK;
     },
 
-    loadLabs: function () {
-        let res = [];
-        for (let i =0; i < arguments.length; i++) {
-            let labID = arguments[i];
-            if (!(labID in this.labCache))
-                    this.labCache[labID] = Game.getObjectById(labID);
-            res.push(this.labCache[labID]);
-        }
-        return res;
-    },
-
-    searchLabs: function (labInfo, inputType1, inputType2, outputType) {
-        let lab1ID;
-        let lab2ID;
-        let outputLabID;
-
-        for (let labID in labInfo) {
-            let lab = labInfo[labID];
-            if (lab.reacted)
-                continue;
-            if (
-                   (lab.mineralType == outputType && (outputLabID === undefined || labInfo[outputLabID].mineralType === null) && lab.mineralCapacity - lab.mineralAmount)
-                || (lab.mineralType === null && outputLabID === undefined)
-            ) {
-                outputLabID = labID;
-                if (lab.mineralType)
-                    break;
-            }
-        }
-
-        if (!outputLabID)
-            return null;
-
-        for (let labID in labInfo) {
-            if (labID == outputLabID)
-                continue;
-            let lab = labInfo[labID];
-            if ( lab.mineralType == inputType1) {
-                lab1ID = labID;
-                break;
-            } else if (lab.mineralType === null && lab1ID === undefined) {
-                lab1ID = labID;
-            }
-        }
-
-        if (!lab1ID)
-            return null;
-
-        for (let labID in labInfo) {
-            if (labID == outputLabID || labID == lab1ID)
-                continue;
-            let lab = labInfo[labID];
-            if ( lab.mineralType == inputType2) {
-                lab2ID = labID;
-                break;
-            } else if (lab.mineralType === null && lab2ID === undefined) {
-                lab2ID = labID;
-            }
-        }
-
-        if (!lab2ID)
-            return null;
-
-        return [lab1ID, lab2ID, outputLabID];
-    },
-
-    checkLabs: function (labInfo, request) {
-        let labs = request.labs;
-        if (!labInfo[labs[0]] || !labInfo[labs[1]] || !labInfo[labs[2]]
-            || labInfo[labs[0]].mineralType && labInfo[labs[0]].mineralType != request.inputType1
-            || labInfo[labs[1]].mineralType && labInfo[labs[1]].mineralType != request.inputType2
-            || labInfo[labs[2]].mineralType && labInfo[labs[2]].mineralType != request.outputType
-        ) {
-            return 1;
-        }
-
-        return OK;
-    },
-
-    checkAndRequestAmount: function (labInfo, request, storage) {
-        let labs = request.labs;
-        let freeAmount1 = labInfo[labs[0]].mineralAmount - labInfo[labs[0]].usedAmount;
-        let freeAmount2 = labInfo[labs[1]].mineralAmount - labInfo[labs[1]].usedAmount;
-
-        let futureAmount1 = labInfo[labs[0]].transportAmount - labInfo[labs[0]].wantedAmount;
-        let futureAmount2 = labInfo[labs[1]].transportAmount - labInfo[labs[1]].wantedAmount;
-
-        let transportableAmount1 = global.cache.queueTransport.getStoreWithReserved(storage, request.inputType1);
-        let transportableAmount2 = global.cache.queueTransport.getStoreWithReserved(storage, request.inputType2);
-
-        //console.log(`check: ${request.id}: freeAmount1=${freeAmount1}, freeAmount2=${freeAmount2}, futureAmount1=${futureAmount1}, futureAmount2=${futureAmount2}, request.amount=${request.amount}`);
-        if (
-               (freeAmount1 + futureAmount1 + transportableAmount1 >= request.amount) && (labInfo[labs[0]].wantedAmount + request.amount <= labInfo[labs[0]].mineralCapacity)
-            && (freeAmount2 + futureAmount2 + transportableAmount2 >= request.amount) && (labInfo[labs[1]].wantedAmount + request.amount <= labInfo[labs[1]].mineralCapacity)
-        ) {
-            labInfo[labs[0]].mineralType = request.inputType1;
-            labInfo[labs[0]].wantedAmount += request.amount;
-            labInfo[labs[1]].mineralType = request.inputType2;
-            labInfo[labs[1]].wantedAmount += request.amount;
-
-            if (    freeAmount1 >= LAB_REACTION_AMOUNT && freeAmount1 + labInfo[labs[0]].transportAmount >= LAB_REACTION_AMOUNT 
-                 && freeAmount2 >= LAB_REACTION_AMOUNT && freeAmount2 + labInfo[labs[1]].transportAmount >= LAB_REACTION_AMOUNT)
-                return OK;
-            else
-                return ERR_NOT_ENOUGH_RESOURCES;
-        } /*else {
-            
-            if (freeAmount1 + futureAmount1 + transportableAmount1 < request.amount) {
-                if (this.getInputTypes(request.inputType1)) {
-                    //this.addNeedList(request.roomName, LAB_REQUEST_TYPE_REACTION, request.inputType1, request.amount - (freeAmount1 + futureAmount1 + transportableAmount1));
-                } else {
-                    // buy
-                }
-            }
-            if (freeAmount2 + futureAmount2 + transportableAmount2 < request.amount) {
-                if (this.getInputTypes(request.inputType2)) {
-                    //this.addNeedList(request.roomName, LAB_REQUEST_TYPE_REACTION, request.inputType2, request.amount - (freeAmount2 + futureAmount2 + transportableAmount2));
-                } else {
-                    // buy
-                }
-            }
-        }*/
-
-
-        return ERR_NOT_FOUND;
-    },
-
     runLabs: function (roomName) {
         let room = Game.rooms[roomName];
         if (!room)
@@ -254,90 +127,71 @@ var minerals = {
         let storage = room.storage;
         if (!storage)
             return null;
-        let labs = room.getLabs();
-        if (!labs.length)
+        let inputLabs = room.getInputLabs();
+        if (inputLabs.length < 2)
+            return null;
+        let outputLabs = room.getOutputLabs();
+        if (outputLabs.length < 1)
             return null;
         
-        let labInfo = {};
-        for (let lab of labs) {
-            let mineralType = lab.mineralType;
-            let transportAmount = 0;
-            let transportInfo = global.cache.queueTransport.getTypeAndAmount(lab.id);
-            if (transportInfo) {
-                //let arr = _.map(transportInfo, (v,k) => [k,v]);
-                //if (arr.length > 1)
-                    //console.log(`${roomName}: checkLabs got lab ${lab.id} with >1 resourceType transportInfo: ` + JSON.stringify(transportInfo));
-
-                for (let mt in transportInfo) {
-                    let am = transportInfo[mt];
-                
-                    if (mineralType && mineralType == mt || !mineralType & am > 0) {
-                        mineralType = mt;
-                        transportAmount += am;
-                    } else if (mineralType && mineralType != mt && am > 0) {
-                        console.log(`${roomName}: checkLabs got lab ${lab.id} with mineralType=${mineralType} and transport req with mineralType=${mt}`);
-                    }
+        if (!room.memory.labRequestID || !(room.memory.labRequestID in Memory.labRequests)) {
+            for (let request of _.sortBy(_.filter(Memory.labRequests, r => r.roomName == roomName), r => r.createTime)) {
+                if (   global.cache.queueTransport.getStoreWithReserved(storage, request.inputType1) >= request.amount
+                    && global.cache.queueTransport.getStoreWithReserved(storage, request.inputType2) >= request.amount) {
+                    room.memory.labRequestID = request.id;
+                    console.log(roomName + ": set active labRequestID=" + request.id);
+                    break;
                 }
             }
-            labInfo[lab.id] = {
-                id: lab.id,
-                mineralCapacity: lab.mineralCapacity,
-                mineralAmount: lab.mineralAmount,
-                cooldown: lab.cooldown,
-                mineralType,
-                transportAmount,
-                usedAmount: 0,
-                wantedAmount: 0,
-                need: 0,
-                reacted: 0,
-            };
         }
+        if (!room.memory.labRequestID)
+            return null;
 
-        let labGot = {};
-        for (let request of _.sortBy(_.filter(Memory.labRequests, r => r.roomName == roomName), r => -1 * r.inprogress || r.createTime)) {
-            if (!request.labs || this.checkLabs(labInfo, request))
-                request.labs = this.searchLabs(labInfo, request.inputType1, request.inputType2, request.outputType);
-            if (!request.labs) {
-                global.cache.queueLab.progress(request.id, 0);
-                continue;
-            }
-            let check = this.checkAndRequestAmount(labInfo, request, storage);
-            if (check == OK || check == ERR_NOT_ENOUGH_RESOURCES) {
-                labInfo[request.labs[2]].need = 1;
-                global.cache.queueLab.progress(request.id, 1);
-            } else {
-                request.labs = null;
-                global.cache.queueLab.progress(request.id, 0);
-                continue;
-            }
-
-            if (check == OK && !labInfo[request.labs[2]].cooldown) {
-                let labsObj = this.loadLabs.apply(this, request.labs);
-                let res = labsObj[2].runReaction(labsObj[0], labsObj[1]);
-                if (res == OK) {
-                    let amount = LAB_REACTION_AMOUNT;
-                    labInfo[request.labs[0]].usedAmount += amount;
-                    labInfo[request.labs[1]].usedAmount += amount;
-                    labInfo[request.labs[2]].reacted = 1;
-                    global.cache.queueLab.produceAmount(request.id, amount);
+        let request = Memory.labRequests[room.memory.labRequestID];
+        let ready = 0;
+        let i = 0;
+        
+        for (let inputType of [request.inputType1, request.inputType2]) {
+            let lab = inputLabs[i++];
+            let futureAmount = global.cache.queueTransport.getStoreWithReserved(lab, inputType);
+            let transportableAmount = global.cache.queueTransport.getStoreWithReserved(storage, inputType);
+            if ((lab.mineralType == inputType || !lab.mineralType) && futureAmount < request.amount) {
+                if (transportableAmount < request.amount - futureAmount) {
+                    room.memory.labRequestID = null;
+                    global.cache.queueTransport.addRequest(lab, storage, inputType, futureAmount);
                 } else {
-                    console.log(`runLabs: ${request.labs[2]}.runReaction(${request.labs[0]},${request.labs[1]}) for reqID=${request.id} with res=${res}`);
+                    global.cache.queueTransport.addRequest(storage, lab, inputType, request.amount - futureAmount);
                 }
+
+                if (lab.mineralAmount >= LAB_REACTION_AMOUNT)
+                    ready++;
+            } else if (lab.mineralType && lab.mineralType != inputType) {
+                let stored = global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType);
+                if (stored > 0)
+                    global.cache.queueTransport.addRequest(lab, storage, lab.mineralType, stored );
             }
         }
 
-        for (let labID in labInfo) {
-            let lab = labInfo[labID];
-            let needAmount = lab.wantedAmount - lab.mineralAmount - lab.transportAmount;
-            let transportableAmount = global.cache.queueTransport.getStoreWithReserved(storage, lab.mineralType);
-            let stored = global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType);
-            //console.log(`LAB S{labID}: needAmount=${needAmount}, wantedAmount=${lab.wantedAmount}, mineralAmount=${lab.mineralAmount}, transportAmount=${lab.transportAmount}, transportableAmount=${transportableAmount}, usedAmount=${lab.usedAmount}`);
-            if (needAmount > 0 && transportableAmount > 0) {
-                //console.log(`${labID}: wantedAmount=${lab.wantedAmount}, mineralAmount=${lab.mineralAmount}, transportAmount=${lab.transportAmount}, transportableAmount=${transportableAmount}, usedAmount=${lab.usedAmount}`);
-                global.cache.queueTransport.addRequest(storage, lab, lab.mineralType, _.min([transportableAmount, needAmount]));
-            } else if (!lab.wantedAmount && !lab.cooldown && (lab.need ? stored >= LAB_REQUEST_AMOUNT : stored > 0)) {
-                //console.log(`id=${lab.id}, need=${lab.need}, amount=` + stored);
-                global.cache.queueTransport.addRequest(lab, storage, lab.mineralType, stored );
+        if (ready < 2)
+            return null;
+
+        let lab1 = Game.getObjectById(inputLabs[0].id);
+        let lab2 = Game.getObjectById(inputLabs[1].id);
+        for (let lab of outputLabs) {
+            if (lab.mineralType && lab.mineralType != request.outputType || lab.mineralAmount >= LAB_TRANSPORT_AMOUNT) {
+                let stored = global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType);
+                if (lab.mineralType != request.outputType ? stored > 0 : stored >= LAB_TRANSPORT_AMOUNT)
+                    global.cache.queueTransport.addRequest(lab, storage, lab.mineralType, stored);
+            }
+            if (lab.mineralType && lab.mineralType != request.outputType)
+                continue;
+
+            let lab3 = Game.getObjectById(lab.id);
+            let res = lab3.runReaction(lab1, lab2);
+            if (res == OK) {
+                global.cache.queueLab.produceAmount(request.id, LAB_REACTION_AMOUNT);
+            } else {
+                console.log(`runLabs: ${lab3,id}.runReaction(${lab1.id},${lab2.id}) for reqID=${request.id} with res=${res}`);
             }
         }
     },

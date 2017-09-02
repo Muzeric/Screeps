@@ -306,8 +306,8 @@ Room.prototype.linkAction = function () {
     if (!link_to)
         return ERR_NOT_FOUND;
 
+    let space = link_to.energyCapacity - link_to.energy;
     for (let link_from of this.getUnStoragedLinks()) {
-        let space = link_to.energyCapacity - link_to.energy;
         if (link_from && !link_from.cooldown && link_from.energy && link_from.energy <= space) {
             space -= link_from.energy;
             link_from.transferEnergy(link_to);
@@ -373,8 +373,12 @@ Room.prototype.getPairedExtractor = function(withAmount) {
     return null;
 }
 
-Room.prototype.getLabs = function () {
-    return this.memory.structures[STRUCTURE_LAB] || [];
+Room.prototype.getInputLabs = function () {
+    return _.filter((this.memory.structures[STRUCTURE_LAB] || []), l => l.input).sort(function(a,b) {if (a.id > b.id) return 1; if (a.id < b.id) return -1; return 0;});
+}
+
+Room.prototype.getOutputLabs = function () {
+    return _.filter((this.memory.structures[STRUCTURE_LAB] || []), l => !l.input && !l.cooldown);
 }
 
 Room.prototype.getFreeLab = function (needEnergy) {
@@ -695,6 +699,23 @@ Room.prototype.updateStructures = function() {
             if (mineral) {
                 let res = this.createConstructionSite(mineral.pos, STRUCTURE_EXTRACTOR);
                 console.log(this.name + ": BUILT (" + res + ") extractor");
+            }
+        }
+
+        if ((memory.structures[STRUCTURE_LAB] || []).length >= 3) {
+            let count = 0;
+            for (let lab1 of memory.structures[STRUCTURE_LAB].sort(function(a,b) {if (a.id > b.id) return 1; if (a.id < b.id) return -1; return 0;})) {
+                let got = 0;
+                for (let lab2 of memory.structures[STRUCTURE_LAB]) {
+                    if (lab1.pos.inRangeTo(lab2, 2))
+                        got++;
+                }
+                if (got == memory.structures[STRUCTURE_LAB].length) {
+                    lab1.input = 1;
+                    count++;
+                }
+                if (count >= 2)
+                    break;
             }
         }
     }

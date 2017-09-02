@@ -260,6 +260,8 @@ let origMoveTo = Creep.prototype.moveTo;
 Creep.prototype.moveTo = function() {
     let targetPos, opts;
     [targetPos, opts] = this.moveToPos(arguments[0], arguments[1], arguments[2]);
+    if (this.room.name == "E25N15")
+        targetPos = new RoomPosition(10,7,"E25N15");    
     let res = this.travelTo(targetPos, opts);
     if (res == OK)
         this.room.needRoad(this);
