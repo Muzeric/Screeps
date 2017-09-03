@@ -295,15 +295,32 @@ Creep.prototype.attackNearHostile = function(range, mark) {
     let targets = this.room.getNearAttackers(this.pos, range || 5);
     if (!targets.length)
         return ERR_NOT_FOUND;
-        
-    let target = Game.getObjectById(targets.sort((a,b) => this.pos.getRangeTo(a.pos) - this.pos.getRangeTo(b.pos))[0].id);
+
+    let minRange;
+    let minTarget;
+    let mass = 0;
+    for (let t of targets) {
+        let range = this.pos.getRangeTo(t.pos);
+        if (minRange === undefined || range < minRange) {
+            minRange = range;
+            minTarget = t;
+        }
+        mass += range == 1 ? 10 : (range == 2 ? 4 : (range == 3 ? 1 : 0));
+    }
+    
+    let target = Game.getObjectById(minTarget);
     if (!target)
         return ERR_INVALID_TARGET;
 
     console.log(this.name + ": attackNearHostile, pos=" + this.pos.getKey(1) + ", hits=" + target.hits + ", owner=" + target.owner.username);
 
-    if (this.getActiveBodyparts(RANGED_ATTACK))
-        this.rangedAttack(target);
+    if (this.getActiveBodyparts(RANGED_ATTACK)) {
+        console.log(this.name + ": mass=" + mass);
+        if (mass > 10)
+            this.rangedMassAttack();
+        else
+            this.rangedAttack(target);
+    }
         
     let res = this.attack(target);
     if (res == ERR_NOT_IN_RANGE)
