@@ -26,9 +26,9 @@ profiler.wrap(function() {
     global.cache.wantEnergy = {};
     global.cache.creeps = {};
     global.cache.creeps["_army"] = {};
+    global.cache.objects = {};
     
     var moveErrors = {};
-    var objectCache = {};
     global.cache.roomNames = _.filter( _.uniq( [].concat( 
         _.map(Game.flags, 'pos.roomName'), 
         _.map( Game.rooms, 'name' ), 
@@ -70,13 +70,13 @@ profiler.wrap(function() {
         let creep = Game.creeps[creep_name];
         
         let role = creep.memory.role;
-        if(!(role in objectCache))
-            objectCache[role] = require('role.' + role);
+        if(!(role in global.cache.objects))
+            global.cache.objects[role] = require('role.' + role);
         
         if(creep.spawning) {
-            if ("prerun" in objectCache[role]) {
+            if ("prerun" in global.cache.objects[role]) {
                 try {
-                    objectCache[role].prerun(creep);
+                    global.cache.objects[role].prerun(creep);
                 } catch (e) {
                     console.log(creep.name + " PRERUNNING ERROR: " + e.toString() + " => " + e.stack);
                     Game.notify(creep.name + " PRERUNNING ERROR: " + e.toString() + " => " + e.stack);
@@ -96,7 +96,7 @@ profiler.wrap(function() {
         try {
             creep.memory.carryEnergy = creep.carry.energy;
             if (!creep.memory.stop)
-                objectCache[role].run(creep);
+                global.cache.objects[role].run(creep);
         } catch (e) {
             console.log(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
             Game.notify(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
@@ -212,9 +212,9 @@ profiler.wrap(function() {
         } else if (res[0] == 0) {
             let spawn = res[1];
             let energy = res[2];
-            if(!(need.role in objectCache))
-                objectCache[need.role] = require('role.' + need.role);
-            let [body, leftEnergy] = objectCache[need.role].create(energy, need.arg);
+            if(!(need.role in global.cache.objects))
+                global.cache.objects[need.role] = require('role.' + need.role);
+            let [body, leftEnergy] = global.cache.objects[need.role].create(energy, need.arg);
             
             let newName = spawn.createCreep(body, need.role + "-" + _.round(Math.random()*1000), {
                 "role": need.role,
