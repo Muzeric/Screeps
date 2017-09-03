@@ -25,7 +25,6 @@ profiler.wrap(function() {
     global.cache.wantCarry = {};
     global.cache.wantEnergy = {};
     global.cache.creeps = {};
-    global.cache.creeps["_army"] = {};
     global.cache.objects = {};
     
     var moveErrors = {};

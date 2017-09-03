@@ -743,7 +743,7 @@ Room.prototype.updateCreeps = function() {
         keepersPoses: [],
         hostileAttackers: [],
         hostileOther: [],
-        mine: [],
+        mine: {},
     };
     let creepCache = global.cache.creeps[this.name];
     memory.hostilesCount = 0;
@@ -765,9 +765,6 @@ Room.prototype.updateCreeps = function() {
             creepCache.mine[c.memory.role].push(c);
             if (c.memory.role == "harvester" && c.memory.targetID) {
                 global.cache.wantCarry[roomName][c.memory.targetID] = (global.cache.wantCarry[roomName][c.memory.targetID] || 0) + c.carry.energy;
-            } else if (c.memory.role == "attacker" || c.memory.role == "healer") {
-                global.cache.creeps["_army"][c.memory.role + 's'] = global.cache.creeps["_army"][c.memory.role + 's'] || [];
-                global.cache.creeps["_army"][c.memory.role + 's'].push(c);
             }
         } else  {
             creepCache.hostileOther.push(c);

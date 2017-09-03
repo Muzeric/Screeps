@@ -308,7 +308,7 @@ Creep.prototype.attackNearHostile = function(range, mark) {
         mass += range == 1 ? 10 : (range == 2 ? 4 : (range == 3 ? 1 : 0));
     }
     
-    let target = Game.getObjectById(minTarget);
+    let target = Game.getObjectById(minTarget.id);
     if (!target)
         return ERR_INVALID_TARGET;
 
