@@ -22,7 +22,7 @@ var role = {
         }
 	},
 	
-    create: function(energy, tower) {
+    create: function(energy, tower = 0) {
         if (!tower)
             energy -= 300; // MOVE,HEAL at end
         let body = [];
