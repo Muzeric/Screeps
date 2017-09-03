@@ -15,8 +15,6 @@ profiler.wrap(function() {
     global.cache = {};
     global.cache.stat = require('stat');
     global.cache.stat.init();
-    global.cache.queueLab = require('queue.lab');
-    global.cache.queueLab.init();
     global.cache.queueTransport = require('queue.transport');
     global.cache.queueTransport.init();
     global.cache.minerals = require('minerals');
@@ -178,11 +176,11 @@ profiler.wrap(function() {
         if (room && Memory.rooms[roomName].type == 'my') {
             towerAction(room);
             room.linkAction();
-            global.cache.minerals.runLabs(roomName);
         }
         global.cache.stat.updateRoom(roomName, 'cpu', Game.cpu.getUsed() - lastCPU);
     });
     global.cache.stat.addCPU("needList");
+
     if (Game.time % PERIOD_NEEDLIST == 1)
         console.log("needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.countName})));
     
@@ -242,6 +240,11 @@ profiler.wrap(function() {
         }
     }
     global.cache.stat.addCPU("create");
+    _.forEach(global.cache.roomNames, function(roomName) {
+        if (roomName in Memory.rooms && Memory.rooms[roomName].type == 'my')
+            global.cache.minerals.runLabs(roomName);
+    });
+    global.cache.stat.addCPU("runLabs");
     global.cache.stat.finish();
 });
 };

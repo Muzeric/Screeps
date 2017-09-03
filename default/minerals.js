@@ -93,31 +93,6 @@ var minerals = {
         return this.searchCombination(roomName, elems);
     },
 
-    checkNeeds: function (room) {
-        let roomName = room.name;
-        let storage = room.storage;
-        if (!storage)
-            return null;
-        
-        for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
-            let elem = this.library[outputType];
-            let in1 = storage.store[elem.inputTypes[0]] || 0;
-            let in2 = storage.store[elem.inputTypes[1]] || 0;
-            let out = storage.store[outputType] || 0;
-            let producing = global.cache.queueLab.getProducing(roomName, LAB_REQUEST_TYPE_TERMINAL, outputType);
-            //console.log(`${roomName}: checNeeds for ${outputType} in1=${in1}, in2=${in2}, out=${out}, producing=${producing}`);
-            if (in1 < BALANCE_LAB_MIN || in2 < BALANCE_LAB_MIN || out + producing >= BALANCE_MIN)
-                continue;
-            
-            let amount = _.min([BALANCE_MIN - out - producing, in1, in2]);
-            console.log(`${roomName}: checNeeds added request for ${amount} of ${outputType}`);
-            global.cache.queueLab.addRequest(roomName, outputType, amount);
-            break;
-        }
-
-        return OK;
-    },
-
     runLabs: function (roomName) {
         let room = Game.rooms[roomName];
         if (!room)
@@ -132,21 +107,34 @@ var minerals = {
         if (outputLabs.length < 1)
             return null;
         
-        if (!room.memory.labRequestID || !(room.memory.labRequestID in Memory.labRequests)) {
-            room.memory.labRequestID = null;
-            for (let request of _.sortBy(_.filter(Memory.labRequests, r => r.roomName == roomName), r => r.createTime)) {
-                if (   global.cache.queueTransport.getStoreWithReserved(storage, request.inputType1) >= request.amount
-                    && global.cache.queueTransport.getStoreWithReserved(storage, request.inputType2) >= request.amount) {
-                    room.memory.labRequestID = request.id;
-                    console.log(roomName + ": set active labRequestID=" + request.id);
-                    break;
-                }
+        if (!room.memory.labRequest) {
+            for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
+                let elem = this.library[outputType];
+                let in1 = storage.store[elem.inputTypes[0]] || 0;
+                let in2 = storage.store[elem.inputTypes[1]] || 0;
+                let out = storage.store[outputType] || 0;
+                if (in1 < BALANCE_LAB_MIN || in2 < BALANCE_LAB_MIN || out >= BALANCE_MIN)
+                    continue;
+                
+                let amount = _.min([BALANCE_MIN - out, in1, in2, LAB_REQUEST_AMOUNT]);
+                console.log(`${roomName}: start request for ${amount} of ${outputType}`);
+                
+                room.memory.labRequest = {
+                    outputType,
+                    amount,
+                    done: 0,
+                    inputType1: elem.inputTypes[0],
+                    inputType2: elem.inputTypes[1],
+                    createTime: Game.time,
+                };
+
+                break;
             }
         }
-        if (!room.memory.labRequestID)
+        if (!room.memory.labRequest)
             return null;
 
-        let request = Memory.labRequests[room.memory.labRequestID];
+        let request = room.memory.labRequest;
         let ready = 0;
         let i = 0;
         
@@ -158,7 +146,7 @@ var minerals = {
                 ready++;
             if ((lab.mineralType == inputType || !lab.mineralType) && futureAmount < request.amount) {
                 if (transportableAmount < request.amount - futureAmount) {
-                    room.memory.labRequestID = null;
+                    room.memory.labRequest = null;
                     global.cache.queueTransport.addRequest(lab, storage, inputType, futureAmount);
                 } else {
                     global.cache.queueTransport.addRequest(storage, lab, inputType, request.amount - futureAmount);
@@ -188,9 +176,12 @@ var minerals = {
             let lab3 = Game.getObjectById(lab.id);
             let res = lab3.runReaction(lab1, lab2);
             if (res == OK) {
-                global.cache.queueLab.produceAmount(request.id, LAB_REACTION_AMOUNT);
+                request.amount -= LAB_REACTION_AMOUNT;
+                request.done += LAB_REACTION_AMOUNT;
+                if (request.amount <= 0)
+                    room.memory.labRequest = null;
             } else {
-                console.log(`runLabs: ${lab3,id}.runReaction(${lab1.id},${lab2.id}) for reqID=${request.id} with res=${res}`);
+                console.log(`runLabs: ${lab3,id}.runReaction(${lab1.id},${lab2.id}) with res=${res}`);
             }
         }
     },
