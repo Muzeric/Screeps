@@ -253,7 +253,7 @@ Room.prototype.needRoad = function(creep) {
     let roads = this.memory.needRoads;
     let key = creep.pos.x + "," + creep.pos.y;
     
-    if (creep.memory.role == 'harvester' || creep.memory.role == 'longharvester' || creep.memory.role == 'upgrader') {
+    if (["harvester","longharvester","upgrader","transporter","antikeeper"].indexOf(creep.memory.role) !== -1) {
         if (!(key in roads)) {
             roads[key] = {wanted : 1, lastUpdate : Game.time, needRepair : 0, id : null};
         } else {
