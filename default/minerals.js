@@ -135,6 +135,7 @@ var minerals = {
             return null;
         
         if (!room.memory.labRequestID || !(room.memory.labRequestID in Memory.labRequests)) {
+            room.memory.labRequestID = null;
             for (let request of _.sortBy(_.filter(Memory.labRequests, r => r.roomName == roomName), r => r.createTime)) {
                 if (   global.cache.queueTransport.getStoreWithReserved(storage, request.inputType1) >= request.amount
                     && global.cache.queueTransport.getStoreWithReserved(storage, request.inputType2) >= request.amount) {
