@@ -289,7 +289,7 @@ Creep.prototype.goFromKeepers = function() {
 }
 
 Creep.prototype.attackNearHostile = function(range, mark) {
-    if (!this.getActiveBodyparts(ATTACK))
+    if (!this.getActiveBodyparts(ATTACK) && !this.getActiveBodyparts(RANGED_ATTACK))
         return ERR_NO_BODYPART;
 
     let targets = this.room.getNearAttackers(this.pos, range || 5);
@@ -302,6 +302,9 @@ Creep.prototype.attackNearHostile = function(range, mark) {
 
     console.log(this.name + ": attackNearHostile, pos=" + this.pos.getKey(1) + ", hits=" + target.hits + ", owner=" + target.owner.username);
 
+    if (this.getActiveBodyparts(RANGED_ATTACK))
+        this.rangedAttack(target);
+        
     let res = this.attack(target);
     if (res == ERR_NOT_IN_RANGE)
         this.moveTo(target);

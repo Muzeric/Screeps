@@ -27,18 +27,30 @@ var role = {
             energy -= 300; // MOVE,HEAL at end
         let body = [];
         
-        let mnum = Math.floor(energy / (50+80));
-        if (mnum * 2 + 2 + body.length > 50) // Body parts limit
-            mnum = Math.floor((50 - body.length - 2) / 2);
-        let anum = mnum;
-        while (energy >= 50 && mnum-- > 0) {
+        let tnum = 0;
+        let mnum = 0;
+        let anum = 0;
+        let rnum = 0;
+        if (energy < 3000) {
+            mnum = utils.clamp(Math.floor(energy / (50+80)), 0, 24 + !tower * 2);
+            anum = mnum;
+        } else {
+            tnum = tower ? 0 : 4;
+            mnum = utils.clamp(Math.floor((energy - 10 * tnum) / (50+80 + 50+150) * 2) + tnum, 0, 24 + !tower * 2);
+            anum = Math.floor((mnum - tnum) / 2);
+            rnum = Math.floor((mnum - tnum) / 2);
+        }
+        energy -= 10 * tnum + 80 * anum + 150 * rnum + 50 * mnum;
+
+        while (tnum-- > 0)
+            body.push(TOUGH);
+        while (mnum-- > 0)
             body.push(MOVE);
-            energy -= 50;
-        }
-        while (energy >= 80 && anum-- > 0) {
+        while (anum-- > 0)
             body.push(ATTACK);
-            energy -= 80;
-        }
+        while (rnum-- > 0)
+            body.push(RANGED_ATTACK);
+        
         if (!tower) {
             body.push(MOVE);
             body.push(HEAL);
