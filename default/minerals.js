@@ -93,7 +93,7 @@ var minerals = {
         return this.searchCombination(roomName, elems);
     },
 
-    clearLabs: function (labs) {
+    clearLabs: function (labs, storage) {
         for (let lab of labs) {
             if (lab.mineralType && lab.mineralAmount) {
                 let stored = global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType);
@@ -142,8 +142,8 @@ var minerals = {
             }
         }
         if (!room.memory.labRequest) {
-            this.clearLabs(inputLabs);
-            this.clearLabs(outputLabs);
+            this.clearLabs(inputLabs, storage);
+            this.clearLabs(outputLabs, storage);
             return null;
         }
 
