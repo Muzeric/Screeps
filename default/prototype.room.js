@@ -379,6 +379,10 @@ Room.prototype.getOutputLabs = function () {
     return _.filter((this.memory.structures[STRUCTURE_LAB] || []), l => !l.input && !l.cooldown);
 }
 
+Room.prototype.getBoostLabs = function () {
+    return _.filter((this.memory.structures[STRUCTURE_LAB] || []), l => l.boostFlag);
+}
+
 Room.prototype.getFreeLab = function (needEnergy) {
     let lab = _.filter(this.memory.structures[STRUCTURE_LAB] || [], l => l.mineralType === null && (!needEnergy || l.energy >= needEnergy))[0];
     if (lab)
@@ -701,19 +705,21 @@ Room.prototype.updateStructures = function() {
         }
 
         if ((memory.structures[STRUCTURE_LAB] || []).length >= 3) {
-            let count = 0;
+            let inputCount = 0;
+            let boostCount = 0;
             for (let lab1 of memory.structures[STRUCTURE_LAB].sort(function(a,b) {if (a.id > b.id) return 1; if (a.id < b.id) return -1; return 0;})) {
                 let got = 0;
                 for (let lab2 of memory.structures[STRUCTURE_LAB]) {
                     if (lab1.pos.inRangeTo(lab2, 2))
                         got++;
                 }
-                if (got == memory.structures[STRUCTURE_LAB].length) {
+                if (got == memory.structures[STRUCTURE_LAB].length && inputCount < 2) {
                     lab1.input = 1;
-                    count++;
+                    inputCount++;
+                } else if (boostCount < 1) {
+                    lab1.boostFlag = 1;
+                    boostCount++;
                 }
-                if (count >= 2)
-                    break;
             }
         }
     }

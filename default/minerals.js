@@ -93,6 +93,16 @@ var minerals = {
         return this.searchCombination(roomName, elems);
     },
 
+    clearLabs: function (labs) {
+        for (let lab of labs) {
+            if (lab.mineralType && lab.mineralAmount) {
+                let stored = global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType);
+                if (stored > 0)
+                    global.cache.queueTransport.addRequest(lab, storage, lab.mineralType, stored);
+            }
+        }
+    },
+
     runLabs: function (roomName) {
         let room = Game.rooms[roomName];
         if (!room)
@@ -131,8 +141,11 @@ var minerals = {
                 break;
             }
         }
-        if (!room.memory.labRequest)
+        if (!room.memory.labRequest) {
+            this.clearLabs(inputLabs);
+            this.clearLabs(outputLabs);
             return null;
+        }
 
         let request = room.memory.labRequest;
         let ready = 0;

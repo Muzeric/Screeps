@@ -518,3 +518,78 @@ Creep.prototype.checkInRoomAndGo = function (opts) {
 
     return ERR_NOT_IN_RANGE;
 }
+
+Creep.prototype.boost = function (bodyPart, skill) {
+    if (this.ticksToLive < BOOST_MIN_TICKS)
+        return ERR_GCL_NOT_ENOUGH;
+
+    let unboostedCount = this.getUnboostedBodyparts(bodyPart);
+    if (!unboostedCount)
+        return ERR_FULL;
+
+    if (!(bodyPart in BOOSTS))
+        return ERR_INVALID_ARGS;
+
+    let bt;
+    for (let _bt in BOOSTS[bodyPart]) {
+        let skills = BOOSTS[bodyPart][_bt];
+        let power = 0;
+        if (skill in skills && skills[skill] > power) {
+            power = skills[skill];
+            bt = _bt;
+        }
+    }
+    if (bt === undefined)
+        return ERR_INVALID_ARGS;
+
+    let room = this.room;
+    let labs = room.getBoostLabs();
+    if (!labs.length) {
+        room = Game.spawns[this.memory.spawnName].room;
+        if (!room)
+            return ERR_NOT_ENOUGH_EXTENSIONS;
+        labs = room.getBoostLabs();
+        if (!labs.length)
+            return ERR_NOT_ENOUGH_EXTENSIONS;
+    }
+
+    let storage = room.storage;
+    if (!storage)
+        return ERR_NOT_ENOUGH_EXTENSIONS;
+
+    if (this.carryCapacity < LAB_BOOST_MINERAL)
+        return ERR_NO_BODYPART;
+/*
+    let need = LAB_BOOST_MINERAL * unboostedCount;
+    let got = this.carry[bt] || 0;
+    let free = this.carryCapacity - _.sum(this.carry);
+    let able = storage.store[bt];
+    
+    for (let _lab of labs) {
+        let lab = Game.getObjectById(_lab.id);
+        if (!lab)
+            continue;
+        if (got >= LAB_BOOST_MINERAL && (got >= need || free < LAB_BOOST_MINERAL) || creep.memory.boostLabID == lab.id) {
+            this.memory.boostLabID = lab.id;
+            // boosting stage
+            if (this.pos.isNearTo(lab)) {
+                this.transfer(lab, bt);
+                let res = lab.boostCreep(this);
+                console.log(creep.name + ": BOOSTED (" + res + ")");
+                if (res == OK)
+                    creep.memory.boostLabID = 0;
+            } else {
+                creep.moveTo(lab);
+            }
+        } else {
+            creep.memory.boostLabID = 0;
+            // getting stage
+            if (this.withdraw(storage, bt, _.floor( _.min([need - got, free, able]) / LAB_BOOST_MINERAL) * LAB_BOOST_MINERAL ) == ERR_NOT_IN_RANGE) {
+                this.moveTo(storage);
+            }
+        }
+    }
+
+    return OK;
+*/
+}
