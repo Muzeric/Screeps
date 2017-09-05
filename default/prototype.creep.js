@@ -520,6 +520,8 @@ Creep.prototype.checkInRoomAndGo = function (opts) {
 }
 
 Creep.prototype.boost = function (bodyPart, skill) {
+    this.memory.boostLabID = null;
+
     if (this.ticksToLive < BOOST_MIN_TICKS)
         return ERR_GCL_NOT_ENOUGH;
 
@@ -565,31 +567,31 @@ Creep.prototype.boost = function (bodyPart, skill) {
     let free = this.carryCapacity - _.sum(this.carry);
     let able = storage.store[bt];
     
-    for (let _lab of labs) {
-        let lab = Game.getObjectById(_lab.id);
-        if (!lab)
-            continue;
-        if (lab.mineralType && lab.mineralType != bt) {
-            // TODO: set some flag about boost need
-            continue;
-        }
-        let gotLab = lab.mineralAmount || 0;
+    let lab = Game.getObjectById(labs[0].id);
+    if (!lab)
+        return ERR_INVALID_ARGS;
+    let gotLab = lab.mineralAmount || 0;
 
-        if (gotLab >= LAB_BOOST_MINERAL) {
-            let res = lab.boostCreep(this);
-            console.log(this.name + ": BOOSTED (" + res + ")");
-        } else if (got >= LAB_BOOST_MINERAL && (got >= need || free < LAB_BOOST_MINERAL || able < LAB_BOOST_MINERAL)) {
-            if (this.transfer(lab, bt) == ERR_NOT_IN_RANGE)
-                this.moveTo(lab);
-            console.log(this.name + ": BOOSTing, transfer");
-        } else if (able >= LAB_BOOST_MINERAL && free >= LAB_BOOST_MINERAL) {
-            if (this.withdraw(storage, bt, _.floor( _.min([need - got, free, able]) / LAB_BOOST_MINERAL) * LAB_BOOST_MINERAL ) == ERR_NOT_IN_RANGE)
-                this.moveTo(storage);
-            console.log(this.name + ": BOOSTing, withdraw");
-        } else {
-            console.log(this.name + ": BOOSTing, no resources");
-            return ERR_NOT_ENOUGH_RESOURCES;
-        }
+    this.memory.boostLabID = lab.id;
+    if (lab.mineralType && lab.mineralType != bt) {
+        return ERR_BUSY;
+    } else if (gotLab >= LAB_BOOST_MINERAL) {
+        let res = lab.boostCreep(this);
+        console.log(this.name + ": BOOSTED (" + res + ")");
+        if (res == OK)
+            this.memory.boostLabID = null;
+    } else if (got >= LAB_BOOST_MINERAL && (got >= need || free < LAB_BOOST_MINERAL || able < LAB_BOOST_MINERAL)) {
+        if (this.transfer(lab, bt) == ERR_NOT_IN_RANGE)
+            this.moveTo(lab);
+        console.log(this.name + ": BOOSTing, transfer");
+    } else if (able >= LAB_BOOST_MINERAL && free >= LAB_BOOST_MINERAL) {
+        if (this.withdraw(storage, bt, _.floor( _.min([need - got, free, able]) / LAB_BOOST_MINERAL) * LAB_BOOST_MINERAL ) == ERR_NOT_IN_RANGE)
+            this.moveTo(storage);
+        console.log(this.name + ": BOOSTing, withdraw");
+    } else {
+        console.log(this.name + ": BOOSTing, no resources");
+        this.memory.boostLabID = null;
+        return ERR_NOT_ENOUGH_RESOURCES;
     }
 
     return OK;

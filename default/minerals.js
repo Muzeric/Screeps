@@ -178,6 +178,14 @@ var minerals = {
         let lab1 = Game.getObjectById(inputLabs[0].id);
         let lab2 = Game.getObjectById(inputLabs[1].id);
         for (let lab of outputLabs) {
+            if (global.cache.boostingLabs.indexOf(lab.id) !== -1) {
+                if (lab.mineralAmount) {
+                    let stored = global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType);
+                    if (stored > 0)
+                        global.cache.queueTransport.addRequest(lab, storage, lab.mineralType, stored);
+                }
+                continue;
+            }
             if (lab.mineralType && lab.mineralType != request.outputType || lab.mineralAmount >= LAB_TRANSPORT_AMOUNT) {
                 let stored = global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType);
                 if (lab.mineralType != request.outputType ? stored > 0 : stored >= LAB_TRANSPORT_AMOUNT)
