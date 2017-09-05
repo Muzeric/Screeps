@@ -191,6 +191,9 @@ var minerals = {
             if (res == OK) {
                 request.amount -= LAB_REACTION_AMOUNT;
                 request.done += LAB_REACTION_AMOUNT;
+                inputLabs[0].mineralAmount -= LAB_REACTION_AMOUNT;
+                inputLabs[1].mineralAmount -= LAB_REACTION_AMOUNT;
+                lab.mineralAmount -= LAB_REACTION_AMOUNT;
                 if (request.amount <= 0)
                     room.memory.labRequest = null;
             } else {
