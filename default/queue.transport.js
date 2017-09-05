@@ -260,10 +260,10 @@ var queue = {
     },
 
     status: function () {
-        _.filter(Memory.transportRequests).forEach(r => 
+        _.sortBy(Memory.transportRequests, r => Game.getObjectById(r.fromID).pos.roomName).forEach(r => 
             console.log(
-                r.id + ".\t" + Game.getObjectById(r.fromID).pos + "\t-> " + r.amount + " of " + r.resourceType + 
-                "\t-> " + Game.getObjectById(r.toID).pos + "\tby " + r.creepID + " time: " + (Game.time - r.createTime)
+                "[" + r.id + "] \t" + Game.getObjectById(r.fromID).pos + "\t-> " + Game.getObjectById(r.toID).pos +
+                "\t" + r.amount + "\tof " + r.resourceType + "\tfor " + (Game.time - r.createTime) + " sec\tby " +  r.creepID
         ));
     },
 };
