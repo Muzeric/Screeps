@@ -24,7 +24,7 @@ profiler.wrap(function() {
     global.cache.wantEnergy = {};
     global.cache.creeps = {};
     global.cache.objects = {};
-    global.cache.boostingLabs = {};
+    global.cache.boostingLabs = [];
     
     var moveErrors = {};
     global.cache.roomNames = _.filter( _.uniq( [].concat( 
