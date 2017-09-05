@@ -257,7 +257,15 @@ var queue = {
 
     getTypeAndAmount: function (objectID) {
         return this.transportReserved[objectID];
-    }
+    },
+
+    status: function () {
+        _.filter(Memory.transportRequests).forEach(r => 
+            console.log(
+                r.id + ".\t" + Game.getObjectById(r.fromID).pos + "\t-> " + r.amount + " of " + r.resourceType + 
+                "\t-> " + Game.getObjectById(r.toID).pos + "\tby " + r.creepID + " time: " + (Game.time - r.createTime)
+        ));
+    },
 };
 
 module.exports = queue;
