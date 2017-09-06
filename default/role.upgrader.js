@@ -9,39 +9,8 @@ var role = {
 			return;
 		}
 
-		let unboostedCount = creep.getUnboostedBodyparts(WORK);
-		let bt = "XGH2O";
-		while (creep.ticksToLive > 1200 && unboostedCount && (room.storage && room.storage.store[bt] >= LAB_BOOST_MINERAL && _.sum(creep.carry) == 0 || creep.carry[bt] >= LAB_BOOST_MINERAL || creep.memory.boostLabID)) {
-			if (creep.ticksToLive % 5 == 0)
-		        console.log(creep.name + ": want boosting");
-			let lab = Game.getObjectById(creep.memory.boostLabID) || room.getFreeLab(unboostedCount * LAB_BOOST_ENERGY);
-			if (!lab)
-				break;
-			let need = LAB_BOOST_MINERAL * unboostedCount;
-			let got = creep.carry[bt] || 0;
-			let free = creep.carryCapacity - _.sum(creep.carry);
-			let able = room.storage.store[bt];
-			if (got >= LAB_BOOST_MINERAL && (got >= need || free < LAB_BOOST_MINERAL) || creep.memory.boostLabID == lab.id) {
-				creep.memory.boostLabID = lab.id;
-				// boosting stage
-				if (creep.pos.isNearTo(lab)) {
-					creep.transfer(lab, bt);
-					let res = lab.boostCreep(creep);
-					console.log(creep.name + ": BOOSTED (" + res + ")");
-					if (res == OK)
-						creep.memory.boostLabID = 0;
-				} else {
-					creep.moveTo(lab);
-				}
-			} else {
-				creep.memory.boostLabID = 0;
-				// getting stage
-				if (creep.withdraw(room.storage, bt, _.floor( _.min([need - got, free, able]) / LAB_BOOST_MINERAL) * LAB_BOOST_MINERAL ) == ERR_NOT_IN_RANGE) {
-					creep.moveTo(room.storage);
-				}
-			}
+		if (creep.boost(WORK, "upgradeController") == OK)
 			return;
-		}
 
 	    if(creep.carry.energy == 0 && creep.memory.upgrading) {
 			creep.memory.upgrading = false;
