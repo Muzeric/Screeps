@@ -589,7 +589,7 @@ Creep.prototype.boost = function (bodyPart, skill) {
             this.moveTo(storage);
         console.log(this.name + ": BOOSTing, withdraw");
     } else {
-        console.log(this.name + ": BOOSTing, no resources");
+        //console.log(this.name + ": BOOSTing, no resources");
         this.memory.boostLabID = null;
         return ERR_NOT_ENOUGH_RESOURCES;
     }
