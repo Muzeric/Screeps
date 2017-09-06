@@ -16,7 +16,7 @@ var role = {
             creep.memory.building = false;
             creep.memory.targetID = null;
 	    }
-	    if(!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
+	    if(!creep.memory.building && _.sum(creep.carry) == creep.carryCapacity) {
 	        creep.memory.building = true;
 	        creep.memory.energyID = null;
 	    }

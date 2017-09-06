@@ -14,7 +14,7 @@ var role = {
 
 	    if(creep.carry.energy == 0 && creep.memory.upgrading) {
 			creep.memory.upgrading = false;
-	    } else if (creep.carry.energy == creep.carryCapacity && !creep.memory.upgrading) {
+	    } else if (_.sum(creep.carry) == creep.carryCapacity && !creep.memory.upgrading) {
 	        creep.memory.upgrading = true;
 	        creep.memory.errors = 0;
 	        creep.memory.energyID = null;

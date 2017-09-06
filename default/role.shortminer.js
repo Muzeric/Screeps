@@ -34,7 +34,7 @@ var role = {
         
         if(creep.carry.energy == 0 && creep.memory.transfering) {
             creep.memory.transfering = false;
-        } else if ((creep.carry.energy == creep.carryCapacity || creep.carry.energy && !source.energy) && !creep.memory.transfering) {
+        } else if ((_.sum(creep.carry) == creep.carryCapacity || creep.carry.energy && !source.energy) && !creep.memory.transfering) {
             creep.memory.transfering = true;
         }
         
