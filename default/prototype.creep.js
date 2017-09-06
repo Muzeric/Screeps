@@ -573,9 +573,12 @@ Creep.prototype.boost = function (bodyPart, skill) {
     let gotLab = lab.mineralAmount || 0;
 
     this.memory.boostLabID = lab.id;
-    if (lab.mineralType && lab.mineralType != bt) {
+    if (got < need && got + free < need && _.sum(this.carry) != got) {
+        this.memory.boostLabID = null;
+        return ERR_FULL;
+    } else if (lab.mineralType && lab.mineralType != bt) {
         return ERR_BUSY;
-    } else if (gotLab >= LAB_BOOST_MINERAL) {
+    } else if (gotLab >= LAB_BOOST_MINERAL && this.pos.isNearTo(lab)) {
         let res = lab.boostCreep(this);
         console.log(this.name + ": BOOSTED (" + res + ")");
         if (res == OK)
