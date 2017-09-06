@@ -6,6 +6,12 @@ var role = {
         let room = Game.rooms[creep.memory.roomName];
         if (!room)
             return null;
+
+        if (room.getBuilderTicks() > BOOST_BUILDER_MIN_BTICKS)
+            console.log(creep.name + ": want to boost in " + room.name + " with " + room.getBuilderTicks() + " ticks");
+        //if (room.getBuilderTicks() > BOOST_BUILDER_MIN_BTICKS && creep.boost(WORK, "build") == OK)
+        //    return;
+
 	    if(creep.memory.building && creep.carry.energy == 0) {
             creep.memory.building = false;
             creep.memory.targetID = null;

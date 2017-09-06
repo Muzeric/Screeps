@@ -403,6 +403,10 @@ Room.prototype.getRepairs = function () {
     return _.filter( _.flatten(_.values(this.memory.structures)), s => !s.finished && s.hits < s.hitsMax*0.9 && s.hits < this.getRepairLimit() );
 }
 
+Room.prototype.getBuilderTicks = function () {
+    return (this.memory.constructionHits || 0) / BUILD_POWER + (this.memory.repairHits || 0) / REPAIR_POWER;
+}
+
 Room.prototype.finishBuildRepair = function (targetID) {
     for (let key in this.memory.structures) {
         for (let i = 0; i < this.memory.structures[key].length; i++) {
@@ -572,6 +576,7 @@ Room.prototype.updateStructures = function() {
     let extractorConstructionCount = 0;
     this.find(FIND_MY_CONSTRUCTION_SITES).forEach( function(s) {
         memory.constructions++;
+        memory.constructionHits += s.progressTotal - s.progress;
         if (s.structureType == STRUCTURE_ROAD) {
             if( room.refreshRoad(memory, s) < 0) {
                 s.remove();
