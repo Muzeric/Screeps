@@ -1,4 +1,3 @@
-
 require('constants');
 require('prototype.creep');
 require('prototype.roomposition');
