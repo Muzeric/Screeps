@@ -117,6 +117,15 @@ var minerals = {
         if (outputLabs.length < 1)
             return null;
         
+        let request;
+        if (room.memory.labRequest) {
+            request = room.memory.labRequest;
+            if (request.amount < LAB_REACTION_AMOUNT || !request.outputType) {
+                console.log(`${roomName}: bad request for ${request.amount} of ${request.outputType}`);
+                Game.notify(`${roomName}: bad request for ${request.amount} of ${request.outputType}`);
+                room.memory.labRequest = null;
+            }
+        }
         if (!room.memory.labRequest) {
             for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
                 let elem = this.library[outputType];
@@ -147,7 +156,7 @@ var minerals = {
             return null;
         }
 
-        let request = room.memory.labRequest;
+        request = room.memory.labRequest;
         let ready = 0;
         let i = 0;
         
