@@ -205,7 +205,7 @@ var minerals = {
                 if (request.amount <= 0)
                     room.memory.labRequest = null;
             } else {
-                console.log(`runLabs: ${lab3,id}.runReaction(${lab1.id},${lab2.id}) with res=${res}`);
+                console.log(`runLabs: ${lab3.id}.runReaction(${lab1.id},${lab2.id}) with res=${res}`);
             }
         }
         if (!room.memory.labRequest) {
