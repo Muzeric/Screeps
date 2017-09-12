@@ -120,7 +120,7 @@ var minerals = {
         let request;
         if (room.memory.labRequest) {
             request = room.memory.labRequest;
-            if (request.amount < LAB_REACTION_AMOUNT || !request.outputType) {
+            if (request.amount < LAB_REACTION_AMOUNT || request.outputType == "undefined") {
                 console.log(`${roomName}: bad request for ${request.amount} of ${request.outputType}`);
                 Game.notify(`${roomName}: bad request for ${request.amount} of ${request.outputType}`);
                 room.memory.labRequest = null;
