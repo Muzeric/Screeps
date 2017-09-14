@@ -134,6 +134,7 @@ Room.prototype.updatePathToRooms = function () {
 
 Room.prototype.balanceStore = function () {
     let memory = this.memory;
+    let thisRoomName = this.name;
     
     for (let object of [this.storage, this.terminal]) {
         if (!object || !("store" in object))
@@ -145,10 +146,10 @@ Room.prototype.balanceStore = function () {
                 continue;
             let est = global.cache.queueTransport.getStoreWithReserved(object, rt) - balanceMax;
             //console.log(`${this.name}: has ${store[rt]} of ${rt} and est = ${est}`);
-            for (let roomName in Game.rooms) {
+            for (let room of _.sortBy(Game.rooms, r => r.name == thisRoomName ? -1 : 1)) {
                 if (est <= 0)
                     break;
-                let room = Game.rooms[roomName];
+                let roomName = room.name;
                 if ((roomName == this.name && object.structureType == STRUCTURE_STORAGE) || !room.controller || !room.controller.my || !room.storage || global.cache.queueTransport.getStoreWithReserved(room.storage, rt) >= BALANCE_MIN)
                     continue;
                 let amount = _.min([est, BALANCE_MIN - global.cache.queueTransport.getStoreWithReserved(room.storage, rt)]);
