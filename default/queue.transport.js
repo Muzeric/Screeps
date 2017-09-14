@@ -42,7 +42,7 @@ var queue = {
         }
         let req_resourceType = resourceType || ("store" in req_from ? _.filter(Object.keys(req_from.store), k => req_from.store[k])[0] : req_from.mineralType);
         let req_amount = amount || ("store" in req_from ? req_from.store[req_resourceType] : req_from.mineralAmount);
-        if (!req_resourceType || !req_amount) {
+        if (!req_resourceType || req_amount <= 0) {
             console.log(`queueTransport.addRequest: can't calc any of these: resourceType=${req_resourceType}, amount=${req_amount}`);
             return null;
         }
@@ -101,7 +101,7 @@ var queue = {
         for (let request of _.filter(Memory.transportRequests, r => !r.creepID)) {
             let from = Game.getObjectById(request.fromID);
             let to = Game.getObjectById(request.toID);
-            if (!from || !to) {
+            if (!from || !to || request.amount < 0) {
                 this.badRequest(request.id);
                 continue;
             }
