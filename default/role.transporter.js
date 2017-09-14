@@ -66,7 +66,7 @@ var role = {
                 return creep.moveTo(from, {ignoreHostiled: 1});
 
             let amount = _.min([request.amount - (creep.carry[request.resourceType] || 0), creep.carryCapacity - _.sum(creep.carry), fromAmount]);
-            if (!amount) {
+            if (amount <= 0) {
                 queue.unbindRequest(request.id);
                 return;
             }
