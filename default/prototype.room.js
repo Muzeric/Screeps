@@ -606,9 +606,6 @@ Room.prototype.updateStructures = function() {
         memory.structures[FIND_MY_CONSTRUCTION_SITES].push(elem);
     });
 
-    memory.costMatrix = costs.serialize();
-    global.cache.matrix[this.name]["common"] = costs;
-
     for (let extractor of (memory.structures[STRUCTURE_EXTRACTOR] || [])) {
         let container = _.filter(memory.structures[STRUCTURE_CONTAINER], c => extractor.pos.inRangeTo(c.pos, 2))[0];
         if (container) {
@@ -618,8 +615,12 @@ Room.prototype.updateStructures = function() {
                 extractor.betweenPos = container.pos;
             else
                 extractor.betweenPos = _.filter( utils.getRangedPlaces(null, extractor.pos, 1), p => p.isNearTo(container.pos) )[0];
+            costs.set(extractor.betweenPos.x, extractor.betweenPos.y, 100);
         }
     }
+
+    memory.costMatrix = costs.serialize();
+    global.cache.matrix[this.name]["common"] = costs;
 
     if (memory.type == "other" && (memory.structures[STRUCTURE_SOURCE] || []).length) {
         memory.type = "central";
