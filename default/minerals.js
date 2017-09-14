@@ -9,9 +9,11 @@ var minerals = {
     init: function () {
         for (let rt1 in REACTIONS)
             for (let rt2 in REACTIONS)
-                this.library[REACTIONS[rt1][rt2]] = {
-                    inputTypes: [rt1, rt2],
-                };
+                if (rt2 in REACTIONS[rt1]) {
+                    this.library[REACTIONS[rt1][rt2]] = {
+                        inputTypes: [rt1, rt2],
+                    };
+                }
     },
 
     getInputTypes: function (rt) {
