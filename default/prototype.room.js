@@ -135,7 +135,7 @@ Room.prototype.updatePathToRooms = function () {
 Room.prototype.balanceStore = function () {
     let memory = this.memory;
 
-    for (let object in (this.storage, this.terminal)) {
+    for (let object of [this.storage, this.terminal]) {
         if (!object || !("store" in object))
             continue;
         let store = object.store;
