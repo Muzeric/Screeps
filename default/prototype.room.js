@@ -135,12 +135,14 @@ Room.prototype.updatePathToRooms = function () {
 Room.prototype.balanceStore = function () {
     let memory = this.memory;
 
-    if (this.storage) {
-        let store = this.storage.store;
+    for (let object of (this.storage, this.terminal)) {
+        if (!object || !("store" in object))
+            continue;
+        let store = object.store;
         for (let rt in store) {
-            if (rt == "energy" || store[rt] < BALANCE_MAX || global.cache.queueTransport.getStoreWithReserved(this.storage, rt) < BALANCE_MAX)
+            if (rt == "energy" || store[rt] < BALANCE_MAX || global.cache.queueTransport.getStoreWithReserved(object, rt) < BALANCE_MAX)
                 continue;
-            let est = global.cache.queueTransport.getStoreWithReserved(this.storage, rt) - BALANCE_MAX;
+            let est = global.cache.queueTransport.getStoreWithReserved(object, rt) - BALANCE_MAX;
             //console.log(`${this.name}: has ${store[rt]} of ${rt} and est = ${est}`);
             for (let roomName in Game.rooms) {
                 if (est <= 0)
@@ -151,13 +153,13 @@ Room.prototype.balanceStore = function () {
                 let amount = _.min([est, BALANCE_MIN - global.cache.queueTransport.getStoreWithReserved(room.storage, rt)]);
                 if (amount > 0) {
                     console.log(`${this.name}: balance ${amount} of ${rt} to ${room.name}`);
-                    global.cache.queueTransport.addRequest(this.storage, room.storage, rt, amount);
+                    global.cache.queueTransport.addRequest(object, room.storage, rt, amount);
                     est -= amount;
                 }
             }
-            if (est > 0 && this.terminal) {
+            if (est > 0 && this.terminal && this.terminal.id != object.id) {
                 console.log(`${this.name}: balance other ${rt} to terminal`);
-                global.cache.queueTransport.addRequest(this.storage, this.terminal, rt, _.min([est, this.terminal.storeCapacity - _.sum(this.terminal.store)]));
+                global.cache.queueTransport.addRequest(object, this.terminal, rt, _.min([est, this.terminal.storeCapacity - _.sum(this.terminal.store)]));
             }
         }
     }
