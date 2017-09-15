@@ -22,8 +22,15 @@ var role = {
 	    if(creep.memory.building) {
             if(!creep.memory.targetID)
                 creep.memory.targetID = getBuilderTargets(creep, room);
-            if(!creep.memory.targetID)
+            if(!creep.memory.targetID) {
+                for (let s of creep.pos.lookFor(LOOK_STRUCTURES)) {
+                    if ([STRUCTURE_CONTAINER, STRUCTURE_ROAD, STRUCTURE_RAMPART].indexOf(s.structureType) != -1) {
+                        creep.move(Math.floor(Math.random() * 8) + 1);
+                        return;
+                    }
+                }
                 return;
+            }
             
             let target = Game.getObjectById(creep.memory.targetID);
             if (!target || "hits" in target && (target.hits == target.hitsMax || target.hits >= room.getRepairLimit())) {
