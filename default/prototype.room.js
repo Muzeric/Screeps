@@ -732,6 +732,11 @@ Room.prototype.updateStructures = function() {
                 }
             }
         }
+
+        if (this.storage && this.storage.store.energy > REPAIR_ENERGY_LIMIT)
+            memory.repairLimit = REPAIR_LIMIT_HIGH;
+        else if (!("repairLimit" in memory) || this.storage && this.storage.store.energy < 0.8*REPAIR_ENERGY_LIMIT)
+            memory.repairLimit = REPAIR_LIMIT;
     }
 
     memory.structuresTime = Game.time;
