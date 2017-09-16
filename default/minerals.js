@@ -3,17 +3,41 @@ const profiler = require('screeps-profiler');
 
 var minerals = {
     library: {},
+    topBoosts: {},
     orders: null,
     labCache: {},
 
     init: function () {
-        for (let rt1 in REACTIONS)
-            for (let rt2 in REACTIONS)
+        for (let rt1 in REACTIONS) {
+            for (let rt2 in REACTIONS) {
                 if (rt2 in REACTIONS[rt1]) {
                     this.library[REACTIONS[rt1][rt2]] = {
                         inputTypes: [rt1, rt2],
                     };
                 }
+            }
+        }
+        
+        for (let bodyPart in BOOSTS) {
+            for (let bt in BOOSTS[bodyPart]) {
+                for (let skill in BOOSTS[bodyPart][bt]) {
+                    this.topBoosts[bodyPart] = this.topBoosts[bodyPart] || {};
+                    this.topBoosts[bodyPart][skill] = this.topBoosts[bodyPart][skill] || {};
+                    if (!this.topBoosts[bodyPart][skill].power || BOOSTS[bodyPart][bt][skill] > this.topBoosts[bodyPart][skill].power) {
+                        this.topBoosts[bodyPart][skill].power = BOOSTS[bodyPart][bt][skill];
+                        this.topBoosts[bodyPart][skill].bt = bt;
+                    }
+                }
+            }
+        }
+    },
+
+    getBoostResource: function (bodyPart, skill) {
+        if (bodyPart in this.topBoosts && skill in this.topBoosts[bodyPart]) {
+            return this.topBoosts[bodyPart][skill].bt;
+        }
+
+        return null;
     },
 
     getInputTypes: function (rt) {

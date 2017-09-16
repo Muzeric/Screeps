@@ -523,16 +523,6 @@ Creep.prototype.checkInRoomAndGo = function (opts) {
 Creep.prototype.boost = function (bodyPart, skill) {
     this.memory.boostLabID = null;
 
-    if (this.ticksToLive < BOOST_MIN_TICKS)
-        return ERR_GCL_NOT_ENOUGH;
-
-    let unboostedCount = this.getUnboostedBodyparts(bodyPart);
-    if (!unboostedCount)
-        return ERR_FULL;
-
-    if (!(bodyPart in BOOSTS))
-        return ERR_INVALID_ARGS;
-
     let bt;
     for (let _bt in BOOSTS[bodyPart]) {
         let skills = BOOSTS[bodyPart][_bt];
@@ -543,6 +533,16 @@ Creep.prototype.boost = function (bodyPart, skill) {
         }
     }
     if (bt === undefined)
+        return ERR_INVALID_ARGS;
+
+    if (this.ticksToLive < BOOST_MIN_TICKS && !(bt in this.carry))
+        return ERR_GCL_NOT_ENOUGH;
+
+    let unboostedCount = this.getUnboostedBodyparts(bodyPart);
+    if (!unboostedCount)
+        return ERR_FULL;
+
+    if (!(bodyPart in BOOSTS))
         return ERR_INVALID_ARGS;
 
     let room = this.room;
