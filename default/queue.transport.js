@@ -67,7 +67,7 @@ var queue = {
             state: 0,
         };
         //console.log("queueTransport.addRequest: ADDED: " + JSON.stringify(Memory.transportRequests[req_id]));
-        console.log(`transport ADDED: ${req_id}. ${req_from.pos.roomName} -> ${req_to.pos.roomName} ${req_amount} of ${req_resourceType}`);
+        console.log(`transport ADDED: ${req_id}. ${req_from.pos.roomName} (${req_from.structureType}) -> ${req_to.pos.roomName} (${req_to.structureType}) ${req_amount} of ${req_resourceType}`);
 
         return req_id;
     },
@@ -172,7 +172,7 @@ var queue = {
         request.amount -= amount;
         if (request.amount <= 0) {
             //console.log("queueTransport: finished request: " + JSON.stringify(request));
-            console.log(`transport DONE: ${reqID}. ${request.fromRoomName} -> ${request.toRoomName} ${request.done} of ${request.resourceType}`);
+            console.log(`transport DONE: ${reqID}. ${request.fromRoomName} -> ${request.toRoomName} ${request.put} of ${request.resourceType}`);
             delete this.indexByCreep[request.creepID];
             delete Memory.transportRequests[reqID];
             return null;
