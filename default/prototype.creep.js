@@ -523,16 +523,8 @@ Creep.prototype.checkInRoomAndGo = function (opts) {
 Creep.prototype.boost = function (bodyPart, skill) {
     this.memory.boostLabID = null;
 
-    let bt;
-    for (let _bt in BOOSTS[bodyPart]) {
-        let skills = BOOSTS[bodyPart][_bt];
-        let power = 0;
-        if (skill in skills && skills[skill] > power) {
-            power = skills[skill];
-            bt = _bt;
-        }
-    }
-    if (bt === undefined)
+    let bt = global.cache.minerals.getBoostResource(bodyPart, skill);
+    if (!bt)
         return ERR_INVALID_ARGS;
 
     if (this.ticksToLive < BOOST_MIN_TICKS && !(bt in this.carry))
@@ -571,6 +563,8 @@ Creep.prototype.boost = function (bodyPart, skill) {
     let lab = Game.getObjectById(labs[0].id);
     if (!lab)
         return ERR_INVALID_ARGS;
+    if (lab.energy < LAB_BOOST_ENERGY)
+        return ERR_NOT_ENOUGH_RESOURCES;
     let gotLab = lab.mineralAmount || 0;
 
     this.memory.boostLabID = lab.id;
