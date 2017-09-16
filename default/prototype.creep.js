@@ -478,7 +478,10 @@ Creep.prototype.gotoSource = function() {
     
     let res;
     if(source.structureType && (source.structureType == STRUCTURE_CONTAINER || source.structureType == STRUCTURE_STORAGE || source.structureType == STRUCTURE_LINK)) {
-        res = this.withdraw(source, RESOURCE_ENERGY);
+        if (_.sum(this.carry) != this.carry.energy && source.structureType == STRUCTURE_STORAGE)
+            res = this.transfer(source, _.filter(_.keys(this.carry), t => t != "energy")[0]);
+        else
+            res = this.withdraw(source, RESOURCE_ENERGY);
     } else if (source.resourceType && source.resourceType == RESOURCE_ENERGY) {
         res = this.pickup(source);
         if (!res) {
