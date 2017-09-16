@@ -319,10 +319,13 @@ Room.prototype.linkAction = function () {
     return OK;
 }
 
-Room.prototype.getStoragedLink = function() {
+Room.prototype.getStoragedLink = function(ret) {
     let link = _.filter(this.memory.structures[STRUCTURE_LINK], l => l.storaged)[0];
-    if (link)
+    if (link) {
+        if (ret)
+            ret.object = link;
         return Game.getObjectById(link.id);
+    }
     
     return null;
 }
@@ -529,8 +532,11 @@ Room.prototype.updateStructures = function() {
 
             if (s.structureType == STRUCTURE_LINK) {
                 elem.minersFrom = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.energyID == s.id);
-                if (room.storage && s.pos.inRangeTo(room.storage.pos, 2))
+                if (room.storage && s.pos.inRangeTo(room.storage.pos, 2)) {
                     elem.storaged = 1;
+                    elem.betweenPos = _.filter( utils.getRangedPlaces(null, room.storage.pos, 1), p => p.isNearTo(s.pos) )[0];
+                    costs.set(elem.betweenPos.x, elem.betweenPos.y, 100);
+                }
             } else if (s.structureType == STRUCTURE_EXTRACTOR) {
                 elem.rangedPlaces = utils.getRangedPlaces(null, s.pos, 1);
                 let mineral = s.pos.lookFor(LOOK_MINERALS)[0];

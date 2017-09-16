@@ -2,48 +2,50 @@ var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var role = {
-    /** @param {Creep} creep **/
     run: function(creep) {
         if (!utils.checkInRoomAndGo(creep))
             return;
 
         if (creep.memory.cID === undefined) {
-            creep.memory.cID = creep.room.storage.id;
-        }
-        let container = Game.getObjectById(creep.memory.cID);
-        if(!container) {
-            console.log(creep.name + " has problem with getting container " + creep.memory.cID);
-            delete creep.memory.cID;
-            return;
-        }
-
-        if (creep.memory.energyID === undefined) {
-            let sources = container.pos.findInRange(FIND_STRUCTURES, 2, {filter: s => s.structureType == STRUCTURE_LINK});
-            if(!sources.length) {
-                console.log("Problem getting source for " + creep.name);
+            if (!creep.room.storage) {
+                console.log(creep.name + ": no storage in " + creep.room.name);
                 return;
             }
-            creep.memory.energyID = sources[0].id;
-        }
-        let source = Game.getObjectById(creep.memory.energyID);
-        if (!source) {
-            console.log(creep.name + " has problem with getting source " + creep.memory.energyID);
-            delete creep.memory.energyID;
-            return;
+            creep.memory.cID = creep.room.storage.id;
         }
         
-        if(creep.carry.energy == 0 && creep.memory.transfering) {
-            creep.memory.transfering = false;
-        } else if ((_.sum(creep.carry) == creep.carryCapacity || creep.carry.energy && !source.energy) && !creep.memory.transfering) {
-            creep.memory.transfering = true;
+        if (creep.memory.energyID === undefined) {
+            let ret = {};
+            let link = creep.room.getStoragedLink(ret);
+            if (!link || !("object" in ret)) {
+                console.log(creep.name + ": can't getStoragedLink in " + creep.room.name);
+                return;
+            }
+            creep.memory.energyID = link.id;
+            creep.memory.betweenPos = ret.object.betweenPos;
         }
-        
-        if(!creep.memory.transfering) {   
-            if(creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
-                creep.moveTo(source)
+
+        let betweenPos = new RoomPosition(creep.memory.betweenPos.x, creep.memory.betweenPos.y, creep.memory.betweenPos.roomName);
+        if (creep.pos.isEqualTo(betweenPos)) {
+            if(creep.carry.energy == 0 && creep.memory.transfering)
+                creep.memory.transfering = false;
+            else if ((_.sum(creep.carry) == creep.carryCapacity || creep.carry.energy && !source.energy) && !creep.memory.transfering)
+                creep.memory.transfering = true;
+            
+            if(creep.memory.transfering) {
+                if (creep.carry.energy)
+                    creep.transfer(creep.room.storage, RESOURCE_ENERGY);
+            } else {
+                let link = Game.getObjectById(creep.memory.energyID);
+                if (!link) {
+                    console.log(creep.name + ": can't load link " + creep.memory.energyID);
+                    return;
+                }
+                if (link.energy)
+                    creep.withdraw(link, RESOURCE_ENERGY);
+            }
         } else {
-            if(creep.transfer(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
-                creep.moveTo(container);
+            creep.moveTo(betweenPos);
         }
 	},
 	
