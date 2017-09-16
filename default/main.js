@@ -431,7 +431,7 @@ function getRoomLimits (room, creepsCount) {
     let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 1000);
     let transportAmount = _.sum(_.filter(Memory.transportRequests, r => Game.getObjectById(r.toID).room.name == room.name), r => r.amount);
     //let builderCount = (builds ? (builds > 5 && room.controller.level >= 8 ? 3 : (builds < 5 ? _.ceil(builds/2) : 3)) : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)) + (repairs > 20 && room.controller.level >= 8 ? 2 : 0);
-    let builderWorkCount = utils.clamp( _.ceil(room.getBuilderTicks() / (CREEP_LIFE_TIME * 0.6)), 0, 100 );
+    let builderWorkCount = utils.clamp( _.min([_.ceil(room.getBuilderTicks() / (CREEP_LIFE_TIME * 0.6)), _.ceil(memory.energy / (2.5 * CREEP_LIFE_TIME * 0.6) ) ]), 0, 100 );
     
     let limits = [];
     limits.push({
