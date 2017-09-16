@@ -525,8 +525,10 @@ Room.prototype.updateStructures = function() {
                         elem.betweenPos = s.pos;
                     else
                         elem.betweenPos = _.filter( utils.getRangedPlaces(null, elem.source.pos, 1), p => p.isNearTo(s.pos) )[0];
-                    if (elem.betweenPos)
+                    if (elem.betweenPos) {
                         elem.source.pair = (elem.source.pair || 0) + 1;
+                        costs.set(elem.betweenPos.x, elem.betweenPos.y, 100);
+                    }
                 }
             }
 
