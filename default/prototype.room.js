@@ -460,6 +460,11 @@ Room.prototype.updateStructures = function() {
     for (let key of _.filter(Object.keys(memory.needRoads), r => memory.needRoads[r].id ))
         memory.needRoads[key].id = null; // Renew id's, if hostile or manual removed object
 
+    if (this.storage && this.storage.store.energy > REPAIR_ENERGY_LIMIT)
+        memory.repairLimit = REPAIR_LIMIT_HIGH;
+    else if (!("repairLimit" in memory) || this.storage && this.storage.store.energy < 0.8*REPAIR_ENERGY_LIMIT)
+        memory.repairLimit = REPAIR_LIMIT;
+
     this.find(FIND_STRUCTURES).forEach( function(s) {
         let elem;
         if (s.structureType == STRUCTURE_KEEPER_LAIR) {
@@ -732,11 +737,6 @@ Room.prototype.updateStructures = function() {
                 }
             }
         }
-
-        if (this.storage && this.storage.store.energy > REPAIR_ENERGY_LIMIT)
-            memory.repairLimit = REPAIR_LIMIT_HIGH;
-        else if (!("repairLimit" in memory) || this.storage && this.storage.store.energy < 0.8*REPAIR_ENERGY_LIMIT)
-            memory.repairLimit = REPAIR_LIMIT;
     }
 
     memory.structuresTime = Game.time;
