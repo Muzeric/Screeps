@@ -238,7 +238,7 @@ profiler.wrap(function() {
             skipSpawnNames[spawn.name] = 1;
             
             //let newName = need.role;
-            console.log(newName + " (arg: " + JSON.stringify(need.arg) + ") BURNING by " + spawn.room.name + '.' + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + leftEnergy + ":" + (energy - leftEnergy) + ") " + body.length + ":[" + body + "]");
+            console.log("BURNING " + newName + " (arg: " + JSON.stringify(need.arg) + ") by " + spawn.name + " for " + need.roomName + ", energy (" + energy + "->" + (energy - leftEnergy) + ") " + body.length + ":" + JSON.stringify(_.countBy(body)) );
         }
     }
     global.cache.stat.addCPU("create");
