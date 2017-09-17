@@ -147,19 +147,19 @@ Room.prototype.balanceStore = function () {
             let est = global.cache.queueTransport.getStoreWithReserved(object, rt) - balanceMax;
             //console.log(`${this.name}: has ${store[rt]} of ${rt} and est = ${est}`);
             for (let room of _.sortBy(Game.rooms, r => Game.map.getRoomLinearDistance(r.name, thisRoomName))) {
-                if (est <= 0)
+                if (est < BALANCE_TRANSPORT_MIN)
                     break;
                 let roomName = room.name;
                 if ((roomName == this.name && object.structureType == STRUCTURE_STORAGE) || !room.controller || !room.controller.my || !room.storage || global.cache.queueTransport.getStoreWithReserved(room.storage, rt) >= BALANCE_MIN)
                     continue;
                 let amount = _.min([est, BALANCE_MIN - global.cache.queueTransport.getStoreWithReserved(room.storage, rt)]);
-                if (amount > 0) {
+                if (amount >= BALANCE_TRANSPORT_MIN) {
                     console.log(`${this.name}: balance ${amount} of ${rt} to ${room.name}`);
                     global.cache.queueTransport.addRequest(object, room.storage, rt, amount);
                     est -= amount;
                 }
             }
-            if (est > 0 && this.terminal && this.terminal.id != object.id) {
+            if (est >= BALANCE_TRANSPORT_MIN && this.terminal && this.terminal.id != object.id) {
                 console.log(`${this.name}: balance other ${rt} to terminal`);
                 global.cache.queueTransport.addRequest(object, this.terminal, rt, _.min([est, this.terminal.storeCapacity - _.sum(this.terminal.store)]));
             }
