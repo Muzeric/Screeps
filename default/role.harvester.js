@@ -11,11 +11,11 @@ var role = {
 	        creep.memory.errors = 0;
 	        creep.memory.energyID = null;
 	    }
-	    
+        
+        let target = getTarget(creep, creep.carry.energy);
 	    if(!creep.memory.transfering) {
-            creep.findSourceAndGo();
+            creep.findSourceAndGo(target && target.structureType == STRUCTURE_STORAGE);
         } else {
-            let target = getTarget(creep, creep.carry.energy);
             if(!target)
                 return;
             

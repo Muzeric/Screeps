@@ -329,7 +329,7 @@ Creep.prototype.attackNearHostile = function(range, mark) {
     return OK;
 }
 
-Creep.prototype.findSourceAndGo = function () {
+Creep.prototype.findSourceAndGo = function (exceptStorage) {
     if (this.room.memory.type == 'lair' && !this.goFromKeepers())
         return;
         
@@ -342,13 +342,13 @@ Creep.prototype.findSourceAndGo = function () {
         (this.room.name == this.memory.roomName && !this.memory.energyID) ||
         (this.room.name != this.memory.roomName && !this.memory.energyID && !this.memory.bookedEnergyID)
     ) {
-        this.findSource();
+        this.findSource(exceptStorage);
     }
 
     this.gotoSource();
 }
 
-Creep.prototype.findSource = function () {
+Creep.prototype.findSource = function (exceptStorage) {
     let memory = Memory.rooms[this.memory.roomName];
     if (!memory) {
         console.log(this.name + ": findSource have no memory of " + this.memory.roomName);
@@ -359,7 +359,7 @@ Creep.prototype.findSource = function () {
 
     let targets = _.filter(
         (memory.structures[STRUCTURE_CONTAINER] || []).concat( 
-        (memory.structures[STRUCTURE_STORAGE] || []), 
+        (exceptStorage ? [] : memory.structures[STRUCTURE_STORAGE] || []), 
         (memory.structures[STRUCTURE_SOURCE] || []),
         (memory.resources || []) ),
      t => t.energy);
