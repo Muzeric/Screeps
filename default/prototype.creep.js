@@ -482,7 +482,7 @@ Creep.prototype.gotoSource = function(exceptStorage) {
             res = this.transfer(source, _.filter(_.keys(this.carry), t => t != "energy")[0]);
         } else {
             if (exceptStorage && source.structureType == STRUCTURE_STORAGE)
-                res = this.isNearTo(source) ? OK : ERR_NOT_IN_RANGE;
+                res = this.pos.isNearTo(source) ? OK : ERR_NOT_IN_RANGE;
             else
                 res = this.withdraw(source, RESOURCE_ENERGY);
         }
