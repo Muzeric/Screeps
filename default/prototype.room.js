@@ -235,6 +235,9 @@ Room.prototype.updateResources = function() {
                 memory.store[s.mineralType] = (memory.store[s.mineralType] || 0) + s.mineralAmount;
         } else if (elem.structureType == STRUCTURE_POWER_SPAWN) {
             elem.power = s.power;
+        } else if (elem.structureType == STRUCTURE_NUKER) {
+            elem.ghodium = s.ghodium;
+            memory.store["ghodium"] = (memory.store["ghodium"] || 0) + (s.ghodium || 0);
         }
 
         if (s.structureType == STRUCTURE_SPAWN && s.hits < s.hitsMax * 0.5 && s.my && !room.controller.safeMode && !room.controller.safeModeCooldown && room.controller.safeModeAvailable) {
@@ -553,6 +556,14 @@ Room.prototype.updateStructures = function() {
                 elem.mineralCapacity = s.mineralCapacity;
             } else if (s.structureType == STRUCTURE_POWER_SPAWN) {
                 elem.powerCapacity = s.powerCapacity;
+            } else if (s.structureType == STRUCTURE_NUKER) {
+                if (room.storage) {
+                    let stored = global.cache.queueTransport.getStoreWithReserved(s, "ghodium");
+                    let able = global.cache.queueTransport.getStoreWithReserved(room.storage, "ghodium");
+                    let need = s.ghodiumCapacity - stored;
+                    if (need > 0 && able >= need)
+                        global.cache.queueTransport.addRequest(room.storage, s, "ghodium", need);
+                }
             }
 
             if (s.structureType != STRUCTURE_CONTAINER)
