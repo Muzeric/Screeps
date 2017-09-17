@@ -80,7 +80,7 @@ var role = {
         _.filter(Game.rooms, r => r.memory.type == "my" && r.memory.pointPos && r.getPathToRoom(creep.memory.roomName) > 0 && r.getPathToRoom(creep.memory.roomName) <= 3*50 && Game.map.getRoomLinearDistance(r.name, creep.memory.roomName) <= 3).forEach( function(r) {
             let carryParts = _.sum( _.map( _.filter(Game.creeps, c => c.memory.role == "longharvester" && c.memory.containerRoomName == r.name), c => _.sum(c.body, p => p.type == CARRY) ) );
             let carryDistance = r.getPathToRoom(creep.memory.roomName) || Game.map.getRoomLinearDistance(r.name, creep.memory.roomName) * 50 || 0;
-            let cost = (carryParts + carryDistance / 3) / r.energyCapacityAvailable + (r.memory.energy > MAX_ENERGY_BY_LONGHARVEST ? 50 : 0);
+            let cost = (carryParts + carryDistance / 3) / r.energyCapacityAvailable + (r.memory.freeEnergy > MAX_ENERGY_BY_LONGHARVEST ? 50 : 0);
             if (minCost === undefined || cost < minCost) {
                 res = r.name;
                 minCost = cost;

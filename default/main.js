@@ -426,12 +426,12 @@ function getRoomLimits (room, creepsCount) {
     let countHarvester = _.max([unminerSources, _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 15)]);
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
     let unStoragedLinks = (room.getUnStoragedLinks() || []).length;
-    let extraUpgraders = utils.clamp( _.floor(memory.energy / UPGRADERS_EXTRA_ENERGY), 0, 4);
+    let extraUpgraders = utils.clamp( _.floor(memory.freeEnergy / UPGRADERS_EXTRA_ENERGY), 0, 4);
     let pairedExtractor = room.getPairedExtractor(1);
     let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 1000);
     let transportAmount = _.sum(_.filter(Memory.transportRequests, r => Game.getObjectById(r.toID).room.name == room.name), r => r.amount);
     //let builderCount = (builds ? (builds > 5 && room.controller.level >= 8 ? 3 : (builds < 5 ? _.ceil(builds/2) : 3)) : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)) + (repairs > 20 && room.controller.level >= 8 ? 2 : 0);
-    let builderWorkCount = utils.clamp( _.min([_.ceil(room.getBuilderTicks() / (CREEP_LIFE_TIME * 0.6)), _.ceil(memory.energy / (2.5 * CREEP_LIFE_TIME * 0.6) ) ]), 0, 100 );
+    let builderWorkCount = utils.clamp( _.min([_.ceil(room.getBuilderTicks() / (CREEP_LIFE_TIME * 0.6)), _.ceil(memory.freeEnergy / (2.5 * CREEP_LIFE_TIME * 0.6) ) ]), 0, 100 );
     
     let limits = [];
     limits.push({

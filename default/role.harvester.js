@@ -121,7 +121,7 @@ function setTarget (creep, estEnergy) {
     for(let target of targets) {
         if (target.structureType == STRUCTURE_TERMINAL && target.energy > MIN_TERMINAL_ENERGY)
             continue;
-        else if (target.structureType == STRUCTURE_NUKER && creep.room.memory.energy < REPAIR_ENERGY_LIMIT)
+        else if (target.structureType == STRUCTURE_NUKER && creep.room.memory.freeEnergy < REPAIR_ENERGY_LIMIT)
             continue;
         let wantEnergy = target.energyCapacity - target.energy;
         let cpath = creep.pos.getRangeTo(target.pos.x, target.pos.y);
