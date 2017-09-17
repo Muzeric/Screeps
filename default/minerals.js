@@ -158,10 +158,10 @@ var minerals = {
                 let in1 = storage.store[elem.inputTypes[0]] || 0;
                 let in2 = storage.store[elem.inputTypes[1]] || 0;
                 let out = storage.store[outputType] || 0;
-                if (in1 < BALANCE_LAB_MIN || in2 < BALANCE_LAB_MIN || out >= BALANCE_MIN)
+                let amount = _.min([BALANCE_MIN - out, in1, in2, LAB_REQUEST_AMOUNT]);
+                if (amount < BALANCE_LAB_MIN)
                     continue;
                 
-                let amount = _.min([BALANCE_MIN - out, in1, in2, LAB_REQUEST_AMOUNT]);
                 console.log(`${roomName}: start request for ${amount} of ${outputType}`);
                 
                 room.memory.labRequest = {
