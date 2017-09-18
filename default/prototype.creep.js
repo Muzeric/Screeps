@@ -581,17 +581,19 @@ Creep.prototype.boost = function (bodyPart, skill) {
         return ERR_BUSY;
     } else if (gotLab >= LAB_BOOST_MINERAL && this.pos.isNearTo(lab)) {
         let res = lab.boostCreep(this);
-        console.log(this.name + ": BOOSTED (" + res + ")");
+        console.log(this.room.name + ". " + this.name + ": BOOSTED (" + res + ")");
         if (res == OK)
             this.memory.boostLabID = null;
     } else if (got >= LAB_BOOST_MINERAL && (got >= need || free < LAB_BOOST_MINERAL || able < LAB_BOOST_MINERAL)) {
         if (this.transfer(lab, bt) == ERR_NOT_IN_RANGE)
             this.moveTo(lab);
-        console.log(this.name + ": BOOSTing, transfer");
+        if (Game.time % 5 == 0)
+            console.log(this.room.name + ". " + this.name + ": BOOSTing, transfer");
     } else if (able >= LAB_BOOST_MINERAL && free >= LAB_BOOST_MINERAL) {
         if (this.withdraw(storage, bt, _.floor( _.min([need - got, free, able]) / LAB_BOOST_MINERAL) * LAB_BOOST_MINERAL ) == ERR_NOT_IN_RANGE)
             this.moveTo(storage);
-        console.log(this.name + ": BOOSTing, withdraw");
+        if (Game.time % 5 == 0)
+            console.log(this.room.name + ". " + this.name + ": BOOSTing, withdraw");
     } else {
         //console.log(this.name + ": BOOSTing, no resources");
         this.memory.boostLabID = null;

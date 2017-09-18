@@ -270,9 +270,9 @@ var queue = {
     status: function () {
         _.sortBy(Memory.transportRequests, r => r.fromRoomName).forEach(r => 
             console.log(
-                "[" + r.id + "] \t" + r.fromRoomName + " -> " + r.toRoomName + "\t" + r.amount + 
-                "\tof " + r.resourceType + "\tfor " + (Game.time - r.createTime) + 
-                " sec\tby " + (Game.getObjectById(r.creepID) || {}).name + " called " + r.caller
+                r.id + "\t" + r.amount + "\t" + r.resourceType + "\t" + r.fromRoomName + " -> " + r.toRoomName + 
+                "\tfor " + (Game.time - r.createTime) + " sec\tby " +
+                (Game.getObjectById(r.creepID) || {}).name + "\tcalled " + r.caller
         ));
     },
 };
