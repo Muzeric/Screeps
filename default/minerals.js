@@ -167,6 +167,8 @@ var minerals = {
                     return b.length - a.length;
             }) ) {
                 let extra = cache[outputType] || 0;
+                if (extra > BALANCE_MAX - BALANCE_MIN)
+                    extra = BALANCE_MAX - BALANCE_MIN;
                 let elem = this.library[outputType];
                 let in1 = storage.store[elem.inputTypes[0]] || 0;
                 let in2 = storage.store[elem.inputTypes[1]] || 0;
