@@ -55,8 +55,8 @@ var queue = {
         Memory.transportRequests[req_id] = {
             fromID: req_from.id,
             toID: req_to.id,
-            fromRoomName: req_from.pos.roomName + "(" + req_from.structureType + ")",
-            toRoomName: req_to.pos.roomName + "(" + req_to.structureType + ")",
+            fromRoomName: req_from.pos.roomName + " " + req_from.structureType,
+            toRoomName: req_to.pos.roomName + " " + req_to.structureType,
             resourceType: req_resourceType,
             amount: req_amount,
             id: req_id,
@@ -65,10 +65,10 @@ var queue = {
             createTime: Game.time,
             creepID: null,
             state: 0,
-            caller: addRequest.caller,
+            caller: this.addRequest.caller,
         };
         //console.log("queueTransport.addRequest: ADDED: " + JSON.stringify(Memory.transportRequests[req_id]));
-        console.log(`transport ADDED: ${req_id}. ${req_from.pos.roomName} (${req_from.structureType}) -> ${req_to.pos.roomName} (${req_to.structureType}) ${req_amount} of ${req_resourceType}`);
+        console.log(`transport ADDED: ${req_id}. ${req_from.pos.roomName} ${req_from.structureType} -> ${req_to.pos.roomName} ${req_to.structureType} ${req_amount} of ${req_resourceType}`);
 
         return req_id;
     },
