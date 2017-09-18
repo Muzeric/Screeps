@@ -24,6 +24,7 @@ profiler.wrap(function() {
     global.cache.creeps = {};
     global.cache.objects = {};
     global.cache.boostingLabs = {};
+    global.cache.targets = {};
     
     var moveErrors = {};
     global.cache.roomNames = _.filter( _.uniq( [].concat( 
@@ -44,10 +45,14 @@ profiler.wrap(function() {
             //console.log(name + " DEAD (" + Memory.creeps[name].roomName + ")");
             global.cache.stat.die(name);
             delete Memory.creeps[name];
+            continue;
         } else if (Game.creeps[name].memory.errors > 0) {
             console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
             moveErrors[Game.creeps[name].room.name] = 1;
         }
+        let memory = Memory.creeps[name];
+        if (memory.targetID)
+            global.cache.targets[memory.targetID] = (global.cache.targets[memory.targetID] || 0) + 1;
     }
 
     global.cache.stat.addCPU("memory");

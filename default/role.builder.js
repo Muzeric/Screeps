@@ -83,14 +83,19 @@ function getBuilderTargets (creep, room) {
     let targetID;
     for (let target of targets) {
         let pos = new RoomPosition(target.pos.x, target.pos.y, target.pos.roomName);
+        let creeps = global.cache.targets[target.id] || 0;
         let cost = ("hits" in target ? target.hits / 1000 : 0) + (creep.pos.getRangeTo(pos) || 0) + (target.constructionStructureType == STRUCTURE_SPAWN ? -100 : (target.constructionStructureType == STRUCTURE_EXTENSION ? -10 : 0));
         if (target.structureType == STRUCTURE_RAMPART && target.hits && target.hits < REPAIR_TOWER_LIMIT)
             cost -= 50;
+        if (creeps > 1)
+            cost += 50 * creeps;
         if (minCost === undefined || cost < minCost) {
             targetID = target.id;
             minCost = cost;
         }
     }
+    if (targetID)
+        global.cache.targets[targetID] = (global.cache.targets[targetID] || 0) + 1;
 
     return targetID;
 }
