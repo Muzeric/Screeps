@@ -51,6 +51,7 @@ var queue = {
             console.log(`queueTransport.addRequest: req_id (${req_id}) already exists`);
             return null;
         }
+        let caller = (new Error()).stack.split('\n')[3].trim();
         
         Memory.transportRequests[req_id] = {
             fromID: req_from.id,
@@ -65,10 +66,10 @@ var queue = {
             createTime: Game.time,
             creepID: null,
             state: 0,
-            caller: this.addRequest.caller,
+            caller,
         };
         //console.log("queueTransport.addRequest: ADDED: " + JSON.stringify(Memory.transportRequests[req_id]));
-        console.log(`transport ADDED: ${req_id}. ${req_from.pos.roomName} ${req_from.structureType} -> ${req_to.pos.roomName} ${req_to.structureType} ${req_amount} of ${req_resourceType}`);
+        console.log(`transport ADDED: ${req_id}. ${req_from.pos.roomName} ${req_from.structureType} -> ${req_to.pos.roomName} ${req_to.structureType} ${req_amount} of ${req_resourceType} called ${caller}`);
 
         return req_id;
     },
@@ -269,7 +270,7 @@ var queue = {
     status: function () {
         _.sortBy(Memory.transportRequests, r => r.fromRoomName).forEach(r => 
             console.log(
-                "[" + r.id + "] \t" + r.fromRoomName + "\t-> " + r.toRoomName + "\t" + r.amount + 
+                "[" + r.id + "] \t" + r.fromRoomName + " -> " + r.toRoomName + "\t" + r.amount + 
                 "\tof " + r.resourceType + "\tfor " + (Game.time - r.createTime) + 
                 " sec\tby " + (Game.getObjectById(r.creepID) || {}).name + " called by " + r.caller
         ));
