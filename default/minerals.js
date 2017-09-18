@@ -159,18 +159,16 @@ var minerals = {
             let cache = {};
             for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
                 let extra = cache[outputType] || 0;
-                if (extra) {
-                    console.log("extra: " + extra + " of " + outputType);
-                    extra = 0;
-                }
                 let elem = this.library[outputType];
                 let in1 = storage.store[elem.inputTypes[0]] || 0;
                 let in2 = storage.store[elem.inputTypes[1]] || 0;
                 let needOut = BALANCE_MIN - (storage.store[outputType] || 0) + extra;
                 let amount = _.min([needOut, in1, in2, LAB_REQUEST_AMOUNT]);
                 if (amount < BALANCE_LAB_MIN) {
-                    cache[elem.inputTypes[0]] = (cache[elem.inputTypes[0]] || 0) + needOut;
-                    cache[elem.inputTypes[1]] = (cache[elem.inputTypes[1]] || 0) + needOut;
+                    if (needOut > 0) {
+                        cache[elem.inputTypes[0]] = (cache[elem.inputTypes[0]] || 0) + needOut;
+                        cache[elem.inputTypes[1]] = (cache[elem.inputTypes[1]] || 0) + needOut;
+                    }
                     continue;
                 }
 
