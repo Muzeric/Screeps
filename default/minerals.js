@@ -157,7 +157,15 @@ var minerals = {
         }
         if (!room.memory.labRequest) {
             let cache = {};
-            for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
+            //for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
+            for (let outputType of _.keys(global.cache.minerals.library).sort(function(a, b) {
+                if(a == "ZK" || a == "UL") 
+                    return 1; 
+                else if (b == "ZK" && b == "UL") 
+                    return -1; 
+                else 
+                    return b.length - a.length;
+            }) ) {
                 let extra = cache[outputType] || 0;
                 let elem = this.library[outputType];
                 let in1 = storage.store[elem.inputTypes[0]] || 0;
