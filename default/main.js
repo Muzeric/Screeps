@@ -104,11 +104,6 @@ module.exports.loop = function () {
             Game.notify(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
         }
         
-        if (creep.memory.boostLabID) {
-            global.cache.boostingLabs[creep.memory.boostLabID] = global.cache.boostingLabs[creep.memory.boostLabID] || {};
-            global.cache.boostingLabs[creep.memory.boostLabID][creep.memory.boostResourceType] = 1;
-        }
-        
         if (!creepsCPUStat[creep.memory.role])
             creepsCPUStat[creep.memory.role] = {"cpu" : 0, "sum" : 0};
         

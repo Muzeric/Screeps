@@ -526,8 +526,6 @@ Creep.prototype.checkInRoomAndGo = function (opts) {
 }
 
 Creep.prototype.boost = function (bodyPart, skill) {
-    this.memory.boostLabID = null;
-
     let bt = global.cache.minerals.getBoostResource(bodyPart, skill);
     if (!bt)
         return ERR_INVALID_ARGS;
@@ -572,18 +570,15 @@ Creep.prototype.boost = function (bodyPart, skill) {
         return ERR_NOT_ENOUGH_RESOURCES;
     let gotLab = lab.mineralAmount || 0;
 
-    this.memory.boostLabID = lab.id;
-    this.memory.boostResourceType = bt;
     if (got < need && got + free < need && _.sum(this.carry) != got) {
-        this.memory.boostLabID = null;
         return ERR_FULL;
     } else if (lab.mineralType && lab.mineralType != bt) {
+        global.cache.boostingLabs[lab.id] = global.cache.boostingLabs[lab.id] || {};
+        global.cache.boostingLabs[lab.id][bt] = 1;
         return ERR_BUSY;
     } else if (gotLab >= LAB_BOOST_MINERAL && this.pos.isNearTo(lab)) {
         let res = lab.boostCreep(this);
         console.log(this.room.name + ". " + this.name + ": BOOSTED (" + res + ")");
-        if (res == OK)
-            this.memory.boostLabID = null;
     } else if (got >= LAB_BOOST_MINERAL && (got >= need || free < LAB_BOOST_MINERAL || able < LAB_BOOST_MINERAL)) {
         if (this.transfer(lab, bt) == ERR_NOT_IN_RANGE)
             this.moveTo(lab);
@@ -596,10 +591,11 @@ Creep.prototype.boost = function (bodyPart, skill) {
             console.log(this.room.name + ". " + this.name + ": BOOSTing, withdraw");
     } else {
         //console.log(this.name + ": BOOSTing, no resources");
-        this.memory.boostLabID = null;
         return ERR_NOT_ENOUGH_RESOURCES;
     }
 
+    global.cache.boostingLabs[lab.id] = global.cache.boostingLabs[lab.id] || {};
+    global.cache.boostingLabs[lab.id][bt] = 1;
     return OK;
 
 }
