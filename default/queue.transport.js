@@ -272,7 +272,7 @@ var queue = {
             console.log(
                 "[" + r.id + "] \t" + r.fromRoomName + " -> " + r.toRoomName + "\t" + r.amount + 
                 "\tof " + r.resourceType + "\tfor " + (Game.time - r.createTime) + 
-                " sec\tby " + (Game.getObjectById(r.creepID) || {}).name + " called by " + r.caller
+                " sec\tby " + (Game.getObjectById(r.creepID) || {}).name + " called " + r.caller
         ));
     },
 };
