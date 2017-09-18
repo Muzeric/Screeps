@@ -109,7 +109,8 @@ Creep.prototype.trySubPath = function(targetPos, opts) {
 
     let pf = travel.getPath(this.pos, subpath, null, 1, this.room.memory.pathCache, 300, opts.ignoreHostiled);
     if (pf.incomplete) {
-        console.log(this.name + ": moveTo incomplete sub path from " + this.pos.getKey(1) + " to " + JSON.stringify(subpath) + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+        //console.log(this.name + ": moveTo incomplete sub path from " + this.pos.getKey(1) + " to " + JSON.stringify(subpath) + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+        console.log(this.name + ": moveTo incomplete sub path from " + this.pos.getKey(1) + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
         return this.move(Math.floor(Math.random() * 8) + 1);
         //return ERR_NO_PATH;
     } else if (!pf.path.length) {
