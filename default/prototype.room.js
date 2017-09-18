@@ -214,6 +214,7 @@ Room.prototype.updateResources = function() {
         if (!s) {
             console.log(this.name + ": no resource object " + elem.id);
             elem.energy = 0;
+            memory.structuresTime = 0;
             continue;
         }
         elem.energy = "energy" in s ? s.energy : ("store" in s ? s.store[RESOURCE_ENERGY] : 0);
