@@ -568,14 +568,10 @@ Creep.prototype.boost = function (bodyPart, skill) {
         return ERR_INVALID_ARGS;
     if (lab.energy < LAB_BOOST_ENERGY)
         return ERR_NOT_ENOUGH_RESOURCES;
-    let gotLab = lab.mineralAmount || 0;
+    let gotLab = lab.mineralType == bt ? (lab.mineralAmount || 0) : 0;
 
     if (got < need && got + free < need && _.sum(this.carry) != got) {
         return ERR_FULL;
-    } else if (lab.mineralType && lab.mineralType != bt) {
-        global.cache.boostingLabs[lab.id] = global.cache.boostingLabs[lab.id] || {};
-        global.cache.boostingLabs[lab.id][bt] = 1;
-        return ERR_BUSY;
     } else if (gotLab >= LAB_BOOST_MINERAL && this.pos.isNearTo(lab)) {
         let res = lab.boostCreep(this);
         console.log(this.room.name + ". " + this.name + ": BOOSTED (" + res + ")");
