@@ -55,8 +55,8 @@ var queue = {
         Memory.transportRequests[req_id] = {
             fromID: req_from.id,
             toID: req_to.id,
-            fromRoomName: req_from.pos.roomName,
-            toRoomName: req_to.pos.roomName,
+            fromRoomName: req_from.pos.roomName + "(" + req_from.structureType + ")",
+            toRoomName: req_to.pos.roomName + "(" + req_to.structureType + ")",
             resourceType: req_resourceType,
             amount: req_amount,
             id: req_id,
@@ -65,6 +65,7 @@ var queue = {
             createTime: Game.time,
             creepID: null,
             state: 0,
+            caller: addRequest.caller,
         };
         //console.log("queueTransport.addRequest: ADDED: " + JSON.stringify(Memory.transportRequests[req_id]));
         console.log(`transport ADDED: ${req_id}. ${req_from.pos.roomName} (${req_from.structureType}) -> ${req_to.pos.roomName} (${req_to.structureType}) ${req_amount} of ${req_resourceType}`);
@@ -266,10 +267,11 @@ var queue = {
     },
 
     status: function () {
-        _.sortBy(Memory.transportRequests, r => Game.getObjectById(r.fromID).pos.roomName).forEach(r => 
+        _.sortBy(Memory.transportRequests, r => r.fromRoomName).forEach(r => 
             console.log(
-                "[" + r.id + "] \t" + Game.getObjectById(r.fromID).pos + "\t-> " + Game.getObjectById(r.toID).pos +
-                "\t" + r.amount + "\tof " + r.resourceType + "\tfor " + (Game.time - r.createTime) + " sec\tby " +  r.creepID + " - " + (Game.getObjectById(r.creepID) || {}).name
+                "[" + r.id + "] \t" + r.fromRoomName + "\t-> " + r.toRoomName + "\t" + r.amount + 
+                "\tof " + r.resourceType + "\tfor " + (Game.time - r.createTime) + 
+                " sec\tby " + (Game.getObjectById(r.creepID) || {}).name + " called by " + r.caller
         ));
     },
 };

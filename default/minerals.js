@@ -122,6 +122,9 @@ var minerals = {
     clearLabs: function (labs, storage) {
         for (let lab of labs) {
             if (lab.mineralType && lab.mineralAmount) {
+                if (lab.id in global.cache.boostingLabs && lab.mineralType in global.cache.boostingLabs[lab.id])
+                    continue;
+
                 let stored = global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType);
                 if (stored > 0)
                     global.cache.queueTransport.addRequest(lab, storage, lab.mineralType, stored);
