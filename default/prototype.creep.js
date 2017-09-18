@@ -561,7 +561,7 @@ Creep.prototype.boost = function (bodyPart, skill) {
     let need = LAB_BOOST_MINERAL * unboostedCount;
     let got = this.carry[bt] || 0;
     let free = this.carryCapacity - _.sum(this.carry);
-    let able = storage.store[bt];
+    let able = storage.store[bt] || 0;
     
     let lab = Game.getObjectById(labs[0].id);
     if (!lab)
@@ -592,6 +592,6 @@ Creep.prototype.boost = function (bodyPart, skill) {
 
     global.cache.boostingLabs[lab.id] = global.cache.boostingLabs[lab.id] || {};
     global.cache.boostingLabs[lab.id][bt] = 1;
-    return OK;
 
+    return OK;
 }
