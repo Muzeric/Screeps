@@ -198,7 +198,8 @@ var minerals = {
             if ((lab.mineralType == inputType || !lab.mineralType) && futureAmount < request.amount) {
                 if (transportableAmount < request.amount - futureAmount) {
                     room.memory.labRequest = null;
-                    global.cache.queueTransport.addRequest(lab, storage, inputType, futureAmount);
+                    return null;
+                    //global.cache.queueTransport.addRequest(lab, storage, inputType, futureAmount);
                 } else {
                     global.cache.queueTransport.addRequest(storage, lab, inputType, request.amount - futureAmount);
                 }
