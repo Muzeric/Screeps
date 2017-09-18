@@ -23,7 +23,7 @@ profiler.wrap(function() {
     global.cache.wantEnergy = {};
     global.cache.creeps = {};
     global.cache.objects = {};
-    global.cache.boostingLabs = [];
+    global.cache.boostingLabs = {};
     
     var moveErrors = {};
     global.cache.roomNames = _.filter( _.uniq( [].concat( 
@@ -99,8 +99,10 @@ profiler.wrap(function() {
             Game.notify(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
         }
         
-        if (creep.memory.boostLabID)
-            global.cache.boostingLabs.push(creep.memory.boostLabID);
+        if (creep.memory.boostLabID) {
+            global.cache.boostingLabs[creep.memory.boostLabID] = global.cache.boostingLabs[creep.memory.boostLabID] || {};
+            global.cache.boostingLabs[creep.memory.boostLabID][creep.memory.boostResourceType] = 1;
+        }
         
         if (!creepsCPUStat[creep.memory.role])
             creepsCPUStat[creep.memory.role] = {"cpu" : 0, "sum" : 0};

@@ -572,6 +572,7 @@ Creep.prototype.boost = function (bodyPart, skill) {
     let gotLab = lab.mineralAmount || 0;
 
     this.memory.boostLabID = lab.id;
+    this.memory.boostResourceType = bt;
     if (got < need && got + free < need && _.sum(this.carry) != got) {
         this.memory.boostLabID = null;
         return ERR_FULL;

@@ -213,8 +213,8 @@ var minerals = {
         let lab1 = Game.getObjectById(inputLabs[0].id);
         let lab2 = Game.getObjectById(inputLabs[1].id);
         for (let lab of outputLabs) {
-            if (global.cache.boostingLabs.indexOf(lab.id) !== -1) {
-                if (lab.mineralAmount) {
+            if (lab.id in global.cache.boostingLabs) {
+                if (lab.mineralAmount && !(lab.mineralType in global.cache.boostingLabs[lab.id])) {
                     let stored = global.cache.queueTransport.getStoreWithReserved(lab, lab.mineralType);
                     if (stored > 0)
                         global.cache.queueTransport.addRequest(lab, storage, lab.mineralType, stored);
