@@ -22,7 +22,7 @@ module.exports.loop = function () {
     global.cache.wantCarry = {};
     global.cache.wantEnergy = {};
     global.cache.creeps = {};
-    global.cache.objects = {};
+    global.cache.objects = global.cache.objects || {};
     global.cache.boostingLabs = {};
     global.cache.targets = {};
     
