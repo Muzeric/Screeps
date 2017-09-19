@@ -257,15 +257,13 @@ var minerals = {
                 inputLabs[0].mineralAmount -= LAB_REACTION_AMOUNT;
                 inputLabs[1].mineralAmount -= LAB_REACTION_AMOUNT;
                 lab.mineralAmount -= LAB_REACTION_AMOUNT;
-                if (request.amount <= 0)
+                if (request.amount <= 0) {
                     room.memory.labRequest = null;
+                    break;
+                }
             } else {
                 console.log(`runLabs: ${lab3.id}.runReaction(${lab1.id},${lab2.id}) with res=${res}`);
             }
-        }
-        if (!room.memory.labRequest) {
-            this.clearLabs(inputLabs, storage);
-            this.clearLabs(outputLabs, storage);
         }
     },
 };
