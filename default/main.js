@@ -431,7 +431,8 @@ function getRoomLimits (room, creepsCount) {
     let extraUpgraders = utils.clamp( _.floor(memory.freeEnergy / UPGRADERS_EXTRA_ENERGY), 0, 4);
     let pairedExtractor = room.getPairedExtractor(1);
     let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 1000);
-    let transportAmount = _.sum(_.filter(Memory.transportRequests, r => Game.getObjectById(r.toID).room.name == room.name), r => r.amount);
+    let transportAmountIn = _.sum(_.filter(Memory.transportRequests, r => r.fromRoomName == room.name && r.fromRoomName == r.toRoomName), r => r.amount);
+    let transportAmountOut = _.sum(_.filter(Memory.transportRequests, r => r.toRoomName == room.name && r.fromRoomName != r.toRoomName), r => r.amount);
     //let builderCount = (builds ? (builds > 5 && room.controller.level >= 8 ? 3 : (builds < 5 ? _.ceil(builds/2) : 3)) : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)) + (repairs > 20 && room.controller.level >= 8 ? 2 : 0);
     let builderWorkCount = utils.clamp( _.min([_.ceil(room.getBuilderTicks() / (CREEP_LIFE_TIME * 0.6)), _.ceil(memory.freeEnergy / (2.5 * CREEP_LIFE_TIME * 0.6) ) ]), 0, 100 );
     
@@ -508,10 +509,20 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 3150 : 3950,
     },{
             role : "transporter",
-            "count" : utils.clamp(_.ceil(transportAmount / TRANSPORTER_CREATING_AMOUNT), 0, 6),
+            "count" : transportAmountIn > 0 ? 1 : 0,
             "priority" : 8,
             "wishEnergy" : 1500,
             "maxEnergy" : 1500,
+            "arg": "in",
+            "countName" : "transporter-in",
+    },{
+            role : "transporter",
+            "count" : utils.clamp(_.ceil(transportAmountOut / TRANSPORTER_CREATING_AMOUNT), 0, 6),
+            "priority" : 8,
+            "wishEnergy" : 1500,
+            "maxEnergy" : 1500,
+            "arg": "out",
+            "countName" : "transporter-out",
     },{
             role : "scout",
             "count" : memory.scoutCount || 0,

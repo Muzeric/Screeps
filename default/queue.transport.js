@@ -99,13 +99,19 @@ var queue = {
         request.creepID = null;
     },
 
-    getRequest: function (creepID, creepPos) {
+    getRequest: function (creepID, creepPos, type) {
         if (creepID in this.indexByCreep)
             return this.loadRequest(this.indexByCreep[creepID]);
         
         let minCost;
         let minRequest;
-        for (let request of _.filter(Memory.transportRequests, r => !r.creepID)) {
+        for (let request of _.filter(Memory.transportRequests, r => 
+            !r.creepID && 
+            (
+                type == "in" && r.fromRoomName == creepPos.roomName && r.fromRoomName == r.toRoomName ||
+                type != "in" && r.fromRoomName != r.toRoomName
+            )
+        )) {
             let from = Game.getObjectById(request.fromID);
             let to = Game.getObjectById(request.toID);
             if (!from || !to || request.amount < 0) {
@@ -270,7 +276,7 @@ var queue = {
     },
 
     status: function () {
-        _.sortBy(Memory.transportRequests, r => r.fromRoomName).forEach(r => 
+        _.sortBy(Memory.transportRequests, r => r.fromRoomName || r.createTime).forEach(r => 
             console.log(
                 r.id + "\t" + r.amount + "\t" + r.resourceType + "\t" + 
                 r.fromRoomName + " " + r.fromStructureType + " -> " + r.toRoomName + " " + r.toStructureType + 
