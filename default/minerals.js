@@ -166,13 +166,14 @@ var minerals = {
                 else 
                     return b.length - a.length;
             }) ) {
+                let balanceMin = outputType.length == 5 ? BALANCE_MIN : 0;
                 let extra = cache[outputType] || 0;
-                if (extra > BALANCE_MAX - BALANCE_MIN)
-                    extra = BALANCE_MAX - BALANCE_MIN;
+                if (extra > BALANCE_MAX - balanceMin)
+                    extra = BALANCE_MAX - balanceMin;
                 let elem = this.library[outputType];
                 let in1 = storage.store[elem.inputTypes[0]] || 0;
                 let in2 = storage.store[elem.inputTypes[1]] || 0;
-                let needOut = BALANCE_MIN - (room.memory.store[outputType] || 0) + extra;
+                let needOut = balanceMin - (room.memory.store[outputType] || 0) + extra;
                 let amount = _.floor(_.min([needOut, in1, in2, LAB_REQUEST_AMOUNT]) / LAB_REACTION_AMOUNT) * LAB_REACTION_AMOUNT;
                 if (amount < BALANCE_LAB_MIN) {
                     if (needOut > 0) {
