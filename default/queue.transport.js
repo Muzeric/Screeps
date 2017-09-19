@@ -56,8 +56,10 @@ var queue = {
         Memory.transportRequests[req_id] = {
             fromID: req_from.id,
             toID: req_to.id,
-            fromRoomName: req_from.pos.roomName + " " + req_from.structureType,
-            toRoomName: req_to.pos.roomName + " " + req_to.structureType,
+            fromRoomName: req_from.pos.roomName,
+            fromStructureType: req_from.structureType,
+            toRoomName: req_to.pos.roomName,
+            toStructureType: req_to.structureType,
             resourceType: req_resourceType,
             amount: req_amount,
             id: req_id,
@@ -174,7 +176,7 @@ var queue = {
         request.amount -= amount;
         if (request.amount <= 0) {
             //console.log("queueTransport: finished request: " + JSON.stringify(request));
-            console.log(`transport DONE: ${reqID}. ${request.fromRoomName} -> ${request.toRoomName} ${request.put} of ${request.resourceType}`);
+            console.log(`transport DONE: ${reqID}. ${request.fromRoomName} ${request.fromStructureType} -> ${request.toRoomName} ${request.toStructureType} ${request.put} of ${request.resourceType}`);
             delete this.indexByCreep[request.creepID];
             delete Memory.transportRequests[reqID];
             return null;
@@ -270,7 +272,8 @@ var queue = {
     status: function () {
         _.sortBy(Memory.transportRequests, r => r.fromRoomName).forEach(r => 
             console.log(
-                r.id + "\t" + r.amount + "\t" + r.resourceType + "\t" + r.fromRoomName + " -> " + r.toRoomName + 
+                r.id + "\t" + r.amount + "\t" + r.resourceType + "\t" + 
+                r.fromRoomName + " " + r.fromStructureType + " -> " + r.toRoomName + " " + r.toStructureType + 
                 "\tfor " + (Game.time - r.createTime) + " sec\tby " +
                 (Game.getObjectById(r.creepID) || {}).name + "\tcalled " + r.caller
         ));
