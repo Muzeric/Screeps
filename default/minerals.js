@@ -173,7 +173,7 @@ var minerals = {
                 let in1 = storage.store[elem.inputTypes[0]] || 0;
                 let in2 = storage.store[elem.inputTypes[1]] || 0;
                 let needOut = BALANCE_MIN - (storage.store[outputType] || 0) + extra;
-                let amount = _.min([needOut, in1, in2, LAB_REQUEST_AMOUNT]);
+                let amount = _.floor(_.min([needOut, in1, in2, LAB_REQUEST_AMOUNT]) / LAB_REACTION_AMOUNT) * LAB_REACTION_AMOUNT;
                 if (amount < BALANCE_LAB_MIN) {
                     if (needOut > 0) {
                         cache[elem.inputTypes[0]] = (cache[elem.inputTypes[0]] || 0) + needOut;
