@@ -27,14 +27,8 @@ var role = {
 
         let betweenPos = new RoomPosition(creep.memory.betweenPos.x, creep.memory.betweenPos.y, creep.memory.betweenPos.roomName);
         if (creep.pos.isEqualTo(betweenPos)) {
-            if(creep.carry.energy == 0 && creep.memory.transfering)
-                creep.memory.transfering = false;
-            else if ((_.sum(creep.carry) == creep.carryCapacity || creep.carry.energy && !source.energy) && !creep.memory.transfering)
-                creep.memory.transfering = true;
-            
-            if(creep.memory.transfering) {
-                if (creep.carry.energy)
-                    creep.transfer(creep.room.storage, RESOURCE_ENERGY);
+            if (creep.carry.energy) {
+                creep.transfer(creep.room.storage, RESOURCE_ENERGY);
             } else {
                 let link = Game.getObjectById(creep.memory.energyID);
                 if (!link) {
