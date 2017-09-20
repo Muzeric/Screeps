@@ -530,15 +530,12 @@ Creep.prototype.boost = function (bodyPart, skill) {
     if (!bt)
         return ERR_INVALID_ARGS;
 
-    if (this.ticksToLive < BOOST_MIN_TICKS && !(bt in this.carry))
+    if (this.ticksToLive < BOOST_MIN_TICKS && !(bt in this.carry) && (!("boostBook" in this.memory) || !(bt in this.memory.boostBook)))
         return ERR_GCL_NOT_ENOUGH;
 
     let unboostedCount = this.getUnboostedBodyparts(bodyPart);
     if (!unboostedCount)
         return ERR_FULL;
-
-    if (!(bodyPart in BOOSTS))
-        return ERR_INVALID_ARGS;
 
     let room = this.room;
     let labs = room.getBoostLabs();
@@ -554,9 +551,6 @@ Creep.prototype.boost = function (bodyPart, skill) {
     let storage = room.storage;
     if (!storage)
         return ERR_NOT_ENOUGH_EXTENSIONS;
-
-    if (this.carryCapacity < LAB_BOOST_MINERAL)
-        return ERR_NO_BODYPART;
 
     let need = LAB_BOOST_MINERAL * unboostedCount;
     let got = this.carry[bt] || 0;
@@ -584,6 +578,10 @@ Creep.prototype.boost = function (bodyPart, skill) {
             this.moveTo(lab);
         if (Game.time % 5 == 0)
             console.log(this.room.name + ". " + this.name + ": BOOSTing, transfer");
+    } else if (this.carryCapacity == 0 && booked >= LAB_BOOST_MINERAL && gotLab >= LAB_BOOST_MINERAL) {
+        this.moveTo(lab);
+        if (Game.time % 5 == 0)
+            console.log(this.room.name + ". " + this.name + ": BOOSTing, move to lab");
     } else if (able >= LAB_BOOST_MINERAL && free >= LAB_BOOST_MINERAL) {
         if (this.withdraw(storage, bt, _.floor( _.min([need - got, free, able]) / LAB_BOOST_MINERAL) * LAB_BOOST_MINERAL ) == ERR_NOT_IN_RANGE)
             this.moveTo(storage);
@@ -592,12 +590,13 @@ Creep.prototype.boost = function (bodyPart, skill) {
     } else if (this.carryCapacity == 0 && (able >= LAB_BOOST_MINERAL && ableWR >= LAB_BOOST_MINERAL || booked >= LAB_BOOST_MINERAL)) {
         let futureGotLab = global.cache.queueTransport.getStoreWithReserved(lab, bt);
         if (booked && futureGotLab >= LAB_BOOST_MINERAL) {
-            this.moveTo(lab, {range: 3});
+            this.moveTo(lab, {range: 5});
             if (Game.time % 5 == 0)
                 console.log(this.room.name + ". " + this.name + ": BOOSTing, wait resource");
-        } else if (!booked) {
-            let amount = _.min([need - futureGotLab, able, ableWR]);
+        } else if (!booked && ableWR > 0) {
+            let amount = _.min([need, able, ableWR]);
             global.cache.queueTransport.addRequest(storage, lab, bt, amount);
+            this.memory.boostBook = this.memory.boostBook || {};
             this.memory.boostBook[bt] = amount;
         } else {
             return ERR_NOT_ENOUGH_RESOURCES;

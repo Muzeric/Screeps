@@ -13,6 +13,8 @@ var role = {
 	    
         let friend = _.filter(Game.creeps, c => c.memory.role == "antikeeper" && c.memory.roomName == creep.memory.roomName && c != creep && !c.spawning)[0];
         if (creep.room.name != creep.memory.roomName) {
+            if (creep.boost(HEAL, "heal") == OK)
+                return;
             if (!Game.flags["Antikeeper." + creep.memory.roomName]) {
                 console.log(creep.name + " no flag in " + creep.memory.roomName);
                 return;
