@@ -560,8 +560,10 @@ Creep.prototype.boost = function (bodyPart, skill) {
 
     let need = LAB_BOOST_MINERAL * unboostedCount;
     let got = this.carry[bt] || 0;
+    let booked = "boostBook" in this.memory ? (this.memory.boostBook[bt] || 0) : 0;
     let free = this.carryCapacity - _.sum(this.carry);
     let able = storage.store[bt] || 0;
+    let ableWR = global.cache.queueTransport.getStoreWithReserved(storage, bt);
     
     let lab = Game.getObjectById(labs[0].id);
     if (!lab)
@@ -575,6 +577,8 @@ Creep.prototype.boost = function (bodyPart, skill) {
     } else if (gotLab >= LAB_BOOST_MINERAL && this.pos.isNearTo(lab)) {
         let res = lab.boostCreep(this);
         console.log(this.room.name + ". " + this.name + ": BOOSTED (" + res + ")");
+        if (booked)
+            delete this.memory.boostBook[bt];
     } else if (got >= LAB_BOOST_MINERAL && (got >= need || free < LAB_BOOST_MINERAL || able < LAB_BOOST_MINERAL)) {
         if (this.transfer(lab, bt) == ERR_NOT_IN_RANGE)
             this.moveTo(lab);
@@ -585,6 +589,17 @@ Creep.prototype.boost = function (bodyPart, skill) {
             this.moveTo(storage);
         if (Game.time % 5 == 0)
             console.log(this.room.name + ". " + this.name + ": BOOSTing, withdraw");
+    } else if (this.carryCapacity == 0 && (able >= LAB_BOOST_MINERAL && ableWR >= LAB_BOOST_MINERAL || booked >= LAB_BOOST_MINERAL)) {
+        let futureGotLab = global.cache.queueTransport.getStoreWithReserved(lab, bt);
+        if (booked && futureGotLab >= LAB_BOOST_MINERAL) {
+            this.moveTo(lab, {range: 3});
+        } else if (!booked) {
+            let amount = _.min([need - futureGotLab, able, ableWR]);
+            global.cache.queueTransport.addRequest(storage, lab, bt, amount);
+            this.memory.boostBook[bt] = amount;
+        } else {
+            return ERR_NOT_ENOUGH_RESOURCES;
+        }
     } else {
         //console.log(this.name + ": BOOSTing, no resources");
         return ERR_NOT_ENOUGH_RESOURCES;
