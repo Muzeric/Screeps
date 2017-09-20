@@ -454,10 +454,7 @@ function getRoomLimits (room, creepsCount) {
             "count" : _.min([pairedSources, 1]),
             "priority" : 1,
             "minEnergy" : 550,
-            "wishEnergy" : 650,
-            "body" : {
-                "work" : 5 * _.min([pairedSources, 1]),
-            },
+            "wishEnergy" : 850,
     },{
             "role" : "defender",
             "count" : Game.roomsHelper.getHostilesCount(room.name) * 2,
@@ -480,7 +477,7 @@ function getRoomLimits (room, creepsCount) {
             "count" : pairedSources,
             "priority" : 2,
             "minEnergy" : 550,
-            "wishEnergy" : 700,
+            "wishEnergy" : 850,
     },{
             role : "upgrader",
             "count" : room.controller.level < 8 ? 10 : 1,

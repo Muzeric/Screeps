@@ -69,7 +69,7 @@ var role = {
     create: function(energy) {
         energy -= 50;
         let body = [CARRY];
-        let wlim = 5;
+        let wlim = 6;
         let fat = 1;
         while (energy >= 100 && wlim) {
             if (energy >= 100) {
