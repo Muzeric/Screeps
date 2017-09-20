@@ -68,9 +68,7 @@ module.exports.loop = function () {
     global.cache.stat.addCPU("roomUpdate");
 
     let creepsCPUStat = {};
-    for (creep_name of _.keys(Game.creeps).sort()) {
-        let creep = Game.creeps[creep_name];
-        
+    for (creep of _.sortBy( Game.creeps, c => CREEP_WEIGHT[c.memory.role] || CREEP_WEIGHT["default"])) {
         let role = creep.memory.role;
         if(!(role in global.cache.objects))
             global.cache.objects[role] = require('role.' + role);
