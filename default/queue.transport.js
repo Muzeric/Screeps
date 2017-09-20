@@ -109,7 +109,7 @@ var queue = {
             !r.creepID && 
             (
                 type == "in" && r.fromRoomName == creepPos.roomName && r.fromRoomName == r.toRoomName ||
-                type != "in" && r.fromRoomName != r.toRoomName
+                type == "out" && (r.fromRoomName != r.toRoomName || creepPos.roomName == r.fromRoomName)
             )
         )) {
             let from = Game.getObjectById(request.fromID);
