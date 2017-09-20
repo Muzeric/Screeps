@@ -70,8 +70,15 @@ module.exports.loop = function () {
     let creepsCPUStat = {};
     for (creep of _.sortBy( Game.creeps, c => CREEP_WEIGHT[c.memory.role] || CREEP_WEIGHT["default"])) {
         let role = creep.memory.role;
-        if(!(role in global.cache.objects))
-            global.cache.objects[role] = require('role.' + role);
+        if(!(role in global.cache.objects)) {
+            try {
+                global.cache.objects[role] = require('role.' + role);
+            } catch (e) {
+                console.log(creep.name + " REQUIRE ERROR: " + e.toString() + " => " + e.stack);
+                console.log(JSON.stringify("global.objects: " + global.cache.objects));
+                continue;
+            }
+        }
         
         if(creep.spawning) {
             if ("prerun" in global.cache.objects[role]) {
