@@ -593,6 +593,8 @@ Creep.prototype.boost = function (bodyPart, skill) {
         let futureGotLab = global.cache.queueTransport.getStoreWithReserved(lab, bt);
         if (booked && futureGotLab >= LAB_BOOST_MINERAL) {
             this.moveTo(lab, {range: 3});
+            if (Game.time % 5 == 0)
+                console.log(this.room.name + ". " + this.name + ": BOOSTing, wait resource");
         } else if (!booked) {
             let amount = _.min([need - futureGotLab, able, ableWR]);
             global.cache.queueTransport.addRequest(storage, lab, bt, amount);
