@@ -114,7 +114,7 @@ var queue = {
         )) {
             let from = Game.getObjectById(request.fromID);
             let to = Game.getObjectById(request.toID);
-            if (!from || !to || request.amount < 0) {
+            if (!from || !to || request.amount <= 0) {
                 this.badRequest(request.id);
                 continue;
             }
