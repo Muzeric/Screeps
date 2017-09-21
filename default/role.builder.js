@@ -17,21 +17,27 @@ var role = {
 	    if(!creep.memory.building && _.sum(creep.carry) == creep.carryCapacity) {
 	        creep.memory.building = true;
 	        creep.memory.energyID = null;
-	    }
+        }
+        
+        if(!creep.memory.targetID)
+            creep.memory.targetID = getBuilderTargets(creep, room);
 
-	    if(creep.memory.building) {
-            if(!creep.memory.targetID)
-                creep.memory.targetID = getBuilderTargets(creep, room);
-            if(!creep.memory.targetID) {
+        if(!creep.memory.targetID) {
+            if (creep.carry.energy) {
+                if(creep.upgradeController(room.controller) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(room.controller, {range: 2});
+            } else {
                 for (let s of creep.pos.lookFor(LOOK_STRUCTURES)) {
                     if ([STRUCTURE_CONTAINER, STRUCTURE_ROAD, STRUCTURE_RAMPART].indexOf(s.structureType) != -1) {
                         creep.move(Math.floor(Math.random() * 8) + 1);
-                        return;
+                        break;
                     }
                 }
-                return;
             }
-            
+            return;
+        }
+
+	    if(creep.memory.building) {
             let target = Game.getObjectById(creep.memory.targetID);
             if (!target || "hits" in target && (target.hits == target.hitsMax || target.hits >= room.getRepairLimit())) {
                 room.finishBuildRepair(creep.memory.targetID);
