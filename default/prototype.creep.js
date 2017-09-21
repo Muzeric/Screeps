@@ -530,7 +530,7 @@ Creep.prototype.boost = function (bodyPart, skill) {
     if (!bt)
         return ERR_INVALID_ARGS;
 
-    if (this.ticksToLive < BOOST_MIN_TICKS && !(bt in this.carry) && (!("boostBook" in this.memory) || !(bt in this.memory.boostBook)))
+    if (this.ticksToLive < BOOST_STOP_TICKS || (this.ticksToLive < BOOST_MIN_TICKS && !(bt in this.carry) && (!("boostBook" in this.memory) || !(bt in this.memory.boostBook))))
         return ERR_GCL_NOT_ENOUGH;
 
     let unboostedCount = this.getUnboostedBodyparts(bodyPart);

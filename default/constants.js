@@ -44,6 +44,7 @@ global.BALANCE_MAX = 20000;
 global.BALANCE_LAB_MIN = 500;
 global.BALANCE_TRANSPORT_MIN = 1000;
 global.BOOST_MIN_TICKS = 1200;
+global.BOOST_STOP_TICKS = 900;
 global.BOOST_BUILDER_MIN_BTICKS = 20000;
 global.CREEP_WEIGHT = {
     defender: 1,
