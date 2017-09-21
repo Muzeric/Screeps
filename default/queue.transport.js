@@ -12,12 +12,12 @@ var queue = {
         this.transportReserved = this.getReserved();
     },
 
-    getDefaultStorage: function (point) {
-        return Game.rooms[this.mainRoomName].storage;
+    getDefaultStorage: function (creep) {
+        return creep && creep.memory.arg == "in" && creep.room.storage ? creep.room.storage : Game.rooms[this.mainRoomName].storage;
     },
 
-    getDefaultTerminal: function (point) {
-        return Game.rooms[this.mainRoomName].terminal;
+    getDefaultTerminal: function (creep) {
+        return creep && creep.memory.arg == "in" && creep.room.terminal ? creep.room.terminal : Game.rooms[this.mainRoomName].terminal;
     },
 
     addRequest: function (from, to, resourceType, amount) {
