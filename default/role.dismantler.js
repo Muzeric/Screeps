@@ -122,7 +122,7 @@ function setTarget (creep) {
             continue;
         let wantEnergy = target.energyCapacity - target.energy;
         let cpath = creep.pos.getRangeTo(target.pos.x, target.pos.y);
-        let wantCarry = global.cache.wantCarry[creep.room.name] ? global.cache.wantCarry[creep.room.name][target.id] || 0 : 0;
+        let wantCarry = global.cache.wantCarry[target.id] || 0;
         let cpriority = 0;
         if (wantCarry >= wantEnergy)
             cpriority = -100;

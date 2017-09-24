@@ -40,19 +40,23 @@ module.exports.loop = function () {
             return sum; 
     }, {});
 
-    for(var name in Memory.creeps) {
+    for(let name in Memory.creeps) {
         if(!Game.creeps[name]) {
-            //console.log(name + " DEAD (" + Memory.creeps[name].roomName + ")");
             global.cache.stat.die(name);
             delete Memory.creeps[name];
             continue;
-        } else if (Game.creeps[name].memory.errors > 0) {
-            console.log(name + " has "+ Game.creeps[name].memory.errors + " errors");
-            moveErrors[Game.creeps[name].room.name] = 1;
         }
+        let creep = Game.creeps[name];
         let memory = Memory.creeps[name];
-        if (memory.targetID)
+        if (memory.targetID) {
             global.cache.targets[memory.targetID] = (global.cache.targets[memory.targetID] || 0) + 1;
+            if (memory.role == "harvester")
+                global.cache.wantCarry[memory.targetID] = (global.cache.wantCarry[memory.targetID] || 0) + creep.carry.energy;
+        }
+        if (memory.errors > 0) {
+            console.log(name + " has "+ memory.errors + " errors");
+            moveErrors[creep.room.name] = 1;
+        }
     }
 
     global.cache.stat.addCPU("memory");

@@ -125,7 +125,7 @@ function setTarget (creep, estEnergy) {
             continue;
         let wantEnergy = target.energyCapacity - target.energy;
         let cpath = creep.pos.getRangeTo(target.pos.x, target.pos.y);
-        let wantCarry = global.cache.wantCarry[creep.room.name] ? global.cache.wantCarry[creep.room.name][target.id] || 0 : 0;
+        let wantCarry = global.cache.wantCarry[target.id] || 0;
         let cpriority = 0;
         if (wantCarry >= wantEnergy)
             continue;
@@ -150,7 +150,7 @@ function setTarget (creep, estEnergy) {
         return ERR_NOT_FOUND;
         
     creep.memory.targetID = minTarget.id;
-    global.cache.wantCarry[creep.room.name][creep.memory.targetID] = (global.cache.wantCarry[creep.room.name][creep.memory.targetID] || 0) + estEnergy;
+    global.cache.wantCarry[creep.memory.targetID] = (global.cache.wantCarry[creep.memory.targetID] || 0) + estEnergy;
 
     return OK;
 }

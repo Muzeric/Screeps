@@ -240,8 +240,13 @@ Creep.prototype.travelTo = function (targetPos, opts) {
 
     let pf = travel.getPath(this.pos, {pos: targetPos, range: range}, targetKey, addCreeps, this.room.memory.pathCache, maxOps, opts.ignoreHostiled);
     if (pf.incomplete) {
-        console.log(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
-        Game.notify(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
+        console.log(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length + "; addCreeps=" + addCreeps);
+        if (addCreeps) {
+            pf = travel.getPath(this.pos, {pos: targetPos, range: range}, targetKey, 0, this.room.memory.pathCache, maxOps, opts.ignoreHostiled);
+            if (pf.incomplete)
+                console.log(this.name + ": moveTo incomplete path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length + "; addCreeps=" + addCreeps);
+        }
+        
     }
 
     if (pf.path.length) {

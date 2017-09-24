@@ -59,7 +59,6 @@ profiler.registerObject(roomsHelper, 'roomsHelper');
 
 Room.prototype.update = function() {
     global.cache.matrix[this.name] = {};
-    global.cache.wantCarry[this.name] = {};
     global.cache.creeps[this.name] = {};
 
     if (!("pathCache" in this.memory) || Game.time - (this.memory.pathCacheTime || 0) >= UPDATE_INTERVAL_PATHCACHE)
@@ -763,15 +762,19 @@ Room.prototype.updateStructures = function() {
 }
 
 Room.prototype.getNearKeeperPos = function(pos, range) {
-    return _.filter( global.cache.creeps[this.name].keepersPoses, p => pos.inRangeTo(p, range) )[0];
+    let keeper = _.filter( global.cache.creeps[this.name].keepers, c => pos.inRangeTo(c.pos, range) )[0];
+    if (keeper)
+        return keeper.pos;
+
+    return null;
 }
 
 Room.prototype.getNearAttackers = function (pos, range = 5) {
     return _.filter( global.cache.creeps[this.name].hostileAttackers, c => pos.inRangeTo(c.pos, range) );
 }
 
-Room.prototype.getAllAttackers = function (pos, range = 5) {
-    return _.filter( global.cache.creeps[this.name].hostileAttackers, c => pos.inRangeTo(c.pos, range) );
+Room.prototype.getAllAttackers = function () {
+    return global.cache.creeps[this.name].hostileAttackers.concat(global.cache.creeps[this.name].keepers);
 }
 
 Room.prototype.updateCreeps = function() {
@@ -779,7 +782,7 @@ Room.prototype.updateCreeps = function() {
     let roomName = this.name;
     memory.creepsTime = Game.time;
     global.cache.creeps[this.name] = {
-        keepersPoses: [],
+        keepers: [],
         hostileAttackers: [],
         hostileOther: [],
         mine: {},
@@ -793,7 +796,7 @@ Room.prototype.updateCreeps = function() {
 
     this.find(FIND_CREEPS).forEach( function(c) {
         if (c.owner.username == "Source Keeper") {
-            creepCache.keepersPoses.push(c.pos);
+            creepCache.keepers.push(c);
         } else if (!c.my && (1 || c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL))) {
             creepCache.hostileAttackers.push(c);
             memory.hostilesCount++;
@@ -802,9 +805,7 @@ Room.prototype.updateCreeps = function() {
         } else if (c.my) {
             creepCache.mine[c.memory.role] = creepCache.mine[c.memory.role] || [];
             creepCache.mine[c.memory.role].push(c);
-            if (c.memory.role == "harvester" && c.memory.targetID) {
-                global.cache.wantCarry[roomName][c.memory.targetID] = (global.cache.wantCarry[roomName][c.memory.targetID] || 0) + c.carry.energy;
-            }
+            
         } else  {
             creepCache.hostileOther.push(c);
         }
