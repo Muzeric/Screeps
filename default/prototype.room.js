@@ -252,7 +252,7 @@ Room.prototype.updateResources = function() {
 }
 
 Room.prototype.getNearComingLairPos = function(pos, range, leftTime) {
-    let lair = _.filter( this.memory.structures['keeperLair'], s => _.inRange(this.memory.structuresTime + s.ticksToSpawn - Game.time, 1, leftTime || KEEPLAIR_LEAVE_TIME) && pos.inRangeTo(s.pos, range) )[0];
+    let lair = _.filter( this.memory.structures['keeperLair'], s => _.inRange(s.ticksToSpawn, 1, leftTime || KEEPLAIR_LEAVE_TIME) && pos.inRangeTo(s.pos, range) )[0];
     return lair ? (new RoomPosition(lair.pos.x, lair.pos.y, lair.pos.roomName)) : null;
 }
 
