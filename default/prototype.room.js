@@ -805,7 +805,7 @@ Room.prototype.updateCreeps = function() {
     });
 
     if (this.name in global.cache.mineCreeps) {
-        for (let c of _.values(global.cache.mineCreeps[this.name]))
+        for (let c of _.flatten(_.values(global.cache.mineCreeps[this.name])))
             costs.set(c.pos.x, c.pos.y, 0xff);
     }
 
