@@ -21,8 +21,9 @@ module.exports.loop = function () {
     global.cache.matrix = {};
     global.cache.wantCarry = {};
     global.cache.wantEnergy = {};
-    global.cache.creeps = {};
-    global.cache.mineCreeps = {};
+    global.cache.hostiles = {};
+    global.cache.creepsByRoom = {};
+    global.cache.creepsByRoomName = {};
     global.cache.objects = global.cache.objects || {};
     global.cache.boostingLabs = {};
     global.cache.targets = {};
@@ -56,9 +57,11 @@ module.exports.loop = function () {
             global.cache.wantEnergy[memory.energyID].energy += creep.carryCapacity - _.sum(creep.carry);
             global.cache.wantEnergy[memory.energyID].creepsCount++;
         }
-        global.cache.mineCreeps[creep.room.name] = global.cache.mineCreeps[creep.room.name] || {};
-        global.cache.mineCreeps[creep.room.name][memory.role] = global.cache.mineCreeps[creep.room.name][memory.role] || [];
-        global.cache.mineCreeps[creep.room.name][memory.role].push(creep);
+        global.cache.creepsByRoom[creep.room.name] = global.cache.creepsByRoom[creep.room.name] || [];
+        global.cache.creepsByRoom[creep.room.name].push(creep);
+
+        global.cache.creepsByRoomName[memory.roomName] = global.cache.creepsByRoomName[memory.roomName] || [];
+        global.cache.creepsByRoomName[memory.roomName].push(creep);
     }
 
     global.cache.stat.addCPU("memory");
