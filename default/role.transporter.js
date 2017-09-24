@@ -21,9 +21,8 @@ var role = {
         let queue = global.cache.queueTransport;
 
         let storage = queue.getDefaultStorage(creep);
-        let terminal = queue.getDefaultTerminal(creep);
-        if (!terminal || !storage) {
-            console.log(creep.name + ": no main terminal or storage");
+        if (!storage) {
+            console.log(creep.name + ": no deafult storage");
             return;
         }
 
