@@ -11,7 +11,8 @@ var role = {
             healed = 1;
         }
 	    
-        let friend = _.filter(Game.creeps, c => c.memory.role == "antikeeper" && c.memory.roomName == creep.memory.roomName && c != creep && !c.spawning)[0];
+        let friend = _.find(global.cache.creepsByRoomName[creep.memory.roomName], c => c.memory.role == "antikeeper" && c != creep && !c.spawning);
+        let friendRange = friend ? creep.pos.getRangeTo(friend) : 0;
         if (creep.room.name != creep.memory.roomName) {
             if (creep.boost(HEAL, "heal") == OK)
                 return;
@@ -22,14 +23,12 @@ var role = {
             if (!friend && Game.roomsHelper.getHostilesCount(creep.memory.roomName, 0) > 1) {
                 creep.say("Want pair");
                 creep.moveTo(Game.spawns[creep.memory.spawnName])
-            } else if (!friend || creep.pos.inRangeTo(friend, 3) || Game.roomsHelper.getHostilesCount(creep.memory.roomName, 0) <= 1 || creep.pos.isBorder() || friend.room.name == creep.memory.roomName) {
+            } else if (!friend || friendRange <= 3 || Game.roomsHelper.getHostilesCount(creep.memory.roomName, 0) <= 1 || creep.pos.isBorder() || friend.room.name == creep.memory.roomName) {
                 creep.moveTo(Game.flags["Antikeeper." + creep.memory.roomName]);
             } else {
                 if (!friend.memory.gotoFriendID) {
                     creep.moveTo(friend);
                     creep.memory.gotoFriendID = friend.id;
-                } else if (creep.pos.isBorder()) {
-                    creep.moveTo(friend);
                 }
             }
             return;
@@ -40,8 +39,18 @@ var role = {
             }
         }
 
-        let target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        if (target && friend && (!creep.pos.inRangeTo(friend, 4) || friend.hits < friend.hitsMax) && !creep.pos.inRangeTo(target, 4) && friend.room.name == creep.room.name) {
+        let hostiles = creep.room.getAllAttackers();
+        let target;
+        let minRange;
+        for (let hostile of hostiles) {
+            let range = creep.pos.getRangeTo(hostile);
+            if (minRange === undefined || range < minRange || hostile.hits < target.hits) {
+                minRange = range;
+                target = hostile;
+            }
+        }
+
+        if (target && friend && (friendRange > 4 || friend.hits < friend.hitsMax) && minRange > 4 && friend.room.name == creep.room.name) {
             if (!friend.memory.gotoFriendID) {
                 creep.moveTo(friend);
                 creep.memory.gotoFriendID = friend.id;
@@ -55,40 +64,38 @@ var role = {
             return;
         }
 
-        let seeked;
         if (target) {
             let safePlace;
             if (!creep.memory.arg) {
                 safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(creep, target.pos, 3));
                 creep.rangedAttack(target);
             } else {
-                if (creep.pos.isNearTo(target)) {
+                if (minRange <= 1) {
                     if (healed)
                         creep.cancelOrder('heal');
                     creep.attack(target);
                 }
             }
             creep.moveTo(safePlace ? safePlace : target);
-        } else if (seeked = creep.pos.findInRange(FIND_MY_CREEPS, 11, {filter: c => c.hits < c.hitsMax && c != creep})[0] ) {
-            if (creep.pos.isNearTo(seeked)) {
-                if (!healed)
-                    creep.heal(seeked);
-            } else {
-                creep.moveTo(seeked);
-                creep.rangedHeal(seeked);
-            }
         } else {
-            let lairs = creep.room.find(FIND_STRUCTURES, { filter : s => s.structureType == STRUCTURE_KEEPER_LAIR});
-            if (!lairs.length) {
-                console.log(creep.name + " no lairs in " + creep.room.name);
-                return;
+            let seeked = _.find(global.cache.creepsByRoom[creep.room.name], c => c.hits < c.hitsMax && c != creep && creep.pos.inRangeTo(c, 11));
+            if (seeked) {
+                if (creep.pos.isNearTo(seeked)) {
+                    if (!healed)
+                        creep.heal(seeked);
+                } else {
+                    creep.moveTo(seeked);
+                    creep.rangedHeal(seeked);
+                }
+            } else {
+                let lairPos = creep.room.getComingLairPos();
+                if (!lairPos) {
+                    console.log(creep.name + " no lairs in " + creep.room.name);
+                    return;
+                }
+                if (creep.memory.arg || creep.pos.getRangeTo(lairPos) > 3)
+                    creep.moveTo(lairPos);
             }
-            let lair = lairs.sort(function(a,b) {
-                return a.ticksToSpawn - b.ticksToSpawn;
-            })[0];
-
-            if (creep.memory.arg || creep.pos.getRangeTo(lair) > 3)
-                creep.moveTo(lair);
         }
 
 	},

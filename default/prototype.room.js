@@ -208,7 +208,7 @@ Room.prototype.updateResources = function() {
         memory.resources.push(elem);
     });
 
-    for ( let elem of _.filter(_.flatten(_.values(memory.structures)), s => "energy" in s || "store" in s) )  {
+    for ( let elem of _.filter(_.flatten(_.values(memory.structures)), s => "energy" in s || "store" in s || s.structureType == STRUCTURE_KEEPER_LAIR) )  {
         let s = Game.getObjectById(elem.id);
         if (!s) {
             console.log(this.name + ": no resource object " + elem.id);
@@ -238,6 +238,8 @@ Room.prototype.updateResources = function() {
         } else if (elem.structureType == STRUCTURE_NUKER) {
             elem.ghodium = s.ghodium;
             memory.store["G"] = (memory.store["G"] || 0) + (s.ghodium || 0);
+        } else if (elem.structureType == STRUCTURE_KEEPER_LAIR) {
+            elem.ticksToSpawn = s.ticksToSpawn;
         }
 
         if (s.structureType == STRUCTURE_SPAWN && s.hits < s.hitsMax * 0.5 && s.my && !room.controller.safeMode && !room.controller.safeModeCooldown && room.controller.safeModeAvailable) {
@@ -251,12 +253,12 @@ Room.prototype.updateResources = function() {
 
 Room.prototype.getNearComingLairPos = function(pos, range, leftTime) {
     let lair = _.filter( this.memory.structures['keeperLair'], s => _.inRange(this.memory.structuresTime + s.ticksToSpawn - Game.time, 1, leftTime || KEEPLAIR_LEAVE_TIME) && pos.inRangeTo(s.pos, range) )[0];
-    return lair ? lair.pos : null;
+    return lair ? (new RoomPosition(lair.pos.x, lair.pos.y, lair.pos.roomName)) : null;
 }
 
 Room.prototype.getComingLairPos = function () {
     let lair = _.sortBy(this.memory.structures['keeperLair'], l => l.ticksToSpawn)[0];
-    return lair ? lair.pos : null;
+    return lair ? (new RoomPosition(lair.pos.x, lair.pos.y, lair.pos.roomName)) : null;
 }
 
 Room.prototype.needRoad = function(creep) {
