@@ -254,6 +254,11 @@ Room.prototype.getNearComingLairPos = function(pos, range, leftTime) {
     return lair ? lair.pos : null;
 }
 
+Room.prototype.getComingLairPos = function () {
+    let lair = _.sortBy(this.memory.structures['keeperLair'], l => l.ticksToSpawn)[0];
+    return lair ? lair.pos : null;
+}
+
 Room.prototype.needRoad = function(creep) {
     let roads = this.memory.needRoads;
     let key = creep.pos.x + "," + creep.pos.y;
