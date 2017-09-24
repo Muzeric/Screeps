@@ -22,6 +22,7 @@ module.exports.loop = function () {
     global.cache.wantCarry = {};
     global.cache.wantEnergy = {};
     global.cache.creeps = {};
+    global.cache.mineCreeps = {};
     global.cache.objects = global.cache.objects || {};
     global.cache.boostingLabs = {};
     global.cache.targets = {};
@@ -29,16 +30,9 @@ module.exports.loop = function () {
     var moveErrors = {};
     global.cache.roomNames = _.filter( _.uniq( [].concat( 
         _.map(Game.flags, 'pos.roomName'), 
-        _.map( Game.rooms, 'name' ), 
-        Object.keys(Memory.rooms) 
+        _.map(Game.rooms, 'name'), 
+        _.keys(Memory.rooms)
     ) ), n => n != "undefined");
-
-    global.cache.wantEnergy = _.reduce( _.filter(Game.creeps, c => c.memory.energyID), function (sum, value, key) { 
-            sum[value.memory.energyID] = sum[value.memory.energyID] || {energy : 0, creepsCount : 0};
-            sum[value.memory.energyID].energy += value.carryCapacity - value.carry.energy;
-            sum[value.memory.energyID].creepsCount++;
-            return sum; 
-    }, {});
 
     for(let name in Memory.creeps) {
         if(!Game.creeps[name]) {
@@ -57,6 +51,14 @@ module.exports.loop = function () {
             console.log(name + " has "+ memory.errors + " errors");
             moveErrors[creep.room.name] = 1;
         }
+        if (memory.energyID) {
+            global.cache.wantEnergy[memory.energyID] = global.cache.wantEnergy[memory.energyID] || {energy : 0, creepsCount : 0};
+            global.cache.wantEnergy[memory.energyID].energy += creep.carryCapacity - _.sum(creep.carry);
+            global.cache.wantEnergy[memory.energyID].creepsCount++;
+        }
+        global.cache.mineCreeps[creep.room.name] = global.cache.mineCreeps[creep.room.name] || {};
+        global.cache.mineCreeps[creep.room.name][memory.role] = global.cache.mineCreeps[creep.room.name][memory.role] || [];
+        global.cache.mineCreeps[creep.room.name][memory.role].push(creep);
     }
 
     global.cache.stat.addCPU("memory");

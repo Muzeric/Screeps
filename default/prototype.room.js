@@ -183,7 +183,7 @@ Room.prototype.getAmount = function (rt) {
 Room.prototype.canBuildContainers = function () {
     let memory = this.memory;
     if (memory.type == "my" && (memory.structures[STRUCTURE_SPAWN] || []).length && (memory.structures[STRUCTURE_EXTENSION] || []).length || 
-        memory.type == "reserved" && (global.cache.creeps[this.name].mine["longharvester"] || []).length > 1
+        memory.type == "reserved" && (this.name in global.cache.mineCreeps ? (global.cache.mineCreeps[this.name]["longharvester"] || []) : []).length > 1
     )
         return 1;
     
@@ -784,8 +784,6 @@ Room.prototype.updateCreeps = function() {
     global.cache.creeps[this.name] = {
         keepers: [],
         hostileAttackers: [],
-        hostileOther: [],
-        mine: {},
     };
     let creepCache = global.cache.creeps[this.name];
     memory.hostilesCount = 0;
@@ -794,24 +792,22 @@ Room.prototype.updateCreeps = function() {
         global.cache.matrix[this.name]["common"] = PathFinder.CostMatrix.deserialize(memory.costMatrix);
     let costs = global.cache.matrix[this.name]["common"].clone();
 
-    this.find(FIND_CREEPS).forEach( function(c) {
+    this.find(FIND_HOSTILE_CREEPS).forEach( function(c) {
         if (c.owner.username == "Source Keeper") {
             creepCache.keepers.push(c);
-        } else if (!c.my && (1 || c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL))) {
+        } else {
             creepCache.hostileAttackers.push(c);
             memory.hostilesCount++;
             if (Game.time + c.ticksToLive > memory.hostilesDeadTime)
                 memory.hostilesDeadTime = Game.time + c.ticksToLive;
-        } else if (c.my) {
-            creepCache.mine[c.memory.role] = creepCache.mine[c.memory.role] || [];
-            creepCache.mine[c.memory.role].push(c);
-            
-        } else  {
-            creepCache.hostileOther.push(c);
         }
         costs.set(c.pos.x, c.pos.y, 0xff);
     });
 
-    
+    if (this.name in global.cache.mineCreeps) {
+        for (let c of _.values(global.cache.mineCreeps[this.name]))
+            costs.set(c.pos.x, c.pos.y, 0xff);
+    }
+
     global.cache.matrix[this.name]["withCreeps"] = costs;
 }
