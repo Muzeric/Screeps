@@ -35,16 +35,18 @@ var role = {
         }
 	},
 	
-	create: function(energy) {
-	    let body = [];
-	    while (energy >= 50 && body.length < 50) {
+	create: function(energy, opts = {}) {
+		let body = [];
+		let wlim = opts.top ? 15 : 100;
+	    while (energy >= 50 && body.length < 50 && wlim) {
 	        if(energy >= 50) {
 	            body.push(MOVE);
 	            energy -= 50;
 	        }
 	        if(energy >= 100 && body.length < 50) {
 	            body.push(WORK);
-	            energy -= 100;
+				energy -= 100;
+				wlim--;
 	        }
 	        if(energy >= 50 && body.length < 50) {
 	            body.push(CARRY);
