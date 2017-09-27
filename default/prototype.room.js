@@ -183,7 +183,7 @@ Room.prototype.getAmount = function (rt) {
 Room.prototype.canBuildContainers = function () {
     let memory = this.memory;
     if (memory.type == "my" && (memory.structures[STRUCTURE_SPAWN] || []).length && (memory.structures[STRUCTURE_EXTENSION] || []).length || 
-        memory.type == "reserved" && (this.name in global.cache.creepsByRoomName ? _.filter(global.cache.creepsByRoom[this.name], c => c.memory.role == "longharvester") : []).length > 1
+        memory.type != "my" && (this.name in global.cache.creepsByRoomName ? _.filter(global.cache.creepsByRoomName[this.name], c => c.memory.role == "longharvester") : []).length > 1
     )
         return 1;
     

@@ -195,6 +195,12 @@ var utils = {
         }
         return out.join("");
     },
+
+    extendX: function() {
+        for (order of _.filter(Game.market.orders, o => o.resourceType == "X" && o.type == ORDER_BUY)) {
+            Game.market.extendOrder(order.id, 10000);
+        }
+    },
 };
 
 module.exports = utils;
