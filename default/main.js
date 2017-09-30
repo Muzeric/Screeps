@@ -126,6 +126,9 @@ module.exports.loop = function () {
         creepsCPUStat[creep.memory.role]["sum"]++;
 
         global.cache.stat.updateRoom(creep.room.name, 'cpu', cpu);
+
+        if (Game.cpu.tickLimit - Game.cpu.getUsed() < CPU_LIMIT)
+            break;
     }
     global.cache.stat.addCPU("run", creepsCPUStat);
     
