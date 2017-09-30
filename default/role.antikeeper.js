@@ -43,7 +43,7 @@ var role = {
         let minRange;
         for (let hostile of hostiles) {
             let range = creep.pos.getRangeTo(hostile);
-            if (minRange === undefined || range < minRange || creep.memory.targetID == hostile.id || hostile.hits < target.hits) {
+            if (minRange === undefined || range < minRange || range == minRange && (creep.memory.targetID == hostile.id || hostile.hits < target.hits)) {
                 minRange = range;
                 target = hostile;
             }
