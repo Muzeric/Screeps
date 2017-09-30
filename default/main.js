@@ -128,7 +128,7 @@ module.exports.loop = function () {
         global.cache.stat.updateRoom(creep.room.name, 'cpu', cpu);
 
         if (Game.cpu.tickLimit - Game.cpu.getUsed() < CPU_LIMIT) {
-            console.log("STOP RUNNING: cpu left " + Game.cpu.tickLimit - Game.cpu.getUsed());
+            console.log("STOP RUNNING: cpu left " + (Game.cpu.tickLimit - Game.cpu.getUsed()));
             break;
         }
     }

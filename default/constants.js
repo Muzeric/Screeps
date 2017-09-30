@@ -46,7 +46,7 @@ global.BALANCE_TRANSPORT_MIN = 1000;
 global.BOOST_MIN_TICKS = 1200;
 global.BOOST_STOP_TICKS = 900;
 global.BOOST_BUILDER_MIN_BTICKS = 20000;
-global.CPU_LIMIT = 20;
+global.CPU_LIMIT = 40;
 global.CREEP_WEIGHT = {
     defender: 1,
     antikeeper: 1,
