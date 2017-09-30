@@ -140,11 +140,12 @@ module.exports.loop = function () {
     }
     let needList = [];
 
+    let leftCPU = Game.cpu.tickLimit - Game.cpu.getUsed();
     _.forEach(global.cache.roomNames, function(roomName) {
         let lastCPU = Game.cpu.getUsed();
         let room = Game.rooms[roomName];
 
-        if (Game.time % PERIOD_NEEDLIST == 1) {
+        if (Game.time % PERIOD_NEEDLIST == 1 && leftCPU > CPU_LIMIT) {
             let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), c => c.memory.countName || c.memory.role);
             let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
 
@@ -243,10 +244,12 @@ module.exports.loop = function () {
         }
     }
     global.cache.stat.addCPU("create");
-    _.forEach(global.cache.roomNames, function(roomName) {
-        if (roomName in Memory.rooms && Memory.rooms[roomName].type == 'my')
-            global.cache.minerals.runLabs(roomName);
-    });
+    if (leftCPU > CPU_LIMIT) {
+        _.forEach(global.cache.roomNames, function(roomName) {
+            if (roomName in Memory.rooms && Memory.rooms[roomName].type == 'my')
+                global.cache.minerals.runLabs(roomName);
+        });
+    }
     global.cache.stat.addCPU("runLabs");
     global.cache.stat.finish();
 //});
