@@ -203,7 +203,7 @@ var utils = {
     },
 
     isLowCPU: function() {
-        return Game.cpu.tickLimit - Game.cpu.getUsed() < CPU_LIMIT && Game.cpu.bucket < CPU_LIMIT;
+        return Game.cpu.tickLimit - Game.cpu.getUsed() < (Game.cpu.bucket < Game.cpu.time ? CPU_LIMIT_HIGH : CPU_LIMIT_LOW);
     },
 };
 
