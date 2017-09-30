@@ -479,6 +479,7 @@ Room.prototype.updateStructures = function() {
     else if (!("repairLimit" in memory) || this.storage && this.storage.store.energy < 0.8*REPAIR_ENERGY_LIMIT)
         memory.repairLimit = REPAIR_LIMIT;
 
+    let betweenCache = {};
     this.find(FIND_STRUCTURES).forEach( function(s) {
         let elem;
         if (s.structureType == STRUCTURE_KEEPER_LAIR) {
@@ -535,10 +536,11 @@ Room.prototype.updateStructures = function() {
                     if (s.structureType == STRUCTURE_CONTAINER && s.pos.isNearTo(elem.source.pos))
                         elem.betweenPos = s.pos;
                     else
-                        elem.betweenPos = _.filter( utils.getRangedPlaces(null, elem.source.pos, 1), p => p.isNearTo(s.pos) )[0];
+                        elem.betweenPos = _.filter( utils.getRangedPlaces(null, elem.source.pos, 1), p => p.isNearTo(s.pos) && !(p.getKey() in betweenCache) )[0];
                     if (elem.betweenPos) {
                         elem.source.pair = (elem.source.pair || 0) + 1;
                         costs.set(elem.betweenPos.x, elem.betweenPos.y, 100);
+                        betweenCache[elem.betweenPos.getKey()] = 1;
                     }
                 }
             }
@@ -547,8 +549,11 @@ Room.prototype.updateStructures = function() {
                 elem.minersFrom = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.energyID == s.id);
                 if (room.storage && s.pos.inRangeTo(room.storage.pos, 2)) {
                     elem.storaged = 1;
-                    elem.betweenPos = _.filter( utils.getRangedPlaces(null, room.storage.pos, 1), p => p.isNearTo(s.pos) )[0];
-                    costs.set(elem.betweenPos.x, elem.betweenPos.y, 100);
+                    elem.betweenPos = _.filter( utils.getRangedPlaces(null, room.storage.pos, 1), p => p.isNearTo(s.pos) && !(p.getKey() in betweenCache) )[0];
+                    if (elem.betweenPos) {
+                        costs.set(elem.betweenPos.x, elem.betweenPos.y, 100);
+                        betweenCache[elem.betweenPos.getKey()] = 1;
+                    }
                 }
             } else if (s.structureType == STRUCTURE_EXTRACTOR) {
                 elem.rangedPlaces = utils.getRangedPlaces(null, s.pos, 1);
