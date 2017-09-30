@@ -95,8 +95,8 @@ var role = {
 
 function getLongBuilderTargets(creep) {
 	for (let room of _.sortBy(
-		_.filter(Game.rooms, r => r.name in global.cache.creepsByRoomName && _.filter(global.cache.creepsByRoomName[r.name], c => c.memory.role == "longharvester").length), 
-		r => creep.room == r ? 0 : creep.room.getPathToRoom(r.name) || 1000)
+		_.filter(Game.rooms, r => r.name in global.cache.creepsByRoomName && _.find(global.cache.creepsByRoomName[r.name], c => c.memory.role == "longharvester")), 
+		r => creep.room == r ? 0 : (creep.room.getPathToRoom(r.name) || 1000))
 	) {
 		let targets = room.getConstructions().concat(room.getRepairs());
 		if (!targets.length)

@@ -126,25 +126,8 @@ module.exports.loop = function () {
         creepsCPUStat[creep.memory.role]["sum"]++;
 
         global.cache.stat.updateRoom(creep.room.name, 'cpu', cpu);
-
-        /*
-        creep.memory.stat.CPU += (Game.cpu.getUsed() - lastCPU);
-        let diffEnergy = creep.carry[RESOURCE_ENERGY] - creep.memory.lastEnergy;
-        creep.memory.lastEnergy = creep.carry[RESOURCE_ENERGY];
-        if (diffEnergy < 0)
-            creep.memory.stat.spentEnergy -= diffEnergy;
-        else
-            creep.memory.stat.gotEnergy += diffEnergy;
-
-        if (creep.pos.toString() != creep.memory.lastPos) {
-            creep.memory.stat.moves++;
-            creep.memory.lastPos = creep.pos.toString();
-        }
-        */
     }
     global.cache.stat.addCPU("run", creepsCPUStat);
-    
-    //stat.roles = JSON.parse(JSON.stringify(rolesCount));
     
     if (!Memory.limitList || !Memory.limitTime) {
         Memory.limitList = {};
@@ -152,9 +135,6 @@ module.exports.loop = function () {
     }
     let needList = [];
 
-    let longbuilders = _.filter(Game.creeps, c => c.memory.role == "longbuilder" && (c.ticksToLive > ALIVE_TICKS || c.spawning)).length;
-    let buildFlags = _.filter(Game.flags, f => f.name.substring(0, 5) == 'Build').length;
-    let stopLongBuilders = longbuilders * 1.5 >= buildFlags;
     _.forEach(global.cache.roomNames, function(roomName) {
         let lastCPU = Game.cpu.getUsed();
         let room = Game.rooms[roomName];
@@ -165,7 +145,7 @@ module.exports.loop = function () {
 
             if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
                 try {
-                    Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount, stopLongBuilders);
+                    Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount);
                 } catch (e) {
                     console.log(roomName + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
                     Game.notify(roomName + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
@@ -267,15 +247,14 @@ module.exports.loop = function () {
 //});
 };
 
-function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
+function getNotMyRoomLimits (roomName, creepsCount) {
     let lastCPU = Game.cpu.getUsed();
     let memory = Memory.rooms[roomName] || {structures : {}};
     let room = Game.rooms[roomName];
     let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
     if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"])
         return [];
-    let builds = (memory.constructions || 0) - (memory.constructionsRoads || 0);
-    let repairs = memory.repairs || 0;
+    let buildTicks = room ? room.getBuilderTicks() : 0;
     let liteClaimer = memory.type == 'reserved' && memory.reserveEnd - Game.time > 3000 || Memory.claimRoom == roomName ? 1 : 0;
     let sourcesForWork = (memory.structures[STRUCTURE_SOURCE] || []).length;
     let sourcesCapacity = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.energyCapacity);
@@ -346,11 +325,11 @@ function getNotMyRoomLimits (roomName, creepsCount, stopLongBuilders) {
         "range" : 3,
     },{
         "role" : "longbuilder",
-        "count" : fcount["Build"] && !stopLongBuilders && builds && !(memory.type == 'lair' && !antikeepersCount) ? 1 : 0,
+        "count" : buildTicks && creepsCount["longharvester"] && !(memory.type == 'lair' && !antikeepersCount) ? 1 : 0,
         "priority" : 13,
-        "wishEnergy" : 1500,
+        "wishEnergy" : buildTicks > 15000 ? 1500 : 1000,
         "range" : 2,
-        "maxEnergy" : 2000,
+        "maxEnergy" : buildTicks > 15000 ? 2000 : 1000,
     },{
         "role" : "longharvester",
         "count" : memory.type == 'lair' || memory.type == 'central' || !needHarvester ? 0 : (creepsCount["longharvester"] || 0) + 1,
