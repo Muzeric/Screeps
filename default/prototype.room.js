@@ -450,6 +450,7 @@ Room.prototype.updateStructures = function() {
     memory.repairs = 0;
     memory.repairHits = 0;
     memory.visuals = [];
+    memory.spawnStructures = [];
     if (!("needRoads" in memory))
         memory.needRoads = {};
     memory.pointPos = Game.flags["PointPos." + this.name] ? Game.flags["PointPos." + this.name].pos : null;
@@ -610,6 +611,13 @@ Room.prototype.updateStructures = function() {
             }
         }
     });
+
+    if (this.storage) {
+        memory.spawnStructures = _.map(
+            _.sortBy(memory.structures[STRUCTURE_EXTENSION].concat(memory.structures[STRUCTURE_SPAWN]), s => s.pos.getRangeTo(this.storage.pos)),
+            s => s.id
+        );
+    }
 
     let constructionsContainers = {};
     let extensionConstructionCount = 0;
