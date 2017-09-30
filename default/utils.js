@@ -201,6 +201,10 @@ var utils = {
             Game.market.extendOrder(order.id, 10000);
         }
     },
+
+    isLowCPU: function() {
+        return Game.cpu.tickLimit - Game.cpu.getUsed() < CPU_LIMIT && Game.cpu.bucket < CPU_LIMIT;
+    },
 };
 
 module.exports = utils;

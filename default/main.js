@@ -127,7 +127,7 @@ module.exports.loop = function () {
 
         global.cache.stat.updateRoom(creep.room.name, 'cpu', cpu);
 
-        if (Game.cpu.tickLimit - Game.cpu.getUsed() < CPU_LIMIT) {
+        if (global.cache.utils.isLowCPU()) {
             console.log("STOP RUNNING: cpu left " + (Game.cpu.tickLimit - Game.cpu.getUsed()));
             break;
         }
@@ -140,12 +140,14 @@ module.exports.loop = function () {
     }
     let needList = [];
 
-    let leftCPU = Game.cpu.tickLimit - Game.cpu.getUsed();
-    _.forEach(global.cache.roomNames, function(roomName) {
+    for (let roomName of global.cache.roomNames) {
+        if (global.cache.utils.isLowCPU())
+            break;
+
         let lastCPU = Game.cpu.getUsed();
         let room = Game.rooms[roomName];
 
-        if (Game.time % PERIOD_NEEDLIST == 1 && leftCPU > CPU_LIMIT) {
+        if (Game.time % PERIOD_NEEDLIST == 1) {
             let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), c => c.memory.countName || c.memory.role);
             let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
 
@@ -182,7 +184,7 @@ module.exports.loop = function () {
             room.linkAction();
         }
         global.cache.stat.updateRoom(roomName, 'cpu', Game.cpu.getUsed() - lastCPU);
-    });
+    }
     global.cache.stat.addCPU("needList");
 
     if (Game.time % PERIOD_NEEDLIST == 1)
@@ -192,6 +194,9 @@ module.exports.loop = function () {
     let skipRoomNames = {};
     let reservedEnergy = {};
     for (let need of needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } )) {
+        if (global.cache.utils.isLowCPU())
+            break;
+
         if (!_.filter(Game.spawns, s => 
                 !s.spawning && 
                 !(s.name in skipSpawnNames) && 
@@ -244,11 +249,11 @@ module.exports.loop = function () {
         }
     }
     global.cache.stat.addCPU("create");
-    if (leftCPU > CPU_LIMIT) {
-        _.forEach(global.cache.roomNames, function(roomName) {
-            if (roomName in Memory.rooms && Memory.rooms[roomName].type == 'my')
-                global.cache.minerals.runLabs(roomName);
-        });
+    for (let roomName of global.cache.roomNames) {
+        if (global.cache.utils.isLowCPU())
+            break;
+        if (roomName in Memory.rooms && Memory.rooms[roomName].type == 'my')
+            global.cache.minerals.runLabs(roomName);
     }
     global.cache.stat.addCPU("runLabs");
     global.cache.stat.finish();
