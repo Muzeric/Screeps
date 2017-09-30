@@ -254,7 +254,7 @@ function getNotMyRoomLimits (roomName, creepsCount) {
     let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
     if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"])
         return [];
-    let buildTicks = room ? room.getBuilderTicks() : 0;
+    let buildTicks = room && room.getConstructions() ? room.getBuilderTicks() : 0;
     let liteClaimer = memory.type == 'reserved' && memory.reserveEnd - Game.time > 3000 || Memory.claimRoom == roomName ? 1 : 0;
     let sourcesForWork = (memory.structures[STRUCTURE_SOURCE] || []).length;
     let sourcesCapacity = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.energyCapacity);
