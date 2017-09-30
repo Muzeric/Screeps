@@ -1,4 +1,3 @@
-var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var role = {
@@ -32,11 +31,11 @@ var role = {
         let anum = 0;
         let rnum = 0;
         if (energy < 3000) {
-            mnum = utils.clamp(Math.floor(energy / (50+80)), 0, 24 + tower);
+            mnum = global.cache.utils.clamp(Math.floor(energy / (50+80)), 0, 24 + tower);
             anum = mnum;
         } else {
             tnum = tower ? 0 : 4;
-            mnum = utils.clamp(Math.floor((energy - 10 * tnum) / (50+80 + 50+150) * 2) + tnum, 0, 24 + tower);
+            mnum = global.cache.utils.clamp(Math.floor((energy - 10 * tnum) / (50+80 + 50+150) * 2) + tnum, 0, 24 + tower);
             anum = Math.floor((mnum - tnum) / 2);
             rnum = Math.floor((mnum - tnum) / 2);
         }

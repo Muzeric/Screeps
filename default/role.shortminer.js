@@ -1,9 +1,8 @@
-var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        if (!utils.checkInRoomAndGo(creep))
+        if (!global.cache.utils.checkInRoomAndGo(creep))
             return;
 
         if (creep.memory.cID === undefined) {

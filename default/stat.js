@@ -1,4 +1,3 @@
-var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var stat = {
@@ -60,7 +59,7 @@ var stat = {
             Memory.stat.CPUHistory["_total"].repairs = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.repairHits || 0);
             Game.notify(
                 "CPUHistory:" + Game.time + ":" + 
-                utils.lzw_encode(JSON.stringify(Memory.stat.CPUHistory, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} )) +
+                global.cache.utils.lzw_encode(JSON.stringify(Memory.stat.CPUHistory, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} )) +
                 "#END#"
             );
             delete Memory.stat.CPUHistory;
@@ -70,7 +69,7 @@ var stat = {
         if (Game.time - Memory.stat.roomSent > 100) {
             Game.notify(
                 "room.3:" + Game.time + ":" + 
-                utils.lzw_encode(this.dumpRoomStat()) +
+                global.cache.utils.lzw_encode(this.dumpRoomStat()) +
                 "#END#"
             );
             delete Memory.stat.roomHistory;

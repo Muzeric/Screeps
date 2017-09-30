@@ -1,4 +1,3 @@
-var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var role = {

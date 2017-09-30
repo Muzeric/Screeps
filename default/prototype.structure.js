@@ -1,5 +1,4 @@
 const profiler = require('screeps-profiler');
-var utils = require('utils');
 var travel = require('travel');
 
 Object.defineProperty(Structure.prototype, 'memory', {

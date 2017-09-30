@@ -1,4 +1,3 @@
-var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var role = {
@@ -24,7 +23,7 @@ var role = {
             return;
         }
 
-        let places = utils.getRangedPlaces(null, creep.pos, 1);
+        let places = global.cache.utils.getRangedPlaces(null, creep.pos, 1);
         let healersOK = _.sum(healers, c => c.pos.inRangeTo(creep.pos, 2)) >= _.min([places.length, healers.length]) ? 1 : 0;
         let healersBorder = _.sum(healers, c => c.pos.isBorder());
 

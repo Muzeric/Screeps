@@ -1,5 +1,3 @@
-var utils = require('utils');
-
 RoomPosition.prototype.isBorder = function () {
     return (this.x == 0 || this.x == 49 || this.y == 0 || this.y == 49) ? true : false;
 }
@@ -135,8 +133,8 @@ RoomPosition.prototype.change = function (diffx, diffy, inRoom) {
     y += _.parseInt(diffy);
 
     if (inRoom) {
-        x = utils.clamp(x, 0, 49);
-        y = utils.clamp(y, 0, 49);
+        x = global.cache.utils.clamp(x, 0, 49);
+        y = global.cache.utils.clamp(y, 0, 49);
     } else {
         let exits = Game.map.describeExits(this.roomName);
         if (x <= 0) {

@@ -1,5 +1,4 @@
 const profiler = require('screeps-profiler');
-var utils = require('utils');
 var travel = require('travel');
 
 var roomsHelper = {
@@ -464,8 +463,8 @@ Room.prototype.updateStructures = function() {
                 energyCapacity : s.energyCapacity,
                 minersFrom : _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner") && c.memory.energyID == s.id),
                 structureType : STRUCTURE_SOURCE,
-                places : utils.getRangedPlaces(null, s.pos, 1).length,
-                rangedPlaces : utils.getRangedPlaces(null, s.pos, 1),
+                places : global.cache.utils.getRangedPlaces(null, s.pos, 1).length,
+                rangedPlaces : global.cache.utils.getRangedPlaces(null, s.pos, 1),
         };
         memory.structures[STRUCTURE_SOURCE] = memory.structures[STRUCTURE_SOURCE] || [];
         memory.structures[STRUCTURE_SOURCE].push(elem);
@@ -504,7 +503,7 @@ Room.prototype.updateStructures = function() {
                 memory.pointPos = s.pos;
             elem = {
                 structureType : s.structureType,
-                rangedPlaces : utils.getRangedPlaces(null, s.pos, 1),
+                rangedPlaces : global.cache.utils.getRangedPlaces(null, s.pos, 1),
             };
         } else if (s.structureType == STRUCTURE_ROAD) {
             costs.set(s.pos.x, s.pos.y, 1);
@@ -512,7 +511,7 @@ Room.prototype.updateStructures = function() {
         } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_POWER_SPAWN, STRUCTURE_LAB, STRUCTURE_EXTRACTOR, STRUCTURE_TERMINAL, STRUCTURE_NUKER].indexOf(s.structureType) !== -1) {
             elem = {
                 structureType : s.structureType,
-                places : utils.getRangedPlaces(null, s.pos, 1).length,
+                places : global.cache.utils.getRangedPlaces(null, s.pos, 1).length,
                 hits : s.hits,
                 hitsMax : s.hitsMax, 
             };
@@ -536,7 +535,7 @@ Room.prototype.updateStructures = function() {
                     if (s.structureType == STRUCTURE_CONTAINER && s.pos.isNearTo(elem.source.pos))
                         elem.betweenPos = s.pos;
                     else
-                        elem.betweenPos = _.filter( utils.getRangedPlaces(null, elem.source.pos, 1), p => p.isNearTo(s.pos) && !(p.getKey() in betweenCache) )[0];
+                        elem.betweenPos = _.filter( global.cache.utils.getRangedPlaces(null, elem.source.pos, 1), p => p.isNearTo(s.pos) && !(p.getKey() in betweenCache) )[0];
                     if (elem.betweenPos) {
                         elem.source.pair = (elem.source.pair || 0) + 1;
                         costs.set(elem.betweenPos.x, elem.betweenPos.y, 100);
@@ -549,14 +548,14 @@ Room.prototype.updateStructures = function() {
                 elem.minersFrom = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.energyID == s.id);
                 if (room.storage && s.pos.inRangeTo(room.storage.pos, 2)) {
                     elem.storaged = 1;
-                    elem.betweenPos = _.filter( utils.getRangedPlaces(null, room.storage.pos, 1), p => p.isNearTo(s.pos) && !(p.getKey() in betweenCache) )[0];
+                    elem.betweenPos = _.filter( global.cache.utils.getRangedPlaces(null, room.storage.pos, 1), p => p.isNearTo(s.pos) && !(p.getKey() in betweenCache) )[0];
                     if (elem.betweenPos) {
                         costs.set(elem.betweenPos.x, elem.betweenPos.y, 100);
                         betweenCache[elem.betweenPos.getKey()] = 1;
                     }
                 }
             } else if (s.structureType == STRUCTURE_EXTRACTOR) {
-                elem.rangedPlaces = utils.getRangedPlaces(null, s.pos, 1);
+                elem.rangedPlaces = global.cache.utils.getRangedPlaces(null, s.pos, 1);
                 let mineral = s.pos.lookFor(LOOK_MINERALS)[0];
                 if (!mineral) {
                     console.log(room.name + ": no mineral under extractor");
@@ -655,7 +654,7 @@ Room.prototype.updateStructures = function() {
             if (extractor.pos.isNearTo(container.pos))
                 extractor.betweenPos = container.pos;
             else
-                extractor.betweenPos = _.filter( utils.getRangedPlaces(null, extractor.pos, 1), p => p.isNearTo(container.pos) )[0];
+                extractor.betweenPos = _.filter( global.cache.utils.getRangedPlaces(null, extractor.pos, 1), p => p.isNearTo(container.pos) )[0];
             costs.set(extractor.betweenPos.x, extractor.betweenPos.y, 100);
         }
     }
@@ -674,7 +673,7 @@ Room.prototype.updateStructures = function() {
             let contPos;
             let maxPlaces = 0;
             for (let pos of source.rangedPlaces) {
-                let places = utils.getRangedPlaces(null, pos, 1).length;
+                let places = global.cache.utils.getRangedPlaces(null, pos, 1).length;
                 if (places > maxPlaces) {
                     contPos = pos;
                     maxPlaces = places;
@@ -730,7 +729,7 @@ Room.prototype.updateStructures = function() {
                     for (let xdiff of xmod ? [-1 * xmod, xmod] : [0]) {
                         for (let ydiff of ymod ? [-1 * ymod, ymod] : [0]) {
                             let newPos = basePos.change(xdiff, ydiff, 1);
-                            if (utils.checkPosForExtension(newPos, costs)) {
+                            if (global.cache.utils.checkPosForExtension(newPos, costs)) {
                                 newCount++;
                                 //memory.visuals.push(newPos);
                                 let res = this.createConstructionSite(newPos, STRUCTURE_EXTENSION);

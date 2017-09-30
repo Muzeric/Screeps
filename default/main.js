@@ -2,7 +2,6 @@ require('constants');
 require('prototype.creep');
 require('prototype.roomposition');
 require('prototype.structure');
-var utils = require('utils');
 var travel = require('travel');
 //const profiler = require('screeps-profiler');
 // This line monkey patches the global prototypes. 
@@ -12,6 +11,7 @@ module.exports.loop = function () {
 //profiler.wrap(function() {
     Game.roomsHelper = require('prototype.room');
     global.cache = {};
+    global.cache.utils = require('utils');
     global.cache.stat = require('stat');
     global.cache.stat.init();
     global.cache.queueTransport = require('queue.transport');
@@ -429,13 +429,13 @@ function getRoomLimits (room, creepsCount) {
     let countHarvester = _.max([unminerSources, _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 15)]);
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
     let unStoragedLinks = (room.getUnStoragedLinks() || []).length;
-    let extraUpgraders = utils.clamp( _.floor(memory.freeEnergy / UPGRADERS_EXTRA_ENERGY), 0, 4);
+    let extraUpgraders = global.cache.utils.clamp( _.floor(memory.freeEnergy / UPGRADERS_EXTRA_ENERGY), 0, 4);
     let pairedExtractor = room.getPairedExtractor(1);
     let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 1000);
     let transportAmountIn = _.sum(_.filter(Memory.transportRequests, r => r.fromRoomName == room.name && r.fromRoomName == r.toRoomName), r => r.amount);
     let transportAmountOut = _.sum(_.filter(Memory.transportRequests, r => r.toRoomName == room.name && r.fromRoomName != r.toRoomName), r => r.amount);
     //let builderCount = (builds ? (builds > 5 && room.controller.level >= 8 ? 3 : (builds < 5 ? _.ceil(builds/2) : 3)) : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)) + (repairs > 20 && room.controller.level >= 8 ? 2 : 0);
-    let builderWorkCount = utils.clamp( _.min([_.ceil(room.getBuilderTicks() / (CREEP_LIFE_TIME * 0.6)), _.ceil(memory.freeEnergy / (2.5 * CREEP_LIFE_TIME * 0.6) ) ]), 0, 100 );
+    let builderWorkCount = global.cache.utils.clamp( _.min([_.ceil(room.getBuilderTicks() / (CREEP_LIFE_TIME * 0.6)), _.ceil(memory.freeEnergy / (2.5 * CREEP_LIFE_TIME * 0.6) ) ]), 0, 100 );
     
     let limits = [];
     limits.push({
@@ -516,7 +516,7 @@ function getRoomLimits (room, creepsCount) {
             "countName" : "transporter-in",
     },{
             role : "transporter",
-            "count" : utils.clamp(_.ceil(transportAmountOut / TRANSPORTER_CREATING_AMOUNT), 0, 6),
+            "count" : global.cache.utils.clamp(_.ceil(transportAmountOut / TRANSPORTER_CREATING_AMOUNT), 0, 6),
             "priority" : 8,
             "wishEnergy" : 1500,
             "maxEnergy" : 1500,

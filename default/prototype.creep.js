@@ -1,4 +1,3 @@
-var utils = require('utils');
 var travel = require('travel');
 
 Creep.prototype.getUnboostedBodyparts = function (type) {
@@ -135,12 +134,12 @@ Creep.prototype.trySubPath = function(targetPos, opts) {
 Creep.prototype.usePath = function(memory, memkey, targetPos, opts) {
     let mem = memory[memkey];
 
-    let iter = travel.getIterFromSerializedPath(mem.path, this.pos, utils.clamp(mem.iter-1, 0, mem.iter));
+    let iter = travel.getIterFromSerializedPath(mem.path, this.pos, global.cache.utils.clamp(mem.iter-1, 0, mem.iter));
     if (iter !== null && iter >= mem.iter) {
         mem.iter = iter+1;
         mem.here = 0;
     } else if (iter === null && (mem.iter || this.pos.getKey() != mem.sourceKey)) { // Zero mem.iter may be means we are on the source pos and it's ok
-        let border_iter = travel.getIterFromSerializedPath(mem.path, this.pos.invertBorderPos(), utils.clamp(mem.iter-1, 0, mem.iter));
+        let border_iter = travel.getIterFromSerializedPath(mem.path, this.pos.invertBorderPos(), global.cache.utils.clamp(mem.iter-1, 0, mem.iter));
         if (border_iter !== null) {
             //console.log(this.name + ": moveTo BUT got inverted pos, iter=" + border_iter + "; travel=" + JSON.stringify(this.memory.travel));
             return OK;
@@ -288,7 +287,7 @@ Creep.prototype.goFromKeepers = function() {
     let targetPos = this.room.getNearKeeperPos(this.pos, 5) || this.room.getNearComingLairPos(this.pos, 5);
     if (!targetPos)
         return -7;
-    let safePlace = this.pos.findClosestByPath(utils.getRangedPlaces(this, targetPos, 6));
+    let safePlace = this.pos.findClosestByPath(global.cache.utils.getRangedPlaces(this, targetPos, 6));
     return this.moveTo(safePlace ? safePlace : Game.spawns[this.memory.spawnName].room.controller); 
 }
 

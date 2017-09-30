@@ -1,4 +1,3 @@
-var utils = require('utils');
 const profiler = require('screeps-profiler');
 
 var role = {
@@ -67,7 +66,7 @@ var role = {
         if (target) {
             let safePlace;
             if (!creep.memory.arg) {
-                safePlace = creep.pos.findClosestByPath(utils.getRangedPlaces(creep, target.pos, 3));
+                safePlace = creep.pos.findClosestByPath(global.cache.utils.getRangedPlaces(creep, target.pos, 3));
                 creep.rangedAttack(target);
             } else {
                 if (minRange <= 1) {
