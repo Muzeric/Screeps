@@ -221,31 +221,33 @@ module.exports.loop = function () {
             if(!(need.role in global.cache.objects))
                 global.cache.objects[need.role] = require('role.' + need.role);
             let [body, leftEnergy] = global.cache.objects[need.role].create(energy, need.arg);
-            
-            let newName = spawn.createCreep(body, need.role + "-" + _.round(Math.random()*1000), {
-                "role": need.role,
-                "spawnName": spawn.name,
-                "roomName" : need.roomName,
-                "energy" : energy - leftEnergy,
-                "arg" : need.arg,
-                "countName": need.countName,
-                /*
-                "stat" : {
-                    spentEnergy : 0,
-                    gotEnergy : 0,
-                    CPU : 0,
-                    moves : 0,
-                },
-                */
-            });
-            if(newName) {
+            if (leftEnergy < 0) {
+                console.log("FAIL TO CREATE: leftEnergy=" + leftEnergy + " for energy=" + energy + ", arg=" + need.arg + ", role=" + need.role);
+                continue;
+            }
+            let newName = need.role + "-" + _.round(Math.random()*1000);
+            let opts = {
+                "memory": {
+                    "role": need.role,
+                    "spawnName": spawn.name,
+                    "roomName" : need.roomName,
+                    "energy" : energy - leftEnergy,
+                    "arg" : need.arg,
+                    "countName": need.countName,
+            }};
+            if (spawn.room.memory.spawnStructures.length)
+                opts["energyStructures"] = _.map(spawn.room.memory.spawnStructures, id => Game.getObjectById(id));
+
+            let ret = spawn.spawnCreep(body, newName, opts);
+
+            if(ret == OK) {
                 reservedEnergy[spawn.room.name] = (reservedEnergy[spawn.room.name] || 0) + (energy - leftEnergy);
                 global.cache.stat.updateRoom(need.roomName, 'create', -1 * (energy - leftEnergy));
+                console.log(spawn.name + ": BURNING " + newName + " (arg: " + JSON.stringify(need.arg) + ") for " + need.roomName + ", energy (" + energy + "->" + (energy - leftEnergy) + ") " + body.length + ":" + JSON.stringify(_.countBy(body)) );
+            } else {
+                console.log(spawn.name + ": FAILED to burn: ret=" + ret + " of " + newName + " (arg: " + JSON.stringify(need.arg) + ") for " + need.roomName + ", energy (" + energy + "->" + (energy - leftEnergy) + ") ");
             }
             skipSpawnNames[spawn.name] = 1;
-            
-            //let newName = need.role;
-            console.log(spawn.name + ": BURNING " + newName + " (arg: " + JSON.stringify(need.arg) + ") for " + need.roomName + ", energy (" + energy + "->" + (energy - leftEnergy) + ") " + body.length + ":" + JSON.stringify(_.countBy(body)) );
         }
     }
     global.cache.stat.addCPU("create");
