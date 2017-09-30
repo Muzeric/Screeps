@@ -44,12 +44,13 @@ my $count = 1;
 my @msgs_done = ();
 my @msgs_bad = ();
 foreach my $msg (@msgs) {
-  print "\r$count ($msg)           ";
+  my $prefix = "\r$count ($msg)           ";
+  print $prefix;
 
   #my $string = $imap->message_string($msg) 
   my $string = $imap->get($msg)
-  or print STDERR "getting meassage: ".$imap->errstr."\n"
-  and die;
+  or print STDERR "${prefix}getting meassage: ".$imap->errstr."\n"
+  and next;
   $string = "$string";
 
   #print "String: $string\n";
@@ -77,11 +78,11 @@ foreach my $msg (@msgs) {
         $cpu_out .= "$tick\n$jshash\n";
         $good = 1;       
       } else {
-        print STDERR "can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
+        print STDERR "${prefix}can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
       }
     } elsif (($version, $tick, $comp) = $str =~ /room\.(\d+):(\d+):(.+)#END#/g) {
       if (!exists($room_versions->{$version})) {
-        print STDERR "No version=$version\n";
+        print STDERR "${prefix}No version=$version\n";
         next;
       }
       my $hash = {};
@@ -103,7 +104,7 @@ foreach my $msg (@msgs) {
       $good = 1;
     } else {
       #print "not parsed: ".substr($str, 0, 50)." ... ".substr($str, -50)."\n";
-      print STDERR "not parsed: $str\n";
+      print STDERR "${prefix}not parsed: $str\n";
     }
 
   }
