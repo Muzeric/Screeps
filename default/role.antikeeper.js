@@ -43,7 +43,7 @@ var role = {
         let minRange;
         for (let hostile of hostiles) {
             let range = creep.pos.getRangeTo(hostile);
-            if (minRange === undefined || range < minRange || hostile.hits < target.hits) {
+            if (minRange === undefined || range < minRange || creep.memory.targetID == hostile.id || hostile.hits < target.hits) {
                 minRange = range;
                 target = hostile;
             }
@@ -64,6 +64,7 @@ var role = {
         }
 
         if (target) {
+            creep.memory.targetID = target.id;
             let safePlace;
             if (!creep.memory.arg) {
                 safePlace = creep.pos.findClosestByPath(global.cache.utils.getRangedPlaces(creep, target.pos, 3));
