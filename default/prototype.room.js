@@ -235,9 +235,10 @@ Room.prototype.updateResources = function() {
                 memory.store[s.mineralType] = (memory.store[s.mineralType] || 0) + s.mineralAmount;
         } else if (elem.structureType == STRUCTURE_POWER_SPAWN) {
             elem.power = s.power;
-        } else if (elem.structureType == STRUCTURE_NUKER) {
+        /*} else if (elem.structureType == STRUCTURE_NUKER) {
             elem.ghodium = s.ghodium;
             memory.store["G"] = (memory.store["G"] || 0) + (s.ghodium || 0);
+        */
         } else if (elem.structureType == STRUCTURE_KEEPER_LAIR) {
             elem.ticksToSpawn = s.ticksToSpawn;
         }
