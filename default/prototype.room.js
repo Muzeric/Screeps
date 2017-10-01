@@ -583,7 +583,7 @@ Room.prototype.updateStructures = function() {
                 costs.set(s.pos.x, s.pos.y, 0xff);
             
         } else if ([STRUCTURE_WALL, STRUCTURE_RAMPART].indexOf(s.structureType) !== -1) {
-            if (s.hits < s.hitsMax*0.9 && s.hits < room.getRepairLimit() ) {
+            if (s.hits < s.hitsMax*0.9) {
                 elem = {
                     hits : s.hits,
                     hitsMax : s.hitsMax, 
