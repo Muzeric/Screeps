@@ -594,9 +594,7 @@ function getSpawnForCreate (need, skipSpawnNames, skipRoomNames, reservedEnergy)
     //    return [-3];
 
     let waitRoomName = null;
-    for (let spawn of spawnsInRange.sort( function(a,b) { 
-        return (Game.map.getRoomLinearDistance(a.room.name, need.roomName) - Game.map.getRoomLinearDistance(b.room.name, need.roomName)) || (a.room.energyAvailable - b.room.energyAvailable); 
-    } )) {
+    for (let spawn of _.sortBy(spawnsInRange, s => s.room.name == need.roomName ? -1 : s.room.getPathToRoom(need.roomName))) {
         if (spawn.room.name == waitRoomName)
             continue;
         let energy = spawn.room.energyAvailable - (reservedEnergy[spawn.room.name] || 0);

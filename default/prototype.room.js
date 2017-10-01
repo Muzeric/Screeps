@@ -144,7 +144,7 @@ Room.prototype.balanceStore = function () {
                 continue;
             let est = global.cache.queueTransport.getStoreWithReserved(object, rt) - balanceMax;
             //console.log(`${this.name}: has ${store[rt]} of ${rt} and est = ${est}`);
-            for (let room of _.sortBy(Game.rooms, r => Game.map.getRoomLinearDistance(r.name, thisRoomName))) {
+            for (let room of _.sortBy(Game.rooms, r => this.getPathToRoom(r.name) || 1000)) {
                 if (est < BALANCE_TRANSPORT_MIN)
                     break;
                 let roomName = room.name;
