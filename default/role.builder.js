@@ -81,7 +81,7 @@ var role = {
 };
 
 function getBuilderTargets (creep, room) {
-    let targets = room.getConstructions().concat(room.getRepairs());
+    let targets = room.getConstructions().concat(room.getRepairs(1));
     if (!targets.length)
         return null;
     let minCost;

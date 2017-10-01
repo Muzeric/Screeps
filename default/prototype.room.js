@@ -416,8 +416,8 @@ Room.prototype.getConstructions = function () {
     return _.filter( this.memory.structures[FIND_MY_CONSTRUCTION_SITES] || [], s => !s.finished);
 }
 
-Room.prototype.getRepairs = function () {
-    return _.filter( _.flatten(_.values(this.memory.structures)), s => !s.finished && s.hits < s.hitsMax*0.9 && s.hits < this.getRepairLimit() );
+Room.prototype.getRepairs = function (all) {
+    return _.filter( _.flatten(_.values(this.memory.structures)), s => !s.finished && s.hits < s.hitsMax*0.9 && (all || s.hits < this.getRepairLimit()) );
 }
 
 Room.prototype.getBuilderTicks = function () {
