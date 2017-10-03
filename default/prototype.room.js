@@ -109,7 +109,7 @@ Room.prototype.updatePathToRooms = function () {
     for (let roomName of global.cache.roomNames) {
         if (roomName == this.name)
             continue;
-        if (oldPaths[roomName] && Memory.rooms[roomName].structuresTime > 0 && Memory.rooms[roomName].structuresTime < memory.pathToRoomsTime) {
+        if (roomName in oldPaths && Memory.rooms[roomName].structuresTime > 0 && Memory.rooms[roomName].structuresTime < memory.pathToRoomsTime) {
             memory.pathToRooms[roomName] = oldPaths[roomName];
             continue;
         }
