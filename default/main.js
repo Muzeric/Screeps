@@ -276,18 +276,18 @@ module.exports.loop = function () {
         let y0 = _.floor(parseInt(match[4]) / 10) * 10;
         let name0 = l1 + x0 + l2 + y0;
         if (!(name0 in Memory.observeCache))
-            observeCache[name0] = {"x": x0, "y": y0};
+            Memory.observeCache[name0] = {"x": x0, "y": y0};
 
         let count = 121;
         while (count-- > 0) {
-            let name = l1 + observeCache[name0].x + l2 + observeCache[name0].y;
+            let name = l1 + Memory.observeCache[name0].x + l2 + Memory.observeCache[name0].y;
             if (name in Memory.rooms && "structuresTime" in Memory.rooms[name] && Game.time - Memory.rooms[name].structuresTime < UPDATE_INTERVAL_STRUCTURES) {
-                observeCache[name0].x++;
-                if (observeCache[name0].x > x0 + 10) {
-                    observeCache[name0].x = x0;
-                    observeCache[name0].y++;
-                    if (observeCache[name0].y > y0 + 10) {
-                        observeCache[name0].y = y0;
+                Memory.observeCache[name0].x++;
+                if (Memory.observeCache[name0].x > x0 + 10) {
+                    Memory.observeCache[name0].x = x0;
+                    Memory.observeCache[name0].y++;
+                    if (Memory.observeCache[name0].y > y0 + 10) {
+                        Memory.observeCache[name0].y = y0;
                         break;
                     }
                 }
