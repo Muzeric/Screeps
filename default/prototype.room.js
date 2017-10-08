@@ -89,8 +89,6 @@ Room.prototype.update = function() {
 }
 
 Room.prototype.update2 = function() {
-    if (!("pathToRoomsTime" in this.memory) || Game.time - (this.memory.pathToRoomsTime || 0) >= UPDATE_INTERVAL_PATHCACHE)
-        this.updatePathToRooms();
     if (!("balanceTime" in this.memory) || Game.time - (this.memory.balanceTime || 0) >= UPDATE_INTERVAL_BALANCE)
         this.balanceStore();
 
@@ -98,36 +96,26 @@ Room.prototype.update2 = function() {
 }
 
 Room.prototype.getPathToRoom = function (roomName) {
+    if (roomName == this.name)
+        return 0;
     let memory = this.memory;
-    return memory.pathToRooms[roomName];
-}
+    memory.pathToRoomCache = memory.pathToRoomCache || {};
 
-Room.prototype.updatePathToRooms = function () {
-    let memory = this.memory;
-    let oldPaths = memory.pathToRooms;
-    memory.pathToRooms = {};
-    for (let roomName of global.cache.roomNames) {
-        if (roomName == this.name)
-            continue;
-        if (oldPaths && roomName in oldPaths && Memory.rooms[roomName].structuresTime > 0 && Memory.rooms[roomName].structuresTime < memory.pathToRoomsTime) {
-            memory.pathToRooms[roomName] = oldPaths[roomName];
-            continue;
-        }
-        memory.pathToRooms[roomName] = travel.getRoomsAvgPathLength(memory.pathCache, roomName);
-        if (!memory.pathToRooms[roomName]) {
-            if (Memory.rooms[roomName] && Memory.rooms[roomName].pointPos && memory.pointPos) {
-                let ps = memory.pointPos;
-                let pt = Memory.rooms[roomName].pointPos;
-                let path = travel.getPath(new RoomPosition(ps.x, ps.y, ps.roomName), {pos: new RoomPosition(pt.x, pt.y, pt.roomName), range: 2}, null, 0, null, PATH_OPS_LIMIT_LONG * 2);
-                if (path.path.length && !path.incomplete)
-                    memory.pathToRooms[roomName] = path.path.length;
-            } else {
-                memory.pathToRooms[roomName] = Game.map.getRoomLinearDistance(this.name, roomName) * 50 || null;
-            }
-        }
+    if (!(roomName in memory.pathToRoomCache)) {
+        let length = null;
+        if (Memory.rooms[roomName] && Memory.rooms[roomName].pointPos && memory.pointPos) {
+            let ps = memory.pointPos;
+            let pt = Memory.rooms[roomName].pointPos;
+            let path = travel.getPath(new RoomPosition(ps.x, ps.y, ps.roomName), {pos: new RoomPosition(pt.x, pt.y, pt.roomName), range: 2}, null, 0, null, PATH_OPS_LIMIT_LONG * 2);
+            if (path.path.length && !path.incomplete)
+                length = path.path.length;
+        } 
+        if (length === null)
+            length = Game.map.getRoomLinearDistance(this.name, roomName) * 50 || null;
+        memory.pathToRoomCache[roomName] = {"length": length, "createTime": Game.time};
     }
 
-    memory.pathToRoomsTime = Game.time;
+    return memory.pathToRoomCache[roomName].length;
 }
 
 Room.prototype.balanceStore = function () {
@@ -176,7 +164,12 @@ Room.prototype.updatePathCache = function() {
     let memory = this.memory;
     memory.pathCache = memory.pathCache || {};
     memory.pathCount = travel.clearPathCache(memory.pathCache);
+    memory.pathToRoomCache = memory.pathToRoomCache || {};
     //console.log(this.name + ": updatePathCache: " + allCount + " paths, " + delCount + " deleted");
+    for (let roomName in memory.pathToRoomCache) {
+        if (Game.time - (memory.pathToRoomCache[roomName].createTime || 0) > PATHCACHE_CREATE_TIMEOUT)
+            delete memory.pathToRoomCache[roomName];
+    }
     memory.pathCacheTime = Game.time;
 }
 
