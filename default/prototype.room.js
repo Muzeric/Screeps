@@ -115,7 +115,7 @@ Room.prototype.updatePathToRooms = function () {
         }
         memory.pathToRooms[roomName] = travel.getRoomsAvgPathLength(memory.pathCache, roomName);
         if (!memory.pathToRooms[roomName]) {
-            if (Memory.rooms[roomName] && Memory.rooms[roomName].pointPos && memory.pointPos) {
+            if (Memory.rooms[roomName] && Memory.rooms[roomName].pointPos && memory.pointPos && Memory.rooms[roomName].type == "my") {
                 let ps = memory.pointPos;
                 let pt = Memory.rooms[roomName].pointPos;
                 let path = travel.getPath(new RoomPosition(ps.x, ps.y, ps.roomName), {pos: new RoomPosition(pt.x, pt.y, pt.roomName), range: 2}, null, 0, null, PATH_OPS_LIMIT_LONG * 2);
@@ -133,6 +133,11 @@ Room.prototype.updatePathToRooms = function () {
 Room.prototype.balanceStore = function () {
     let memory = this.memory;
     let thisRoomName = this.name;
+
+    if (memory.type != "my") {
+        memory.balanceTime = Game.time;
+        return;
+    }
     
     for (let object of [this.storage, this.terminal]) {
         if (!object || !("store" in object))
@@ -195,6 +200,11 @@ Room.prototype.updateResources = function() {
     memory.energy = 0;
     memory.freeEnergy = 0;
     memory.store = {};
+
+    if (memory.type == "hostiled") {
+        memory.resourcesTime = Game.time;
+        return;
+    }
 
     this.find(FIND_DROPPED_RESOURCES).forEach( function(r) {
         let elem = {
@@ -622,13 +632,6 @@ Room.prototype.updateStructures = function() {
         }
     });
 
-    if (this.storage) {
-        memory.spawnStructures = _.map(
-            _.sortBy(memory.structures[STRUCTURE_EXTENSION].concat(memory.structures[STRUCTURE_SPAWN]), s => s.pos.getRangeTo(this.storage.pos)),
-            s => s.id
-        );
-    }
-
     let constructionsContainers = {};
     let extensionConstructionCount = 0;
     let extractorConstructionCount = 0;
@@ -684,7 +687,7 @@ Room.prototype.updateStructures = function() {
         memory.type = "central";
     }
 
-    if (this.canBuildContainers()) {
+    if (memory.type != "hostiled" && this.canBuildContainers()) {
         for (let source of _.filter([].concat(memory.structures[STRUCTURE_SOURCE] || [], memory.structures[STRUCTURE_EXTRACTOR] || []), s => !s.pair && s.rangedPlaces.length)) {
             if (source.structureType == STRUCTURE_EXTRACTOR && !source.mineralAmount)
                 continue;
@@ -787,6 +790,13 @@ Room.prototype.updateStructures = function() {
                     boostCount++;
                 }
             }
+        }
+
+        if (this.storage) {
+            memory.spawnStructures = _.map(
+                _.sortBy(memory.structures[STRUCTURE_EXTENSION].concat(memory.structures[STRUCTURE_SPAWN]), s => s.pos.getRangeTo(this.storage.pos)),
+                s => s.id
+            );
         }
     }
 
