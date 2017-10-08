@@ -258,6 +258,7 @@ module.exports.loop = function () {
             global.cache.minerals.runLabs(roomName);
     }
     global.cache.stat.addCPU("runLabs");
+    /*
     Memory.observeCache = Memory.observeCache || {};
     for (let roomName in Game.rooms) {
         if (global.cache.utils.isLowCPU())
@@ -306,6 +307,7 @@ module.exports.loop = function () {
         }
     }   
     global.cache.stat.addCPU("observe");
+    */
     global.cache.stat.finish();
 //});
 };
