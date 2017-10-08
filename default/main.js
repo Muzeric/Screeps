@@ -258,6 +258,52 @@ module.exports.loop = function () {
             global.cache.minerals.runLabs(roomName);
     }
     global.cache.stat.addCPU("runLabs");
+    Memory.observeCache = Memory.observeCache || {};
+    for (let room of Game.rooms) {
+        if (global.cache.utils.isLowCPU())
+            break;
+        if (!(room.memory.structures[STRUCTURE_OBSERVER] || []).length)
+            continue;
+        let regex = /^(\w)(\d+)(\w)(\d+)$/;
+        let match = regex.exec(room.name);
+        if (!match) {
+            console.log("Observe FAILED regexp of " + room.name);
+            break;
+        }
+        let l1 = match[1];
+        let l2 = match[3];
+        let x0 = _.floor(parseInt(match[2]) / 10) * 10;
+        let y0 = _.floor(parseInt(match[4]) / 10) * 10;
+        let name0 = l1 + x0 + l2 + y0;
+        if (!(name0 in Memory.observeCache))
+            observeCache[name0] = {"x": x0, "y": y0};
+
+        let count = 121;
+        while (count-- > 0) {
+            let name = l1 + observeCache[name0].x + l2 + observeCache[name0].y;
+            if (name in Memory.rooms && "structuresTime" in Memory.rooms[name] && Game.time - Memory.rooms[name].structuresTime < UPDATE_INTERVAL_STRUCTURES) {
+                observeCache[name0].x++;
+                if (observeCache[name0].x > x0 + 10) {
+                    observeCache[name0].x = x0;
+                    observeCache[name0].y++;
+                    if (observeCache[name0].y > y0 + 10) {
+                        observeCache[name0].y = y0;
+                        break;
+                    }
+                }
+                continue;
+            }
+            let observer = Game.getObjectById( room.memory.structures[STRUCTURE_OBSERVER][0].id );
+            if (!observer) {
+                console.log("Observe: can't load object in " + room.name + " by id=" + room.memory.structures[STRUCTURE_OBSERVER][0].id);
+                break;
+            }
+            let res = observer.observeRoom(name);
+            console.log("Observed room " + name + " (" + res + ")");
+            break;
+        }
+    }   
+    global.cache.stat.addCPU("observe");
     global.cache.stat.finish();
 //});
 };
@@ -267,7 +313,7 @@ function getNotMyRoomLimits (roomName, creepsCount) {
     let memory = Memory.rooms[roomName] || {structures : {}};
     let room = Game.rooms[roomName];
     let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
-    if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"])
+    if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"] && memory.type != "banked")
         return [];
     let buildTicks = room && room.getConstructions().length ? room.getBuilderTicks() : 0;
     let liteClaimer = memory.type == 'reserved' && memory.reserveEnd - Game.time > 3000 || Memory.claimRoom == roomName ? 1 : 0;
@@ -315,7 +361,7 @@ function getNotMyRoomLimits (roomName, creepsCount) {
         "range": 3,
     },{
         "role" : "longharvester",
-        "count" : memory.type == 'lair' || memory.type == 'central' ? 0 : needHarvester * sourcesForWork,
+        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' ? 0 : needHarvester * sourcesForWork,
         "arg" : {work: workerHarvester, attack: 1},
         "priority" : 10,
         "minEnergy" : 550,
@@ -332,7 +378,7 @@ function getNotMyRoomLimits (roomName, creepsCount) {
         "range" : 3,
     },{
         "role" : "longminer",
-        "count" : memory.type == 'lair' || memory.type == 'central' ? 0 : pairedSources,
+        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' ? 0 : pairedSources,
         "arg" : {long: 0, attack: 1},
         "priority" : 12,
         "wishEnergy" : 1060,
@@ -347,7 +393,7 @@ function getNotMyRoomLimits (roomName, creepsCount) {
         "maxEnergy" : buildTicks > 15000 ? 2000 : 1000,
     },{
         "role" : "longharvester",
-        "count" : memory.type == 'lair' || memory.type == 'central' || !needHarvester ? 0 : (creepsCount["longharvester"] || 0) + 1,
+        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' || !needHarvester ? 0 : (creepsCount["longharvester"] || 0) + 1,
         "arg" : {work: workerHarvester, attack: 1},
         "priority" : 14,
         "minEnergy" : 550,

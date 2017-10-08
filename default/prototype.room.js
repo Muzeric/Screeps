@@ -207,7 +207,7 @@ Room.prototype.updateResources = function() {
         memory.resources.push(elem);
     });
 
-    for ( let elem of _.filter(_.flatten(_.values(memory.structures)), s => "energy" in s || "store" in s || s.structureType == STRUCTURE_KEEPER_LAIR) )  {
+    for ( let elem of _.filter(_.flatten(_.values(memory.structures)), s => "energy" in s || "store" in s || s.structureType == STRUCTURE_KEEPER_LAIR || "power" in s) )  {
         let s = Game.getObjectById(elem.id);
         if (!s) {
             console.log(this.name + ": no resource object " + elem.id);
@@ -234,6 +234,9 @@ Room.prototype.updateResources = function() {
                 memory.store[s.mineralType] = (memory.store[s.mineralType] || 0) + s.mineralAmount;
         } else if (elem.structureType == STRUCTURE_POWER_SPAWN) {
             elem.power = s.power;
+        } else if (elem.structureType == STRUCTURE_POWER_BANK) {
+            elem.power = s.power;
+            elem.ticksToDecay = s.ticksToDecay;
         /*} else if (elem.structureType == STRUCTURE_NUKER) {
             elem.ghodium = s.ghodium;
             memory.store["G"] = (memory.store["G"] || 0) + (s.ghodium || 0);
@@ -503,15 +506,22 @@ Room.prototype.updateStructures = function() {
             if (!memory.pointPos)
                 memory.pointPos = s.pos;
             elem = {
-                structureType : s.structureType,
                 rangedPlaces : global.cache.utils.getRangedPlaces(null, s.pos, 1),
+            };
+        } else if (s.structureType == STRUCTURE_POWER_BANK) {
+            memory.type = 'banked';
+            elem = {
+                places : global.cache.utils.getRangedPlaces(null, s.pos, 1).length,
+                power: s.power,
+                ticksToDecay: s.ticksToDecay,
+                hits : s.hits,
+                hitsMax : s.hitsMax,
             };
         } else if (s.structureType == STRUCTURE_ROAD) {
             costs.set(s.pos.x, s.pos.y, 1);
             room.refreshRoad(memory, s);
         } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_POWER_SPAWN, STRUCTURE_LAB, STRUCTURE_EXTRACTOR, STRUCTURE_TERMINAL, STRUCTURE_NUKER].indexOf(s.structureType) !== -1) {
             elem = {
-                structureType : s.structureType,
                 places : global.cache.utils.getRangedPlaces(null, s.pos, 1).length,
                 hits : s.hits,
                 hitsMax : s.hitsMax, 

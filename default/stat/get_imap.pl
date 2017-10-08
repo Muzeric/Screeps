@@ -3,6 +3,7 @@
 use strict;
 use Term::ReadKey;
 #use Mail::IMAPClient;
+use Net::IMAP::Simple;
 use Net::IMAP::Simple::Gmail;
 use MIME::Parser;
 use Data::Dumper;
@@ -108,12 +109,6 @@ foreach my $msg (@msgs) {
     }
 
   }
-  
-  if ($good) {
-    push(@msgs_done, $msg);
-  } else {
-    push(@msgs_bad, $msg);
-  }
 
   if ($cpu_out) {
     open(MSGF, ">mail_cpu/m$msg.msg")
@@ -129,30 +124,24 @@ foreach my $msg (@msgs) {
     print MSGF "$room_out\n";
     close(MSGF);
   }
+ 
+  if ($good) {
+    $imap->remove_labels($msg, qw/ScreepsInput/);
+    $imap->add_labels($msg, qw/ScreepsArchive/);
+  
+    push(@msgs_done, $msg);
+  } else {
+    $imap->remove_labels($msg, qw/ScreepsInput/);
+    $imap->add_labels($msg, qw/ScreepsOther/);
+  
+    push(@msgs_bad, $msg);
+  }
   
   $count++;
 }
 print "\n";
 
-print "We have ".scalar(@msgs_done)." done msgs\n";
-$count = 1;
-foreach my $msg (@msgs_done) {
-  print "\r$count ($msg)           ";
-  $imap->remove_labels($msg, qw/ScreepsInput/);
-  $imap->add_labels($msg, qw/ScreepsArchive/);
-  $count++;
-}
-print "\n";
-
-print "We have ".scalar(@msgs_bad)." bad msgs\n";
-$count = 1;
-foreach my $msg (@msgs_bad) {
-  print "\r$count ($msg)           ";
-  $imap->remove_labels($msg, qw/ScreepsInput/);
-  $imap->add_labels($msg, qw/ScreepsOther/);
-  $count++;
-}
-print "\n";
+print "We done $count msgs\n";
 
 sub lzw_decode {
     my $s = shift;
