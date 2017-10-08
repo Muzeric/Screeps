@@ -209,6 +209,24 @@ var utils = {
             console.log("BREAK: cpu left " + _.floor(left));
         return stop;
     },
+
+    memoryProfiler: function() {
+        let hash = {};
+        for (let key in Memory)
+            hash[key] = JSON.stringify(Memory[key]).length;
+        
+        let hash2 = {};
+        for (let roomName in Memory.rooms) {
+            for (let key in Memory.rooms[roomName])
+                hash2[key] = (hash2[key] || 0) + JSON.stringify(Memory.rooms[roomName][key]).length;
+        }
+
+        for (let coll of [hash, hash2]) {
+            for (let key of _.keys(coll).sort((a, b) => coll[b] - coll[a]) )
+                console.log(key + ": " + coll[key]);
+            console.log("\n");
+        }
+    },
 };
 
 module.exports = utils;
