@@ -132,34 +132,31 @@ module.exports.loop = function () {
     }
     global.cache.stat.addCPU("run", creepsCPUStat);
     
-    if (!Memory.limitList || !Memory.limitTime) {
-        Memory.limitList = {};
-        Memory.limitTime = {};
-    }
-    let needList = [];
+    if (Game.time % PERIOD_NEEDLIST == 0) {
+        let needList = [];
 
-    for (let roomName of global.cache.roomNames) {
-        if (global.cache.utils.isLowCPU())
-            break;
+        for (let roomName of global.cache.roomNames) {
+            if (global.cache.utils.isLowCPU())
+                break;
 
-        let lastCPU = Game.cpu.getUsed();
-        let room = Game.rooms[roomName];
+            let lastCPU = Game.cpu.getUsed();
+            let room = Game.rooms[roomName];
+            let limitList = [];
 
-        if (Game.time % PERIOD_NEEDLIST == 1) {
-            let creepsCount =  _.countBy(_.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), c => c.memory.countName || c.memory.role);
-            let bodyCount = _.countBy( _.flatten( _.map( _.filter(Game.creeps, c => c.memory.roomName == roomName && (c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning) ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
+            let creepsCount = _.countBy(_.filter(global.cache.creepsByRoomName[roomName], c => c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning), c => c.memory.countName || c.memory.role);
+            let bodyCount = _.countBy( _.flatten( _.map( _.filter(global.cache.creepsByRoomName[roomName], c => c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
 
-            if (!Memory.limitList[roomName] || !Memory.limitTime[roomName] || (Game.time - Memory.limitTime[roomName] > 10)) {
-                try {
-                    Memory.limitList[roomName] = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount);
-                } catch (e) {
-                    console.log(roomName + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
-                    Game.notify(roomName + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
-                }
-                Memory.limitTime[roomName] = Game.time;
+            try {
+                limitList = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount);
+            } catch (e) {
+                console.log(roomName + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
+                Game.notify(roomName + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
             }
 
-            for (let limit of Memory.limitList[roomName]) {
+            if (!limitList.length)
+                continue;
+
+            for (let limit of limitList) {
                 let notEnoughBody = 0;
                 let hasBodyLimits = 0;
                 if (limit["body"]) {
@@ -175,85 +172,99 @@ module.exports.loop = function () {
                     creepsCount[limit.countName] = (creepsCount[limit.countName] || 0) + 1;
                 }
             }
-        }
 
+            global.cache.stat.updateRoom(roomName, 'cpu', Game.cpu.getUsed() - lastCPU);
+        }
+        console.log("needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.countName})));
+        global.cache.stat.addCPU("needList");
+        
+        let skipSpawnNames = {};
+        let skipRoomNames = {};
+        let reservedEnergy = {};
+        for (let need of needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } )) {
+            if (global.cache.utils.isLowCPU())
+                break;
+
+            if (!_.filter(Game.spawns, s => 
+                    !s.spawning && 
+                    !(s.name in skipSpawnNames) && 
+                    !(s.room.name in skipRoomNames)
+            ).length) {
+                //console.log("All spawns are spawning");
+                break;
+            }
+            
+            let res = getSpawnForCreate(need, skipSpawnNames, skipRoomNames, reservedEnergy);
+            if (res[0] == -2) {
+                //console.log("needList: " + need.role + " for " + need.roomName + " has no spawns in range");
+            } else if (res[0] == -1) {
+                if (res[1])
+                    skipRoomNames[res[1]] = 1;
+                //console.log("needList: " + need.role + " for " + need.roomName + " return waitSpawnName=" + res[1]);
+            } else if (res[0] == -3) {
+                console.log("needList: " + need.role + " for " + need.roomName + " has no spawns with enough energyCapacity");
+            } else if (res[0] == 0) {
+                let spawn = res[1];
+                let energy = res[2];
+                if(!(need.role in global.cache.objects))
+                    global.cache.objects[need.role] = require('role.' + need.role);
+                let [body, leftEnergy] = global.cache.objects[need.role].create(energy, need.arg);
+                if (leftEnergy < 0) {
+                    console.log("FAIL TO CREATE: leftEnergy=" + leftEnergy + " for energy=" + energy + ", arg=" + need.arg + ", role=" + need.role);
+                    continue;
+                }
+                let newName = need.role + "-" + _.round(Math.random()*1000);
+                let opts = {
+                    "memory": {
+                        "role": need.role,
+                        "spawnName": spawn.name,
+                        "roomName" : need.roomName,
+                        "energy" : energy - leftEnergy,
+                        "arg" : need.arg,
+                        "countName": need.countName,
+                }};
+                if (spawn.room.memory.spawnStructures.length)
+                    opts["energyStructures"] = _.map(spawn.room.memory.spawnStructures, id => Game.getObjectById(id));
+
+                let ret = spawn.spawnCreep(body, newName, opts);
+
+                if(ret == OK) {
+                    reservedEnergy[spawn.room.name] = (reservedEnergy[spawn.room.name] || 0) + (energy - leftEnergy);
+                    global.cache.stat.updateRoom(need.roomName, 'create', -1 * (energy - leftEnergy));
+                    console.log(spawn.name + ": BURNING " + newName + " (arg: " + JSON.stringify(need.arg) + ") for " + need.roomName + ", energy (" + energy + "->" + (energy - leftEnergy) + ") " + body.length + ":" + JSON.stringify(_.countBy(body)) );
+                } else {
+                    console.log(spawn.name + ": FAILED to burn: ret=" + ret + " of " + newName + " (arg: " + JSON.stringify(need.arg) + ") for " + need.roomName + ", energy (" + energy + "->" + (energy - leftEnergy) + ") ");
+                }
+                skipSpawnNames[spawn.name] = 1;
+            }
+        }
+        global.cache.stat.addCPU("create");
+    }
+
+    for (let roomName of global.cache.roomNames) {
+        if (global.cache.utils.isLowCPU())
+            break;
+        let lastCPU = Game.cpu.getUsed();
+        let room = Game.rooms[roomName];
+    
         if (room && Memory.rooms[roomName].type == 'my') {
             towerAction(room);
             room.linkAction();
         }
+
         global.cache.stat.updateRoom(roomName, 'cpu', Game.cpu.getUsed() - lastCPU);
     }
-    global.cache.stat.addCPU("needList");
+    global.cache.stat.addCPU("roomActions");
 
-    if (Game.time % PERIOD_NEEDLIST == 1)
-        console.log("needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.countName})));
-    
-    let skipSpawnNames = {};
-    let skipRoomNames = {};
-    let reservedEnergy = {};
-    for (let need of needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } )) {
-        if (global.cache.utils.isLowCPU())
-            break;
-
-        if (!_.filter(Game.spawns, s => 
-                !s.spawning && 
-                !(s.name in skipSpawnNames) && 
-                !(s.room.name in skipRoomNames)
-        ).length) {
-            //console.log("All spawns are spawning");
-            break;
-        }
-        
-        let res = getSpawnForCreate(need, skipSpawnNames, skipRoomNames, reservedEnergy);
-        if (res[0] == -2) {
-            //console.log("needList: " + need.role + " for " + need.roomName + " has no spawns in range");
-        } else if (res[0] == -1) {
-            if (res[1])
-                skipRoomNames[res[1]] = 1;
-            //console.log("needList: " + need.role + " for " + need.roomName + " return waitSpawnName=" + res[1]);
-        } else if (res[0] == -3) {
-            console.log("needList: " + need.role + " for " + need.roomName + " has no spawns with enough energyCapacity");
-        } else if (res[0] == 0) {
-            let spawn = res[1];
-            let energy = res[2];
-            if(!(need.role in global.cache.objects))
-                global.cache.objects[need.role] = require('role.' + need.role);
-            let [body, leftEnergy] = global.cache.objects[need.role].create(energy, need.arg);
-            if (leftEnergy < 0) {
-                console.log("FAIL TO CREATE: leftEnergy=" + leftEnergy + " for energy=" + energy + ", arg=" + need.arg + ", role=" + need.role);
-                continue;
-            }
-            let newName = need.role + "-" + _.round(Math.random()*1000);
-            let opts = {
-                "memory": {
-                    "role": need.role,
-                    "spawnName": spawn.name,
-                    "roomName" : need.roomName,
-                    "energy" : energy - leftEnergy,
-                    "arg" : need.arg,
-                    "countName": need.countName,
-            }};
-            if (spawn.room.memory.spawnStructures.length)
-                opts["energyStructures"] = _.map(spawn.room.memory.spawnStructures, id => Game.getObjectById(id));
-
-            let ret = spawn.spawnCreep(body, newName, opts);
-
-            if(ret == OK) {
-                reservedEnergy[spawn.room.name] = (reservedEnergy[spawn.room.name] || 0) + (energy - leftEnergy);
-                global.cache.stat.updateRoom(need.roomName, 'create', -1 * (energy - leftEnergy));
-                console.log(spawn.name + ": BURNING " + newName + " (arg: " + JSON.stringify(need.arg) + ") for " + need.roomName + ", energy (" + energy + "->" + (energy - leftEnergy) + ") " + body.length + ":" + JSON.stringify(_.countBy(body)) );
-            } else {
-                console.log(spawn.name + ": FAILED to burn: ret=" + ret + " of " + newName + " (arg: " + JSON.stringify(need.arg) + ") for " + need.roomName + ", energy (" + energy + "->" + (energy - leftEnergy) + ") ");
-            }
-            skipSpawnNames[spawn.name] = 1;
-        }
-    }
-    global.cache.stat.addCPU("create");
     for (let roomName of global.cache.roomNames) {
         if (global.cache.utils.isLowCPU())
             break;
+        let lastCPU = Game.cpu.getUsed();
+
         if (roomName in Memory.rooms && Memory.rooms[roomName].type == 'my')
             global.cache.minerals.runLabs(roomName);
+
+        global.cache.stat.updateRoom(roomName, 'cpu', Game.cpu.getUsed() - lastCPU);
     }
     global.cache.stat.addCPU("runLabs");
     /*
