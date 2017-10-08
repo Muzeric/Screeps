@@ -202,8 +202,12 @@ var utils = {
         }
     },
 
-    isLowCPU: function() {
-        return Game.cpu.tickLimit - Game.cpu.getUsed() < (Game.cpu.bucket < Game.cpu.limit ? CPU_LIMIT_HIGH : CPU_LIMIT_LOW);
+    isLowCPU: function(silent) {
+        let left = Game.cpu.tickLimit - Game.cpu.getUsed();
+        let stop = left < (Game.cpu.bucket < Game.cpu.limit ? CPU_LIMIT_HIGH : CPU_LIMIT_LOW);
+        if (!silent)
+            console.log("BREAK: cpu left " + _.floor(left));
+        return stop;
     },
 };
 

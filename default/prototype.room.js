@@ -71,19 +71,6 @@ Room.prototype.update = function() {
     for (let pos of this.memory.visuals) {
         this.visual.circle(pos, {fill: 'red'});
     }
-    /*
-    for (let key of _.filter(Object.keys(this.memory.needRoads), r => this.memory.needRoads[r].wanted > ROADS_REPAIR_WANTED)) {
-        let color = 'green';
-        if (this.memory.needRoads[key].wanted > ROADS_CONSTRUCT_WANTED)
-            color = 'red';
-        else if (this.memory.needRoads[key].wanted > 10)
-            color = 'yellow';
-            
-        let pos = key.split(',');
-        
-        this.visual.circle(parseInt(pos[0]), parseInt(pos[1]), {fill: color});
-    }
-    */
 
     return OK;
 }
