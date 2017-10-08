@@ -277,29 +277,31 @@ module.exports.loop = function () {
         let name0 = l1 + x0 + l2 + y0;
         if (!(name0 in Memory.observeCache))
             Memory.observeCache[name0] = {"x": x0, "y": y0};
+        else if (Memory.observeCache[name0].over == Game.time)
+            continue;
 
         let count = 121;
         while (count-- > 0) {
-            let name = l1 + Memory.observeCache[name0].x + l2 + Memory.observeCache[name0].y;
-            if (name in Memory.rooms && "structuresTime" in Memory.rooms[name] && Game.time - Memory.rooms[name].structuresTime < UPDATE_INTERVAL_STRUCTURES) {
-                Memory.observeCache[name0].x++;
-                if (Memory.observeCache[name0].x > x0 + 10) {
-                    Memory.observeCache[name0].x = x0;
-                    Memory.observeCache[name0].y++;
-                    if (Memory.observeCache[name0].y > y0 + 10) {
-                        Memory.observeCache[name0].y = y0;
-                        break;
-                    }
+            Memory.observeCache[name0].x++;
+            if (Memory.observeCache[name0].x > x0 + 10) {
+                Memory.observeCache[name0].x = x0;
+                Memory.observeCache[name0].y++;
+                if (Memory.observeCache[name0].y > y0 + 10) {
+                    Memory.observeCache[name0].y = y0;
+                    Memory.observeCache[name0].over = Game.time;
                 }
-                continue;
             }
+            let name = l1 + Memory.observeCache[name0].x + l2 + Memory.observeCache[name0].y;
+            if (name in Memory.rooms && "structuresTime" in Memory.rooms[name] && Game.time - Memory.rooms[name].structuresTime < UPDATE_INTERVAL_STRUCTURES)
+                continue;
+
             let observer = Game.getObjectById( Memory.rooms[roomName].structures[STRUCTURE_OBSERVER][0].id );
             if (!observer) {
                 console.log("Observe: can't load object in " + roomName + " by id=" + Memory.rooms[roomName].structures[STRUCTURE_OBSERVER][0].id);
                 break;
             }
             let res = observer.observeRoom(name);
-            console.log("Observed room " + name + " (" + res + ")");
+            console.log("Observed room " + name + " by " + roomName + " (" + res + ")");
             break;
         }
     }   
