@@ -259,15 +259,15 @@ module.exports.loop = function () {
     }
     global.cache.stat.addCPU("runLabs");
     Memory.observeCache = Memory.observeCache || {};
-    for (let room of Game.rooms) {
+    for (let roomName in Game.rooms) {
         if (global.cache.utils.isLowCPU())
             break;
-        if (!(room.memory.structures[STRUCTURE_OBSERVER] || []).length)
+        if (!(Memory.rooms[roomName].structures[STRUCTURE_OBSERVER] || []).length)
             continue;
         let regex = /^(\w)(\d+)(\w)(\d+)$/;
-        let match = regex.exec(room.name);
+        let match = regex.exec(roomName);
         if (!match) {
-            console.log("Observe FAILED regexp of " + room.name);
+            console.log("Observe FAILED regexp of " + roomName);
             break;
         }
         let l1 = match[1];
@@ -293,9 +293,9 @@ module.exports.loop = function () {
                 }
                 continue;
             }
-            let observer = Game.getObjectById( room.memory.structures[STRUCTURE_OBSERVER][0].id );
+            let observer = Game.getObjectById( Memory.rooms[roomName].structures[STRUCTURE_OBSERVER][0].id );
             if (!observer) {
-                console.log("Observe: can't load object in " + room.name + " by id=" + room.memory.structures[STRUCTURE_OBSERVER][0].id);
+                console.log("Observe: can't load object in " + roomName + " by id=" + Memory.rooms[roomName].structures[STRUCTURE_OBSERVER][0].id);
                 break;
             }
             let res = observer.observeRoom(name);
