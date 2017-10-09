@@ -180,7 +180,11 @@ var travel = {
         for (let target in pathCache) {
             for (let source in pathCache[target]) {
                 allCount++;
-                if (Game.time - pathCache[target][source].useTime > PATHCACHE_USE_TIMEOUT || Game.time - pathCache[target][source].createTime > PATHCACHE_CREATE_TIMEOUT) {
+                if (
+                    Game.time - pathCache[target][source].useTime > PATHCACHE_USE_TIMEOUT || 
+                    Game.time - pathCache[target][source].createTime > PATHCACHE_CREATE_TIMEOUT ||
+                    !pathCache[target][source].useCount && Game.time - pathCache[target][source].useTime > PATHCACHE_USE_TIMEOUT/3
+                ) {
                     delete pathCache[target][source];
                     delCount++;
                 }
