@@ -221,7 +221,20 @@ var utils = {
                 hash2[key] = (hash2[key] || 0) + JSON.stringify(Memory.rooms[roomName][key]).length;
         }
 
-        for (let coll of [hash, hash2]) {
+        let hash3 = {};
+        for (let roomName in Memory.rooms) {
+            if (!("pathCache" in Memory.rooms[roomName]))
+                continue;
+            for (let target in Memory.rooms[roomName]["pathCache"]) {
+                for (let source in Memory.rooms[roomName]["pathCache"][target]) {
+                    let path = Memory.rooms[roomName]["pathCache"][target][source];
+                    hash3[_.ceil(path.useCount / 10)] = (hash3[_.ceil(path.useCount / 10)] || 0) + 1;
+                }
+            }
+        }
+
+        for (let coll of [hash, hash2, hash3]) {
+            console.log("Total: " + _.sum(coll));
             for (let key of _.keys(coll).sort((a, b) => coll[b] - coll[a]) )
                 console.log(key + ": " + coll[key]);
             console.log("\n");

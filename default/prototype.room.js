@@ -255,6 +255,9 @@ Room.prototype.getComingLairPos = function () {
 }
 
 Room.prototype.needRoad = function(creep) {
+    if (this.memory.type == "hostiled")
+        return -1;
+
     let roads = this.memory.needRoads;
     let key = creep.pos.x + "," + creep.pos.y;
     
