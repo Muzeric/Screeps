@@ -233,7 +233,15 @@ var utils = {
             }
         }
 
-        for (let coll of [hash, hash2, hash3]) {
+        let hash4 = {};
+        for (let roomName in Memory.rooms) {
+            if (!("structures" in Memory.rooms[roomName]))
+                continue;
+            for (let structureType in Memory.rooms[roomName]["structures"])
+                hash4[structureType] = (hash4[structureType] || 0) + JSON.stringify(Memory.rooms[roomName]["structures"][structureType]).length;
+        }
+
+        for (let coll of [hash, hash2, hash3, hash4]) {
             console.log("Total: " + _.sum(coll));
             for (let key of _.keys(coll).sort((a, b) => coll[b] - coll[a]) )
                 console.log(key + ": " + coll[key]);
