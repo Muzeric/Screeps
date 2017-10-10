@@ -205,8 +205,10 @@ var utils = {
     isLowCPU: function(silent) {
         let left = Game.cpu.tickLimit - Game.cpu.getUsed();
         let stop = left < (Game.cpu.bucket < Game.cpu.limit ? CPU_LIMIT_HIGH : CPU_LIMIT_LOW);
-        if (!silent && stop)
-            console.log("BREAK: cpu left " + _.floor(left));
+        if (!silent && stop) {
+            let caller = (new Error()).stack.split('\n')[3].trim();
+            console.log("BREAK: cpu left " + _.floor(left) + " stopped at " + caller);
+        }
         return stop;
     },
 
