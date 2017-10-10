@@ -783,6 +783,9 @@ Room.prototype.updateStructures = function() {
         }
     }
 
+    if (memory.type == "hostiled")
+        memory.structures = {};
+
     memory.structuresTime = Game.time;
 }
 
