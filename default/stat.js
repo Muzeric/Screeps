@@ -80,9 +80,9 @@ var stat = {
     dumpRoomStat : function () {
         let res = '';
         let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu'];
-        let lite = _.keys(Memory.stat.roomHistory) > 20;
+        let lite = _.keys(Memory.stat.roomHistory).length > 20;
         for (let roomName in Memory.stat.roomHistory) {
-            if (lite && (!(roomName in Memory.rooms) || ["my", "reserved", "lair", "banked"].indexOf(Memory.rooms[roomName]) !== -1))
+            if (lite && (!(roomName in Memory.rooms) || ["my", "reserved", "lair", "banked"].indexOf(Memory.rooms[roomName].type) == -1))
                 continue;
             res += roomName;
             for (let key of keys) {
