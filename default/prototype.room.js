@@ -257,25 +257,11 @@ Room.prototype.getComingLairPos = function () {
 Room.prototype.needRoad = function(creep) {
     if (this.memory.type == "hostiled")
         return -1;
+    let memory = this.memory;
 
-    let roads = this.memory.needRoads;
-    let key = creep.pos.x + "," + creep.pos.y;
-    
-    if (["harvester","longharvester","upgrader","transporter","antikeeper"].indexOf(creep.memory.role) !== -1) {
-        if (!(key in roads)) {
-            roads[key] = {wanted : 1, lastUpdate : Game.time, needRepair : 0, id : null};
-        } else {
-            roads[key].wanted = Game.time - roads[key].lastUpdate < ROADS_TIMEOUT ? roads[key].wanted + 1 : 1;
-            roads[key].lastUpdate = Game.time;
-        }
-    }
-
-    if (roads[key] && roads[key].needRepair && roads[key].id && creep.carry.energy && creep.getActiveBodyparts(WORK)) {
-        let road = Game.getObjectById(roads[key].id);
-        if (!road) {
-            roads[key].id = null;
-            return -1;
-        }
+    let road =  _.find(creep.pos.lookFor(LOOK_STRUCTURES), s => s.structureType == STRUCTURE_ROAD)
+             || _.find(creep.pos.lookFor(LOOK_CONSTRUCTION_SITES), s => s.structureType == STRUCTURE_ROAD);
+    if (road && creep.carry.energy && creep.getActiveBodyparts(WORK)) {
         if (road.hits && road.hits < road.hitsMax) {
             //console.log(creep.name + ": repair road on " + key);
             creep.repair(road);
@@ -283,30 +269,24 @@ Room.prototype.needRoad = function(creep) {
             //console.log(creep.name + ": build road on " + key);
             creep.build(road);
         }
-        return 0;
+    }
+    if ((!road || road.progressTotal) && ["harvester","longharvester","upgrader","transporter","antikeeper"].indexOf(creep.memory.role) !== -1) {
+        if (!("wantRoads" in memory))
+            memory.wantRoads = {};
+
+        let value = memory.wantRoads[creep.pos.getKey()] || 0;
+        let time = _.floor(value / 10);
+        let count = value - time;
+        if (Game.time - time < ROADS_TIMEOUT) {
+            if (count < 9)
+                count++;
+        } else {
+            count = 1;
+        }
+        memory.wantRoads[creep.pos.getKey()] = Game.time * 10 + count;
     }
 
     return 0;
-}
-
-Room.prototype.refreshRoad = function (memory, s) {
-    let key = s.pos.x + "," + s.pos.y;
-    if (memory.needRoads[key]) {
-        memory.needRoads[key].id = s.id;
-        if (Game.time - (memory.needRoads[key].lastUpdate || 0) > ROADS_TIMEOUT) {
-            delete memory.needRoads[key];
-            return -1;
-        }
-
-        if (memory.needRoads[key].wanted > ROADS_REPAIR_WANTED && (s.progressTotal || s.hits && s.hits < s.hitsMax * 0.9))
-            memory.needRoads[key].needRepair = 1;
-        else
-            memory.needRoads[key].needRepair = 0;
-        
-        return 0;
-    }
-
-    return -2;
 }
 
 Room.prototype.linkAction = function () {
@@ -447,8 +427,8 @@ Room.prototype.updateStructures = function() {
     memory.repairHits = 0;
     memory.visuals = [];
     memory.spawnStructures = [];
-    if (!("needRoads" in memory))
-        memory.needRoads = {};
+    if (!("wantRoads" in memory))
+        memory.wantRoads = {};
     memory.pointPos = Game.flags["PointPos." + this.name] ? Game.flags["PointPos." + this.name].pos : null;
     let costs = new PathFinder.CostMatrix;
         
@@ -466,9 +446,6 @@ Room.prototype.updateStructures = function() {
         memory.structures[STRUCTURE_SOURCE] = memory.structures[STRUCTURE_SOURCE] || [];
         memory.structures[STRUCTURE_SOURCE].push(elem);
     });
-
-    for (let key of _.filter(Object.keys(memory.needRoads), r => memory.needRoads[r].id ))
-        memory.needRoads[key].id = null; // Renew id's, if hostile or manual removed object
 
     if (this.storage && this.storage.store.energy > REPAIR_ENERGY_LIMIT)
         memory.repairLimit = REPAIR_LIMIT_HIGH;
@@ -512,7 +489,6 @@ Room.prototype.updateStructures = function() {
             };
         } else if (s.structureType == STRUCTURE_ROAD) {
             costs.set(s.pos.x, s.pos.y, 1);
-            room.refreshRoad(memory, s);
         } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_POWER_SPAWN, STRUCTURE_LAB, STRUCTURE_EXTRACTOR, STRUCTURE_TERMINAL, STRUCTURE_NUKER, STRUCTURE_OBSERVER].indexOf(s.structureType) !== -1) {
             elem = {
                 places : global.cache.utils.getRangedPlaces(null, s.pos, 1).length,
@@ -622,9 +598,12 @@ Room.prototype.updateStructures = function() {
         memory.constructions++;
         memory.constructionHits += s.progressTotal - s.progress;
         if (s.structureType == STRUCTURE_ROAD) {
-            if( room.refreshRoad(memory, s) < 0) {
-                s.remove();
-                return;
+            let value = memory.wantRoads[s.pos.getKey()] || 0;
+            let time = _.floor(value / 10);
+            if (Game.time - time > ROADS_TIMEOUT) {
+                let res = s.remove();
+                delete memory.wantRoads[s.pos.getKey()];
+                console.log(room.name + ": REMOVE (" + res + ") constr road at " + s.pos.getKey());
             } else {
                 memory.constructionsRoads++;
                 costs.set(s.pos.x, s.pos.y, 1);
@@ -697,16 +676,16 @@ Room.prototype.updateStructures = function() {
         }
     }
 
-    for (let key of _.filter(Object.keys(memory.needRoads), r => 
-            !memory.needRoads[r].id && 
-            (memory.needRoads[r].wanted > ROADS_CONSTRUCT_WANTED || Game.time - (memory.needRoads[r].lastUpdate || 0) > ROADS_TIMEOUT)
-    )) {
-        if (Game.time - (memory.needRoads[key].lastUpdate || 0) > ROADS_TIMEOUT) {
-            delete memory.needRoads[key];
-        } else if (memory.constructions < MAX_CONSTRUCTIONS_PER_ROOM) {
-            let pos = key.split(',');
-            if (pos[0] != 0 && pos[0] != 49 && pos[1] != 0 && pos[1] != 49) {
-                let res = this.createConstructionSite(parseInt(pos[0]), parseInt(pos[1]), STRUCTURE_ROAD);
+    for (let key in memory.wantRoads) {
+        let value = memory.wantRoads[key];
+        let time = _.floor(value / 10);
+        let count = value - time;
+        if (Game.time - time > ROADS_TIMEOUT) {
+            delete memory.wantRoads[key];
+        } else if (count > ROADS_CONSTRUCT_WANTED && memory.constructions < MAX_CONSTRUCTIONS_PER_ROOM) {
+            let coor = key.split(',');
+            if (coor[0] != 0 && coor[0] != 49 && coor[1] != 0 && coor[1] != 49) {
+                let res = this.createConstructionSite(parseInt(coor[0]), parseInt(coor[1]), STRUCTURE_ROAD);
                 console.log(this.name + ": BUILT (" + res + ") road at " + key);
                 memory.constructions++;
                 memory.constructionsRoads++;
