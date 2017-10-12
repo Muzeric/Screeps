@@ -255,7 +255,7 @@ Room.prototype.getComingLairPos = function () {
 }
 
 Room.prototype.needRoad = function(creep) {
-    if (this.memory.type == "hostiled")
+    if (this.memory.type == "hostiled" || creep.pos.isBorder())
         return -1;
     let memory = this.memory;
 
@@ -263,10 +263,10 @@ Room.prototype.needRoad = function(creep) {
              || _.find(creep.pos.lookFor(LOOK_CONSTRUCTION_SITES), s => s.structureType == STRUCTURE_ROAD);
     if (road && creep.carry.energy && creep.getActiveBodyparts(WORK)) {
         if (road.hits && road.hits < road.hitsMax) {
-            //console.log(creep.name + ": repair road on " + key);
+            //console.log(creep.name + ": repair road on " + creep.pos.getKey(1));
             creep.repair(road);
         } else if (road.progressTotal) {
-            //console.log(creep.name + ": build road on " + key);
+            //console.log(creep.name + ": build road on " + creep.pos.getKey(1));
             creep.build(road);
         }
     }
@@ -683,10 +683,10 @@ Room.prototype.updateStructures = function() {
         if (Game.time - time > ROADS_TIMEOUT) {
             delete memory.wantRoads[key];
         } else if (count > ROADS_CONSTRUCT_WANTED && memory.constructions < MAX_CONSTRUCTIONS_PER_ROOM) {
-            let coor = key.split(',');
-            if (coor[0] != 0 && coor[0] != 49 && coor[1] != 0 && coor[1] != 49) {
-                let res = this.createConstructionSite(parseInt(coor[0]), parseInt(coor[1]), STRUCTURE_ROAD);
-                console.log(this.name + ": BUILT (" + res + ") road at " + key);
+            let coor = key.split('x');
+            let res = this.createConstructionSite(parseInt(coor[0]), parseInt(coor[1]), STRUCTURE_ROAD);
+            console.log(this.name + ": BUILT (" + res + ") road at " + key);
+            if (res = OK) {
                 memory.constructions++;
                 memory.constructionsRoads++;
             }
