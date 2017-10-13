@@ -276,7 +276,7 @@ Room.prototype.needRoad = function(creep) {
 
         let value = memory.wantRoads[creep.pos.getKey()] || 0;
         let time = _.floor(value / 10);
-        let count = value - time;
+        let count = value - time * 10;
         if (Game.time - time < ROADS_TIMEOUT) {
             if (count < 9)
                 count++;
@@ -679,7 +679,7 @@ Room.prototype.updateStructures = function() {
     for (let key in memory.wantRoads) {
         let value = memory.wantRoads[key];
         let time = _.floor(value / 10);
-        let count = value - time;
+        let count = value - time * 10;
         if (Game.time - time > ROADS_TIMEOUT) {
             delete memory.wantRoads[key];
         } else if (count > ROADS_CONSTRUCT_WANTED && memory.constructions < MAX_CONSTRUCTIONS_PER_ROOM) {
