@@ -301,7 +301,7 @@ module.exports.loop = function () {
                 }
             }
             let name = l1 + Memory.observeCache[name0].x + l2 + Memory.observeCache[name0].y;
-            if (name in Memory.rooms && "structuresTime" in Memory.rooms[name] && Game.time - Memory.rooms[name].structuresTime < UPDATE_INTERVAL_STRUCTURES)
+            if (name in Memory.rooms && "structuresTime" in Memory.rooms[name] && Game.time - Memory.rooms[name].structuresTime < OBSERVE_INTERVAL)
                 continue;
 
             let observer = Game.getObjectById( Memory.rooms[roomName].structures[STRUCTURE_OBSERVER][0].id );
@@ -310,7 +310,7 @@ module.exports.loop = function () {
                 break;
             }
             let res = observer.observeRoom(name);
-            console.log("Observed room " + name + " by " + roomName + " (" + res + ")");
+            //console.log("Observed room " + name + " by " + roomName + " (" + res + ")");
             break;
         }
     }   
