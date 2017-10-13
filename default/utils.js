@@ -214,24 +214,22 @@ var utils = {
 
     memoryProfiler: function() {
         let hash = {};
-        for (let key in Memory)
-            hash[key] = JSON.stringify(Memory[key]).length;
+        for (let key in Memory) {
+            hash[key] = {};
+            hash[key].length = JSON.stringify(Memory[key]).length;
+            let cpu = Game.cpu.getUsed();
+            let some = JSON.parse(JSON.stringify(Memory[key]));
+            hash[key].cpu = Game.cpu.getUsed() - cpu;
+        }
         
         let hash2 = {};
         for (let roomName in Memory.rooms) {
-            for (let key in Memory.rooms[roomName])
-                hash2[key] = (hash2[key] || 0) + JSON.stringify(Memory.rooms[roomName][key]).length;
-        }
-
-        let hash3 = {};
-        for (let roomName in Memory.rooms) {
-            if (!("pathCache" in Memory.rooms[roomName]))
-                continue;
-            for (let target in Memory.rooms[roomName]["pathCache"]) {
-                for (let source in Memory.rooms[roomName]["pathCache"][target]) {
-                    let path = Memory.rooms[roomName]["pathCache"][target][source];
-                    hash3[_.ceil(path.useCount / 10)] = (hash3[_.ceil(path.useCount / 10)] || 0) + 1;
-                }
+            for (let key in Memory.rooms[roomName]) {
+                hash2[key] = hash2[key] || {};
+                hash2[key].length = (hash2[key].length || 0) + JSON.stringify(Memory.rooms[roomName][key]).length;
+                let cpu = Game.cpu.getUsed();
+                let some = JSON.parse(JSON.stringify(Memory.rooms[roomName][key]));
+                hash2[key].cpu = (hash2[key].cpu || 0) + (Game.cpu.getUsed() - cpu);
             }
         }
 
@@ -239,14 +237,25 @@ var utils = {
         for (let roomName in Memory.rooms) {
             if (!("structures" in Memory.rooms[roomName]))
                 continue;
-            for (let structureType in Memory.rooms[roomName]["structures"])
-                hash4[structureType] = (hash4[structureType] || 0) + JSON.stringify(Memory.rooms[roomName]["structures"][structureType]).length;
+            for (let structureType in Memory.rooms[roomName]["structures"]) {
+                hash4[structureType] = hash4[structureType] || {};
+                hash4[structureType].length = (hash4[structureType].length || 0) + JSON.stringify(Memory.rooms[roomName]["structures"][structureType]).length;
+                let cpu = Game.cpu.getUsed();
+                let some = JSON.parse(JSON.stringify(Memory.rooms[roomName]["structures"][structureType]));
+                hash4[structureType].cpu = (hash4[structureType].cpu || 0) + (Game.cpu.getUsed() - cpu);
+            }
         }
 
-        for (let coll of [hash, hash2, hash3, hash4]) {
-            console.log("Total: " + _.sum(coll));
-            for (let key of _.keys(coll).sort((a, b) => coll[b] - coll[a]) )
-                console.log(key + ": " + coll[key]);
+        for (let coll of [hash, hash2, hash4]) {
+            let totalLength = 0;
+            let totalCpu = 0;
+            for (let key in coll) {
+                totalLength += coll[key].length;
+                totalCpu += coll[key].cpu;
+            }
+            console.log("Total: length=" + totalLength + ", cpu=" + _.floor(totalCpu, 1));
+            for (let key of _.keys(coll).sort((a, b) => coll[b].cpu - coll[a].cpu) )
+                console.log(key + ": " + coll[key].length + "\t" + _.floor(coll[key].cpu, 1));
             console.log("\n");
         }
     },

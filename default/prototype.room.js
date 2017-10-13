@@ -489,6 +489,8 @@ Room.prototype.updateStructures = function() {
             };
         } else if (s.structureType == STRUCTURE_ROAD) {
             costs.set(s.pos.x, s.pos.y, 1);
+            if (s.pos.getKey() in memory.wantRoads)
+                delete memory.wantRoads[s.pos.getKey()];
         } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_POWER_SPAWN, STRUCTURE_LAB, STRUCTURE_EXTRACTOR, STRUCTURE_TERMINAL, STRUCTURE_NUKER, STRUCTURE_OBSERVER].indexOf(s.structureType) !== -1) {
             elem = {
                 places : global.cache.utils.getRangedPlaces(null, s.pos, 1).length,
