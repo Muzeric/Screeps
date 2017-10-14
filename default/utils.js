@@ -202,6 +202,12 @@ var utils = {
         }
     },
 
+    terminalInfo: function() {
+        for (let room of _.filter(Game.rooms, r => r.terminal)) {
+            console.log(room.name + ": " + JSON.stringify(room.terminal.store));
+        }
+    },
+
     isLowCPU: function(silent) {
         let left = Game.cpu.tickLimit - Game.cpu.getUsed();
         let stop = left < (Game.cpu.bucket < Game.cpu.limit ? CPU_LIMIT_HIGH : CPU_LIMIT_LOW);
