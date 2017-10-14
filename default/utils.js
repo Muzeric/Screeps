@@ -204,7 +204,14 @@ var utils = {
 
     terminalInfo: function() {
         for (let room of _.filter(Game.rooms, r => r.terminal)) {
-            console.log(room.name + ": " + JSON.stringify(room.terminal.store));
+            let print = room.name + ": ";
+            for (let rt in room.terminal.store) {
+                let order = _.find(Game.market.orders, o => o.resourceType == rt && o.type == ORDER_SELL && roomName == room.name);
+                print += rt + "=" + room.terminal.store[rt];
+                if (order)
+                    print += " (" + order.id + ", p=" + order.price + ", a=" + order.amount + ")";
+                print += "; "
+            }
         }
     },
 

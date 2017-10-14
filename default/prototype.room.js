@@ -97,8 +97,10 @@ Room.prototype.getPathToRoom = function (roomName) {
             if (path.path.length && !path.incomplete)
                 length = path.path.length;
         } 
-        if (length === null)
-            length = Game.map.getRoomLinearDistance(this.name, roomName) * 50 || null;
+        if (length === null) {
+            let route = Game.map.findRoute(this.name, roomName);
+            length = route.length * 50 || null;
+        }
         memory.pathToRoomCache[roomName] = {"length": length, "createTime": Game.time};
     }
 

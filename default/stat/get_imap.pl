@@ -104,7 +104,11 @@ foreach my $msg (@msgs) {
       $room_out .= "}\n";
       $good = 1;
     } else {
-      print "not parsed: ".substr($str, 0, 50)." ... ".substr($str, -50)."\n";
+      if (length($str) > 105) {
+        print "not parsed: ".substr($str, 0, 50)." ... ".substr($str, -50)."\n";
+      } else {
+        print "not parsed: $str\n";
+      }
       #print STDERR "${prefix}not parsed: $str\n";
     }
 
