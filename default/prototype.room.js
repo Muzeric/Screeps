@@ -326,6 +326,10 @@ Room.prototype.getTowers = function() {
     return _.map( this.memory.structures[STRUCTURE_TOWER], t => Game.getObjectById(t.id) );
 }
 
+Room.prototype.getNuker = function() {
+    return _.map( this.memory.structures[STRUCTURE_NUKER], t => Game.getObjectById(t.id) )[0];
+}
+
 Room.prototype.getPairedContainer = function(pos) {
     let containers = _.filter( [].concat(
         (this.memory.structures[STRUCTURE_CONTAINER] || []),

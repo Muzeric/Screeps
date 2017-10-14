@@ -144,6 +144,8 @@ var minerals = {
         let outputLabs = room.getOutputLabs();
         if (outputLabs.length < 1)
             return null;
+        let nuker = room.getNuker();
+        let gNeed = nuker ? nuker.ghodiumCapacity - nuker.ghodium : 0;
         
         let request;
         if (room.memory.labRequest) {
@@ -155,7 +157,7 @@ var minerals = {
             }
         }
         if (!room.memory.labRequest) {
-            let cache = {};
+            let cache = {"G": gNeed};
             //for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
             for (let outputType of _.keys(global.cache.minerals.library).sort(function(a, b) {
                 if(a == "ZK" || a == "UL") 
