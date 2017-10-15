@@ -130,7 +130,7 @@ Room.prototype.balanceStore = function () {
     }) ) {
         let balanceMin = outputType.length == 5 ? BALANCE_MIN : 0;
         let extra = memory.needResources[outputType] || 0;
-        let elem = this.library[outputType];
+        let elem = global.cache.minerals.library[outputType];
         let in1 = storage.store[elem.inputTypes[0]] || 0;
         let in2 = storage.store[elem.inputTypes[1]] || 0;
         let needOut = balanceMin - (room.memory.store[outputType] || 0) + extra;
