@@ -128,17 +128,28 @@ Room.prototype.balanceStore = function () {
         else 
             return b.length - a.length;
     }) ) {
-        let balanceMin = outputType.length == 5 ? BALANCE_MIN : 0;
-        let extra = memory.needResources[outputType] || 0;
+        memory.needResources[outputType] = memory.needResources[outputType] || 0;
+        if (outputType.length == 5)
+            memory.needResources[outputType] += BALANCE_MIN;
+        memory.needResources[outputType] -= global.cache.queueTransport.getRoomStoreWithCarring(this.name, outputType) || 0;
         let elem = global.cache.minerals.library[outputType];
-        let in1 = memory.store[elem.inputTypes[0]] || 0;
-        let in2 = memory.store[elem.inputTypes[1]] || 0;
-        let needOut = balanceMin - (memory.store[outputType] || 0) + extra;
-        if (needOut > 0) {
-            memory.needResources[elem.inputTypes[0]] = (memory.needResources[elem.inputTypes[0]] || 0) + needOut;
-            memory.needResources[elem.inputTypes[1]] = (memory.needResources[elem.inputTypes[1]] || 0) + needOut;
+        if (memory.needResources[outputType] > 0) {
+            memory.needResources[elem.inputTypes[0]] = (memory.needResources[elem.inputTypes[0]] || 0) + memory.needResources[outputType];
+            memory.needResources[elem.inputTypes[1]] = (memory.needResources[elem.inputTypes[1]] || 0) + memory.needResources[outputType];
+        }    
+    }
+
+    if (this.terminal && this.storage) {
+        for (let rt in memory.needResources) {
+            let amount = memory.needResources[rt];
+            let need = amount < 0 ? -1 * amount : 0;
+            let cur = _.min([global.cache.queueTransport.getStoreWithReserved(this.terminal, rt), this.terminal.store[rt]]);
+            if (cur > need) {
+                console.log(`${this.name}: rebalance of ${rt} ${cur - need} from terminal`);
+            } else if (cur < need) {
+                console.log(`${this.name}: rebalance of ${rt} ${need - cur} to terminal`);
+            }
         }
-        
     }
     
     for (let object of [this.storage, this.terminal]) {

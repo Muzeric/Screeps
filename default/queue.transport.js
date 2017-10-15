@@ -8,7 +8,9 @@ var queue = {
     init: function () {
         Memory.transportRequests = Memory.transportRequests || {};
         this.indexByCreep = {};
-        this.transportReserved = this.getReserved();
+        this.transportReserved = {};
+        this.carring = {};
+        this.getReserved();
     },
 
     getDefaultStorage: function (creep) {
@@ -206,6 +208,10 @@ var queue = {
                         console.log("queueTransport: getReserved double (reqID=" + this.indexByCreep[request.creepID] + ") index for request=" + JSON.stringify(request));
                     else
                         this.indexByCreep[request.creepID] = reqID;
+                    if (got > 0) {
+                        this.carring[request.toRoomName] = this.carring[request.toRoomName] || {};
+                        this.carring[request.toRoomName][request.resourceType] = (this.carring[request.toRoomName][request.resourceType] || 0) + got;
+                    }
                 }
             } else if (Game.time - request.createTime > TRANSPORT_REQUEST_TIMEOUT && request.state > 0) {
                 console.log("Timeout transport request: " + JSON.stringify(request));
@@ -242,17 +248,16 @@ var queue = {
                     cache[key] = reqID;
                 }
             }
-            if (got - request.amount) {
-                res[request.fromID] = res[request.fromID] || {};
-                res[request.fromID][request.resourceType] = (res[request.fromID][request.resourceType] || 0) - request.amount + got;
-            }
-            if (request.amount) {
-                res[request.toID] = res[request.toID] || {};
-                res[request.toID][request.resourceType] = (res[request.toID][request.resourceType] || 0) + request.amount;
+            if (request.amount > 0) {
+                this.transportReserved[request.fromID] = this.transportReserved[request.fromID] || {};
+                this.transportReserved[request.fromID][request.resourceType] = (this.transportReserved[request.fromID][request.resourceType] || 0) - request.amount + got;
+
+                this.transportReserved[request.toID] = this.transportReserved[request.toID] || {};
+                this.transportReserved[request.toID][request.resourceType] = (this.transportReserved[request.toID][request.resourceType] || 0) + request.amount;
             }
         }
 
-        return res;
+        return OK;
     },
 
     getStoreWithReserved: function (object, resourceType) {
@@ -272,6 +277,13 @@ var queue = {
 
     getTypeAndAmount: function (objectID) {
         return this.transportReserved[objectID];
+    },
+
+    getRoomStoreWithCarring: function (roomName, rt) {
+        if (!(roomName in Memory.rooms) || !("store" in Memory.rooms[roomName]))
+            return null;
+        
+        return Memory.rooms[roomName].store[rt] || 0 + this.carring[roomName][rt] || 0;
     },
 
     status: function () {
