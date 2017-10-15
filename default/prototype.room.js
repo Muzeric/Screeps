@@ -143,15 +143,18 @@ Room.prototype.balanceStore = function () {
         for (let rt in memory.needResources) {
             let amount = memory.needResources[rt];
             let need = amount < 0 ? -1 * amount : 0;
-            let cur = _.min([global.cache.queueTransport.getStoreWithReserved(this.terminal, rt), this.terminal.store[rt]]);
+            let cur = global.cache.queueTransport.getStoreWithReserved(this.terminal, rt);
             if (cur > need) {
+                global.cache.queueTransport.addRequest(this.terminal, this.storage, rt, _.min([cur - need, this.terminal.store[rt]]));
                 console.log(`${this.name}: rebalance of ${rt} ${cur - need} from terminal`);
             } else if (cur < need) {
+                global.cache.queueTransport.addRequest(this.storage, this.terminal, rt, _.min([need - cur, this.storage.store[rt]]));
                 console.log(`${this.name}: rebalance of ${rt} ${need - cur} to terminal`);
             }
         }
     }
     
+    /*
     for (let object of [this.storage, this.terminal]) {
         if (!object || !("store" in object))
             continue;
@@ -181,6 +184,7 @@ Room.prototype.balanceStore = function () {
             }
         }
     }
+    */
 
     memory.balanceTime = Game.time;
 }
