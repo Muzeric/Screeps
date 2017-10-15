@@ -131,9 +131,9 @@ Room.prototype.balanceStore = function () {
         let balanceMin = outputType.length == 5 ? BALANCE_MIN : 0;
         let extra = memory.needResources[outputType] || 0;
         let elem = global.cache.minerals.library[outputType];
-        let in1 = storage.store[elem.inputTypes[0]] || 0;
-        let in2 = storage.store[elem.inputTypes[1]] || 0;
-        let needOut = balanceMin - (room.memory.store[outputType] || 0) + extra;
+        let in1 = memory.store[elem.inputTypes[0]] || 0;
+        let in2 = memory.store[elem.inputTypes[1]] || 0;
+        let needOut = balanceMin - (memory.store[outputType] || 0) + extra;
         if (needOut > 0) {
             memory.needResources[elem.inputTypes[0]] = (memory.needResources[elem.inputTypes[0]] || 0) + needOut;
             memory.needResources[elem.inputTypes[1]] = (memory.needResources[elem.inputTypes[1]] || 0) + needOut;
