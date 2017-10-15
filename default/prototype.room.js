@@ -115,6 +115,31 @@ Room.prototype.balanceStore = function () {
         memory.balanceTime = Game.time;
         return;
     }
+    memory.needResources = {};
+    let nuker = this.getNuker();
+    if (nuker)
+        memory.needResources["G"] = nuker.ghodiumCapacity - nuker.ghodium;
+
+    for (let outputType of _.keys(global.cache.minerals.library).sort(function(a, b) {
+        if(a == "ZK" || a == "UL") 
+            return 1; 
+        else if (b == "ZK" && b == "UL") 
+            return -1; 
+        else 
+            return b.length - a.length;
+    }) ) {
+        let balanceMin = outputType.length == 5 ? BALANCE_MIN : 0;
+        let extra = memory.needResources[outputType] || 0;
+        let elem = this.library[outputType];
+        let in1 = storage.store[elem.inputTypes[0]] || 0;
+        let in2 = storage.store[elem.inputTypes[1]] || 0;
+        let needOut = balanceMin - (room.memory.store[outputType] || 0) + extra;
+        if (needOut > 0) {
+            memory.needResources[elem.inputTypes[0]] = (memory.needResources[elem.inputTypes[0]] || 0) + needOut;
+            memory.needResources[elem.inputTypes[1]] = (memory.needResources[elem.inputTypes[1]] || 0) + needOut;
+        }
+        
+    }
     
     for (let object of [this.storage, this.terminal]) {
         if (!object || !("store" in object))

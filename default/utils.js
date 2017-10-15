@@ -332,6 +332,15 @@ var utils = {
             console.log("\n");
         }
     },
+
+    nukerInfo: function() {
+        for (let r of _.filter(Game.rooms, r => r.controller && r.controller.my)) {
+            let nuker = r.getNuker();
+            if(!nuker)
+                continue;
+            console.log(r.name + ": energy=" + nuker.energy + "; ghodium=" + nuker.ghodium);
+        }
+    },
 };
 
 module.exports = utils;
