@@ -155,12 +155,15 @@ Room.prototype.balanceStore = function () {
     }
     
     if (this.terminal) {
+        let stop = 0;
         for (let rt in this.terminal.store) {
+            if (stop)
+                break;
             if (rt == "energy")
                 continue;
             let est = _.min([this.terminal.store[rt], global.cache.queueTransport.getStoreWithReserved(this.terminal, rt)]);
             for (let room of _.sortBy(Game.rooms, r => Game.map.getRoomLinearDistance(thisRoomName, r.name, true))) {
-                if (est <= 0)
+                if (est <= 0 || stop)
                     break;
                 if (room.name == this.name || !("needResources" in room.memory) || !(rt in room.memory.needResources) || !(room.memory.needResources[rt] > 0))
                     continue;
@@ -177,6 +180,7 @@ Room.prototype.balanceStore = function () {
                         est -= amount;
                         room.memory.needResources[rt] -= amount;
                         memory.needResources[rt] += amount;
+                        stop = 1;
                     }
                 }
                 console.log(`${this.name}: rebalance out ${amount} of ${rt} to ${room.name} for ${cost} energy (${res})`);
