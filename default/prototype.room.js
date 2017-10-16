@@ -187,37 +187,6 @@ Room.prototype.balanceStore = function () {
             }
         }
     }
-    /*
-    for (let object of [this.storage, this.terminal]) {
-        if (!object || !("store" in object))
-            continue;
-        let store = object.store;
-        let balanceMax = object.structureType == STRUCTURE_TERMINAL ? 0 : BALANCE_MAX;
-        for (let rt in store) {
-            if (rt == "energy" || store[rt] < balanceMax || global.cache.queueTransport.getStoreWithReserved(object, rt) < balanceMax)
-                continue;
-            let est = global.cache.queueTransport.getStoreWithReserved(object, rt) - balanceMax;
-            //console.log(`${this.name}: has ${store[rt]} of ${rt} and est = ${est}`);
-            for (let room of _.sortBy(Game.rooms, r => this.getPathToRoom(r.name) || 1000)) {
-                if (est < BALANCE_TRANSPORT_MIN)
-                    break;
-                let roomName = room.name;
-                if ((roomName == this.name && object.structureType == STRUCTURE_STORAGE) || !room.controller || !room.controller.my || !room.storage || global.cache.queueTransport.getStoreWithReserved(room.storage, rt) >= BALANCE_MIN)
-                    continue;
-                let amount = _.min([est, BALANCE_MIN - global.cache.queueTransport.getStoreWithReserved(room.storage, rt)]);
-                if (amount >= BALANCE_TRANSPORT_MIN) {
-                    console.log(`${this.name}: balance ${amount} of ${rt} to ${room.name}`);
-                    global.cache.queueTransport.addRequest(object, room.storage, rt, amount);
-                    est -= amount;
-                }
-            }
-            if (est >= BALANCE_TRANSPORT_MIN && this.terminal && this.terminal.id != object.id) {
-                console.log(`${this.name}: balance other ${rt} to terminal`);
-                global.cache.queueTransport.addRequest(object, this.terminal, rt, _.min([est, this.terminal.storeCapacity - _.sum(this.terminal.store)]));
-            }
-        }
-    }
-    */
 
     memory.balanceTime = Game.time;
 }

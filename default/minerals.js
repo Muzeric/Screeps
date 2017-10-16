@@ -156,35 +156,19 @@ var minerals = {
                 room.memory.labRequest = null;
             }
         }
-        if (!room.memory.labRequest) {
-            let cache = {"G": gNeed};
-            //for (let outputType of _.keys(this.library).sort((a, b) => a.length - b.length)) {
-            for (let outputType of _.keys(global.cache.minerals.library).sort(function(a, b) {
-                if(a == "ZK" || a == "UL") 
-                    return 1; 
-                else if (b == "ZK" && b == "UL") 
-                    return -1; 
-                else 
-                    return b.length - a.length;
-            }) ) {
-                let balanceMin = outputType.length == 5 ? BALANCE_MIN : 0;
-                let extra = cache[outputType] || 0;
-                if (extra > BALANCE_MAX - balanceMin)
-                    extra = BALANCE_MAX - balanceMin;
+        if (!room.memory.labRequest && room.memory.needResources) {
+            for (let outputType in room.memory.needResources) {
+                if (!(outputType in this.library) || !(room.memory.needResources[outputType] > 0))
+                    continue;
                 let elem = this.library[outputType];
                 let in1 = storage.store[elem.inputTypes[0]] || 0;
                 let in2 = storage.store[elem.inputTypes[1]] || 0;
-                let needOut = balanceMin - (room.memory.store[outputType] || 0) + extra;
+                let needOut = room.memory.needResources[outputType];
                 let amount = _.floor(_.min([needOut, in1, in2, LAB_REQUEST_AMOUNT]) / LAB_REACTION_AMOUNT) * LAB_REACTION_AMOUNT;
                 //if (roomName == "E27S15" && Game.time % 5 == 0)
-                //    console.log("runLabs: " + outputType + "; needOut=" + needOut + " (extra=" + extra + "); in1=" + in1 + "; in2=" + in2);
-                if (amount < BALANCE_LAB_MIN) {
-                    if (needOut > 0) {
-                        cache[elem.inputTypes[0]] = (cache[elem.inputTypes[0]] || 0) + needOut;
-                        cache[elem.inputTypes[1]] = (cache[elem.inputTypes[1]] || 0) + needOut;
-                    }
+                //    console.log("runLabs: " + outputType + "; needOut=" + needOut + "; in1=" + in1 + "; in2=" + in2);
+                if (amount < BALANCE_LAB_MIN)
                     continue;
-                }
 
                 console.log(`${roomName}: start request for ${amount} of ${outputType}`);
                 room.memory.labRequest = {
