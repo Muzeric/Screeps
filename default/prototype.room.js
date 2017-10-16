@@ -162,7 +162,7 @@ Room.prototype.balanceStore = function () {
             for (let room of _.sortBy(Game.rooms, r => Game.map.getRoomLinearDistance(thisRoomName, r.name, true))) {
                 if (est <= 0)
                     break;
-                if (!("needResources" in room.memory) || !(rt in room.memory.needResources) || !(room.memory.needResources[rt] > 0))
+                if (room.name == this.name || !("needResources" in room.memory) || !(rt in room.memory.needResources) || !(room.memory.needResources[rt] > 0))
                     continue;
                 let amount = _.min([est, room.memory.needResources[rt]]);
                 let cost = Game.market.calcTransactionCost(amount, thisRoomName, room.name);
