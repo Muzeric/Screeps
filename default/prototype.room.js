@@ -140,6 +140,8 @@ Room.prototype.balanceStore = function () {
 
     if (this.terminal && this.storage) {
         for (let rt in memory.needResources) {
+            if (rt == "energy")
+                continue;
             let amount = memory.needResources[rt];
             let need = amount < 0 ? -1 * amount : 0;
             let cur = global.cache.queueTransport.getStoreWithReserved(this.terminal, rt);
