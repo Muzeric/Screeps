@@ -164,6 +164,8 @@ var minerals = {
                 let in1 = storage.store[elem.inputTypes[0]] || 0;
                 let in2 = storage.store[elem.inputTypes[1]] || 0;
                 let needOut = room.memory.needResources[outputType];
+                if (in1 < LAB_REACTION_AMOUNT || in2 < LAB_REACTION_AMOUNT || needOut < LAB_REACTION_AMOUNT)
+                    continue;
                 let amount = _.floor(_.min([needOut, in1, in2, LAB_REQUEST_AMOUNT]) / LAB_REACTION_AMOUNT) * LAB_REACTION_AMOUNT;
                 //if (roomName == "E27S15" && Game.time % 5 == 0)
                 //    console.log("runLabs: " + outputType + "; needOut=" + needOut + "; in1=" + in1 + "; in2=" + in2);

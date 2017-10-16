@@ -115,7 +115,7 @@ Room.prototype.balanceStore = function () {
         memory.balanceTime = Game.time;
         return;
     }
-    memory.needResources = {};
+    memory.needResources = _.reduce(RESOURCES_ALL, function(r,v) {r[v]=0; return r;}, {});
     let nuker = this.getNuker();
     if (nuker)
         memory.needResources["G"] = nuker.ghodiumCapacity - nuker.ghodium;
@@ -128,7 +128,6 @@ Room.prototype.balanceStore = function () {
         else 
             return b.length - a.length;
     }) ) {
-        memory.needResources[outputType] = memory.needResources[outputType] || 0;
         if (outputType.length == 5)
             memory.needResources[outputType] += BALANCE_MIN;
         memory.needResources[outputType] -= global.cache.queueTransport.getRoomStoreWithCarring(this.name, outputType) || 0;
