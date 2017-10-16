@@ -155,7 +155,6 @@ Room.prototype.balanceStore = function () {
     }
     
     if (this.terminal) {
-        let cache = {};
         for (let rt in this.terminal.store) {
             if (rt == "energy")
                 continue;
@@ -163,12 +162,12 @@ Room.prototype.balanceStore = function () {
             for (let room of _.sortBy(Game.rooms, r => Game.map.getRoomLinearDistance(thisRoomName, r.name, true))) {
                 if (est <= 0)
                     break;
-                if (!("needResources" in room.memory) || !(rt in room.memory.needResources) || !room.memory.needResources[rt])
+                if (!("needResources" in room.memory) || !(rt in room.memory.needResources) || !(room.memory.needResources[rt] > 0))
                     continue;
-                let amount = _.min([est, room.memory.needResources[rt] - (cache[room.name + rt] || 0)]);
+                let amount = _.min([est, room.memory.needResources[rt]]);
                 let cost = Game.market.calcTransactionCost(amount, thisRoomName, room.name);
                 console.log(`${this.name}: rebalance out ${amount} of ${rt} to ${room.name} for ${cost} energy`);
-                cache[room.name + rt] = (cache[room.name + rt] || 0) + amount;
+                est -= amount;
             }
         }
     }
