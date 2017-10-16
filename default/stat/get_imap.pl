@@ -45,7 +45,7 @@ my $count = 1;
 my @msgs_done = ();
 my @msgs_bad = ();
 foreach my $msg (@msgs) {
-  my $prefix = "\r$count ($msg)           ";
+  my $prefix = "\r$count ($msg)\t ";
   print $prefix;
 
   #my $string = $imap->message_string($msg) 

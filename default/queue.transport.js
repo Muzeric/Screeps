@@ -53,6 +53,12 @@ var queue = {
             return null;
         }
         let caller = (new Error()).stack.split('\n')[3].trim();
+
+        /*
+        for(let r of _.filter(Memory.transportRequests, r => r.fromID == req_to.id || r.toID == req_from.id)) {
+
+        }
+        */
         
         Memory.transportRequests[req_id] = {
             fromID: req_from.id,

@@ -210,7 +210,7 @@ var utils = {
     autoMarket: function(really) {
         let orders = Game.market.getAllOrders();
         let print = "\n";
-        for (let room of _.filter(Game.rooms, r => r.terminal)) {
+        for (let room of _.filter(Game.rooms, r => r.terminal && r.controller.my)) {
             print += room.name + ":\n";
             for (let rt in room.terminal.store) {
                 if (rt == "energy" || room.terminal.store[rt] < 1000)
