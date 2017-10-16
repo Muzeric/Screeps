@@ -180,7 +180,7 @@ Room.prototype.balanceStore = function () {
                     res = this.terminal.send(rt, amount, room.name, `rebalance from ${this.name} for ${cost} energy`);
                     if (res == OK) {
                         est -= amount;
-                        room.memory.needResources[rt] -= amount;
+                        global.cache.minerals.decreaseNeed(room.memory.needResources, rt, amount);
                         memory.needResources[rt] += amount;
                         stop = 1;
                     }

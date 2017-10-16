@@ -254,6 +254,15 @@ var minerals = {
             }
         }
     },
+
+    decreaseNeed: function(cache, rt, amount) {
+        cache[rt] -= amount;
+        if (!(rt in this.library))
+            return;
+        let elem = this.library[rt];
+        this.decreaseNeed(cache, elem.inputTypes[0], amount);
+        this.decreaseNeed(cache, elem.inputTypes[1], amount);
+    },
 };
 
 module.exports = minerals;
