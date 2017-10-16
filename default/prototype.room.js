@@ -168,6 +168,8 @@ Room.prototype.balanceStore = function () {
                 if (room.name == this.name || !("needResources" in room.memory) || !(rt in room.memory.needResources) || !(room.memory.needResources[rt] > 0))
                     continue;
                 let amount = _.min([est, room.memory.needResources[rt]]);
+                if (amount < TERMINAL_MIN_SEND)
+                    continue;
                 let cost = Game.market.calcTransactionCost(amount, thisRoomName, room.name);
                 if (cost > (this.terminal.store.energy || 0)) {
                     console.log(`${this.name}: not enough energy for rebalancing ${rt} to ${room.name} ${this.terminal.store.energy || 0} < ${cost}`);
