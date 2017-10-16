@@ -176,6 +176,7 @@ Room.prototype.balanceStore = function () {
                     if (res == OK) {
                         est -= amount;
                         room.memory.needResources[rt] -= amount;
+                        memory.needResources[rt] += amount;
                     }
                 }
                 console.log(`${this.name}: rebalance out ${amount} of ${rt} to ${room.name} for ${cost} energy (${res})`);
