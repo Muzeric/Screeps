@@ -166,8 +166,19 @@ Room.prototype.balanceStore = function () {
                     continue;
                 let amount = _.min([est, room.memory.needResources[rt]]);
                 let cost = Game.market.calcTransactionCost(amount, thisRoomName, room.name);
-                console.log(`${this.name}: rebalance out ${amount} of ${rt} to ${room.name} for ${cost} energy`);
-                est -= amount;
+                if (cost > (this.terminal.store.energy || 0)) {
+                    console.log(`${this.name}: not enough energy for rebalancing ${rt} to ${room.name} ${this.terminal.store.energy || 0} < ${cost}`);
+                    break;
+                }
+                let res = null;
+                if (cost < 2000) {
+                    res = this.terminal.send(rt, amount, room.name, `rebalance from ${this.name} for ${cost} energy`);
+                    if (res == OK) {
+                        est -= amount;
+                        room.memory.needResources[rt] -= amount;
+                    }
+                }
+                console.log(`${this.name}: rebalance out ${amount} of ${rt} to ${room.name} for ${cost} energy (${res})`);
             }
         }
     }
