@@ -234,7 +234,9 @@ var queue = {
                 let yek = request.resourceType + "-" + request.toID + "-" + request.fromID;
                 if (key in cache) {
                     let cachedRequest = this.loadRequest(cache[key]);
-                    if (cachedRequest.amount + request.amount > MERGE_TRANSPORT_AMOUNT) {
+                    if (!cachedRequest) {
+                        delete cache[key];
+                    } else if (cachedRequest.amount + request.amount > MERGE_TRANSPORT_AMOUNT) {
                         cache[key] = reqID;
                     } else {
                         cachedRequest.amount += request.amount;
@@ -243,7 +245,9 @@ var queue = {
                     }
                 } else if (yek in cache) {
                     let cachedRequest = this.loadRequest(cache[yek]);
-                    if (cachedRequest.amount > request.amount) {
+                    if (!cachedRequest) {
+                        delete cache[yek];
+                    } else if (cachedRequest.amount > request.amount) {
                         cachedRequest.amount -= request.amount;
                         console.log("Merged INVERT1 transport request: " + JSON.stringify(request) + " to " + JSON.stringify(cachedRequest));
                         this.badRequest(request.id);
@@ -251,10 +255,12 @@ var queue = {
                         request.amount -= cachedRequest.amount;
                         console.log("Merged INVERT2 transport request: " + JSON.stringify(request) + " to " + JSON.stringify(cachedRequest));
                         this.badRequest(cachedRequest.id);
+                        delete cache[yek];
                     } else {
                         console.log("Merged INVERT3 transport request: " + JSON.stringify(request) + " and " + JSON.stringify(cachedRequest));
                         this.badRequest(request.id);
                         this.badRequest(cachedRequest.id);
+                        delete cache[yek];
                     }
                 } else {
                     cache[key] = reqID;
