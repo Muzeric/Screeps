@@ -120,14 +120,14 @@ Room.prototype.balanceStore = function () {
     if (nuker)
         memory.needResources["G"] = nuker.ghodiumCapacity - nuker.ghodium;
 
-    for (let outputType of _.keys(memory.needResources).sort(function(a, b) {
-        if(a == "ZK" || a == "UL") 
-            return 1; 
-        else if (b == "ZK" && b == "UL") 
-            return -1; 
-        else 
-            return b.length - a.length;
-    }) ) {
+    for (let outputType of _.sortBy(_.keys(memory.needResources), function(k) {
+        if (k == "G") 
+            return 3.2; 
+        else if (k == "UL" || k == "ZK")
+            return 3.5; 
+        else
+            return 5 - k.length;
+    })  ) {
         if (outputType.length == 5)
             memory.needResources[outputType] += BALANCE_MIN;
         memory.needResources[outputType] -= global.cache.queueTransport.getRoomStoreWithCarring(this.name, outputType) || 0;
