@@ -120,7 +120,7 @@ Room.prototype.balanceStore = function () {
     if (nuker)
         memory.needResources["G"] = nuker.ghodiumCapacity - nuker.ghodium;
 
-    for (let outputType of _.keys(global.cache.minerals.library).sort(function(a, b) {
+    for (let outputType of _.keys(memory.needResources).sort(function(a, b) {
         if(a == "ZK" || a == "UL") 
             return 1; 
         else if (b == "ZK" && b == "UL") 
@@ -131,16 +131,18 @@ Room.prototype.balanceStore = function () {
         if (outputType.length == 5)
             memory.needResources[outputType] += BALANCE_MIN;
         memory.needResources[outputType] -= global.cache.queueTransport.getRoomStoreWithCarring(this.name, outputType) || 0;
+        if (!(outputType in global.cache.minerals.library))
+            continue;
         let elem = global.cache.minerals.library[outputType];
         if (memory.needResources[outputType] > 0) {
             memory.needResources[elem.inputTypes[0]] = (memory.needResources[elem.inputTypes[0]] || 0) + memory.needResources[outputType];
             memory.needResources[elem.inputTypes[1]] = (memory.needResources[elem.inputTypes[1]] || 0) + memory.needResources[outputType];
-        }    
+        }
     }
 
     if (this.terminal && this.storage) {
         for (let rt in memory.needResources) {
-            if (rt == "energy")
+            if (rt == "energy" || rt == "power")
                 continue;
             let amount = memory.needResources[rt];
             let need = amount < 0 ? -1 * amount : 0;
@@ -160,7 +162,7 @@ Room.prototype.balanceStore = function () {
         for (let rt in this.terminal.store) {
             if (stop)
                 break;
-            if (rt == "energy")
+            if (rt == "energy" || rt == "power")
                 continue;
             let est = _.min([this.terminal.store[rt], global.cache.queueTransport.getStoreWithReserved(this.terminal, rt)]);
             for (let room of _.sortBy(Game.rooms, r => Game.map.getRoomLinearDistance(thisRoomName, r.name, true))) {
