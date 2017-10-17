@@ -180,6 +180,9 @@ var queue = {
         if (!request)
             return null;
         
+        this.transportReserved[request.fromID] = this.transportReserved[request.fromID] || {};
+        this.transportReserved[request.fromID][request.resourceType] = (this.transportReserved[request.fromID][request.resourceType] || 0) + amount;
+        
         request.got = (request.got || 0) + amount;
     },
 
@@ -193,6 +196,8 @@ var queue = {
         
         request.put = (request.put || 0) + amount;
         request.amount -= amount;
+        this.transportReserved[request.toID] = this.transportReserved[request.toID] || {};
+        this.transportReserved[request.toID][request.resourceType] = (this.transportReserved[request.toID][request.resourceType] || 0) - amount;
         if (request.amount <= 0) {
             //console.log("queueTransport: finished request: " + JSON.stringify(request));
             console.log(`transport DONE: ${reqID}. ${request.fromRoomName} ${request.fromStructureType} -> ${request.toRoomName} ${request.toStructureType} ${request.put} of ${request.resourceType}`);
