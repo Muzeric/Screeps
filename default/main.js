@@ -572,7 +572,7 @@ function getRoomLimits (room, creepsCount) {
             "maxEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 3150 : 3950,
     },{
             role : "transporter",
-            "count" : transportAmountIn > 0 ? 1 : 0,
+            "count" : transportAmountIn > 50000 ? 2 : (transportAmountIn > 0 ? 1 : 0),
             "priority" : 8,
             "wishEnergy" : 1500,
             "maxEnergy" : 1500,
