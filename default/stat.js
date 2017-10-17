@@ -68,7 +68,7 @@ var stat = {
 
         if (Game.time - Memory.stat.roomSent > 100) {
             Game.notify(
-                "room.3:" + Game.time + ":" + 
+                "room.4:" + Game.time + ":" + 
                 global.cache.utils.lzw_encode(this.dumpRoomStat()) +
                 "#END#"
             );
@@ -79,7 +79,7 @@ var stat = {
 
     dumpRoomStat : function () {
         let res = '';
-        let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu'];
+        let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send'];
         let lite = _.keys(Memory.stat.roomHistory).length > 20;
         for (let roomName in Memory.stat.roomHistory) {
             if (lite && (!(roomName in Memory.rooms) || ["my", "reserved", "lair", "banked"].indexOf(Memory.rooms[roomName].type) == -1))

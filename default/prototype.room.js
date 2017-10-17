@@ -186,6 +186,7 @@ Room.prototype.balanceStore = function () {
                         global.cache.minerals.decreaseNeed(room.memory.needResources, rt, amount);
                         memory.needResources[rt] += amount;
                         stop = 1;
+                        global.cache.stat.updateRoom(thisRoomName, 'send', cost);
                     }
                 }
                 console.log(`${this.name}: rebalance out ${amount} of ${rt} to ${room.name} for ${cost} energy (${res})`);

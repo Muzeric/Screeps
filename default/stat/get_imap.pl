@@ -36,6 +36,7 @@ my $room_versions = {
   '1' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'cpu'],
   '2' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'cpu'],
   '3' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu'],
+  '4' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send'],
 };
 
 my $parser = MIME::Parser->new;
