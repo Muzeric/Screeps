@@ -242,6 +242,7 @@ var minerals = {
             let lab3 = Game.getObjectById(lab.id);
             let res = lab3.runReaction(lab1, lab2);
             if (res == OK) {
+                room.memory.needResources[request.outputType] -= LAB_REACTION_AMOUNT;
                 request.amount -= LAB_REACTION_AMOUNT;
                 request.done += LAB_REACTION_AMOUNT;
                 inputLabs[0].mineralAmount -= LAB_REACTION_AMOUNT;
