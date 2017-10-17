@@ -534,12 +534,21 @@ Creep.prototype.boost = function (bodyPart, skill) {
     if (!bt)
         return ERR_INVALID_ARGS;
 
-    if (this.ticksToLive < BOOST_STOP_TICKS || (this.ticksToLive < BOOST_MIN_TICKS && !(bt in this.carry) && (!("boostBook" in this.memory) || !(bt in this.memory.boostBook))))
+    if (this.ticksToLive < BOOST_STOP_TICKS || (this.ticksToLive < BOOST_MIN_TICKS && !(bt in this.carry) && (!("boostBook" in this.memory) || !(bt in this.memory.boostBook)) && !("boostGot" in this.memory)))
         return ERR_GCL_NOT_ENOUGH;
 
     let unboostedCount = this.getUnboostedBodyparts(bodyPart);
-    if (!unboostedCount)
+    if (!unboostedCount) {
+        if ("boostGot" in this.memory) {
+            let lab = Game.getObjectById(this.memory.boostGot.labID);
+            if (lab && this.pos.isNearTo(lab)) {
+                let res = this.transfer(lab, this.memory.boostGot.mineralType, this.memory.boostGot.mineralAmount);
+                delete this.memory.boostGot;
+                console.log(this.room.name + ". " + this.name + ": BOOSTing, return another resource to lab (" + res + ")");
+            }
+        }
         return ERR_FULL;
+    }
 
     let room = this.room;
     let labs = room.getBoostLabs();
@@ -578,8 +587,15 @@ Creep.prototype.boost = function (bodyPart, skill) {
         if (booked)
             delete this.memory.boostBook[bt];
     } else if (got >= LAB_BOOST_MINERAL && (got >= need || free < LAB_BOOST_MINERAL || able < LAB_BOOST_MINERAL)) {
-        if (this.transfer(lab, bt) == ERR_NOT_IN_RANGE)
-            this.moveTo(lab);
+        if (lab.mineralType && lab.mineralType != bt && lab.mineralAmount > 0 && free >= lab.mineralAmount && this.pos.isNearTo(lab)) {
+            let res = this.withdraw(lab, lab.mineralType, lab.mineralAmount);
+            console.log(this.room.name + ". " + this.name + ": BOOSTing, got another resource from lab (" + res + ")");
+            if (res == OK)
+                this.memory.boostGot = {labID: lab.id, mineralType: lab.mineralType, mineralAmount: lab.mineralAmount};
+        } else {
+            if (this.transfer(lab, bt) == ERR_NOT_IN_RANGE)
+                this.moveTo(lab);
+        }
         if (Game.time % 5 == 0)
             console.log(this.room.name + ". " + this.name + ": BOOSTing, transfer");
     } else if (this.carryCapacity == 0 && booked >= LAB_BOOST_MINERAL && gotLab >= LAB_BOOST_MINERAL) {

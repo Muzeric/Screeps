@@ -148,10 +148,10 @@ Room.prototype.balanceStore = function () {
             let need = amount < 0 ? -1 * amount : 0;
             let cur = global.cache.queueTransport.getStoreWithReserved(this.terminal, rt);
             if (cur > need) {
-                global.cache.queueTransport.addRequest(this.terminal, this.storage, rt, _.min([cur - need, this.terminal.store[rt]]));
+                global.cache.queueTransport.addRequest(this.terminal, this.storage, rt, _.min([cur - need, this.terminal.store[rt] || 0]));
                 console.log(`${this.name}: rebalance of ${rt} ${cur - need} from terminal`);
             } else if (cur < need) {
-                global.cache.queueTransport.addRequest(this.storage, this.terminal, rt, _.min([need - cur, this.storage.store[rt]]));
+                global.cache.queueTransport.addRequest(this.storage, this.terminal, rt, _.min([need - cur, this.storage.store[rt] || 0]));
                 console.log(`${this.name}: rebalance of ${rt} ${need - cur} to terminal`);
             }
         }
