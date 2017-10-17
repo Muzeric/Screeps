@@ -310,7 +310,7 @@ var queue = {
         if (!(roomName in Memory.rooms) || !("store" in Memory.rooms[roomName]))
             return null;
         
-        return Memory.rooms[roomName].store[rt] || 0 + (roomName in this.carring ? this.carring[roomName][rt] || 0 : 0);
+        return (Memory.rooms[roomName].store[rt] || 0) + (roomName in this.carring ? (this.carring[roomName][rt] || 0) : 0);
     },
 
     status: function () {
