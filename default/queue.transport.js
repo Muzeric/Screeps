@@ -42,7 +42,7 @@ var queue = {
             return null;
         }
         let req_resourceType = resourceType || ("store" in req_from ? _.filter(Object.keys(req_from.store), k => req_from.store[k])[0] : req_from.mineralType);
-        let req_amount = amount || ("store" in req_from ? req_from.store[req_resourceType] : req_from.mineralAmount);
+        let req_amount = amount || ("store" in req_from ? req_from.store[req_resourceType] : req_from.mineralAmount) || 0;
         if (!req_resourceType || req_amount <= 0) {
             console.log(`queueTransport.addRequest: can't calc any of these: resourceType=${req_resourceType}, amount=${req_amount}`);
             return null;
