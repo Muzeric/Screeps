@@ -351,6 +351,22 @@ var utils = {
             console.log(r.name + ": energy=" + nuker.energy + "; ghodium=" + nuker.ghodium);
         }
     },
+
+    needsInfo: function() {
+        let print= ""; 
+        for (let roomName in Memory.rooms) {
+            let nr = Memory.rooms[roomName].needResources; 
+            if (!nr)
+                continue;
+            print += roomName + ": ";
+            for(let rt in nr) {
+                if (rt.length == 1 && nr[rt] > 1000)
+                    print += rt + ":" + nr[rt] + "; ";
+            } 
+            print += "\n";
+        }
+        console.log(print)
+    },
 };
 
 module.exports = utils;
