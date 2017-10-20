@@ -348,7 +348,7 @@ var utils = {
             let nuker = r.getNuker();
             if(!nuker)
                 continue;
-            console.log(r.name + ": energy=" + nuker.energy + "; ghodium=" + nuker.ghodium);
+            console.log(r.name + ": energy=" + nuker.energy + "; ghodium=" + nuker.ghodium + ";\t " + nuker.pos.getKey(1) + `  Game.getObjectById("${nuker.id}").launchNuke(new RoomPostion())`);
         }
     },
 
