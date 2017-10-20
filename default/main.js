@@ -363,6 +363,7 @@ function getDiscRoomLimits (roomName, creepsCount, fcount) {
     //console.log(roomName + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; limits=" + JSON.stringify(limits));
 
     return limits;
+}
 
 function getNotMyRoomLimits (roomName, creepsCount, fcount) {
     let lastCPU = Game.cpu.getUsed();
