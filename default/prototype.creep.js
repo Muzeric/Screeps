@@ -529,12 +529,20 @@ Creep.prototype.checkInRoomAndGo = function (opts) {
     return ERR_NOT_IN_RANGE;
 }
 
-Creep.prototype.boost = function (bodyPart, skill) {
+Creep.prototype.boost = function (bodyPart, skill, skipTimer) {
     let bt = global.cache.minerals.getBoostResource(bodyPart, skill);
     if (!bt)
         return ERR_INVALID_ARGS;
 
-    if (this.ticksToLive < BOOST_STOP_TICKS || (this.ticksToLive < BOOST_MIN_TICKS && !(bt in this.carry) && (!("boostBook" in this.memory) || !(bt in this.memory.boostBook)) && !("boostGot" in this.memory)))
+    if (    this.ticksToLive < BOOST_STOP_TICKS 
+            && !skipTimer
+        || (
+            this.ticksToLive < BOOST_MIN_TICKS
+            && !skipTimer
+            && !(bt in this.carry)
+            && (!("boostBook" in this.memory) || !(bt in this.memory.boostBook))
+            && !("boostGot" in this.memory))
+        )
         return ERR_GCL_NOT_ENOUGH;
 
     let unboostedCount = this.getUnboostedBodyparts(bodyPart);

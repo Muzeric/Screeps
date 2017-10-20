@@ -145,9 +145,17 @@ module.exports.loop = function () {
 
             let creepsCount = _.countBy(_.filter(global.cache.creepsByRoomName[roomName], c => c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning), c => c.memory.countName || c.memory.role);
             let bodyCount = _.countBy( _.flatten( _.map( _.filter(global.cache.creepsByRoomName[roomName], c => c.ticksToLive > ALIVE_TICKS + c.body.length*3 || c.spawning ), function(c) { return _.map(c.body, function(p) {return c.memory.role + "," + p.type;});}) ) );
+            let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
 
             try {
-                limitList = room && room.controller && room.controller.my ? getRoomLimits(room, creepsCount) : getNotMyRoomLimits(roomName, creepsCount);
+                let limitList;
+                if (fcount["DisController"]) {
+                    limitList = getDiscRoomLimits(room, creepsCount, fcount);
+                } else if (room && room.controller && room.controller.my) {
+                    limitList = getRoomLimits(room, creepsCount, fcount);
+                } else {
+                    limitList = getNotMyRoomLimits(roomName, creepsCount, fcount);
+                }
             } catch (e) {
                 console.log(roomName + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
                 Game.notify(roomName + " NEEDLIST ERROR: " + e.toString() + " => " + e.stack);
@@ -319,11 +327,47 @@ module.exports.loop = function () {
 //});
 };
 
-function getNotMyRoomLimits (roomName, creepsCount) {
+function getDiscRoomLimits (roomName, creepsCount, fcount) {
+    let memory = Memory.rooms[roomName] || {structures : {}};
+    let room = Game.rooms[roomName];
+    if (!fcount["DisController"])
+        return [];
+    
+    let disClaimercount = 0;
+    if (   STRUCTURE_CONTROLLER in memory.structures
+        && memory.structures[STRUCTURE_CONTROLLER].length
+        && ( !memory.structures[STRUCTURE_CONTROLLER][0].lastAttackController
+             || memory.structures[STRUCTURE_CONTROLLER][0].lastAttackController + CONTROLLER_ATTACK_BLOCKED_UPGRADE < Game.time
+        ))
+        disClaimercount = 1;
+
+    let limits = [];
+    limits.push({
+        "role" : "disclaimer",
+        "count" : disClaimercount,
+        "priority" : 1,
+        "wishEnergy" : 12900,
+        "minEnergy" : 12900,
+        "range": 3,
+    });
+
+    for (let limit of limits) {
+        limit["roomName"] = roomName;
+        limit["originalEnergyCapacity"] = 0;
+        if (!("minEnergy" in limit))
+            limit["minEnergy"] = 0;
+        if (!("countName" in limit))
+            limit["countName"] = limit.role;
+    }
+
+    //console.log(roomName + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; limits=" + JSON.stringify(limits));
+
+    return limits;
+
+function getNotMyRoomLimits (roomName, creepsCount, fcount) {
     let lastCPU = Game.cpu.getUsed();
     let memory = Memory.rooms[roomName] || {structures : {}};
     let room = Game.rooms[roomName];
-    let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
     if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"] && memory.type != "banked")
         return [];
     let buildTicks = room && room.getConstructions().length ? room.getBuilderTicks() : 0;
@@ -480,11 +524,10 @@ function getNotMyRoomLimits (roomName, creepsCount) {
     return limits;
 }
 
-function getRoomLimits (room, creepsCount) {
+function getRoomLimits (room, creepsCount, fcount) {
     let lastCPU = Game.cpu.getUsed();
     let memory = Memory.rooms[room.name] || {structures : {}};
 
-    let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == room.name), f => f.name.substring(0,f.name.indexOf('.')) );
     let builds = (memory.constructions || 0) - (memory.constructionsRoads || 0);
     let repairs = memory.repairs || 0;
     let unminerSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom);

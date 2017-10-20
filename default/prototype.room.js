@@ -469,7 +469,7 @@ Room.prototype.finishBuildRepair = function (targetID) {
 }
 
 Room.prototype.updateStructures = function() {
-    console.log(this.name + ": updateStructures");
+    //console.log(this.name + ": updateStructures");
     let room = this;
     let memory = this.memory;
     memory.structures = {};
@@ -818,7 +818,7 @@ Room.prototype.updateStructures = function() {
         }
     }
 
-    if (memory.type == "hostiled")
+    if (memory.type == "hostiled" && !Game.flags["DisController." + this.name])
         memory.structures = {};
 
     memory.structuresTime = Game.time;

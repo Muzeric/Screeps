@@ -51,8 +51,8 @@ foreach my $msg (@msgs) {
 
   #my $string = $imap->message_string($msg) 
   my $string = $imap->get($msg)
-  or print STDERR "${prefix}getting meassage: ".$imap->errstr."\n"
-  and next;
+  or print STDERR "${prefix}getting meassage failed\n"
+  and die;
   $string = "$string";
 
   #print "String: $string\n";
