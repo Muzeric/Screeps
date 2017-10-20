@@ -149,7 +149,7 @@ module.exports.loop = function () {
 
             try {
                 if (fcount["DisController"]) {
-                    limitList = getDiscRoomLimits(room, creepsCount, fcount);
+                    limitList = getDiscRoomLimits(roomName, creepsCount, fcount);
                 } else if (room && room.controller && room.controller.my) {
                     limitList = getRoomLimits(room, creepsCount, fcount);
                 } else {
