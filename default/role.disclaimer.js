@@ -57,7 +57,7 @@ var role = {
     create: function(energy) {
         // return [[MOVE], 50];
         // 600 * 19 + 50 * 19 = 12350
-        let cnum = 19;
+        let cnum = DISCLAIMER_CLAIM_COUNT;
         let body = [];
         while(cnum-- && energy >= 650) {
             body.push(MOVE);

@@ -337,7 +337,7 @@ function getDiscRoomLimits (roomName, creepsCount, fcount) {
         && memory.structures[STRUCTURE_CONTROLLER].length
         && memory.type == "hostiled"
         && ( !memory.lastAttackController
-             || memory.lastAttackController + CONTROLLER_ATTACK_BLOCKED_UPGRADE < Game.time
+             || memory.lastAttackController + CONTROLLER_ATTACK_BLOCKED_UPGRADE - 150 - DISCLAIMER_CLAIM_COUNT * 2 * CREEP_SPAWN_TIME < Game.time
         ))
         disClaimercount = 1;
 
