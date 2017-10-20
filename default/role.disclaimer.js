@@ -9,6 +9,9 @@ var role = {
             return;
         }
 
+        if (creep.room.memory.type == 'lair' && !creep.goFromKeepers())
+            return;
+
         //if (creep.boost(MOVE, "fatigue", true) == OK)
         //    return;
 
