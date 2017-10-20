@@ -148,7 +148,6 @@ module.exports.loop = function () {
             let fcount = _.countBy(_.filter(Game.flags, f => f.pos.roomName == roomName), f => f.name.substring(0,f.name.indexOf('.')) );
 
             try {
-                let limitList;
                 if (fcount["DisController"]) {
                     limitList = getDiscRoomLimits(room, creepsCount, fcount);
                 } else if (room && room.controller && room.controller.my) {
