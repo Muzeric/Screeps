@@ -335,8 +335,9 @@ function getDiscRoomLimits (roomName, creepsCount, fcount) {
     let disClaimercount = 0;
     if (   STRUCTURE_CONTROLLER in memory.structures
         && memory.structures[STRUCTURE_CONTROLLER].length
-        && ( !memory.structures[STRUCTURE_CONTROLLER][0].lastAttackController
-             || memory.structures[STRUCTURE_CONTROLLER][0].lastAttackController + CONTROLLER_ATTACK_BLOCKED_UPGRADE < Game.time
+        && memory.type == "hostiled"
+        && ( !memory.lastAttackController
+             || memory.lastAttackController + CONTROLLER_ATTACK_BLOCKED_UPGRADE < Game.time
         ))
         disClaimercount = 1;
 
@@ -345,9 +346,9 @@ function getDiscRoomLimits (roomName, creepsCount, fcount) {
         "role" : "disclaimer",
         "count" : disClaimercount,
         "priority" : 1,
-        "wishEnergy" : 12900,
-        "minEnergy" : 12900,
-        "range": 3,
+        "wishEnergy" : 12350,
+        "minEnergy" : 12350,
+        "range": 5,
     });
 
     for (let limit of limits) {

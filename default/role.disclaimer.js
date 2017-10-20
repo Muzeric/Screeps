@@ -47,12 +47,12 @@ var role = {
                 creep.room.memory.lastAttackController = Game.time;
             }
         } else {
-            creep.moveTo(controllerPos);
+            creep.moveTo(controllerPos, {ignoreHostiled: 1});
         }
 	},
 	
     create: function(energy) {
-        return [[MOVE], 50];
+        // return [[MOVE], 50];
         // 600 * 19 + 50 * 19 = 12350
         let cnum = 19;
         let body = [];
