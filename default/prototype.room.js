@@ -783,12 +783,10 @@ Room.prototype.updateStructures = function() {
                     return cache[a.getKey()] - cache[b.getKey()] || !room.storage || a.getRangeTo(room.storage) - b.getRangeTo(room.storage);
                 })[0];
                 if (!(place.getKey() in constructionsContainers) && this.canBuildContainers()) {
-                    /*
                     let res = this.createConstructionSite(place.x, place.y, STRUCTURE_CONTAINER);
                     console.log(this.name + ": BUILT (" + res + ") controlled container at " + place.x + "x" + place.y);
                     if (res == OK)
                         memory.constructions++;
-                    */
                 }
                 memory.visuals.push(place);
             }
