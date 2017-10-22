@@ -496,7 +496,7 @@ Creep.prototype.gotoSource = function(exceptStorage) {
             this.memory.energyID = null;
             return ERR_INVALID_TARGET;
         }
-    } else if (source.structureType == STRUCTURE_SOURCE) {
+    } else if ("ticksToRegeneration" in source) {
         res = this.harvest(source);
     } else  {
         if (_.sum(this.carry) != this.carry.energy && source.structureType == STRUCTURE_STORAGE) {
