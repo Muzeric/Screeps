@@ -101,6 +101,7 @@ function setTarget (creep, estEnergy) {
     let targets = _.filter(
         (memory.structures[STRUCTURE_EXTENSION] || []).concat( 
         (memory.structures[STRUCTURE_LAB] || []), 
+        (memory.structures[STRUCTURE_CONTAINER] || []), 
         (memory.structures[STRUCTURE_TOWER] || []),
         (memory.structures[STRUCTURE_SPAWN] || []),
         (memory.structures[STRUCTURE_TERMINAL] || []),
@@ -121,6 +122,8 @@ function setTarget (creep, estEnergy) {
         if (target.structureType == STRUCTURE_TERMINAL && target.energy > MIN_TERMINAL_ENERGY)
             continue;
         else if (target.structureType == STRUCTURE_NUKER && creep.room.memory.freeEnergy < NUKER_ENERGY_LIMIT)
+            continue;
+        else if (target.structureType == STRUCTURE_CONTAINER && !target.controllered)
             continue;
         let wantEnergy = target.energyCapacity - target.energy;
         let cpath = creep.pos.getRangeTo(target.pos.x, target.pos.y);

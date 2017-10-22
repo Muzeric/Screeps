@@ -788,7 +788,6 @@ Room.prototype.updateStructures = function() {
                     if (res == OK)
                         memory.constructions++;
                 }
-                memory.visuals.push(place);
             }
         }
 

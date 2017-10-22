@@ -395,7 +395,11 @@ Creep.prototype.findSource = function () {
         } else if (energyLeft > 0 && "my" in target && !target.my) {
             cpriority = 2;
         } else if (target.structureType == STRUCTURE_CONTAINER) {
-                if (energyNeed <= energyLeft)
+                if (target.controllered && this.memory.role != "upgrader")
+                    continue;
+                else if (target.controllered && this.memory.role == "upgrader" && energyNeed <= energyLeft)
+                    cpriority = 10;
+                else if (energyNeed <= energyLeft)
                     cpriority = 2;
                 else if (!target.minersTo)
                     continue;
@@ -486,7 +490,15 @@ Creep.prototype.gotoSource = function(exceptStorage) {
     }
     
     let res;
-    if(source.structureType && [STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION].indexOf(source.structureType) !== -1) {
+    if (source.resourceType && source.resourceType == RESOURCE_ENERGY) {
+        res = this.pickup(source);
+        if (!res) {
+            this.memory.energyID = null;
+            return ERR_INVALID_TARGET;
+        }
+    } else if (source.structureType == STRUCTURE_SOURCE) {
+        res = this.harvest(source);
+    } else  {
         if (_.sum(this.carry) != this.carry.energy && source.structureType == STRUCTURE_STORAGE) {
             res = this.transfer(source, _.filter(_.keys(this.carry), t => t != "energy")[0]);
         } else {
@@ -495,14 +507,6 @@ Creep.prototype.gotoSource = function(exceptStorage) {
             else
                 res = this.withdraw(source, RESOURCE_ENERGY);
         }
-    } else if (source.resourceType && source.resourceType == RESOURCE_ENERGY) {
-        res = this.pickup(source);
-        if (!res) {
-            this.memory.energyID = null;
-            return ERR_INVALID_TARGET;
-        }
-    } else {
-        res = this.harvest(source);
     }
     
     if (res == OK) {
