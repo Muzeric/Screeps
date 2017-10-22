@@ -486,7 +486,7 @@ Creep.prototype.gotoSource = function(exceptStorage) {
     }
     
     let res;
-    if(source.structureType && (source.structureType == STRUCTURE_CONTAINER || source.structureType == STRUCTURE_STORAGE || source.structureType == STRUCTURE_LINK)) {
+    if(source.structureType && [STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION].indexOf(source.structureType) !== -1) {
         if (_.sum(this.carry) != this.carry.energy && source.structureType == STRUCTURE_STORAGE) {
             res = this.transfer(source, _.filter(_.keys(this.carry), t => t != "energy")[0]);
         } else {
