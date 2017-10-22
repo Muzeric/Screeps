@@ -829,7 +829,7 @@ Room.prototype.updateStructures = function() {
             }
         }
 
-        if (this.storage) {
+        if (this.storage && STRUCTURE_EXTENSION in memory.structures && STRUCTURE_SPAWN in memory.structures) {
             memory.spawnStructures = _.map(
                 _.sortBy(memory.structures[STRUCTURE_EXTENSION].concat(memory.structures[STRUCTURE_SPAWN]), s => s.pos.getRangeTo(this.storage.pos)),
                 s => s.id
