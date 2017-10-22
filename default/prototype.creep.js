@@ -392,6 +392,8 @@ Creep.prototype.findSource = function () {
                 continue;
             else
                 cpriority = 2;
+        } else if (energyLeft > 0 && !target.my) {
+            cpriority = 2;
         } else if (target.structureType == STRUCTURE_CONTAINER) {
                 if (energyNeed <= energyLeft)
                     cpriority = 2;
@@ -402,6 +404,8 @@ Creep.prototype.findSource = function () {
                 continue;
             else if (this.getActiveBodyparts(WORK) <= 1)
                 cpriority = -2;
+            else
+                cpriority = -1;
         }
 
         let energyTicks = (energyNeed - energyLeft) / 10;
