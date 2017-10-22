@@ -290,6 +290,9 @@ Room.prototype.updateResources = function() {
             console.log(room.name + ": ACTIVATING SAFE MODE: " + res);
             Game.notify(room.name + ": ACTIVATING SAFE MODE: " + res);
         }
+
+        if (elem.energy > 0 && !s.my)
+            memory.resources.push(elem);
     }
     memory.resourcesTime = Game.time;
 }

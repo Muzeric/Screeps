@@ -108,7 +108,7 @@ function setTarget (creep, estEnergy) {
         (memory.structures[STRUCTURE_NUKER] || []),
         (memory.structures[STRUCTURE_POWER_SPAWN] || [])
     ),
-    t => t.energy < t.energyCapacity);
+    t => t.energy < t.energyCapacity && t.my);
 
     if (!targets.length) {
         //console.log(creep.name + ": no any container for energy");
