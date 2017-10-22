@@ -168,7 +168,7 @@ Room.prototype.balanceStore = function () {
             for (let room of _.sortBy(Game.rooms, r => Game.map.getRoomLinearDistance(thisRoomName, r.name, true))) {
                 if (est <= 0 || stop)
                     break;
-                if (room.name == this.name || !("needResources" in room.memory) || !(rt in room.memory.needResources) || !(room.memory.needResources[rt] > 0))
+                if (room.name == this.name || !("needResources" in room.memory) || !(rt in room.memory.needResources) || !(room.memory.needResources[rt] > 0) || !(room.terminal && room.terminal.my))
                     continue;
                 let amount = _.min([est, room.memory.needResources[rt]]);
                 if (amount < TERMINAL_MIN_SEND)
@@ -756,6 +756,25 @@ Room.prototype.updateStructures = function() {
     }
 
     if (memory.type == 'my') {
+        let contcont = _.find(memory.structures[STRUCTURE_CONTAINER], c => room.controller.pos.inRangeTo(c.pos, 3));
+        if (contcont) {
+            contcont.controllered = 1;
+        } else {
+            let places = global.cache.utils.getRangedPlaces(null, room.controller.pos, 2);
+            if (places.length) {
+                let place = _.sortBy(places, p => -1 * global.cache.utils.getRangedPlaces(null, p, 1).length )[0];
+                if (!(place.getKey() in constructionsContainers) && this.canBuildContainers()) {
+                    /*
+                    let res = this.createConstructionSite(place.x, place.y, STRUCTURE_CONTAINER);
+                    console.log(this.name + ": BUILT (" + res + ") controlled container at " + place.x + "x" + place.y);
+                    if (res == OK)
+                        memory.constructions++;
+                    */
+                }
+                memory.visuals.push(place);
+            }
+        }
+
         let maxCount = CONTROLLER_STRUCTURES["extension"][room.controller.level] || 0;
         let curCount = (memory.structures[STRUCTURE_EXTENSION] || []).length + extensionConstructionCount;
         if (maxCount > curCount && (memory.structures[STRUCTURE_SPAWN] || []).length) {

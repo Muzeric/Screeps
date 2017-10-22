@@ -668,7 +668,7 @@ function getRoomLimits (room, creepsCount, fcount) {
         limit["roomName"] = room.name;
         limit["originalEnergyCapacity"] = room.energyCapacityAvailable;
         if (!("range" in limit))
-            limit["range"] = 3;
+            limit["range"] = 5;
         if (!("minEnergy" in limit))
             limit["minEnergy"] = 0;
         if (!("countName" in limit))

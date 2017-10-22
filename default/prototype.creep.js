@@ -250,7 +250,7 @@ Creep.prototype.travelTo = function (targetPos, opts) {
 
     if (pf.path.length) {
         //console.log(this.name + ": moveTo got path from " + this.pos.getKey(1) + " to " + targetKey + "; ops=" + pf.ops + "; cost=" + pf.cost + "; length=" + pf.path.length);
-        travel.setPath(memory.travel, pf.serialized ? pf.path : travel.serializePath(pf.path), sourceKey, targetKey, addCreeps || pf.incomplete ? null : this.room.memory.pathCache, pf.incomplete);
+        travel.setPath(memory.travel, pf.serialized ? pf.path : travel.serializePath(pf.path), sourceKey, targetKey, (addCreeps || pf.incomplete) ? null : this.room.memory.pathCache, pf.incomplete);
         return this.move(this.pos.getDirectionTo(travel.getPosFromSerializedPath(memory.travel.path,memory.travel.iter)));
     } else if (!pf.incomplete) {
         memory.travel.near = this.pos.getKey(1);
