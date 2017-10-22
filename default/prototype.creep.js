@@ -392,7 +392,7 @@ Creep.prototype.findSource = function () {
                 continue;
             else
                 cpriority = 2;
-        } else if (energyLeft > 0 && !target.my) {
+        } else if (energyLeft > 0 && "my" in target && !target.my) {
             cpriority = 2;
         } else if (target.structureType == STRUCTURE_CONTAINER) {
                 if (energyNeed <= energyLeft)
