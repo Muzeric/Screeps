@@ -550,8 +550,9 @@ Room.prototype.updateStructures = function() {
                 delete memory.wantRoads[s.pos.getKey()];
         } else if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_POWER_SPAWN, STRUCTURE_LAB, STRUCTURE_EXTRACTOR, STRUCTURE_TERMINAL, STRUCTURE_NUKER, STRUCTURE_OBSERVER].indexOf(s.structureType) !== -1) {
             if (room.controller && room.controller.my && "my" in s && !s.my && !s.energy && !(s.store && _.sum(s.store)) && !s.mineralAmount) {
-                s.destroy();
-                continue;
+                //let res = s.destroy();
+                console.log(room.name + ": DESTROY " + s.structureType + " at " + s.pos.getKey());
+                return;
             }
             elem = {
                 places : global.cache.utils.getRangedPlaces(null, s.pos, 1).length,
