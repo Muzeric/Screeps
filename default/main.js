@@ -543,7 +543,7 @@ function getRoomLimits (room, creepsCount, fcount) {
     let transportAmountIn = _.sum(_.filter(Memory.transportRequests, r => r.fromRoomName == room.name && r.fromRoomName == r.toRoomName), r => r.amount);
     let transportAmountOut = _.sum(_.filter(Memory.transportRequests, r => r.toRoomName == room.name && r.fromRoomName != r.toRoomName), r => r.amount);
     //let builderCount = (builds ? (builds > 5 && room.controller.level >= 8 ? 3 : (builds < 5 ? _.ceil(builds/2) : 3)) : 0) + (repairs > 10 ? 2 : (repairs ? 1 : 0)) + (repairs > 20 && room.controller.level >= 8 ? 2 : 0);
-    let builderWorkCount = global.cache.utils.clamp( _.min([_.ceil(room.getBuilderTicks() / (CREEP_LIFE_TIME * 0.6)), _.ceil(memory.freeEnergy / (2.5 * CREEP_LIFE_TIME * 0.6) ) ]), 0, 100 );
+    let builderWorkCount = global.cache.utils.clamp( _.min([_.ceil(room.getBuilderTicks() / (CREEP_LIFE_TIME * 0.6)), _.ceil((memory.freeEnergy + 1) / (2.5 * CREEP_LIFE_TIME * 0.6) ) ]), 0, 100 );
     
     let limits = [];
     limits.push({

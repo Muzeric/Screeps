@@ -774,7 +774,14 @@ Room.prototype.updateStructures = function() {
         } else {
             let places = global.cache.utils.getRangedPlaces(null, room.controller.pos, 2);
             if (places.length) {
-                let place = _.sortBy(places, p => -1 * global.cache.utils.getRangedPlaces(null, p, 1).length )[0];
+                let cache = {};
+                let place = places.sort(function(a,b) {
+                    if (!(a in cache))
+                        cache[a.getKey()] = -1 * global.cache.utils.getRangedPlaces(null, a, 1).length;
+                    if (!(b in cache))
+                        cache[b.getKey()] = -1 * global.cache.utils.getRangedPlaces(null, b, 1).length;
+                    return cache[a.getKey()] - cache[b.getKey()] || !room.storage || a.getRangeTo(room.storage) - b.getRangeTo(room.storage);
+                })[0];
                 if (!(place.getKey() in constructionsContainers) && this.canBuildContainers()) {
                     /*
                     let res = this.createConstructionSite(place.x, place.y, STRUCTURE_CONTAINER);
