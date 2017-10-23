@@ -655,6 +655,7 @@ function getRoomLimits (room, creepsCount, fcount) {
             "count" : memory.superhealerCount || 0,
             "priority" : 3,
             "minEnergy" : 2100,
+            "maxEnergy" : 7500,
             "range": 1,
     },{
             role : "superattacker",
