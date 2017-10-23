@@ -11,6 +11,17 @@ var role = {
 		if (creep.boost(WORK, "upgradeController") == OK)
 			return;
 
+		if (creep.carry.energy < creep.getActiveBodyparts(WORK)) {
+			let container = room.getControlleredContainer();
+			if (container && container.store.energy >= creep.carryCapacity - _.sum(creep.carry) && creep.pos.isNearTo(container)) {
+				if (creep.withdraw(container, "energy") == OK) {
+					if(creep.upgradeController(room.controller) == ERR_NOT_IN_RANGE)
+						creep.moveTo(room.controller, {range: 2});
+					return;
+				}
+			}
+		}
+
 	    if(creep.carry.energy == 0 && creep.memory.upgrading) {
 			creep.memory.upgrading = false;
 	    } else if (_.sum(creep.carry) == creep.carryCapacity && !creep.memory.upgrading) {
@@ -37,19 +48,26 @@ var role = {
 	create: function(energy, opts = {}) {
 		let body = [];
 		let wlim = opts.top ? 15 : 100;
+		let fat = 0;
+		let wcount = 0;
+		let fatCoeff = opts.controllered ? 0.5 : 1;
 	    while (energy >= 50 && body.length < 50 && wlim) {
-	        if(energy >= 50) {
+			if(fat * fatCoeff >= 0 && energy >= 50 && body.length < 50) {
 	            body.push(MOVE);
 	            energy -= 50;
+	            fat -= 2;
+			}
+	        if(energy >= 50 && body.length < 50 && (!opts.controllered || wcount % 15 == 0)) {
+	            body.push(CARRY);
+				energy -= 50;
+				fat++;
 	        }
 	        if(energy >= 100 && body.length < 50) {
 	            body.push(WORK);
 				energy -= 100;
 				wlim--;
-	        }
-	        if(energy >= 50 && body.length < 50) {
-	            body.push(CARRY);
-	            energy -= 50;
+				wcount++;
+				fat++;
 	        }
 	    }
 	    return [body, energy];

@@ -381,6 +381,14 @@ Room.prototype.getNuker = function() {
     return _.map( this.memory.structures[STRUCTURE_NUKER], t => Game.getObjectById(t.id) )[0];
 }
 
+Room.prototype.getControlleredContainer = function() {
+    return _.map( _.filter(this.memory.structures[STRUCTURE_CONTAINER], c => c.controllered), c => Game.getObjectById(c.id) )[0];
+}
+
+Room.prototype.checkControlleredContainer = function() {
+    return _.some(this.memory.structures[STRUCTURE_CONTAINER], c => c.controllered);
+}
+
 Room.prototype.getPairedContainer = function(pos) {
     let containers = _.filter( [].concat(
         (this.memory.structures[STRUCTURE_CONTAINER] || []),

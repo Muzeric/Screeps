@@ -537,7 +537,7 @@ function getRoomLimits (room, creepsCount, fcount) {
     let countHarvester = _.max([unminerSources, _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 15)]);
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
     let unStoragedLinks = (room.getUnStoragedLinks() || []).length;
-    let extraUpgraders = global.cache.utils.clamp( _.floor(memory.freeEnergy / UPGRADERS_EXTRA_ENERGY), 0, 4);
+    let controlleredContainer = room.checkControlleredContainer() && memory.freeEnergy > 10000;
     let pairedExtractor = room.getPairedExtractor(1);
     let freeEnergyCount = _.ceil((memory.freeEnergy || 1) / 1000);
     let transportAmountIn = _.sum(_.filter(Memory.transportRequests, r => r.fromRoomName == room.name && r.fromRoomName == r.toRoomName), r => r.amount);
@@ -586,7 +586,7 @@ function getRoomLimits (room, creepsCount, fcount) {
             role : "upgrader",
             "count" : room.controller.level < 8 ? 10 : 1,
             "priority" : 3,
-            "arg": {top: room.controller.level >= 8},
+            "arg": {top: room.controller.level >= 8, controllered: controlleredContainer},
             "wishEnergy" : 1500,
             "body" : {
                 "work" : 3*freeEnergyCount,
