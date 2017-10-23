@@ -417,7 +417,7 @@ function getNotMyRoomLimits (roomName, creepsCount, fcount) {
         "range": 3,
     },{
         "role" : "longharvester",
-        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' ? 0 : needHarvester * sourcesForWork,
+        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' || Memory.claimRoom == roomName ? 0 : needHarvester * sourcesForWork,
         "arg" : {work: workerHarvester, attack: 1},
         "priority" : 10,
         "minEnergy" : 550,
@@ -431,10 +431,10 @@ function getNotMyRoomLimits (roomName, creepsCount, fcount) {
         "priority" : 11,
         "minEnergy" : 650,
         "wishEnergy" : liteClaimer ? 650 : 1300,
-        "range" : 3,
+        "range" : 5,
     },{
         "role" : "longminer",
-        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' ? 0 : pairedSources,
+        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' || Memory.claimRoom == roomName ? 0 : pairedSources,
         "arg" : {long: 0, attack: 1},
         "priority" : 12,
         "wishEnergy" : 1060,
@@ -449,7 +449,7 @@ function getNotMyRoomLimits (roomName, creepsCount, fcount) {
         "maxEnergy" : buildTicks > 15000 ? 2000 : 1000,
     },{
         "role" : "longharvester",
-        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' || !needHarvester ? 0 : (creepsCount["longharvester"] || 0) + 1,
+        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' || !needHarvester || Memory.claimRoom == roomName ? 0 : (creepsCount["longharvester"] || 0) + 1,
         "arg" : {work: workerHarvester, attack: 1},
         "priority" : 14,
         "minEnergy" : 550,
