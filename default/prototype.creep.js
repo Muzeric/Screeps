@@ -514,7 +514,8 @@ Creep.prototype.gotoSource = function(exceptStorage) {
     } else if (res == ERR_NOT_IN_RANGE) {
         return this.moveTo(source);
     } else if (res == ERR_NOT_ENOUGH_ENERGY) {
-        ;
+        if ([STRUCTURE_EXTENSION, STRUCTURE_CONTAINER].indexOf(source.structureType) !== -1)
+            this.memory.energyID = null;
     } else if (res < 0) {
         console.log(this.name + " tried to get energy from " + this.memory.energyID + " with res = " + res);
         this.memory.energyID = null;
