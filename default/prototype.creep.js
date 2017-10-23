@@ -4,6 +4,10 @@ Creep.prototype.getUnboostedBodyparts = function (type) {
     return _.filter( this.body, p => p.type == type && p.hits && !p.boost ).length;
 }
 
+Creep.prototype.getBoostedBodyparts = function (type) {
+    return _.filter( this.body, p => (!type || p.type == type) && p.boost ).length;
+}
+
 // harvest: 0, create: 0, build: 0, repair: 0, upgrade: 0, pickup
 let origHarvest = Creep.prototype.harvest;
 Creep.prototype.harvest = function () {
