@@ -662,6 +662,7 @@ function getRoomLimits (room, creepsCount, fcount) {
             "count" : memory.superattackerCount || 0,
             "priority" : 3,
             "minEnergy" : 2800,
+            "maxEnergy" : 2800,
             "range": 3,
     });
 
