@@ -89,7 +89,7 @@ var role = {
         let tnum = 6;
         let anum = 8;
         let rnum = 7;
-        let mnum = Math.ceil((tnum + anum + rnum)/2);
+        let mnum = tnum + anum + rnum;
         energy -= 10 * tnum + 80 * anum + 150 * rnum + 50 * mnum;
         
         let body = [];
