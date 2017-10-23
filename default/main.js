@@ -656,13 +656,13 @@ function getRoomLimits (room, creepsCount, fcount) {
             "priority" : 3,
             "minEnergy" : 2100,
             "maxEnergy" : 7500,
-            "range": 1,
+            "range": 3,
     },{
             role : "superattacker",
             "count" : memory.superattackerCount || 0,
             "priority" : 3,
-            "minEnergy" : 2300,
-            "range": 1,
+            "minEnergy" : 2800,
+            "range": 3,
     });
 
     for (let limit of limits) {
