@@ -54,7 +54,7 @@ var role = {
         energy -= 50;
         return [body, energy];
         */
-        let hnum = Math.floor(energy / 300);
+        let hnum = global.cache.utils.clamp( Math.floor(energy / 300), 0, 25);
         energy -= 300 * hnum;
         mnum = hnum;
         
