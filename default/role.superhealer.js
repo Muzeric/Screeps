@@ -11,7 +11,7 @@ var role = {
                 console.log(creep.name + ": no attackers");
                 let spawn = Game.spawns[creep.memory.spawnName];
                 if (creep.pos.isNearTo(spawn)) {
-                    if (creep.hits < creep.hitsMax * 0.95)
+                    if (creep.hits < creep.hitsMax * 0.95 && !creep.getBoostedBodyparts())
                         spawn.renewCreep(creep);
                 } else {
                     creep.moveTo(spawn, {ignoreHostiled: 1});
@@ -21,6 +21,7 @@ var role = {
             attacker = attackers.sort((a,b) => a.pos.getRangeTo(creep.pos) - b.pos.getRangeTo(creep.pos))[0];
             creep.memory.attackerID = attacker.id;
         }
+
         let healed = 0;
         let moved = 0;
         let seeked;

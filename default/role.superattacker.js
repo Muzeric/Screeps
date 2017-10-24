@@ -8,7 +8,7 @@ var role = {
         if(!flag || creep.room.name != flag.pos.roomName && healers.length < SUPER_HEALER_MINCOUNT) {
             let spawn = Game.spawns[creep.memory.spawnName];
             if (creep.pos.isNearTo(spawn)) {
-                if (creep.ticksToLive < 1450)
+                if (creep.ticksToLive < 1450 && !creep.getBoostedBodyparts())
                     spawn.renewCreep(creep);
             } else {
                 creep.moveTo(spawn, {ignoreHostiled: 1});
@@ -16,7 +16,7 @@ var role = {
             for (let i = 0; i < healers.length; i++) {
                 let healer = healers[i];
                 healer.moveTo(spawn, {ignoreHostiled: 1});
-                if (healer.ticksToLive < 1450)
+                if (healer.ticksToLive < 1450 && !healer.getBoostedBodyparts())
                     spawn.renewCreep(healer);
             }
             
@@ -24,7 +24,7 @@ var role = {
         }
 
         let places = global.cache.utils.getRangedPlaces(null, creep.pos, 1);
-        let healersOK = _.sum(healers, c => c.pos.inRangeTo(creep.pos, 2)) >= _.min([places.length, healers.length]) ? 1 : 0;
+        let healersOK = _.sum(healers, c => c.pos.inRangeTo(creep.pos, 3)) >= _.min([places.length, healers.length]) ? 1 : 0;
         let healersBorder = _.sum(healers, c => c.pos.isBorder());
 
         if (creep.room.name != flag.pos.roomName) {
@@ -55,8 +55,8 @@ var role = {
                 creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: c => c.getActiveBodyparts(ATTACK) || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL) || c.hits < c.hitsMax}) ||
                 creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType == STRUCTURE_TOWER}) ||
                 creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS) ||
-                creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS) ||
-                creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType != STRUCTURE_CONTROLLER})
+                creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {filter : s => s.structureType != STRUCTURE_CONTROLLER}) ||
+                creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS)
             ;
             if (target) {
                 creep.rangedAttack(target);
