@@ -61,11 +61,13 @@ var role = {
                 creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS) ||
                 creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES)
             ;
-            if (target) {
+            if ("progress" in target) {
+                creep.moveTo(target, {ignoreHostiled: 1});
+            } else if (target) {
                 creep.rangedAttack(target);
                 //Memory.targets[creep.room.name] = target.id;
                 if (creep.attack(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, {ignoreHostiled: 1, range: "body" in target ? 3 : ("progress" in target ? 0 : 1)});
+                    creep.moveTo(target, {ignoreHostiled: 1, range: "body" in target ? 3 : 1});
                 }
             } else {
                 creep.moveTo(flag, {ignoreHostiled: 1});
