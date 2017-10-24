@@ -52,6 +52,39 @@ function _checkPosFree (pos, costs, ext) {
     return true;
 }
 
+function _getMarketPrices (orders, rt) {
+    let prices = {sell: {sum: 0, amount: 0, min: null, max: null}, buy: {sum: 0, amount: 0, min: null, max: null}};
+    for (let order of _.filter(orders, o => o.resourceType == rt && o.amount > 0)) {
+        if (order.price < 0.01 || order.price > 10)
+            continue;
+        let hash = order.type == ORDER_BUY ? prices.buy : prices.sell;
+        if (!hash.amount) {
+            hash.max = order.price;
+            hash.min = order.price;
+        } else if (order.price < hash.min) {
+            hash.min = order.price;
+        } else if (order.price > hash.max) {
+            hash.max = order.price;
+        }
+        hash.amount += order.amount;
+        hash.sum += order.price * order.amount;
+    }
+    for (let type of ["buy", "sell"]) {
+        prices[type].avg = prices[type].amount ? _.ceil(prices[type].sum / prices[type].amount, 3) : 0;
+        delete prices[type].sum;
+        delete prices[type].amount;
+    }
+    delete prices["sell"].max;
+    delete prices["buy"].min;
+    prices["mid"] = prices["sell"].min > 0 && prices["buy"].max > 0 ? _.ceil((prices["sell"].min + prices["buy"].max * 1.1) / 2, 3) : null;
+    if (prices["mid"]) {
+        prices["mid"] = utils.clamp(prices["mid"], prices["sell"].min * 0.9, prices["buy"].max * 2);
+        prices["mid"] = _.ceil(prices["mid"], 3);
+    }
+
+    return prices;
+}
+
 var utils = {
     checkPosForExtension : function (pos, costs) {
         if (!_checkPosFree(pos, costs) || 
@@ -210,78 +243,103 @@ var utils = {
     autoMarket: function(options = {}) {
         let orders = Game.market.getAllOrders();
         let cache = {};
+        let max = options.max || 10000;
         let print = "\n";
-        for (let room of _.filter(Game.rooms, r => r.terminal && r.controller.my)) {
+        for (let room of _.filter(Game.rooms, r => 
+                r.terminal && r.controller.my && (!options.roomName || r.name == options.roomName) 
+        )) {
             print += room.name + ":\n";
-            for (let rt in room.terminal.store) {
-                if (rt == "energy" || room.terminal.store[rt] < 1000 || options.length && rt.length > options.length)
-                    continue;
-                print += "\t" + rt + ": " + room.terminal.store[rt] + "; ";
-                
-                if (!(rt in cache)) {
-                    let prices = {sell: {sum: 0, amount: 0, min: null, max: null}, buy: {sum: 0, amount: 0, min: null, max: null}};
-                    for (let order of _.filter(orders, o => o.resourceType == rt && o.amount > 0)) {
-                        if (order.price < 0.01 || order.price > 10)
-                            continue;
-                        let hash = order.type == ORDER_BUY ? prices.buy : prices.sell;
-                        if (!hash.amount) {
-                            hash.max = order.price;
-                            hash.min = order.price;
-                        } else if (order.price < hash.min) {
-                            hash.min = order.price;
-                        } else if (order.price > hash.max) {
-                            hash.max = order.price;
-                        }
-                        hash.amount += order.amount;
-                        hash.sum += order.price * order.amount;
-                    }
-                    for (let type of ["buy", "sell"]) {
-                        prices[type].avg = prices[type].amount ? _.ceil(prices[type].sum / prices[type].amount, 3) : 0;
-                        delete prices[type].sum;
-                        delete prices[type].amount;
-                    }
-                    delete prices["sell"].max;
-                    delete prices["buy"].min;
-                    prices["mid"] = prices["sell"].min > 0 && prices["buy"].max > 0 ? _.ceil((prices["sell"].min + prices["buy"].max * 1.1) / 2, 3) : null;
-                    prices["mid"] = this.clamp(prices["mid"], prices["sell"].min * 0.9, prices["buy"].max * 2);
-                    prices["mid"] = _.ceil(prices["mid"], 3);
-                    cache[rt] = {mid: prices["mid"], str: JSON.stringify(prices)};
-                }
-                let midPrice = cache[rt].mid;
+            if (!options.type || options.type == "sell") {
+                print += "\tSELL\n";
+                for (let rt in room.terminal.store) {
+                    if (rt == "energy" || room.terminal.store[rt] < 1000 || options.length && rt.length > options.length)
+                        continue;
+                    print += "\t" + rt + ": " + room.terminal.store[rt] + "; ";
+                    
+                    if (!(rt in cache))
+                        cache[rt] = _getMarketPrices(orders, rt);
+                    let midPrice = cache[rt].mid;
+                    let amount = this.clamp(room.terminal.store[rt], 0, max);
 
-                let order = _.find(Game.market.orders, o => o.resourceType == rt && o.type == ORDER_SELL && o.roomName == room.name);
-                if (order) {
-                    print += "MY: {id:" + order.id + ", price:" + order.price + ", amount:" + order.amount + "}; ";
-                    if (midPrice && order.price != midPrice) {
-                        print += "\n";
-                        print += `\tGame.market.changeOrderPrice("${order.id}", ${midPrice});`;
-                        if (options.really) {
-                            let res = Game.market.changeOrderPrice(order.id, midPrice);
-                            print += ` (${res})`;
-                        }
-                        if (order.amount < room.terminal.store[rt]) {
+                    let order = _.find(Game.market.orders, o => o.resourceType == rt && o.type == ORDER_SELL && o.roomName == room.name);
+                    if (order) {
+                        print += "MY: {id:" + order.id + ", price:" + order.price + ", amount:" + order.amount + "}; ";
+                        if (midPrice && order.price != midPrice) {
                             print += "\n";
-                            print += `\tGame.market.extendOrder("${order.id}", ${room.terminal.store[rt] - order.amount});`;
+                            print += `\tGame.market.changeOrderPrice("${order.id}", ${midPrice});`;
                             if (options.really) {
-                                let res = Game.market.extendOrder(order.id, room.terminal.store[rt] - order.amount);
+                                let res = Game.market.changeOrderPrice(order.id, midPrice);
                                 print += ` (${res})`;
                             }
+                            if (order.amount < amount) {
+                                print += "\n";
+                                print += `\tGame.market.extendOrder("${order.id}", ${amount - order.amount});`;
+                                if (options.really) {
+                                    let res = Game.market.extendOrder(order.id, amount - order.amount);
+                                    print += ` (${res})`;
+                                }
+                            }
+                        }
+                    } else if (midPrice) {
+                        print += "\n";
+                        print += `\tGame.market.createOrder(ORDER_SELL, ${rt}, ${midPrice}, ${amount}, ${room.name});`;
+                        if (options.really) {
+                            let res = Game.market.createOrder(ORDER_SELL, rt, midPrice, amount, room.name);
+                            print += ` (${res})`;
                         }
                     }
-                } else if (midPrice) {
                     print += "\n";
-                    print += `\tGame.market.createOrder(ORDER_SELL, ${rt}, ${midPrice}, ${room.terminal.store[rt]}, ${room.name});`;
-                    if (options.really) {
-                        let res = Game.market.createOrder(ORDER_SELL, rt, midPrice, room.terminal.store[rt], room.name);
-                        print += ` (${res})`;
-                    }
                 }
-                print += "\n";
+            }
+            if (!options.type || options.type == "buy") {
+                print += "\tBUY\n";    
+                let nr = room.memory.needResources;
+                if (!nr)
+                    continue;
+                for(let rt in nr) {
+                    if (rt.length > 1 || nr[rt] < 1000 || rt == "G")
+                        continue;
+                    print += "\t" + rt + ":" + nr[rt] + "; ";
+                    if (!(rt in cache))
+                        cache[rt] = _getMarketPrices(orders, rt);
+                    let midPrice = cache[rt].mid;
+                    let amount = this.clamp(nr[rt], 0, max);
+
+                    let order = _.find(Game.market.orders, o => o.resourceType == rt && o.type == ORDER_BUY && o.roomName == room.name);
+                    if (order) {
+                        print += "MY: {id:" + order.id + ", price:" + order.price + ", amount:" + order.amount + "}; ";
+                        if (midPrice && order.price != midPrice) {
+                            print += "\n";
+                            print += `\tGame.market.changeOrderPrice("${order.id}", ${midPrice});`;
+                            if (options.really) {
+                                let res = Game.market.changeOrderPrice(order.id, midPrice);
+                                print += ` (${res})`;
+                            }
+                            if (order.amount < amount) {
+                                print += "\n";
+                                print += `\tGame.market.extendOrder("${order.id}", ${amount - order.amount});`;
+                                if (options.really) {
+                                    let res = Game.market.extendOrder(order.id, amount - order.amount);
+                                    print += ` (${res})`;
+                                }
+                            }
+                        }
+                    } else if (midPrice) {
+                        print += "\n";
+                        print += `\tGame.market.createOrder(ORDER_BUY, ${rt}, ${midPrice}, ${amount}, ${room.name});`;
+                        if (options.really) {
+                            let res = Game.market.createOrder(ORDER_BUY, rt, midPrice, amount, room.name);
+                            print += ` (${res})`;
+                        }
+                    }
+                    print += "\n";
+                } 
+                    
             }
         }
         print += "\n";
         for (let rt in cache)
-            print += rt + ":\t" + cache[rt].mid + "\t" + cache[rt].str + "\n";
+            print += rt + ":\t" + cache[rt].mid + "\t" + JSON.stringify(cache[rt]) + "\n";
         console.log(print);
     },
 
