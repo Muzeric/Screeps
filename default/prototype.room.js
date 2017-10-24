@@ -458,7 +458,7 @@ Room.prototype.getConstructions = function () {
 }
 
 Room.prototype.getRepairs = function (all) {
-    return _.filter( _.flatten(_.values(this.memory.structures)), s => !s.finished && s.hits < s.hitsMax*0.9 && (all || s.hits < this.getRepairLimit()) );
+    return _.filter( _.flatten(_.values(this.memory.structures)), s => !s.finished && s.hits < s.hitsMax*0.9 && (all || s.hits < this.getRepairLimit()) && s.structureType != STRUCTURE_ROAD );
 }
 
 Room.prototype.getBuilderTicks = function () {
@@ -668,6 +668,7 @@ Room.prototype.updateStructures = function() {
     });
 
     let constructionsContainers = {};
+    let constructionsRoads = {};
     let extensionConstructionCount = 0;
     let extractorConstructionCount = 0;
     this.find(FIND_MY_CONSTRUCTION_SITES).forEach( function(s) {
@@ -681,6 +682,7 @@ Room.prototype.updateStructures = function() {
                 delete memory.wantRoads[s.pos.getKey()];
                 console.log(room.name + ": REMOVE (" + res + ") constr road at " + s.pos.getKey());
             } else {
+                constructionsRoads[s.pos.getKey()] = s.id;
                 memory.constructionsRoads++;
                 costs.set(s.pos.x, s.pos.y, 1);
             }
@@ -758,7 +760,7 @@ Room.prototype.updateStructures = function() {
         let count = value - time * 10;
         if (Game.time - time > ROADS_TIMEOUT) {
             delete memory.wantRoads[key];
-        } else if (count > ROADS_CONSTRUCT_WANTED && memory.constructions < MAX_CONSTRUCTIONS_PER_ROOM) {
+        } else if (count > ROADS_CONSTRUCT_WANTED && memory.constructions < MAX_CONSTRUCTIONS_PER_ROOM && !(key in constructionsRoads)) {
             let coor = key.split('x');
             let res = this.createConstructionSite(parseInt(coor[0]), parseInt(coor[1]), STRUCTURE_ROAD);
             console.log(this.name + ": BUILT (" + res + ") road at " + key);
