@@ -2,7 +2,7 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        let healerMinCount = creep.memory.healerMinCount || SUPER_HEALER_MINCOUNT;
+        let healerMinCount = "healerMinCount" in creep.memory ? creep.memory.healerMinCount : SUPER_HEALER_MINCOUNT;
 
         let healers = _.filter(Game.creeps, c => c.memory.role == "superhealer" && c.memory.attackerID == creep.id).sort();
         let flag = _.filter(Game.flags, f => creep.memory.flagName ? f.name == creep.memory.flagName : f.name.substring(0, 6) == 'Attack').sort()[0];
