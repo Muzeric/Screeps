@@ -61,7 +61,7 @@ var role = {
                 creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS) ||
                 creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES)
             ;
-            if ("progress" in target) {
+            if (target && "progress" in target) {
                 creep.moveTo(target, {ignoreHostiled: 1});
             } else if (target) {
                 creep.rangedAttack(target);
