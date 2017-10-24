@@ -2,10 +2,12 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
+        let healerMinCount = creep.memory.healerMinCount || SUPER_HEALER_MINCOUNT;
+
         let healers = _.filter(Game.creeps, c => c.memory.role == "superhealer" && c.memory.attackerID == creep.id).sort();
         let flag = _.filter(Game.flags, f => f.name.substring(0, 6) == 'Attack').sort()[0];
 
-        if(!flag || creep.room.name != flag.pos.roomName && healers.length < SUPER_HEALER_MINCOUNT) {
+        if(!flag || creep.room.name != flag.pos.roomName && healers.length < healerMinCount) {
             let spawn = Game.spawns[creep.memory.spawnName];
             if (creep.pos.isNearTo(spawn)) {
                 if (creep.ticksToLive < 1450 && !creep.getBoostedBodyparts())
@@ -24,7 +26,7 @@ var role = {
         }
 
         let places = global.cache.utils.getRangedPlaces(null, creep.pos, 1);
-        let healersOK = _.sum(healers, c => c.pos.inRangeTo(creep.pos, 3)) >= _.min([places.length, healers.length]) ? 1 : 0;
+        let healersOK = _.sum(healers, c => c.pos.inRangeTo(creep.pos, 3)) >= _.min([places.length, healers.length, healerMinCount]) ? 1 : 0;
         let healersBorder = _.sum(healers, c => c.pos.isBorder());
 
         if (creep.room.name != flag.pos.roomName) {
