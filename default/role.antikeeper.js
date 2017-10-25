@@ -13,8 +13,8 @@ var role = {
         let friend = _.find(global.cache.creepsByRoomName[creep.memory.roomName], c => c.memory.role == "antikeeper" && c != creep && !c.spawning);
         let friendRange = friend ? creep.pos.getRangeTo(friend) : 0;
         if (creep.room.name != creep.memory.roomName) {
-            if (creep.boost(HEAL, "heal") == OK)
-                return;
+            //if (creep.boost(HEAL, "heal") == OK)
+            //    return;
             if (!Game.flags["Antikeeper." + creep.memory.roomName]) {
                 console.log(creep.name + " no flag in " + creep.memory.roomName);
                 return;
