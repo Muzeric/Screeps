@@ -49,6 +49,7 @@ global.BOOST_STOP_TICKS = 900;
 global.BOOST_BUILDER_MIN_BTICKS = 20000;
 global.CPU_LIMIT_LOW = 30;
 global.CPU_LIMIT_HIGH = 100;
+global.CPU_LIMIT_SAVE = 1000;
 global.CREEP_WEIGHT = {
     defender: 1,
     antikeeper: 1,
