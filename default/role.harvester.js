@@ -41,11 +41,12 @@ var role = {
         }
 	},
 	
-	create: function(energy, worker) {
-	    let energyDiff = 0;
-        if (energy > 1350) {
-            energyDiff = energy - 1350;
-            energy = 1350;
+	create: function(energy, options = {}) {
+        let energyDiff = 0;
+        let limit = options.top ? 2700 : 1350;
+        if (energy > limit) {
+            energyDiff = energy - limit;
+            energy = limit;
         }
         let body = [];
         let fat = 0;
@@ -62,7 +63,7 @@ var role = {
 	            energy -= 50;
 	            fat++;
 	        }
-            if((worker || !wnum) && energy >= 100 && body.length < 50) {
+            if((options.work || !wnum) && energy >= 100 && body.length < 50) {
 	            body.push(WORK);
 	            energy -= 100;
 	            fat++;

@@ -549,10 +549,10 @@ function getRoomLimits (room, creepsCount, fcount) {
     limits.push({
             "role" : "harvester",
             "count" : memory.structures[STRUCTURE_SPAWN] ? 1 : 0,
-            "arg" : unminerSources ? 1 : 0,
+            "arg" : {work: unminerSources ? 1 : 0, top: room.controller.level >= 7},
             "priority" : 1,
             "minEnergy" : 300,
-            "wishEnergy" : 300,
+            "wishEnergy" : room.controller.level >= 7 ? 2700 : 1350,
     },{
             "role" : "miner",
             "count" : _.min([pairedSources, 1]),
@@ -569,12 +569,12 @@ function getRoomLimits (room, creepsCount, fcount) {
     },{
             "role" : "harvester",
             "count" : memory.structures[STRUCTURE_SPAWN] ? countHarvester : 0,
-            "arg" : unminerSources ? 1 : 0,
+            "arg" : {work: unminerSources ? 1 : 0, top: room.controller.level >= 7},
             "priority" : 2,
-            "wishEnergy" : 1350,
+            "wishEnergy" : room.controller.level >= 7 ? 2700 : 1350,
             "body" : {
-                "work" : 10*unminerSources,
-                "carry" : 10*countHarvester,
+                "work" : 10*unminerSources * (room.controller.level >= 7 ? 2 : 1),
+                "carry" : 10*countHarvester * (room.controller.level >= 7 ? 2 : 1),
             },
     },{
             "role" : "miner",
