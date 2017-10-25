@@ -7,7 +7,16 @@ var role = {
                 creep.heal(creep);
             return;
         }
-        
+
+        /*
+        let hostiles = global.cache.hostiles[creep.room.name];
+        if (hostiles.length && creep.room.name != creep.memory.roomName) {
+            creep.moveTo(hostiles[0]);
+            if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL))
+                creep.heal(creep);
+            return;
+        }
+        */
         let mark = {};
         let res = creep.attackNearHostile(50, mark);
 

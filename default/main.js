@@ -647,23 +647,22 @@ function getRoomLimits (room, creepsCount, fcount) {
             "wishEnergy" : 5000,
     },{
             role : "dismantler",
-            "count" : fcount["Dismantle"] ? 1 : 0,
-            "priority" : 9,
-            "wishEnergy" : 1500,
+            "count" : memory.dismantlerCount || 0,
+            "priority" : 3,
+            "minEnergy" : 3300,
+            "wishEnergy" : 3300,
     },{
             role : "superhealer",
             "count" : memory.superhealerCount || 0,
             "priority" : 3,
             "minEnergy" : 2100,
             "maxEnergy" : 7500,
-            "range": 3,
     },{
             role : "superattacker",
             "count" : memory.superattackerCount || 0,
             "priority" : 3,
             "minEnergy" : 2800,
             "maxEnergy" : 2800,
-            "range": 3,
     });
 
     for (let limit of limits) {
