@@ -27,6 +27,7 @@ module.exports.loop = function () {
     global.cache.objects = global.cache.objects || {};
     global.cache.boostingLabs = {};
     global.cache.targets = {};
+    global.cache.skipSpawnNames = {};
     
     var moveErrors = {};
     global.cache.roomNames = _.filter( _.uniq( [].concat( 
@@ -185,7 +186,6 @@ module.exports.loop = function () {
         console.log("needList=" + JSON.stringify(_.countBy(needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } ), function(l) {return l.roomName + '.' + l.countName})));
         global.cache.stat.addCPU("needList");
         
-        let skipSpawnNames = {};
         let skipRoomNames = {};
         let reservedEnergy = {};
         for (let need of needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } )) {
@@ -194,14 +194,14 @@ module.exports.loop = function () {
 
             if (!_.filter(Game.spawns, s => 
                     !s.spawning && 
-                    !(s.name in skipSpawnNames) && 
+                    !(s.name in global.cache.skipSpawnNames) && 
                     !(s.room.name in skipRoomNames)
             ).length) {
                 //console.log("All spawns are spawning");
                 break;
             }
             
-            let res = getSpawnForCreate(need, skipSpawnNames, skipRoomNames, reservedEnergy);
+            let res = getSpawnForCreate(need, skipRoomNames, reservedEnergy);
             if (res[0] == -2) {
                 //console.log("needList: " + need.role + " for " + need.roomName + " has no spawns in range");
             } else if (res[0] == -1) {
@@ -242,7 +242,7 @@ module.exports.loop = function () {
                 } else {
                     console.log(spawn.name + ": FAILED to burn: ret=" + ret + " of " + newName + " (arg: " + JSON.stringify(need.arg) + ") for " + need.roomName + ", energy (" + energy + "->" + (energy - leftEnergy) + ") ");
                 }
-                skipSpawnNames[spawn.name] = 1;
+                global.cache.skipSpawnNames[spawn.name] = 1;
             }
         }
         global.cache.stat.addCPU("create");
@@ -682,10 +682,10 @@ function getRoomLimits (room, creepsCount, fcount) {
     return limits;
 }
 
-function getSpawnForCreate (need, skipSpawnNames, skipRoomNames, reservedEnergy) {
+function getSpawnForCreate (need, skipRoomNames, reservedEnergy) {
     let spawnsInRange = _.filter(Game.spawns, s => 
         !s.spawning && 
-        !(s.name in skipSpawnNames) && 
+        !(s.name in global.cache.skipSpawnNames) && 
         !(s.room.name in skipRoomNames) &&
         (s.room.getPathToRoom(need.roomName) && s.room.getPathToRoom(need.roomName) < need.range * 50 || s.room.name == need.roomName)
     );
@@ -701,7 +701,7 @@ function getSpawnForCreate (need, skipSpawnNames, skipRoomNames, reservedEnergy)
         if (spawn.room.name == waitRoomName)
             continue;
         let energy = spawn.room.energyAvailable - (reservedEnergy[spawn.room.name] || 0);
-        //console.log("getSpawnForCreate: " + need.roomName + " wants " + need.role + ", skipSpawnNames=" + JSON.stringify(skipSpawnNames) + ":" + spawn.name + " minEnergy=" + need.minEnergy + ", energyAvailable=" + spawn.room.energyAvailable);
+        //console.log("getSpawnForCreate: " + need.roomName + " wants " + need.role + ", skipSpawnNames=" + JSON.stringify(global.cache.skipSpawnNames) + ":" + spawn.name + " minEnergy=" + need.minEnergy + ", energyAvailable=" + spawn.room.energyAvailable);
         if (
             energy >= need.minEnergy &&
             (

@@ -11,8 +11,10 @@ var role = {
                 console.log(creep.name + ": no attackers");
                 let spawn = Game.spawns[creep.memory.spawnName];
                 if (creep.pos.isNearTo(spawn)) {
-                    if (creep.hits < creep.hitsMax * 0.95 && !creep.getBoostedBodyparts())
+                    if (creep.hits < creep.hitsMax * 0.95 && !creep.getBoostedBodyparts()) {
                         spawn.renewCreep(creep);
+                        global.cache.skipSpawnNames[spawn.name] = 1;
+                    }
                 } else {
                     creep.moveTo(spawn, {ignoreHostiled: 1});
                 }

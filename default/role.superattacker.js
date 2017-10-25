@@ -10,16 +10,20 @@ var role = {
         if(!flag || creep.room.name != flag.pos.roomName && healers.length < healerMinCount) {
             let spawn = Game.spawns[creep.memory.spawnName];
             if (creep.pos.isNearTo(spawn)) {
-                if (creep.ticksToLive < 1450 && !creep.getBoostedBodyparts())
+                if (creep.ticksToLive < 1450 && !creep.getBoostedBodyparts()) {
                     spawn.renewCreep(creep);
+                    global.cache.skipSpawnNames[spawn.name] = 1;
+                }
             } else {
                 creep.moveTo(spawn, {ignoreHostiled: 1});
             }
             for (let i = 0; i < healers.length; i++) {
                 let healer = healers[i];
                 healer.moveTo(spawn, {ignoreHostiled: 1});
-                if (healer.ticksToLive < 1450 && !healer.getBoostedBodyparts())
+                if (healer.ticksToLive < 1450 && !healer.getBoostedBodyparts()) {
                     spawn.renewCreep(healer);
+                    global.cache.skipSpawnNames[spawn.name] = 1;
+                }
             }
             
             return;
