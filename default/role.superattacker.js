@@ -23,7 +23,6 @@ var role = {
                 if (healer.ticksToLive < 1450 && !healer.getBoostedBodyparts()) {
                     spawn.renewCreep(healer);
                     global.cache.skipSpawnNames[spawn.name] = 1;
-                    break;
                 }
             }
             
