@@ -67,11 +67,7 @@ var stat = {
         }
 
         if (Game.time - Memory.stat.roomSent > 100) {
-            Game.notify(
-                "room.4:" + Game.time + ":" + 
-                global.cache.utils.lzw_encode(this.dumpRoomStat()) +
-                "#END#"
-            );
+            this.dumpRoomStat();
             delete Memory.stat.roomHistory;
             Memory.stat.roomSent = Game.time;
         }
@@ -81,6 +77,7 @@ var stat = {
         let res = '';
         let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send'];
         let lite = _.keys(Memory.stat.roomHistory).length > 20;
+        let msgs = [];
         for (let roomName in Memory.stat.roomHistory) {
             if (lite && (!(roomName in Memory.rooms) || ["my", "reserved", "lair", "banked"].indexOf(Memory.rooms[roomName].type) == -1))
                 continue;
@@ -89,9 +86,22 @@ var stat = {
                 res += ':' + _.floor(Memory.stat.roomHistory[roomName][key] || 0, 1);
             }
             res += ';';
+            if (res.length > 900) {
+                msgs.push(res);
+                res = '';
+            }
+        }
+        if (res.length)
+            msgs.push(res);
+
+        for (let msg of msgs) {
+            Game.notify(
+                "room.4:" + Game.time + ":" + 
+                global.cache.utils.lzw_encode(msg) +
+                "#END#"
+            );
         }
 
-        return res;
     },
 
     die : function (name) {
