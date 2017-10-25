@@ -10,7 +10,7 @@ var role = {
         if (creep.boost(WORK, "dismantle") == OK)
             return;
         
-        if (flag.room.name != creep.room.name) {
+        if (flag.pos.roomName != creep.room.name) {
             creep.moveTo(flag, {ignoreHostiled: 1});
         } else {
             let target = Game.getObjectById(creep.memory.dismTargetID);
