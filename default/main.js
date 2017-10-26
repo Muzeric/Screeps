@@ -341,7 +341,7 @@ function getGuardRoomLimits (roomName, creepsCount, fcount) {
         "priority" : 1,
         "wishEnergy" : 2520,
         "minEnergy" : 2520,
-        "range": 5,
+        "range": 7,
     });
 
     for (let limit of limits) {
