@@ -5,7 +5,7 @@ var role = {
         if (creep.room.name != creep.memory.roomName) {
             let flag = _.filter(Game.flags, f => f.pos.roomName == creep.memory.roomName && f.name.substring(0,f.name.indexOf('.')) == "Guard" )[0];
             if (flag) {
-                creep.moveTo(flag, {ignoreHostiled: 1});
+                creep.moveTo(flag);
                 console.log(creep.name + ": goto flag");
             } else {
                 console.log(creep.name + ": no guard flag for " + creep.memory.roomName);
