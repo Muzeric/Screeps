@@ -27,8 +27,9 @@ var role = {
         let anum = 4;
         let rnum = 4;
         let hnum = 3;
-        let mnum = tnum + anum + rnum;
+        let mnum = tnum + anum + rnum + hnum;
         energy -= 10 * tnum + 80 * anum + 150 * rnum + 50 * mnum + 250 * hnum;
+        // 10 * 5 + 80 * 4 + 150 * 4 + 250 * 3 + 50 * 16
 
         while (tnum-- > 0)
             body.push(TOUGH);
