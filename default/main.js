@@ -151,6 +151,8 @@ module.exports.loop = function () {
             try {
                 if (fcount["DisController"]) {
                     limitList = getDiscRoomLimits(roomName, creepsCount, fcount);
+                } else if (fcount["Guard"]) {
+                    limitList = getGuardRoomLimits(roomName, creepsCount, fcount);
                 } else if (room && room.controller && room.controller.my) {
                     limitList = getRoomLimits(room, creepsCount, fcount);
                 } else {
@@ -325,6 +327,36 @@ module.exports.loop = function () {
     global.cache.stat.finish();
 //});
 };
+
+function getGuardRoomLimits (roomName, creepsCount, fcount) {
+    //let memory = Memory.rooms[roomName] || {structures : {}};
+    //let room = Game.rooms[roomName];
+    //if (!fcount["Guard"])
+    //    return [];
+    
+    let limits = [];
+    limits.push({
+        "role" : "guarder",
+        "count" : 1,
+        "priority" : 1,
+        "wishEnergy" : 2520,
+        "minEnergy" : 2520,
+        "range": 5,
+    });
+
+    for (let limit of limits) {
+        limit["roomName"] = roomName;
+        limit["originalEnergyCapacity"] = 0;
+        if (!("minEnergy" in limit))
+            limit["minEnergy"] = 0;
+        if (!("countName" in limit))
+            limit["countName"] = limit.role;
+    }
+
+    //console.log(roomName + ": CPU=" + _.floor(Game.cpu.getUsed() - lastCPU, 2) + "; limits=" + JSON.stringify(limits));
+
+    return limits;
+}
 
 function getDiscRoomLimits (roomName, creepsCount, fcount) {
     let memory = Memory.rooms[roomName] || {structures : {}};
