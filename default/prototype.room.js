@@ -512,7 +512,9 @@ Room.prototype.updateStructures = function() {
         memory.structures[STRUCTURE_SOURCE].push(elem);
     });
 
-    if (this.storage && this.storage.store.energy > REPAIR_ENERGY_LIMIT)
+    if (this.storage && this.storage.store.energy > REPAIR_ENERGY_LIMIT2)
+        memory.repairLimit = REPAIR_LIMIT_HIGH2;
+    else if (this.storage && this.storage.store.energy > REPAIR_ENERGY_LIMIT)
         memory.repairLimit = REPAIR_LIMIT_HIGH;
     else if (!("repairLimit" in memory) || this.storage && this.storage.store.energy < 0.8*REPAIR_ENERGY_LIMIT)
         memory.repairLimit = REPAIR_LIMIT;
