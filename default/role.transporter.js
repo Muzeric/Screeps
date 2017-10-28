@@ -13,9 +13,6 @@ var role = {
 
         if (creep.room.memory.type == 'lair' && !creep.goFromKeepers())
             return;
-        
-        if (creep.memory.arg == "in" && creep.checkInRoomAndGo())
-            return;
 
         let queue = global.cache.queueTransport;
 
