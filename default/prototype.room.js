@@ -317,7 +317,8 @@ Room.prototype.needRoad = function(creep) {
     if (road && creep.carry.energy && creep.getActiveBodyparts(WORK)) {
         if (road.hits && road.hits < road.hitsMax) {
             //console.log(creep.name + ": repair road on " + creep.pos.getKey(1));
-            creep.repair(road);
+            if (["builder", "longbuilder"].indexOf(creep.memory.role) === -1)
+                creep.repair(road);
         } else if (road.progressTotal) {
             //console.log(creep.name + ": build road on " + creep.pos.getKey(1));
             creep.build(road);
