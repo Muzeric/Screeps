@@ -121,7 +121,7 @@ var queue = {
         for (let request of _.filter(Memory.transportRequests, r => 
             !r.creepID && 
             (
-                type == "in" && r.fromRoomName == creepPos.roomName && r.fromRoomName == r.toRoomName ||
+                type == "in" && r.fromRoomName == creep.memory.roomName && r.fromRoomName == r.toRoomName ||
                 type == "out" && (r.fromRoomName != r.toRoomName || creepPos.roomName == r.fromRoomName)
             )
         )) {
