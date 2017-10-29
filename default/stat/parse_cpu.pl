@@ -48,7 +48,7 @@ foreach my $file (@files) {
   chomp($jshash);
 
   if (my $hash = eval($jshash) ) {
-    $info->{$tick} = $hash;
+    $info->{$tick} = [$version, $hash];
     foreach my $key (keys %$hash) {
       $total_keys->{$key} = 1;
     }
@@ -90,10 +90,15 @@ or die $@;
 print STAT "tick\t".join("\t", sort keys %$total_keys)."\t".join("\t", sort keys %$extra)."\n";
 my $run_keys = {};
 foreach my $tick (@ticks) {
-  my $hash = $info->{$tick};
+  my ($version, $hash) = $info->{$tick};
   print STAT $tick;
   foreach my $key (sort keys %$total_keys) {
-    my $value = exists $hash->{$key}->{cpu} ? $hash->{$key}->{cpu} : 0;
+    my $value = 0;
+    if (!$version && exists $hash->{$key}->{cpu}) {
+      $value = $hash->{$key}->{cpu};
+    } elsif ($version == 1) {
+      $value = $hash->{$key};
+    }
     $value =~ s/\./,/;
     print STAT "\t$value";
   }
@@ -105,9 +110,11 @@ foreach my $tick (@ticks) {
 
   print STAT "\n";
 
-  my $run = $hash->{"run"}->{"info"};
-  foreach my $key (keys %$run) {
-    $run_keys->{$key} = 1;
+  if (!$version) {
+    my $run = $hash->{"run"}->{"info"};
+    foreach my $key (keys %$run) {
+      $run_keys->{$key} = 1;
+    }
   }
 }
 close(STAT);

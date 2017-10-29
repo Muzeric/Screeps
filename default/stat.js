@@ -101,7 +101,7 @@ var stat = {
 
     dumpRoleStat : function () {
         let res = '';
-        let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send'];
+        let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'cpu', 'sum'];
         let msgs = [];
         for (let role in Memory.stat.roleHistory) {
             res += role;
@@ -119,7 +119,7 @@ var stat = {
 
         for (let msg of msgs) {
             Game.notify(
-                "role.1:" + Game.time + ":" + 
+                "role.2:" + Game.time + ":" + 
                 global.cache.utils.lzw_encode(msg) +
                 "#END#"
             );

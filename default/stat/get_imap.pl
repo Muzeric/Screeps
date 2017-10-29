@@ -42,6 +42,7 @@ my $room_versions = {
 
 my $role_versions = {
   '1' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send'],
+  '2' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'cpu', 'sum'],
 };
 
 my $parser = MIME::Parser->new;
@@ -55,7 +56,7 @@ foreach my $msg (@msgs) {
   print $prefix;
 
   my $date = $imap->fetch($msg, "INTERNALDATE");
-  my $unixtime = str2time($date);
+  my $unixtime = str2time($date) || 0;
 
   #my $string = $imap->message_string($msg) 
   my $string = $imap->get($msg)
@@ -86,7 +87,7 @@ foreach my $msg (@msgs) {
       my $jshash = lzw_decode($comp);
       $jshash =~ s/:/=>/g;
       if (my $hash = eval($jshash) ) {
-        $cpu_out .= "$tick,$unixtime\n$jshash\n";
+        $cpu_out .= "$tick,$unixtime,0\n$jshash\n";
         $good = 1;       
       } else {
         print STDERR "${prefix}can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
