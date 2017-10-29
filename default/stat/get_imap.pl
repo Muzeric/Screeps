@@ -40,10 +40,14 @@ my $room_versions = {
   '4' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send'],
 };
 
+my $role_versions = {
+  '1' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send'],
+};
+
 my $parser = MIME::Parser->new;
 $parser->tmp_to_core(1);
 $parser->output_to_core(1);
-my $count = 1;
+my $count = 0;
 my @msgs_done = ();
 my @msgs_bad = ();
 foreach my $msg (@msgs) {
@@ -51,7 +55,7 @@ foreach my $msg (@msgs) {
   print $prefix;
 
   my $date = $imap->fetch($msg, "INTERNALDATE");
-  print str2time($date)."\n";
+  my $unixtime = str2time($date);
 
   #my $string = $imap->message_string($msg) 
   my $string = $imap->get($msg)
@@ -73,6 +77,7 @@ foreach my $msg (@msgs) {
   my $good = 0;
   my $cpu_out = '';
   my $room_out = '';
+  my $role_out = '';
   my ($tick, $comp, $version);
   foreach my $str (split(/\n/, $content)) {
     if ($str =~ /\d+ notifications? received on.*shard|\[msg\]|^$/) {
@@ -81,18 +86,27 @@ foreach my $msg (@msgs) {
       my $jshash = lzw_decode($comp);
       $jshash =~ s/:/=>/g;
       if (my $hash = eval($jshash) ) {
-        $cpu_out .= "$tick\n$jshash\n";
+        $cpu_out .= "$tick,$unixtime\n$jshash\n";
         $good = 1;       
+      } else {
+        print STDERR "${prefix}can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
+      }
+    } elsif (($version, $tick, $comp) = $str =~ /CPU\.(\d+):(\d+):(.+)#END#/g) {
+      my $jshash = lzw_decode($comp);
+      $jshash =~ s/:/=>/g;
+      if (my $hash = eval($jshash) ) {
+        $cpu_out .= "$tick,$unixtime,$version\n$jshash\n";
+        $good = 1;
       } else {
         print STDERR "${prefix}can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
       }
     } elsif (($version, $tick, $comp) = $str =~ /room\.(\d+):(\d+):(.+)#END#/g) {
       if (!exists($room_versions->{$version})) {
-        print STDERR "${prefix}No version=$version\n";
+        print STDERR "${prefix}No room version=$version\n";
         next;
       }
       my $hash = {};
-      $room_out .= "$tick\n";
+      $room_out .= "$tick,$unixtime,$version\n";
       $room_out .= "{";
       foreach my $roomt (split(/;/, lzw_decode($comp))) {
         my $i = -1;
@@ -108,6 +122,28 @@ foreach my $msg (@msgs) {
       }
       $room_out .= "}\n";
       $good = 1;
+    } elsif (($version, $tick, $comp) = $str =~ /role\.(\d+):(\d+):(.+)#END#/g) {
+      if (!exists($role_versions->{$version})) {
+        print STDERR "${prefix}No role version=$version\n";
+        next;
+      }
+      my $hash = {};
+      $role_out .= "$tick,$unixtime,$version\n";
+      $role_out .= "{";
+      foreach my $rolet (split(/;/, lzw_decode($comp))) {
+        my $i = -1;
+        foreach my $value (split(/:/, $rolet)) {
+          if ($i == -1) {
+            $role_out .= "\"$value\"=>{";
+          } else {
+            $role_out .= "\"".$role_versions->{$version}->[$i]."\"=>$value,";
+          }
+          $i++;
+        }
+        $role_out .= "},";
+      }
+      $role_out .= "}\n";
+      $good = 1;
     } else {
       if (length($str) > 105) {
         print STDERR "${prefix}not parsed: ".substr($str, 0, 50)." ... ".substr($str, -50)."\n";
@@ -118,7 +154,6 @@ foreach my $msg (@msgs) {
     }
 
   }
-  exit;
 
   if ($cpu_out) {
     open(MSGF, ">mail_cpu/m$msg.msg")
@@ -132,6 +167,13 @@ foreach my $msg (@msgs) {
     or die $@;        
   
     print MSGF "$room_out\n";
+    close(MSGF);
+  }
+  if ($role_out) {
+    open(MSGF, ">mail_role/m$msg.msg")
+    or die $@;        
+  
+    print MSGF "$role_out\n";
     close(MSGF);
   }
  

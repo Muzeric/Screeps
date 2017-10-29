@@ -36,8 +36,11 @@ foreach my $file (@files) {
   open(F, $file)
   or die $@;
 
-  my $tick = <F>;
-  chomp($tick);
+  my $first = <F>;
+  chomp($first);
+  my ($tick, $unixtime, $version) = split(/,/, $first);
+  $unixtime ||= 0;
+  $version ||= 0;
   unless ($tick =~ /^\d+$/) {
     print STDERR "tick is not a number in $file: $tick\n";
     next;

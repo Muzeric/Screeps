@@ -17,8 +17,11 @@ Creep.prototype.harvest = function () {
         let was = arguments[0].energy;
 
         global.cache.stat.updateRoom(this.room.name, 'harvest', _.min([can, was]));
-        if (arguments[0].ticksToRegeneration == 1)
+        global.cache.stat.updateRole(this.memory.role, 'harvest', _.min([can, was]));
+        if (arguments[0].ticksToRegeneration == 1) {
             global.cache.stat.updateRoom(this.room.name, 'lost', -1 * _.min([can, was]));
+            global.cache.stat.updateRole(this.memory.role, 'lost', -1 * _.min([can, was]));
+        }
     }
     return res;
 }
@@ -31,6 +34,7 @@ Creep.prototype.pickup = function () {
         let was = arguments[0].amount;
 
         global.cache.stat.updateRoom(this.room.name, 'pickup', _.min([can, was]));
+        global.cache.stat.updateRole(this.memory.role, 'pickup', _.min([can, was]));
     }
     return res;
 }
@@ -44,6 +48,7 @@ Creep.prototype.build = function () {
         let was = arguments[0].progressTotal - arguments[0].progress;
 
         global.cache.stat.updateRoom(this.room.name, 'build', -1 * _.min([can, got, was]));
+        global.cache.stat.updateRole(this.memory.role, 'build', -1 * _.min([can, got, was]));
     }
     return res;
 }
@@ -57,6 +62,7 @@ Creep.prototype.repair = function () {
         let was = _.ceil((arguments[0].hitsMax - arguments[0].hits) / 100);
 
         global.cache.stat.updateRoom(this.room.name, 'repair', -1 * _.min([can, got, was]));
+        global.cache.stat.updateRole(this.memory.role, 'repair', -1 * _.min([can, got, was]));
     }
     return res;
 }
@@ -78,6 +84,7 @@ Creep.prototype.upgradeController = function () {
         }
         
         global.cache.stat.updateRoom(this.room.name, 'upgrade', -1 * sum);
+        global.cache.stat.updateRole(this.memory.role, 'upgrade', -1 * sum);
     }
     return res;
 }

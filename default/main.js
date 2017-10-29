@@ -77,8 +77,8 @@ module.exports.loop = function () {
     
     global.cache.stat.addCPU("roomUpdate");
 
-    let creepsCPUStat = {};
     for (creep of _.sortBy( Game.creeps, c => CREEP_WEIGHT[c.memory.role] || CREEP_WEIGHT["default"])) {
+        let lastCPU = Game.cpu.getUsed();
         let role = creep.memory.role;
         if(!(role in global.cache.objects)) {
             try {
@@ -108,8 +108,6 @@ module.exports.loop = function () {
             continue;
         }
         
-        let lastCPU = Game.cpu.getUsed();
-        
         try {
             creep.memory.carryEnergy = creep.carry.energy;
             if (!creep.memory.stop)
@@ -119,19 +117,15 @@ module.exports.loop = function () {
             Game.notify(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
         }
         
-        if (!creepsCPUStat[creep.memory.role])
-            creepsCPUStat[creep.memory.role] = {"cpu" : 0, "sum" : 0};
-        
-        let cpu = Game.cpu.getUsed() - lastCPU;
-        creepsCPUStat[creep.memory.role]["cpu"] += cpu;
-        creepsCPUStat[creep.memory.role]["sum"]++;
-
+                let cpu = Game.cpu.getUsed() - lastCPU;
         global.cache.stat.updateRoom(creep.room.name, 'cpu', cpu);
+        global.cache.stat.updateRole(role, 'cpu', cpu);
+        global.cache.stat.updateRole(role, 'sum', 1);
 
         if (global.cache.utils.isLowCPU())
             break;
     }
-    global.cache.stat.addCPU("run", creepsCPUStat);
+    global.cache.stat.addCPU("run");
     
     if (Game.time % PERIOD_NEEDLIST == 0) {
         let needList = [];
@@ -300,6 +294,7 @@ module.exports.loop = function () {
 
         let count = 121;
         while (count-- > 0) {
+            let lastCPU = Game.cpu.getUsed();
             Memory.observeCache[name0].x++;
             if (Memory.observeCache[name0].x > x0 + 10) {
                 Memory.observeCache[name0].x = x0;
@@ -320,6 +315,7 @@ module.exports.loop = function () {
             }
             let res = observer.observeRoom(name);
             //console.log("Observed room " + name + " by " + roomName + " (" + res + ")");
+            global.cache.stat.updateRoom(name, 'cpu', Game.cpu.getUsed() - lastCPU);
             break;
         }
     }   

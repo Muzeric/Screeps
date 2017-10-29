@@ -7,6 +7,7 @@ var stat = {
         Memory.stat = Memory.stat || {};
         Memory.stat.CPUHistory = Memory.stat.CPUHistory || {};
         Memory.stat.roomHistory = Memory.stat.roomHistory || {};
+        Memory.stat.roleHistory = Memory.stat.roleHistory || {};
         Memory.stat.lastGcl =  Memory.stat.lastGcl || Game.gcl.progress;
         Memory.stat.roomSent = Memory.stat.roomSent || Game.time;
         this.lastCPU = 0;
@@ -21,25 +22,17 @@ var stat = {
         Memory.stat.roomHistory[roomName][param] = (Memory.stat.roomHistory[roomName][param] || 0) + diff;
     },
 
-    addCPU : function (marker, info) {
-        if(!Memory.stat.CPUHistory[marker])
-            Memory.stat.CPUHistory[marker] = {cpu: 0};
-        let mem = Memory.stat.CPUHistory[marker];
+    addRole : function (role) {
+        Memory.stat.roleHistory[role] = Memory.stat.roleHistory[role] || {};
+    },
 
-        mem.cpu += Game.cpu.getUsed() - this.lastCPU;
-        
-        if (info) {
-            if(!mem.info)
-                mem.info = {};
-            for (let key in info) {
-                if (!mem.info[key])
-                    mem.info[key] = {};
-                let imem = mem.info[key];
-                for (let ikey in info[key]) {
-                    imem[ikey] = (imem[ikey] || 0) + info[key][ikey];
-                }
-            }
-        }
+    updateRole : function (role, param, diff) {
+        this.addRoom(role);
+        Memory.stat.roleHistory[role][param] = (Memory.stat.roleHistory[role][param] || 0) + diff;
+    },
+
+    addCPU : function (marker) {
+        Memory.stat.CPUHistory[marker] = (Memory.stat.CPUHistory[marker] || 0) + (Game.cpu.getUsed() - this.lastCPU);
         this.lastCPU = Game.cpu.getUsed();
     },
 
@@ -58,7 +51,7 @@ var stat = {
             Memory.stat.CPUHistory["_total"].paths = _.sum(Memory.rooms, r => r.pathCount || 0);
             Memory.stat.CPUHistory["_total"].repairs = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.repairHits || 0);
             Game.notify(
-                "CPUHistory:" + Game.time + ":" + 
+                "CPU.1:" + Game.time + ":" + 
                 global.cache.utils.lzw_encode(JSON.stringify(Memory.stat.CPUHistory, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} )) +
                 "#END#"
             );
@@ -69,6 +62,8 @@ var stat = {
         if (Game.time - Memory.stat.roomSent > 100) {
             this.dumpRoomStat();
             delete Memory.stat.roomHistory;
+            this.dumpRoleStat();
+            delete Memory.stat.roleHistory;
             Memory.stat.roomSent = Game.time;
         }
     },
@@ -104,9 +99,38 @@ var stat = {
 
     },
 
+    dumpRoleStat : function () {
+        let res = '';
+        let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send'];
+        let msgs = [];
+        for (let role in Memory.stat.roleHistory) {
+            res += role;
+            for (let key of keys) {
+                res += ':' + _.floor(Memory.stat.roomHistory[roomName][key] || 0, 1);
+            }
+            res += ';';
+            if (res.length > 900) {
+                msgs.push(res);
+                res = '';
+            }
+        }
+        if (res.length)
+            msgs.push(res);
+
+        for (let msg of msgs) {
+            Game.notify(
+                "role.1:" + Game.time + ":" + 
+                global.cache.utils.lzw_encode(msg) +
+                "#END#"
+            );
+        }
+
+    },
+
     die : function (name) {
         let creepm = Memory.creeps[name];
         this.updateRoom(creepm.roomName, 'dead', -1 * (creepm.carryEnergy || 0));
+        this.updateRole(creepm.role, 'dead', -1 * (creepm.carryEnergy || 0));
         return;
 
         if(!Memory.stat[creepm.role])
