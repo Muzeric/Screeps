@@ -11,6 +11,7 @@ use Encode;
 use utf8;
 
 use POSIX;
+use Date::Parse;
 #use locale; 
 #setlocale LC_CTYPE, 'en_US.UTF-8';
 
@@ -48,6 +49,9 @@ my @msgs_bad = ();
 foreach my $msg (@msgs) {
   my $prefix = "\r$count ($msg)\t ";
   print $prefix;
+
+  my $date = $imap->fetch($msg, "INTERNALDATE");
+  print str2time($date)."\n";
 
   #my $string = $imap->message_string($msg) 
   my $string = $imap->get($msg)
@@ -114,6 +118,7 @@ foreach my $msg (@msgs) {
     }
 
   }
+  exit;
 
   if ($cpu_out) {
     open(MSGF, ">mail_cpu/m$msg.msg")

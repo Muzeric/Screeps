@@ -2,22 +2,25 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
-        if (!global.cache.utils.checkInRoomAndGo(creep))
+        let room = Game.rooms[creep.memory.roomName];
+        if (!room) {
+            console.log(creep.name + ": no room " + roomName);
             return;
+        }
 
         if (creep.memory.cID === undefined) {
-            if (!creep.room.storage) {
-                console.log(creep.name + ": no storage in " + creep.room.name);
+            if (!room.storage) {
+                console.log(creep.name + ": no storage in " + room.name);
                 return;
             }
-            creep.memory.cID = creep.room.storage.id;
+            creep.memory.cID = room.storage.id;
         }
         
         if (creep.memory.energyID === undefined) {
             let ret = {};
-            let link = creep.room.getStoragedLink(ret);
+            let link = room.getStoragedLink(ret);
             if (!link || !("object" in ret)) {
-                console.log(creep.name + ": can't getStoragedLink in " + creep.room.name);
+                console.log(creep.name + ": can't getStoragedLink in " + room.name);
                 return;
             }
             creep.memory.energyID = link.id;
@@ -27,7 +30,7 @@ var role = {
         let betweenPos = new RoomPosition(creep.memory.betweenPos.x, creep.memory.betweenPos.y, creep.memory.betweenPos.roomName);
         if (creep.pos.isEqualTo(betweenPos)) {
             if (creep.carry.energy) {
-                creep.transfer(creep.room.storage, RESOURCE_ENERGY);
+                creep.transfer(room.storage, RESOURCE_ENERGY);
             } else {
                 let link = Game.getObjectById(creep.memory.energyID);
                 if (!link) {
