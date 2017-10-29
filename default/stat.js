@@ -27,7 +27,7 @@ var stat = {
     },
 
     updateRole : function (role, param, diff) {
-        this.addRoom(role);
+        this.addRole(role);
         Memory.stat.roleHistory[role][param] = (Memory.stat.roleHistory[role][param] || 0) + diff;
     },
 
@@ -106,7 +106,7 @@ var stat = {
         for (let role in Memory.stat.roleHistory) {
             res += role;
             for (let key of keys) {
-                res += ':' + _.floor(Memory.stat.roomHistory[roomName][key] || 0, 1);
+                res += ':' + _.floor(Memory.stat.roleHistory[role][key] || 0, 1);
             }
             res += ';';
             if (res.length > 900) {
