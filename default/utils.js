@@ -240,6 +240,19 @@ var utils = {
         }
     },
 
+    marketClear: function(options = {}) {
+        let print = "\n";
+        for(let order of _.filter(Game.market.orders, o => !o.remainingAmount)) {
+            print += `\t${order.id} from ${order.roomName} ${order.type} ${order.resourceType} created ${Game.time - order.created} sec ago`;
+            if (options.really) {
+                let res = Game.market.cancelOrder(order.id);
+                print += ` (${res})`
+            }
+            print += "\n";
+        }
+        console.log(print);
+    },
+
     autoMarket: function(options = {}) {
         let orders = Game.market.getAllOrders();
         let cache = {};

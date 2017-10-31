@@ -6,8 +6,17 @@ use Encode;
 use utf8;
 
 use POSIX;
+use InfluxDB::HTTP;
 #use locale; 
 #setlocale LC_CTYPE, 'en_US.UTF-8';
+
+my $influx = InfluxDB::HTTP->new(host => '192.168.1.41');
+
+my $ping = $influx->ping();
+unless ($ping) {
+  print "Can't connect to influx\n";
+  exit;
+}
 
 my $limit = shift @ARGV || 0;
 binmode STDOUT, ':utf8';
@@ -48,7 +57,7 @@ foreach my $file (@files) {
   chomp($jshash);
 
   if (my $hash = eval($jshash) ) {
-    $info->{$tick} = [$version, $hash];
+    $info->{$tick} = [$version, $unixtime, $hash];
     foreach my $key (keys %$hash) {
       $total_keys->{$key} = 1;
     }
@@ -64,7 +73,8 @@ print "Got ".scalar(@ticks)." ticks\n";
 if ($limit && scalar(@ticks) > $limit) {
   @ticks = splice(@ticks, -$limit);
 }
-my $extra = {
+my $extra = {};
+my $excel_extra = {
   bucket => undef,
   creeps => sub {
     return ($_[0] || 0) * 100;
@@ -89,22 +99,26 @@ open(STAT, ">stat_total.csv")
 or die $@;
 print STAT "tick\t".join("\t", sort keys %$total_keys)."\t".join("\t", sort keys %$extra)."\n";
 my $run_keys = {};
+my @influx_data = ();
 foreach my $tick (@ticks) {
-  my ($version, $hash) = $info->{$tick};
+  my $data = "total tick=$tick,count=100";
+  my ($version, $unixtime, $hash) = @{$info->{$tick}};
   print STAT $tick;
   foreach my $key (sort keys %$total_keys) {
     my $value = 0;
     if (!$version && exists $hash->{$key}->{cpu}) {
       $value = $hash->{$key}->{cpu};
     } elsif ($version == 1) {
-      $value = $hash->{$key};
+      $value = ref($hash->{$key}) eq "HASH" ? $hash->{$key}->{"cpu"} : $hash->{$key};
     }
+    $data .= ",$key=$value";
     $value =~ s/\./,/;
     print STAT "\t$value";
   }
 
   foreach my $key (sort keys %$extra) {
     my $value = defined $extra->{$key} ? $extra->{$key}->($hash->{_total}->{$key}, $hash->{_total}) : ($hash->{_total}->{$key} || 0);
+    $data .= ",$key=$value";
     print STAT "\t$value";
   }
 
@@ -116,14 +130,20 @@ foreach my $tick (@ticks) {
       $run_keys->{$key} = 1;
     }
   }
+  $data .= " $unixtime";
+  #print "data=$data\n";
+  push(@influx_data, $data);
 }
 close(STAT);
+my $res = $influx->write(\@influx_data, database => "screeps", precision => "s");
+print "Influx result: ".$res."\n";
 
 open(RUN, ">stat_run.csv")
 or die $@;
 print RUN "tick\t".join("\t", sort keys %$run_keys)."\n";
 foreach my $tick (@ticks) {
-  my $hash = $info->{$tick};
+  my ($version, $unixtime, $hash) = @{$info->{$tick}};
+  next if ($version);
   my $run = $hash->{"run"}->{"info"};
   print RUN $tick;
   foreach my $key (sort keys %$run_keys) {
