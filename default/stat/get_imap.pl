@@ -90,15 +90,6 @@ foreach my $msg (@msgs) {
     } elsif ($str =~ /Script execution timed out: CPU limit reached/) {
       print "${prefix}timeout\n";
       $errors->{'timeout'}++;
-    } elsif (($tick, $comp) = $str =~ /CPUHistory:(\d+):(.+)#END#/g) {
-      my $jshash = lzw_decode($comp);
-      $jshash =~ s/:/=>/g;
-      if (my $hash = eval($jshash) ) {
-        $cpu_out .= "$tick,$unixtime,0\n$jshash\n";
-        $good = 1;       
-      } else {
-        print STDERR "${prefix}can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
-      }
     } elsif (($version, $tick, $comp) = $str =~ /CPU\.(\d+):(\d+):(.+)#END#/g) {
       my $jshash = lzw_decode($comp);
       $jshash =~ s/:/=>/g;

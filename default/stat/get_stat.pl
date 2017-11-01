@@ -1,25 +1,37 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Term::ReadKey;
-#use Mail::IMAPClient;
 use Net::IMAP::Simple;
 use Net::IMAP::Simple::Gmail;
 use MIME::Parser;
 use Data::Dumper;
 use Encode;
 use utf8;
-
+use InfluxDB::HTTP;
 use POSIX;
 use Date::Parse;
 #use locale; 
 #setlocale LC_CTYPE, 'en_US.UTF-8';
 
 binmode STDOUT, ':utf8';
-
 $| = 1;
 
-my $password = _get_passwd();
+print "\n\n";
+print localtime()." started\n";
+
+my $influx = InfluxDB::HTTP->new(host => '192.168.1.41');
+
+my $ping = $influx->ping();
+unless ($ping) {
+  die "Can't connect to influx\n";
+}
+
+my $password = shift @ARGV;
+
+$Data::Dumper::Indent = 0;
+$Data::Dumper::Terse = 1;
+$Data::Dumper::Quotekeys = 0;
+$Data::Dumper::Pair = '=';
 
 my $imap = new Net::IMAP::Simple::Gmail('imap.gmail.com', 'debug' => 0, 'Uid' => 1)
 or die "Couldn't connect: $@\n";
@@ -28,20 +40,16 @@ print "Connected\n";
 $imap->login('yamuzer@gmail.com' => $password);
 
 my @msgs = $imap->search('SUBJECT screeps X-GM-LABELS ScreepsInput')
-or print STDERR "Searching: ".($imap->errstr || ' failed without errors')."\n";
+or die "Searching: ".($imap->errstr || ' failed without errors')."\n";
 
 print "Got ".scalar(@msgs)." emailes\n";
 exit if scalar(@msgs) == 0;
 
 my $room_versions = {
-  '1' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'cpu'],
-  '2' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'cpu'],
-  '3' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu'],
   '4' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send'],
 };
 
 my $role_versions = {
-  '1' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send'],
   '2' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'cpu', 'sum'],
 };
 
@@ -49,54 +57,62 @@ my $parser = MIME::Parser->new;
 $parser->tmp_to_core(1);
 $parser->output_to_core(1);
 my $count = 0;
-my @msgs_done = ();
-my @msgs_bad = ();
 foreach my $msg (@msgs) {
-  my $prefix = "\r$count ($msg)\t ";
-  print $prefix;
+  my @influx_data = ();
+  my $prefix = "$count ($msg)\t ";
 
   my $date = $imap->fetch($msg, "INTERNALDATE");
   my $unixtime = str2time($date) || 0;
 
-  #my $string = $imap->message_string($msg) 
   my $string = $imap->get($msg)
-  or print STDERR "${prefix}getting meassage failed\n"
-  and die;
+  or die "${prefix}getting meassage failed\n";
   $string = "$string";
 
-  #print "String: $string\n";
-
   my $entity = $parser->parse_data($string);
-  #$entity->dump_skeleton(\*STDERR);
   my $content = split_entity($entity);
-  #print "Before: ".$content."\n";
-  #$content = decode_base64($content);
   $content = decode("utf8", $content);
-  #print "Unbased: ".$content."\n";
-  #print Dumper($imap->get_labels($msg));
 
   my $good = 0;
-  my $cpu_out = '';
-  my $room_out = '';
-  my $role_out = '';
   my ($tick, $comp, $version);
   foreach my $str (split(/\n/, $content)) {
-    if ($str =~ /\d+ notifications? received on.*shard|\[msg\]|^$/) {
+    if ($str =~ /\d+ notifications? received on.*shard|\[msg\]|^$|\[error\]/) {
       ;
-    } elsif (($tick, $comp) = $str =~ /CPUHistory:(\d+):(.+)#END#/g) {
-      my $jshash = lzw_decode($comp);
-      $jshash =~ s/:/=>/g;
-      if (my $hash = eval($jshash) ) {
-        $cpu_out .= "$tick,$unixtime,0\n$jshash\n";
-        $good = 1;       
-      } else {
-        print STDERR "${prefix}can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
-      }
+    } elsif ($str =~ /Script execution has been interrupted with a hard reset: CPU limit reached/) {
+      my $data = "error limit=1 $unixtime";
+      push(@influx_data, $data);
+    } elsif ($str =~ /Script execution timed out: CPU limit reached/) {
+      my $data = "error timeout=1 $unixtime";
+      push(@influx_data, $data);
     } elsif (($version, $tick, $comp) = $str =~ /CPU\.(\d+):(\d+):(.+)#END#/g) {
       my $jshash = lzw_decode($comp);
       $jshash =~ s/:/=>/g;
       if (my $hash = eval($jshash) ) {
-        $cpu_out .= "$tick,$unixtime,$version\n$jshash\n";
+        if ($version == 1) {
+          $hash->{total} = $hash->{_total}->{cpu};
+          delete $hash->{_total}->{cpu};
+          my $flags = Dumper($hash->{_total});
+          $flags =~ s/["'{}]//g;
+          my $data = "total tick=$tick,$flags $unixtime";
+          push(@influx_data, $data);
+          delete $hash->{_total};
+          print "$prefix$data\n"
+        }
+        my $flags = Dumper($hash);
+        $flags =~ s/["'{}]//g;
+        my $data = "cpu tick=$tick,$flags $unixtime";
+        push(@influx_data, $data);
+        $good = 1;
+      } else {
+        print STDERR "${prefix}can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
+      }
+    } elsif (($version, $tick, $comp) = $str =~ /total\.(\d+):(\d+):(.+)#END#/g) {
+      my $jshash = lzw_decode($comp);
+      $jshash =~ s/:/=>/g;
+      if (my $hash = eval($jshash) ) {
+        my $flags = Dumper($hash);
+        $flags =~ s/["'{}]//g;
+        my $data = "total tick=$tick,$flags $unixtime";
+        push(@influx_data, $data);
         $good = 1;
       } else {
         print STDERR "${prefix}can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
@@ -106,44 +122,44 @@ foreach my $msg (@msgs) {
         print STDERR "${prefix}No room version=$version\n";
         next;
       }
-      my $hash = {};
-      $room_out .= "$tick,$unixtime,$version\n";
-      $room_out .= "{";
+      
       foreach my $roomt (split(/;/, lzw_decode($comp))) {
+        my $data = "";
         my $i = -1;
         foreach my $value (split(/:/, $roomt)) {
           if ($i == -1) {
-            $room_out .= "\"$value\"=>{";
+            $data .= "room,roomName=$value "
           } else {
-            $room_out .= "\"".$room_versions->{$version}->[$i]."\"=>$value,";
+            $data .= "," if ($i > 0);
+            $data .= $room_versions->{$version}->[$i]."=$value";
           }
           $i++;
         }
-        $room_out .= "},";
+        $data .= " $unixtime";
+        push(@influx_data, $data);
       }
-      $room_out .= "}\n";
       $good = 1;
     } elsif (($version, $tick, $comp) = $str =~ /role\.(\d+):(\d+):(.+)#END#/g) {
       if (!exists($role_versions->{$version})) {
         print STDERR "${prefix}No role version=$version\n";
         next;
       }
-      my $hash = {};
-      $role_out .= "$tick,$unixtime,$version\n";
-      $role_out .= "{";
+
       foreach my $rolet (split(/;/, lzw_decode($comp))) {
+        my $data = "";
         my $i = -1;
         foreach my $value (split(/:/, $rolet)) {
           if ($i == -1) {
-            $role_out .= "\"$value\"=>{";
+            $data .= "role,role=$value "
           } else {
-            $role_out .= "\"".$role_versions->{$version}->[$i]."\"=>$value,";
+            $data .= "," if ($i > 0);
+            $data .= $role_versions->{$version}->[$i]."=$value";
           }
           $i++;
         }
-        $role_out .= "},";
+        $data .= " $unixtime";
+        push(@influx_data, $data);
       }
-      $role_out .= "}\n";
       $good = 1;
     } else {
       if (length($str) > 105) {
@@ -151,50 +167,32 @@ foreach my $msg (@msgs) {
       } else {
         print STDERR "${prefix}not parsed: $str\n";
       }
+      my $data = "error parsing=1 $unixtime";
+      push(@influx_data, $data);
       #print STDERR "${prefix}not parsed: $str\n";
     }
 
   }
 
-  if ($cpu_out) {
-    open(MSGF, ">mail_cpu/m$msg.msg")
-    or die $@;        
-  
-    print MSGF "$cpu_out\n";
-    close(MSGF);
+  if (@influx_data) {
+    my $res = $influx->write(\@influx_data, database => "screeps", precision => "s");
+    print "Influx result: ".$res."\n" if !$res;
   }
-  if ($room_out) {
-    open(MSGF, ">mail_room/m$msg.msg")
-    or die $@;        
-  
-    print MSGF "$room_out\n";
-    close(MSGF);
-  }
-  if ($role_out) {
-    open(MSGF, ">mail_role/m$msg.msg")
-    or die $@;        
-  
-    print MSGF "$role_out\n";
-    close(MSGF);
-  }
- 
+
+  if (0) {
   if ($good) {
     $imap->remove_labels($msg, qw/ScreepsInput/);
     $imap->add_labels($msg, qw/ScreepsArchive/);
-  
-    push(@msgs_done, $msg);
   } else {
     $imap->remove_labels($msg, qw/ScreepsInput/);
-    $imap->add_labels($msg, qw/ScreepsOther/);
-  
-    push(@msgs_bad, $msg);
+    $imap->add_labels($msg, qw/ScreepsOther/);  
+  }
   }
   
   $count++;
 }
-print "\n";
 
-print "We done $count msgs\n";
+print localtime()." we done $count msgs\n";
 
 sub lzw_decode {
     my $s = shift;
@@ -236,16 +234,4 @@ sub split_entity {
   }
 
   return $res;
-}
-
-sub _get_passwd {
-	print "Password: ";
-	ReadMode('noecho');
-	my $password = ReadLine(0);
-	chomp($password);
-	ReadMode('normal');
-	print ('*' x length($password)); 
-	print "\n";
-
-	return $password;
 }
