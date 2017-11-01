@@ -59,7 +59,7 @@ var stat = {
                 count: Memory.stat.count,
             };
             Game.notify(
-                "Total.1:" + Game.time + ":" + 
+                "total.1:" + Game.time + ":" + 
                 global.cache.utils.lzw_encode(JSON.stringify(data, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} )) +
                 "#END#"
             );
