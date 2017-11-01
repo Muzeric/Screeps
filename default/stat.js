@@ -5,11 +5,11 @@ var stat = {
 
     init : function () {
         Memory.stat = Memory.stat || {};
+        Memory.stat.count = Memory.stat.count || 0;
         Memory.stat.CPUHistory = Memory.stat.CPUHistory || {};
         Memory.stat.roomHistory = Memory.stat.roomHistory || {};
         Memory.stat.roleHistory = Memory.stat.roleHistory || {};
         Memory.stat.lastGcl =  Memory.stat.lastGcl || Game.gcl.progress;
-        Memory.stat.roomSent = Memory.stat.roomSent || Game.time;
         this.lastCPU = 0;
     },
 
@@ -37,34 +37,39 @@ var stat = {
     },
 
     finish : function () {
-        if(!Memory.stat.CPUHistory["_total"])
-            Memory.stat.CPUHistory["_total"] = {cpu: 0, count: 0};
+        Memory.stat.CPUHistory["total"] = (Memory.stat.CPUHistory["total"] || 0) + Game.cpu.getUsed();
+        Memory.stat.count++;
         
-        Memory.stat.CPUHistory["_total"].cpu += Game.cpu.getUsed();
-        Memory.stat.CPUHistory["_total"].count++;
-        if (Memory.stat.CPUHistory["_total"].count >= 100) {
-            Memory.stat.CPUHistory["_total"].bucket = Game.cpu.bucket;
-            Memory.stat.CPUHistory["_total"].creeps = _.keys(Game.creeps).length;
-            Memory.stat.CPUHistory["_total"].energy = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.energy);
-            Memory.stat.CPUHistory["_total"].store = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => _.sum(r.store, (v,k) => k == "energy" ? 0 : v));
-            Memory.stat.CPUHistory["_total"].gcl = Game.gcl.progress - Memory.stat.lastGcl;
-            Memory.stat.CPUHistory["_total"].paths = _.sum(Memory.rooms, r => r.pathCount || 0);
-            Memory.stat.CPUHistory["_total"].repairs = _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.repairHits || 0);
+        if (Memory.stat.count >= 100) {
             Game.notify(
-                "CPU.1:" + Game.time + ":" + 
+                "CPU.2:" + Game.time + ":" + 
                 global.cache.utils.lzw_encode(JSON.stringify(Memory.stat.CPUHistory, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} )) +
                 "#END#"
             );
             delete Memory.stat.CPUHistory;
+            
+            let data = {
+                bucket: Game.cpu.bucket,
+                creeps: _.keys(Game.creeps).length,
+                energy: _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.energy),
+                store: _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => _.sum(r.store, (v,k) => k == "energy" ? 0 : v)),
+                gcl: Game.gcl.progress - Memory.stat.lastGcl,
+                paths: _.sum(Memory.rooms, r => r.pathCount || 0),
+                repairs: _.sum(_.filter(Memory.rooms, r => r.type == 'my'), r => r.repairHits || 0),
+                count: Memory.stat.count,
+            };
+            Game.notify(
+                "Total.1:" + Game.time + ":" + 
+                global.cache.utils.lzw_encode(JSON.stringify(data, function(key, value) {return typeof value == 'number' ? _.floor(value,1) : value;} )) +
+                "#END#"
+            );
+            Memory.stat.count = 0;
             Memory.stat.lastGcl = Game.gcl.progress;
-        }
 
-        if (Game.time - Memory.stat.roomSent > 100) {
             this.dumpRoomStat();
             delete Memory.stat.roomHistory;
             this.dumpRoleStat();
             delete Memory.stat.roleHistory;
-            Memory.stat.roomSent = Game.time;
         }
     },
 

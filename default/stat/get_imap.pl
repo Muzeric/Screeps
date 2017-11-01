@@ -76,13 +76,20 @@ foreach my $msg (@msgs) {
   #print Dumper($imap->get_labels($msg));
 
   my $good = 0;
+  my $errors = {};
   my $cpu_out = '';
   my $room_out = '';
   my $role_out = '';
   my ($tick, $comp, $version);
   foreach my $str (split(/\n/, $content)) {
-    if ($str =~ /\d+ notifications? received on.*shard|\[msg\]|^$/) {
+    if ($str =~ /\d+ notifications? received on.*shard|\[msg\]|^$|\[error\]/) {
       ;
+    } elsif ($str =~ /Script execution has been interrupted with a hard reset: CPU limit reached/) {
+      print "${prefix}limit\n";
+      $errors->{'limit'}++;
+    } elsif ($str =~ /Script execution timed out: CPU limit reached/) {
+      print "${prefix}timeout\n";
+      $errors->{'timeout'}++;
     } elsif (($tick, $comp) = $str =~ /CPUHistory:(\d+):(.+)#END#/g) {
       my $jshash = lzw_decode($comp);
       $jshash =~ s/:/=>/g;
@@ -155,7 +162,7 @@ foreach my $msg (@msgs) {
     }
 
   }
-
+next;
   if ($cpu_out) {
     open(MSGF, ">mail_cpu/m$msg.msg")
     or die $@;        
