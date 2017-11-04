@@ -7,7 +7,7 @@ use MIME::Parser;
 use Data::Dumper;
 use Encode;
 use utf8;
-use InfluxDB::HTTP;
+#use InfluxDB::HTTP;
 use POSIX;
 use Date::Parse;
 #use locale; 
@@ -19,14 +19,19 @@ $| = 1;
 print "\n\n";
 print localtime()." started\n";
 
-my $influx = InfluxDB::HTTP->new(host => '192.168.1.41');
+#my $influx = InfluxDB::HTTP->new(host => '192.168.1.41');
 
-my $ping = $influx->ping();
-unless ($ping) {
-  die "Can't connect to influx\n";
-}
+#my $ping = $influx->ping();
+#unless ($ping) {
+#  die "Can't connect to influx\n";
+#}
+
+my $influx_file = "influx.data";
+open(INFLUX, ">>$influx_file")
+or die $@;
 
 my $password = shift @ARGV;
+die unless $password;
 
 $Data::Dumper::Indent = 0;
 $Data::Dumper::Terse = 1;
@@ -58,11 +63,11 @@ $parser->tmp_to_core(1);
 $parser->output_to_core(1);
 my $count = 0;
 foreach my $msg (@msgs) {
-  my @influx_data = ();
   my $prefix = "$count ($msg)\t ";
 
   my $date = $imap->fetch($msg, "INTERNALDATE");
   my $unixtime = str2time($date) || 0;
+  $unixtime .= '000000000';
 
   my $string = $imap->get($msg)
   or die "${prefix}getting meassage failed\n";
@@ -79,10 +84,13 @@ foreach my $msg (@msgs) {
       ;
     } elsif ($str =~ /Script execution has been interrupted with a hard reset: CPU limit reached/) {
       my $data = "error limit=1 $unixtime";
-      push(@influx_data, $data);
+      print INFLUX "$data\n";
     } elsif ($str =~ /Script execution timed out: CPU limit reached/) {
       my $data = "error timeout=1 $unixtime";
-      push(@influx_data, $data);
+      print INFLUX "$data\n";
+    } elsif ($str =~ /Script execution has been terminated: CPU bucket is empty/) {
+      my $data = "error bucket=1 $unixtime";
+      print INFLUX "$data\n";
     } elsif (($version, $tick, $comp) = $str =~ /CPU\.(\d+):(\d+):(.+)#END#/g) {
       my $jshash = lzw_decode($comp);
       $jshash =~ s/:/=>/g;
@@ -93,14 +101,13 @@ foreach my $msg (@msgs) {
           my $flags = Dumper($hash->{_total});
           $flags =~ s/["'{}]//g;
           my $data = "total tick=$tick,$flags $unixtime";
-          push(@influx_data, $data);
+      	  print INFLUX "$data\n";
           delete $hash->{_total};
-          print "$prefix$data\n"
         }
         my $flags = Dumper($hash);
         $flags =~ s/["'{}]//g;
         my $data = "cpu tick=$tick,$flags $unixtime";
-        push(@influx_data, $data);
+      	print INFLUX "$data\n";
         $good = 1;
       } else {
         print STDERR "${prefix}can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
@@ -112,7 +119,7 @@ foreach my $msg (@msgs) {
         my $flags = Dumper($hash);
         $flags =~ s/["'{}]//g;
         my $data = "total tick=$tick,$flags $unixtime";
-        push(@influx_data, $data);
+      	print INFLUX "$data\n";
         $good = 1;
       } else {
         print STDERR "${prefix}can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
@@ -136,7 +143,7 @@ foreach my $msg (@msgs) {
           $i++;
         }
         $data .= " $unixtime";
-        push(@influx_data, $data);
+      	print INFLUX "$data\n";
       }
       $good = 1;
     } elsif (($version, $tick, $comp) = $str =~ /role\.(\d+):(\d+):(.+)#END#/g) {
@@ -158,7 +165,7 @@ foreach my $msg (@msgs) {
           $i++;
         }
         $data .= " $unixtime";
-        push(@influx_data, $data);
+      	print INFLUX "$data\n";
       }
       $good = 1;
     } else {
@@ -168,18 +175,12 @@ foreach my $msg (@msgs) {
         print STDERR "${prefix}not parsed: $str\n";
       }
       my $data = "error parsing=1 $unixtime";
-      push(@influx_data, $data);
+      print INFLUX "$data\n";
       #print STDERR "${prefix}not parsed: $str\n";
     }
 
   }
 
-  if (@influx_data) {
-    my $res = $influx->write(\@influx_data, database => "screeps", precision => "s");
-    print "Influx result: ".$res."\n" if !$res;
-  }
-
-  if (0) {
   if ($good) {
     $imap->remove_labels($msg, qw/ScreepsInput/);
     $imap->add_labels($msg, qw/ScreepsArchive/);
@@ -187,10 +188,22 @@ foreach my $msg (@msgs) {
     $imap->remove_labels($msg, qw/ScreepsInput/);
     $imap->add_labels($msg, qw/ScreepsOther/);  
   }
-  }
   
   $count++;
+  last if $count >= 100;
 }
+
+close(INFLUX)
+or die $@;
+
+if (-f $influx_file) {
+	my $res = `curl -i -XPOST 'http://192.168.1.41:8086/write?db=screeps&epoch=s' --data-binary \@$influx_file`;
+	unlink($influx_file);
+	print "Write to influx with res=$res\n";
+	#my $res = $influx->write(\@influx_data, database => "screeps", precision => "s");
+	#print "Influx result: ".$res."\n" if !$res;
+}
+
 
 print localtime()." we done $count msgs\n";
 
