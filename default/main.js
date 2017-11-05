@@ -260,7 +260,7 @@ module.exports.loop = function () {
     global.cache.stat.addCPU("roomActions");
 
     for (let roomName of global.cache.roomNames) {
-        if (global.cache.utils.isLowCPU(0, 1))
+        if (global.cache.utils.isLowCPU(0))
             break;
         let lastCPU = Game.cpu.getUsed();
 
