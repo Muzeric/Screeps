@@ -1,5 +1,9 @@
 #!/usr/bin/perl -w
 
+use lib ('/opt/lib/perl5/site_perl');
+use lib ('/opt/lib/perl5/site_perl/5.10.0');
+use lib ('/opt/lib/perl5/site_perl/5.10.0/i686-linux');
+
 use strict;
 use Net::IMAP::Simple;
 use Net::IMAP::Simple::Gmail;
@@ -30,7 +34,7 @@ my $influx_file = "influx.data";
 open(INFLUX, ">>$influx_file")
 or die $@;
 
-my $password = shift @ARGV;
+my $password = $ENV{'PASSWORD'} || shift @ARGV;
 die unless $password;
 
 $Data::Dumper::Indent = 0;
