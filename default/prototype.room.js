@@ -168,7 +168,13 @@ Room.prototype.balanceStore = function () {
             for (let room of _.sortBy(Game.rooms, r => Game.map.getRoomLinearDistance(thisRoomName, r.name, true))) {
                 if (est <= 0 || stop)
                     break;
-                if (room.name == this.name || !("needResources" in room.memory) || !(rt in room.memory.needResources) || !(room.memory.needResources[rt] > 0) || !(room.terminal && room.terminal.my))
+                if (room.name == this.name 
+                    || !("needResources" in room.memory) 
+                    || !(rt in room.memory.needResources) 
+                    || !(room.memory.needResources[rt] > 0) 
+                    || !(room.terminal && room.terminal.my)
+                    || (room.terminal.storeCapacity - _.sum(room.terminal.store)) < REBALANCE_TERMINAL_FREE
+                )
                     continue;
                 let amount = _.min([est, room.memory.needResources[rt]]);
                 if (amount < TERMINAL_MIN_SEND)
