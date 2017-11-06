@@ -81,8 +81,8 @@ function _getMarketPrices (orders, rt) {
         prices["mid"] = utils.clamp(prices["mid"], prices["sell"].min * 0.9, prices["buy"].max * 2);
         prices["mid"] = _.ceil(prices["mid"], 3);
 
-        prices["midSell"] = utils.clamp(prices["mid"] * 0.9, prices["sell"].min * 0.99, prices["mid"]);
-        prices["midBuy"] = utils.clamp(prices["mid"] * 1.1, prices["mid"], prices["buy"].max);
+        prices["midSell"] = utils.clamp(prices["mid"] * 0.95, prices["sell"].min * 0.99, prices["mid"]);
+        prices["midBuy"] = utils.clamp(prices["mid"] * 1.05, prices["mid"], prices["buy"].max * 1.01);
     }
 
     return prices;
