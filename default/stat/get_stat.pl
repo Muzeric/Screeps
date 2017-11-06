@@ -99,15 +99,6 @@ foreach my $msg (@msgs) {
       my $jshash = lzw_decode($comp);
       $jshash =~ s/:/=>/g;
       if (my $hash = eval($jshash) ) {
-        if ($version == 1) {
-          $hash->{total} = $hash->{_total}->{cpu};
-          delete $hash->{_total}->{cpu};
-          my $flags = Dumper($hash->{_total});
-          $flags =~ s/["'{}]//g;
-          my $data = "total tick=$tick,$flags $unixtime";
-      	  print INFLUX "$data\n";
-          delete $hash->{_total};
-        }
         my $flags = Dumper($hash);
         $flags =~ s/["'{}]//g;
         my $data = "cpu tick=$tick,$flags $unixtime";
@@ -124,6 +115,18 @@ foreach my $msg (@msgs) {
         $flags =~ s/["'{}]//g;
         my $data = "total tick=$tick,$flags $unixtime";
       	print INFLUX "$data\n";
+        $good = 1;
+      } else {
+        print STDERR "${prefix}can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";
+      }
+    } elsif (($version, $tick, $comp) = $str =~ /mineral\.(\d+):(\d+):(.+)#END#/g) {
+      my $jshash = lzw_decode($comp);
+      $jshash =~ s/:/=>/g;
+      if (my $hash = eval($jshash) ) {
+        while (my ($rt, $arr) = each %$hash) {
+          my $data = "mineral,rt=$rt store=$arr[0],need=$arr[1] $unixtime";
+          print INFLUX "$data\n";
+        }
         $good = 1;
       } else {
         print STDERR "${prefix}can't eval: ".substr($jshash, 0, 50)." ... ".substr($jshash, -50)."\n";

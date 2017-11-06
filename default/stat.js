@@ -74,6 +74,23 @@ var stat = {
             delete Memory.stat.roomHistory;
             this.dumpRoleStat();
             delete Memory.stat.roleHistory;
+
+            let rStat = {};
+            for (let m of _.filter(Memory.rooms, r => r.type == "my" && "store" in r && "needResources" in r)) {
+                for (let rt in m.store) {
+                    rStat[rt] = rStat[rt] || [0,0];
+                    rStat[rt][0] += m.store[rt];
+                }
+                for (let rt in m.needResources) {
+                    rStat[rt] = rStat[rt] || [0,0];
+                    rStat[rt][1] += m.needResources[rt];
+                }
+            }
+            Game.notify(
+                "mineral.1:" + Game.time + ":" + 
+                global.cache.utils.lzw_encode(JSON.stringify(rStat)) +
+                "#END#"
+            );
         }
     },
 
