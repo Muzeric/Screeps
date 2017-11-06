@@ -124,7 +124,7 @@ foreach my $msg (@msgs) {
       $jshash =~ s/:/=>/g;
       if (my $hash = eval($jshash) ) {
         while (my ($rt, $arr) = each %$hash) {
-          my $data = "mineral,rt=$rt store=$arr[0],need=$arr[1] $unixtime";
+          my $data = "mineral,rt=$rt store=".$arr->[0].",need=".$arr->[1]." $unixtime";
           print INFLUX "$data\n";
         }
         $good = 1;
