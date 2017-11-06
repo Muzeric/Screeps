@@ -80,6 +80,9 @@ function _getMarketPrices (orders, rt) {
     if (prices["mid"]) {
         prices["mid"] = utils.clamp(prices["mid"], prices["sell"].min * 0.9, prices["buy"].max * 2);
         prices["mid"] = _.ceil(prices["mid"], 3);
+
+        prices["midSell"] = utils.clamp(prices["mid"] * 0.9, prices["sell"].min * 0.99, prices["mid"]);
+        prices["midBuy"] = utils.clamp(prices["mid"] * 1.1, prices["mid"], prices["buy"].max);
     }
 
     return prices;
@@ -258,10 +261,13 @@ var utils = {
         let cache = {};
         let max = options.max || 10000;
         let print = "\n";
+        let oldPrint = '';
         for (let room of _.filter(Game.rooms, r => 
                 r.terminal && r.controller.my && (!options.roomName || r.name == options.roomName) 
         )) {
+            oldPrint = print;
             print += room.name + ":\n";
+            let any = 0;
             if (!options.type || options.type == "sell") {
                 print += "\tSELL\n";
                 for (let rt in room.terminal.store) {
@@ -271,7 +277,7 @@ var utils = {
                     
                     if (!(rt in cache))
                         cache[rt] = _getMarketPrices(orders, rt);
-                    let midPrice = cache[rt].mid;
+                    let midPrice = cache[rt].midSell;
                     let amount = this.clamp(room.terminal.store[rt], 0, max);
 
                     let order = _.find(Game.market.orders, o => o.resourceType == rt && o.type == ORDER_SELL && o.roomName == room.name);
@@ -302,6 +308,7 @@ var utils = {
                         }
                     }
                     print += "\n";
+                    any++;
                 }
             }
             if (!options.type || options.type == "buy") {
@@ -315,7 +322,7 @@ var utils = {
                     print += "\t" + rt + ":" + nr[rt] + "; ";
                     if (!(rt in cache))
                         cache[rt] = _getMarketPrices(orders, rt);
-                    let midPrice = cache[rt].mid;
+                    let midPrice = cache[rt].midBuy;
                     let amount = this.clamp(nr[rt], 0, max);
 
                     let order = _.find(Game.market.orders, o => o.resourceType == rt && o.type == ORDER_BUY && o.roomName == room.name);
@@ -346,9 +353,12 @@ var utils = {
                         }
                     }
                     print += "\n";
+                    any++;
                 } 
                     
             }
+            if (!any)
+                print = oldPrint;
         }
         print += "\n";
         for (let rt in cache)
