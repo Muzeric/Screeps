@@ -63,6 +63,8 @@ module.exports.loop = function () {
 
         global.cache.creepsByRoomName[memory.roomName] = global.cache.creepsByRoomName[memory.roomName] || [];
         global.cache.creepsByRoomName[memory.roomName].push(creep);
+
+        global.cache.stat.updateRole(memory.role, 'sum', 1);
     }
 
     global.cache.stat.addCPU("memory");
@@ -120,7 +122,6 @@ module.exports.loop = function () {
                 let cpu = Game.cpu.getUsed() - lastCPU;
         global.cache.stat.updateRoom(creep.room.name, 'cpu', cpu);
         global.cache.stat.updateRole(role, 'cpu', cpu);
-        global.cache.stat.updateRole(role, 'sum', 1);
 
         if (global.cache.utils.isLowCPU())
             break;
