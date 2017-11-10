@@ -277,7 +277,7 @@ Creep.prototype.moveTo = function() {
     let targetPos, opts;
     [targetPos, opts] = this.moveToPos(arguments[0], arguments[1], arguments[2]);
     let res = this.travelTo(targetPos, opts);
-    if (res == OK)
+    if (res == OK && !opts.noRoad)
         this.room.needRoad(this);
     return res;
 }
@@ -299,7 +299,7 @@ Creep.prototype.goFromKeepers = function() {
     if (!targetPos)
         return -7;
     let safePlace = this.pos.findClosestByPath(global.cache.utils.getRangedPlaces(this, targetPos, 6));
-    return this.moveTo(safePlace ? safePlace : Game.spawns[this.memory.spawnName].room.controller); 
+    return this.moveTo(safePlace ? safePlace : Game.spawns[this.memory.spawnName].room.controller, {noRoad: 1}); 
 }
 
 Creep.prototype.attackNearHostile = function(range, mark) {
