@@ -246,7 +246,7 @@ module.exports.loop = function () {
     }
 
     for (let roomName of global.cache.roomNames) {
-        if (global.cache.utils.isLowCPU())
+        if (global.cache.utils.isLowCPU(1))
             break;
         let lastCPU = Game.cpu.getUsed();
         let room = Game.rooms[roomName];
@@ -261,7 +261,7 @@ module.exports.loop = function () {
     global.cache.stat.addCPU("roomActions");
 
     for (let roomName of global.cache.roomNames) {
-        if (global.cache.utils.isLowCPU(0))
+        if (global.cache.utils.isLowCPU(1))
             break;
         let lastCPU = Game.cpu.getUsed();
 
@@ -273,7 +273,7 @@ module.exports.loop = function () {
     global.cache.stat.addCPU("runLabs");
     Memory.observeCache = Memory.observeCache || {};
     for (let roomName in Game.rooms) {
-        if (global.cache.utils.isLowCPU(0, 1))
+        if (global.cache.utils.isLowCPU(1, 1))
             break;
         if (!(Memory.rooms[roomName].structures[STRUCTURE_OBSERVER] || []).length)
             continue;
