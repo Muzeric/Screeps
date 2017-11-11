@@ -123,7 +123,7 @@ module.exports.loop = function () {
         global.cache.stat.updateRoom(creep.room.name, 'cpu', cpu);
         global.cache.stat.updateRole(role, 'cpu', cpu);
 
-        if (global.cache.utils.isLowCPU())
+        if (global.cache.utils.isLowCPU(1))
             break;
     }
     global.cache.stat.addCPU("run");
@@ -132,7 +132,7 @@ module.exports.loop = function () {
         let needList = [];
 
         for (let roomName of global.cache.roomNames) {
-            if (global.cache.utils.isLowCPU())
+            if (global.cache.utils.isLowCPU(1))
                 break;
 
             let lastCPU = Game.cpu.getUsed();
@@ -186,7 +186,7 @@ module.exports.loop = function () {
         let skipRoomNames = {};
         let reservedEnergy = {};
         for (let need of needList.sort(function(a,b) { return (a.priority - b.priority) || (a.wishEnergy - b.wishEnergy); } )) {
-            if (global.cache.utils.isLowCPU())
+            if (global.cache.utils.isLowCPU(1))
                 break;
 
             if (!_.filter(Game.spawns, s => 

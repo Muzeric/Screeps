@@ -196,7 +196,7 @@ var queue = {
         
         if (request.amount <= 0) {
             //console.log("queueTransport: finished request: " + JSON.stringify(request));
-            console.log(`transport DONE: ${reqID}. ${request.fromRoomName} ${request.fromStructureType} -> ${request.toRoomName} ${request.toStructureType} ${request.put} of ${request.resourceType}`);
+            //console.log(`transport DONE: ${reqID}. ${request.fromRoomName} ${request.fromStructureType} -> ${request.toRoomName} ${request.toStructureType} ${request.put} of ${request.resourceType}`);
             delete this.indexByCreep[request.creepID];
             delete Memory.transportRequests[reqID];
             return null;
