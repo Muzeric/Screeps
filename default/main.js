@@ -46,7 +46,7 @@ module.exports.loop = function () {
         let memory = Memory.creeps[name];
         if (memory.targetID) {
             global.cache.targets[memory.targetID] = (global.cache.targets[memory.targetID] || 0) + 1;
-            if (memory.role == "harvester")
+            if (memory.role == "harvester" || memory.role == "longharvester")
                 global.cache.wantCarry[memory.targetID] = (global.cache.wantCarry[memory.targetID] || 0) + creep.carry.energy;
         }
         if (memory.errors > 0) {

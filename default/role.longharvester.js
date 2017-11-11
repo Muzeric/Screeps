@@ -19,7 +19,7 @@ var role = {
         } else {
             if(_.sum(creep.carry) < creep.carryCapacity * (creep.getActiveBodyparts(WORK) > 1 ? 0.5 : 0.2) && creep.memory.transfering) {
                 creep.memory.transfering = false;
-                creep.memory.cID = null;
+                creep.memory.targetID = null;
             } else if (_.sum(creep.carry) == creep.carryCapacity && !creep.memory.transfering) {
                 creep.memory.transfering = true;
                 creep.memory.energyID = null;
@@ -39,7 +39,7 @@ var role = {
             if (creep.room.memory.type == 'lair' && !creep.goFromKeepers())
                 return;
 
-            if (creep.room.name != creep.memory.containerRoomName && !creep.memory.cID) {
+            if (creep.room.name != creep.memory.containerRoomName && !creep.memory.targetID) {
                 let p = Memory.rooms[creep.memory.containerRoomName].pointPos;
                 if (!p) {
                     console.log(creep.name + ": no alive containerRoom.pos");
@@ -50,13 +50,13 @@ var role = {
                 return;
             }
 
-            if(!creep.memory.cID)
-                set_cid(creep);
+            if(!creep.memory.targetID)
+                setTarget(creep);
         
-            let container = Game.getObjectById(creep.memory.cID);
+            let container = Game.getObjectById(creep.memory.targetID);
             if(!container) {
                 console.log("Problem getting container for " + creep.name);
-                creep.memory.cID = null;
+                creep.memory.targetID = null;
                 return;
             }
 
@@ -64,7 +64,7 @@ var role = {
             if(res == ERR_NOT_IN_RANGE) 
                 creep.moveTo(container);
             else if (res == ERR_FULL)
-                set_cid(creep);
+                setTarget(creep);
         }
 	},
 
@@ -136,20 +136,68 @@ var role = {
 	},
 };
 
-function set_cid (creep) {
-    //console.log("Searching container for " + creep.name);
-    if(creep.room.storage && creep.room.storage.storeCapacity - _.sum(creep.room.storage.store) > 0) {
-        let links = creep.room.find(FIND_STRUCTURES, {filter: s => s.structureType == STRUCTURE_LINK && s.pos.getRangeTo(creep.room.storage) > 3 && s.energyCapacity - s.energy > 0});
-        creep.memory.cID = creep.pos.findClosestByPath(links.concat(creep.room.storage), {ignoreCreeps: true}).id;
-        return;
+function setTarget (creep) {
+    let memory = creep.room.memory;
+    if (!memory) {
+        console.log(creep.name + ": setTarget have no memory of " + creep.room.name);
+        return ERR_NOT_IN_RANGE;
     }
-    let containers = creep.room.find(FIND_STRUCTURES, { filter: s => s.structureType == STRUCTURE_CONTAINER });
-    if(!containers.length) {
-        console.log(creep.name + " no containers in room, nothing to do");
-        return;
+
+    creep.memory.targetID = null;
+    let targets = _.filter(
+        _.filter(memory.structures[STRUCTURE_LINK] || [], t => !t.storaged).concat(
+        (memory.structures[STRUCTURE_EXTENSION] || []),
+        (memory.structures[STRUCTURE_LAB] || []), 
+        _.filter(memory.structures[STRUCTURE_CONTAINER] || [], t => t.controllered), 
+        (memory.structures[STRUCTURE_TOWER] || []),
+        (memory.structures[STRUCTURE_SPAWN] || []),
+        _.filter(memory.structures[STRUCTURE_TERMINAL] || [], t => t.energy < MIN_TERMINAL_ENERGY),
+        (memory.structures[STRUCTURE_STORAGE] || []),
+        _.filter(memory.structures[STRUCTURE_NUKER] || [], t => creep.room.memory.freeEnergy >= NUKER_ENERGY_LIMIT),
+        (memory.structures[STRUCTURE_POWER_SPAWN] || [])
+    ),
+    t => t.energy < t.energyCapacity && (!("my" in t) || t.my));
+
+    if (!targets.length) {
+        //console.log(creep.name + ": no any container for energy");
+        return ERR_NOT_FOUND;
     }
-    creep.memory.cID = containers.sort( function(a,b) { return a.store[RESOURCE_ENERGY] - b.store[RESOURCE_ENERGY]; })[0].id;
-    //console.log(creep.name + " container=" + creep.memory.cID);
+
+    let minTarget;
+    let minCost;
+    for(let target of targets) {
+        let wantEnergy = target.energyCapacity - target.energy;
+        let cpath = creep.pos.getRangeTo(target.pos.x, target.pos.y);
+        let wantCarry = global.cache.wantCarry[target.id] || 0;
+        let cpriority = 0;
+        if (wantCarry >= wantEnergy)
+            continue;
+        //else if (target.structureType == STRUCTURE_LINK)
+        //    cpriority = 50;
+        else if (target.structureType == STRUCTURE_STORAGE)
+            cpriority = -100;
+        else if (target.structureType == STRUCTURE_TOWER && target.energy < target.energyCapacity * 0.9)
+            cpriority = 100;
+        else if (target.structureType == STRUCTURE_TOWER && target.energy > target.energyCapacity * 0.9)
+            cpriority = -30;
+        else if (target.structureType == STRUCTURE_NUKER)
+            cpriority = -49;
+
+        let cost = cpath * 1.2 - cpriority;
+        if (minCost === undefined || cost < minCost) {
+            minTarget = target;
+            minCost = cost;
+        }
+        //if (creep.name == "harvester.0.999")
+        //   console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + wantCarry + " wantCarry and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " cost=" + cost + ", targetID=" + minTarget.id);
+    }
+    if (minTarget === undefined)
+        return ERR_NOT_FOUND;
+        
+    creep.memory.targetID = minTarget.id;
+    global.cache.wantCarry[creep.memory.targetID] = (global.cache.wantCarry[creep.memory.targetID] || 0) + _.min([creep.carry.energy, minTarget.energyCapacity - minTarget.energy]);
+
+    return OK;
 }
 
 module.exports = role;
