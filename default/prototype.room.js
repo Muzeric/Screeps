@@ -149,10 +149,10 @@ Room.prototype.balanceStore = function () {
             let cur = global.cache.queueTransport.getStoreWithReserved(this.terminal, rt);
             if (cur > need && (this.terminal.store[rt] || 0) > REBALANCE_INROOM_MIN) {
                 global.cache.queueTransport.addRequest(this.terminal, this.storage, rt, _.min([cur - need, this.terminal.store[rt] || 0]));
-                console.log(`${this.name}: rebalance of ${rt} ${cur - need} from terminal`);
+                //console.log(`${this.name}: rebalance of ${rt} ${cur - need} from terminal`);
             } else if (cur < need && (this.storage.store[rt] || 0) > REBALANCE_INROOM_MIN) {
                 global.cache.queueTransport.addRequest(this.storage, this.terminal, rt, _.min([need - cur, this.storage.store[rt] || 0]));
-                console.log(`${this.name}: rebalance of ${rt} ${need - cur} to terminal`);
+                //console.log(`${this.name}: rebalance of ${rt} ${need - cur} to terminal`);
             }
         }
     }
@@ -173,6 +173,7 @@ Room.prototype.balanceStore = function () {
                     || !(rt in room.memory.needResources) 
                     || !(room.memory.needResources[rt] > 0) 
                     || !(room.terminal && room.terminal.my)
+                    || (room.storage && (room.storage.storeCapacity - _.sum(room.storage.store)) < REBALANCE_STORAGE_FREE)
                     || (room.terminal.storeCapacity - _.sum(room.terminal.store)) < REBALANCE_TERMINAL_FREE
                 )
                     continue;

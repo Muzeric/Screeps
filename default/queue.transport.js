@@ -78,7 +78,7 @@ var queue = {
             caller,
         };
         //console.log("queueTransport.addRequest: ADDED: " + JSON.stringify(Memory.transportRequests[req_id]));
-        console.log(`transport ADDED: ${req_id}. ${req_from.pos.roomName} ${req_from.structureType} -> ${req_to.pos.roomName} ${req_to.structureType} ${req_amount} of ${req_resourceType} called ${caller}`);
+        //console.log(`transport ADDED: ${req_id}. ${req_from.pos.roomName} ${req_from.structureType} -> ${req_to.pos.roomName} ${req_to.structureType} ${req_amount} of ${req_resourceType} called ${caller}`);
 
         this.transportReserved[req_from.id] = this.transportReserved[req_from.id] || {};
         this.transportReserved[req_from.id][req_resourceType] = (this.transportReserved[req_from.id][req_resourceType] || 0) - req_amount;
