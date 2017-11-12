@@ -606,6 +606,16 @@ Room.prototype.updateStructures = function() {
                         costs.set(elem.betweenPos.x, elem.betweenPos.y, 100);
                         betweenCache[elem.betweenPos.getKey()] = 1;
                     }
+
+                    if (s.structureType == STRUCTURE_CONTAINER) {
+                        for (let rt in s.store) {
+                            if (rt == "energy")
+                                continue;
+                            let amount = global.cache.queueTransport.getStoreWithReserved(s, rt);
+                            if (room.storage && amount > 0)
+                                global.cache.queueTransport.addRequest(s, room.storage, rt, amount);
+                        }
+                    }
                 }
             }
 
@@ -727,6 +737,13 @@ Room.prototype.updateStructures = function() {
             else
                 extractor.betweenPos = _.filter( global.cache.utils.getRangedPlaces(null, extractor.pos, 1), p => p.isNearTo(container.pos) )[0];
             costs.set(extractor.betweenPos.x, extractor.betweenPos.y, 100);
+            for (let rt in container.store) {
+                if (rt == "energy" || rt == extractor.mineralType)
+                    continue;
+                let amount = global.cache.queueTransport.getStoreWithReserved(container, rt);
+                if (this.storage && amount > 0)
+                    global.cache.queueTransport.addRequest(container, this.storage, rt, amount);
+            }
         }
     }
 
@@ -791,6 +808,13 @@ Room.prototype.updateStructures = function() {
         let contcont = _.find(memory.structures[STRUCTURE_CONTAINER], c => room.controller.pos.inRangeTo(c.pos, 3));
         if (contcont) {
             contcont.controllered = 1;
+            for (let rt in contcont.store) {
+                if (rt == "energy")
+                    continue;
+                let amount = global.cache.queueTransport.getStoreWithReserved(contcont, rt);
+                if (amount > 0 && this.storage)
+                    global.cache.queueTransport.addRequest(contcont, this.storage, rt, amount);
+            }
         } else {
             let places = global.cache.utils.getRangedPlaces(null, room.controller.pos, 2);
             if (places.length) {
