@@ -300,7 +300,7 @@ var utils = {
                     }
 
                     let order = _.find(Game.market.orders, o => o.resourceType == rt && o.type == ORDER_SELL && o.roomName == room.name);
-                    if (order) {
+                    if (order && amount) {
                         print += "\tMY: {id:" + order.id + ", price:" + order.price + ", amount:" + order.amount + "}; ";
                         if (midPrice && order.price != midPrice) {
                             print += "\n";
@@ -318,7 +318,7 @@ var utils = {
                                 }
                             }
                         }
-                    } else if (midPrice) {
+                    } else if (midPrice && amount) {
                         print += `\tGame.market.createOrder(ORDER_SELL, ${rt}, ${midPrice}, ${amount}, ${room.name});`;
                         if (options.really) {
                             let res = Game.market.createOrder(ORDER_SELL, rt, midPrice, amount, room.name);
@@ -329,11 +329,16 @@ var utils = {
                     any++;
                 }
             }
-            if (!options.type || options.type == "buy") {
+            while (!options.type || options.type == "buy") {
                 print += "\tBUY\n";    
                 let nr = room.memory.needResources;
                 if (!nr)
-                    continue;
+                    break;
+                if ((room.storage && (room.storage.storeCapacity - _.sum(room.storage.store)) < REBALANCE_STORAGE_FREE)
+                    || (room.terminal.storeCapacity - _.sum(room.terminal.store)) < REBALANCE_TERMINAL_FREE
+                ) {
+                    break;
+                }
                 for(let rt in nr) {
                     if (rt.length > 1 || nr[rt] < 1000 || rt == "G")
                         continue;
@@ -364,7 +369,7 @@ var utils = {
                     }
 
                     let order = _.find(Game.market.orders, o => o.resourceType == rt && o.type == ORDER_BUY && o.roomName == room.name);
-                    if (order) {
+                    if (order && amount) {
                         print += "\tMY: {id:" + order.id + ", price:" + order.price + ", amount:" + order.amount + "}; ";
                         if (midPrice && order.price != midPrice) {
                             print += "\n";
@@ -382,7 +387,7 @@ var utils = {
                                 }
                             }
                         }
-                    } else if (midPrice) {
+                    } else if (midPrice && amount) {
                         print += `\tGame.market.createOrder(ORDER_BUY, ${rt}, ${midPrice}, ${amount}, ${room.name});`;
                         if (options.really) {
                             let res = Game.market.createOrder(ORDER_BUY, rt, midPrice, amount, room.name);
@@ -391,8 +396,8 @@ var utils = {
                     }
                     print += "\n";
                     any++;
-                } 
-                    
+                }
+                break; 
             }
             if (!any)
                 print = oldPrint;

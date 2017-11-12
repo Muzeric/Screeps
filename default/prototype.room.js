@@ -322,7 +322,7 @@ Room.prototype.needRoad = function(creep) {
     let road =  _.find(creep.pos.lookFor(LOOK_STRUCTURES), s => s.structureType == STRUCTURE_ROAD)
              || _.find(creep.pos.lookFor(LOOK_CONSTRUCTION_SITES), s => s.structureType == STRUCTURE_ROAD);
     if (road && creep.carry.energy && creep.getActiveBodyparts(WORK)) {
-        if (road.hits && road.hits < road.hitsMax) {
+        if (road.hits && road.hits < road.hitsMax * REPAIR_ROAD_LIMIT) {
             //console.log(creep.name + ": repair road on " + creep.pos.getKey(1));
             if (["builder", "longbuilder"].indexOf(creep.memory.role) === -1)
                 creep.repair(road);
