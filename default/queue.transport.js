@@ -144,8 +144,9 @@ var queue = {
             }
             this.changeState(request.id, 0);
             let range = (creepPos.roomName == from.pos.roomName ? creepPos.getRangeTo(from) : (from.room.getPathToRoom(creepPos.roomName) || undefined));
-            if (minCost === undefined || (range && range < minCost)) {
-                minCost = range; //request.createTime;
+            let cost = range - (Game.time - request.createTime) - _.ceil(request.amount / TRANSPORTER_AMOUNT) * 10;
+            if (minCost === undefined || (cost && cost < minCost)) {
+                minCost = cost; //request.createTime;
                 minRequest = request;
             }
         }

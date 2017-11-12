@@ -626,16 +626,16 @@ Creep.prototype.boost = function (bodyPart, skill, skipTimer) {
         }
         if (Game.time % 5 == 0)
             console.log(this.room.name + ". " + this.name + ": BOOSTing, transfer");
-    } else if (this.carryCapacity == 0 && booked >= LAB_BOOST_MINERAL && gotLab >= LAB_BOOST_MINERAL) {
+    } else if (this.carryCapacity < need / 2 && booked >= LAB_BOOST_MINERAL && gotLab >= LAB_BOOST_MINERAL) {
         this.moveTo(lab);
         if (Game.time % 5 == 0)
             console.log(this.room.name + ". " + this.name + ": BOOSTing, move to lab");
-    } else if (able >= LAB_BOOST_MINERAL && free >= LAB_BOOST_MINERAL) {
+    } else if (able >= LAB_BOOST_MINERAL && free >= LAB_BOOST_MINERAL && this.carryCapacity >= need / 2) {
         if (this.withdraw(storage, bt, _.floor( _.min([need - got, free, able]) / LAB_BOOST_MINERAL) * LAB_BOOST_MINERAL ) == ERR_NOT_IN_RANGE)
             this.moveTo(storage);
         if (Game.time % 5 == 0)
             console.log(this.room.name + ". " + this.name + ": BOOSTing, withdraw");
-    } else if (this.carryCapacity == 0 && (able >= LAB_BOOST_MINERAL && ableWR >= LAB_BOOST_MINERAL || booked >= LAB_BOOST_MINERAL)) {
+    } else if (this.carryCapacity < need / 2 && (able >= LAB_BOOST_MINERAL && ableWR >= LAB_BOOST_MINERAL || booked >= LAB_BOOST_MINERAL)) {
         let futureGotLab = global.cache.queueTransport.getStoreWithReserved(lab, bt);
         if (booked && futureGotLab >= LAB_BOOST_MINERAL) {
             this.moveTo(lab, {range: 5});
