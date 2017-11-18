@@ -271,11 +271,15 @@ var utils = {
             if (!options.type || options.type == "sell") {
                 print += "\tSELL\n";
                 for (let rt in room.terminal.store) {
-                    if (rt == "energy" || room.terminal.store[rt] < 1000 || options.length && rt.length > options.length)
+                    if (rt == "energy" || rt == "power" || options.length && rt.length > options.length)
                         continue;
-                    print += "\t" + rt + ": " + room.terminal.store[rt] + ";\n";
+                    let amount = this.clamp( _.min([room.terminal.store[rt], global.cache.queueTransport.getStoreWithReserved(room.terminal, rt)]) , 0, max);
+                    if (amount <= REBALANCE_OUTROOM_LEFT)
+                        continue;
+                    amount -= REBALANCE_OUTROOM_LEFT;
+
+                    print += "\t" + rt + ": " + amount + " / " + room.terminal.store[rt] + ";\n";
                     
-                    let amount = this.clamp(room.terminal.store[rt], 0, max);
                     if (!(rt in cache))
                         cache[rt] = _getMarketPrices(orders, rt, room.name, amount, options);
                     let midPrice = cache[rt].midSell;
