@@ -17,9 +17,14 @@ var stat = {
         Memory.stat.roomHistory[roomName] = Memory.stat.roomHistory[roomName] || {};
     },
 
-    updateRoom : function (roomName, param, diff) {
+    updateRoom : function (roomName, param, diff, logicRoomName) {
         this.addRoom(roomName);
         Memory.stat.roomHistory[roomName][param] = (Memory.stat.roomHistory[roomName][param] || 0) + diff;
+        if (logicRoomName) {
+            let logicParam = 'logic' + param.substring(0,1).toUpperCase() + param.substring(1);
+            this.addRoom(logicRoomName);
+            Memory.stat.roomHistory[logicRoomName][logicParam] = (Memory.stat.roomHistory[logicRoomName][logicParam] || 0) + diff;        
+        }
     },
 
     addRole : function (role) {
@@ -96,11 +101,11 @@ var stat = {
 
     dumpRoomStat : function () {
         let res = '';
-        let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send'];
+        let keys = ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send', 'logicCpu'];
         let lite = _.keys(Memory.stat.roomHistory).length > 20;
         let msgs = [];
         for (let roomName in Memory.stat.roomHistory) {
-            if (lite && (!(roomName in Memory.rooms) || ["my", "reserved", "lair", "banked"].indexOf(Memory.rooms[roomName].type) == -1))
+            if (lite && (!(roomName in Memory.rooms) || ["my", "reserved", "lair", "banked", "central"].indexOf(Memory.rooms[roomName].type) == -1))
                 continue;
             res += roomName;
             for (let key of keys) {
@@ -117,7 +122,7 @@ var stat = {
 
         for (let msg of msgs) {
             Game.notify(
-                "room.4:" + Game.time + ":" + 
+                "room.5:" + Game.time + ":" + 
                 global.cache.utils.lzw_encode(msg) +
                 "#END#"
             );

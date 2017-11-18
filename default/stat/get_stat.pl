@@ -56,6 +56,7 @@ exit if scalar(@msgs) == 0;
 
 my $room_versions = {
   '4' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send'],
+  '5' => ['harvest', 'create', 'build', 'repair', 'upgrade', 'pickup', 'dead', 'lost', 'cpu', 'send', 'logicCpu'],
 };
 
 my $role_versions = {

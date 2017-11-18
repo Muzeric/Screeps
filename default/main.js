@@ -101,26 +101,22 @@ module.exports.loop = function () {
                     Game.notify(creep.name + " PRERUNNING ERROR: " + e.toString() + " => " + e.stack);
                 }
             }
-            continue;
-        }
-        
-        if(moveErrors[creep.room.name]) {
+        } else if(moveErrors[creep.room.name]) {
             if(creep.moveTo(creep.room.controller) == OK)
                 creep.memory.errors = 0;
-            continue;
+        } else {
+            try {
+                creep.memory.carryEnergy = creep.carry.energy;
+                if (!creep.memory.stop)
+                    global.cache.objects[role].run(creep);
+            } catch (e) {
+                console.log(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
+                Game.notify(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
+            }
         }
         
-        try {
-            creep.memory.carryEnergy = creep.carry.energy;
-            if (!creep.memory.stop)
-                global.cache.objects[role].run(creep);
-        } catch (e) {
-            console.log(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
-            Game.notify(creep.name + " RUNNING ERROR: " + e.toString() + " => " + e.stack);
-        }
-        
-                let cpu = Game.cpu.getUsed() - lastCPU;
-        global.cache.stat.updateRoom(creep.room.name, 'cpu', cpu);
+        let cpu = Game.cpu.getUsed() - lastCPU;
+        global.cache.stat.updateRoom(creep.room.name, 'cpu', cpu, creep.memory.roomName);
         global.cache.stat.updateRole(role, 'cpu', cpu);
 
         if (global.cache.utils.isLowCPU(1))
