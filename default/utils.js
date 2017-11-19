@@ -273,10 +273,11 @@ var utils = {
                 for (let rt in room.terminal.store) {
                     if (rt == "energy" || rt == "power" || options.length && rt.length > options.length)
                         continue;
-                    let amount = this.clamp( _.min([room.terminal.store[rt], global.cache.queueTransport.getStoreWithReserved(room.terminal, rt)]) , 0, max);
+                    let amount = _.min([room.terminal.store[rt], global.cache.queueTransport.getStoreWithReserved(room.terminal, rt)]);
                     if (amount <= REBALANCE_OUTROOM_LEFT)
                         continue;
                     amount -= REBALANCE_OUTROOM_LEFT;
+                    amount = this.clamp(amount, 0, max);
 
                     print += "\t" + rt + ": " + amount + " / " + room.terminal.store[rt] + ";\n";
                     
