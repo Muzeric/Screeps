@@ -2,21 +2,22 @@ const profiler = require('screeps-profiler');
 
 var role = {
     run: function(creep) {
+        /*
         if (Game.roomsHelper.getHostilesCount(creep.memory.roomName) && creep.checkInRoomAndGo({ignoreHostiled: 1})) {
             if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL))
                 creep.heal(creep);
             return;
         }
-
-        /*
-        let hostiles = global.cache.hostiles[creep.room.name];
-        if (hostiles.length && creep.room.name != creep.memory.roomName) {
-            creep.moveTo(hostiles[0]);
+        */
+        
+        let hostiles = global.cache.hostiles[creep.memory.roomName];
+        if (hostiles && "attackers" in hostiles && hostiles.attackers.length && creep.room.name != creep.memory.roomName) {
+            creep.moveTo(hostiles.attackers[0]);
             if (creep.hits < creep.hitsMax && creep.getActiveBodyparts(HEAL))
                 creep.heal(creep);
             return;
         }
-        */
+        
         let mark = {};
         let res = creep.attackNearHostile(50, mark);
 
