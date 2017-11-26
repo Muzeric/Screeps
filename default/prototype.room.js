@@ -186,7 +186,7 @@ Room.prototype.balanceStore = function () {
                     break;
                 }
                 let res = null;
-                if (cost < 2000) {
+                if (cost < REBALANCE_OUTROOM_MAXENERGY) {
                     res = this.terminal.send(rt, amount, room.name, `rebalance from ${this.name} for ${cost} energy`);
                     if (res == OK) {
                         est -= amount;
