@@ -258,7 +258,7 @@ var utils = {
 
     autoMarket: function(options = {}) {
         let orders = Game.market.getAllOrders();
-        let cache = {};
+        let cache = options.cache || {};
         let max = options.max || 10000;
         let print = "\n";
         let oldPrint = '';
