@@ -72,3 +72,4 @@ global.CREEP_WEIGHT = {
     default: 10,
 };
 global.DISCLAIMER_CLAIM_COUNT = 19;
+global.AUTOMARKET_MIN_CREDITS = 1000000;
