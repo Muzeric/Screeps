@@ -583,25 +583,25 @@ function getRoomLimits (room, creepsCount, fcount) {
             "arg" : {work: unminerSources ? 1 : 0, top: room.controller.level >= 7},
             "priority" : 1,
             "minEnergy" : 300,
-            "wishEnergy" : room.controller.level >= 7 ? 2700 : 1350,
+            "wishEnergy" : !creepsCount["harvester"] ? 300 : (room.controller.level >= 7 ? 2700 : 1350),
     },{
             "role" : "miner",
             "count" : _.min([pairedSources, 1]),
-            "priority" : 1,
+            "priority" : 2,
             "minEnergy" : 550,
             "wishEnergy" : 850,
     },{
             "role" : "defender",
             "count" : Game.roomsHelper.getHostilesCount(room.name) * 2,
             "arg" : memory.structures[STRUCTURE_TOWER] ? 1 : 0,
-            "priority" : 1,
+            "priority" : 2,
             "wishEnergy" : 1500,
             "minEnergy" : 1500,
     },{
             "role" : "harvester",
             "count" : memory.structures[STRUCTURE_SPAWN] ? countHarvester : 0,
             "arg" : {work: unminerSources ? 1 : 0, top: room.controller.level >= 7},
-            "priority" : 2,
+            "priority" : 3,
             "wishEnergy" : room.controller.level >= 7 ? 2700 : 1350,
             "body" : {
                 "work" : 10*unminerSources * (room.controller.level >= 7 ? 2 : 1),
@@ -610,13 +610,13 @@ function getRoomLimits (room, creepsCount, fcount) {
     },{
             "role" : "miner",
             "count" : pairedSources,
-            "priority" : 2,
+            "priority" : 3,
             "minEnergy" : 550,
             "wishEnergy" : 850,
     },{
             role : "upgrader",
             "count" : room.controller.level < 8 ? 10 : 1,
-            "priority" : 3,
+            "priority" : 4,
             "arg": {top: room.controller.level >= 8, controllered: controlleredContainer},
             "wishEnergy" : 1500,
             "body" : {
@@ -626,7 +626,7 @@ function getRoomLimits (room, creepsCount, fcount) {
     },{
             "role" : "builder",
             "count" : builderWorkCount ? (creepsCount["builder"] || 0) + 1 : 0,
-            "priority" : 4,
+            "priority" : 5,
             "wishEnergy" : 1500,
             "maxEnergy" : builderWorkCount > 30 ? 5000 : 1500,
             "body" : {
@@ -635,20 +635,20 @@ function getRoomLimits (room, creepsCount, fcount) {
     },{
             "role" : "shortminer",
             "count" : storagedLink && unStoragedLinks ? 1 : 0,
-            "priority" : (creepsCount["miner"] || 0) >= pairedSources ? 2 : 5,
+            "priority" : (creepsCount["miner"] || 0) >= pairedSources ? 3 : 6,
             "wishEnergy" : 300,
     },{
             role : "mineralminer",
             "count" : pairedExtractor ? 1 : 0,
             "arg": pairedExtractor && pairedExtractor.buildContainerID ? 1 : 0,
-            "priority" : 7,
+            "priority" : 8,
             "minEnergy": 700,
             "wishEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 3150 : 3950,
             "maxEnergy" : pairedExtractor && pairedExtractor.buildContainerID ? 3150 : 3950,
     },{
             role : "transporter",
             "count" : global.cache.utils.clamp(_.ceil(transportAmountIn / TRANSPORTER_IN_CREATING_AMOUNT), 0, 3),
-            "priority" : 8,
+            "priority" : 9,
             "wishEnergy" : 1500,
             "maxEnergy" : 1500,
             "arg": "in",
@@ -656,7 +656,7 @@ function getRoomLimits (room, creepsCount, fcount) {
     },{
             role : "transporter",
             "count" : global.cache.utils.clamp(_.ceil(transportAmountOut / TRANSPORTER_OUT_CREATING_AMOUNT), 0, 6),
-            "priority" : 8,
+            "priority" : 9,
             "wishEnergy" : 1500,
             "maxEnergy" : 1500,
             "arg": "out",
@@ -679,19 +679,19 @@ function getRoomLimits (room, creepsCount, fcount) {
     },{
             role : "dismantler",
             "count" : memory.dismantlerCount || 0,
-            "priority" : 3,
+            "priority" : 4,
             "minEnergy" : 3300,
             "wishEnergy" : 3300,
     },{
             role : "superhealer",
             "count" : memory.superhealerCount || 0,
-            "priority" : 3,
+            "priority" : 4,
             "minEnergy" : 2100,
             "maxEnergy" : 7500,
     },{
             role : "superattacker",
             "count" : memory.superattackerCount || 0,
-            "priority" : 3,
+            "priority" : 4,
             "minEnergy" : 2800,
             "maxEnergy" : 2800,
     });
