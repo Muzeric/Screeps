@@ -151,7 +151,7 @@ function setTarget (creep) {
 
     creep.memory.targetID = null;
     let targets = _.filter(
-        _.filter(memory.structures[STRUCTURE_LINK] || [], t => !t.storaged).concat(
+        _.filter(memory.structures[STRUCTURE_LINK] || [], t => !t.storaged && !t.source).concat(
         (memory.structures[STRUCTURE_EXTENSION] || []),
         (memory.structures[STRUCTURE_LAB] || []), 
         _.filter(memory.structures[STRUCTURE_CONTAINER] || [], t => t.controllered), 
