@@ -254,6 +254,22 @@ Room.prototype.updateResources = function() {
         memory.resources.push(elem);
     });
 
+    this.find(FIND_TOMBSTONES).forEach( function(t) {
+        let elem = {
+            id : t.id,
+            pos : t.pos,
+            energy : t.store[RESOURCE_ENERGY],
+            deathTime: t.deathTime,
+        };
+        memory.energy += elem.energy;
+        elem.store = _.clone(t.store);
+        for (let rt in t.store)
+                memory.store[rt] = (memory.store[rt] || 0) + t.store[rt];
+
+        if (elem.energy > 0)
+            memory.resources.push(elem);
+    });
+
     for ( let elem of _.filter(_.flatten(_.values(memory.structures)), s => "energy" in s || "store" in s || s.structureType == STRUCTURE_KEEPER_LAIR || "power" in s) )  {
         let s = Game.getObjectById(elem.id);
         if (!s) {

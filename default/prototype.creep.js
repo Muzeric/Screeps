@@ -390,14 +390,14 @@ Creep.prototype.findSource = function () {
     let minCost;
     let resultEnergyLeft;
     for(let target of targets) {
-        let placesLeft = target.places - (global.cache.wantEnergy[target.id] ? global.cache.wantEnergy[target.id].creepsCount : 0);
+        let placesLeft = (target.places || 0) - (global.cache.wantEnergy[target.id] ? global.cache.wantEnergy[target.id].creepsCount : 0);
         if (placesLeft <= 0 && !booking)
             continue;
         let range = this.pos.getRangeTo(target.pos.x, target.pos.y);
         let energyLeft = target.energy - (global.cache.wantEnergy[target.id] ? global.cache.wantEnergy[target.id].energy : 0);
 
         let cpriority = 0;
-        if (target.resourceType) { // Dropped
+        if (target.resourceType || target.deathTime) { // Dropped or Tombstone
             energyLeft -= range * 1.2;
             if (this.room.memory.hostilesCount || energyLeft <= 0)
                 continue;
@@ -509,6 +509,8 @@ Creep.prototype.gotoSource = function(exceptStorage) {
         }
     } else if ("ticksToRegeneration" in source) {
         res = this.harvest(source);
+    } else if (source.deathTime) { // tombstone
+        res = this.withdraw(source, RESOURCE_ENERGY);
     } else  {
         if (_.sum(this.carry) != this.carry.energy && source.structureType == STRUCTURE_STORAGE) {
             res = this.transfer(source, _.filter(_.keys(this.carry), t => t != "energy")[0]);
