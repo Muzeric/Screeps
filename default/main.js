@@ -731,7 +731,7 @@ function getSpawnForCreate (need, skipRoomNames, reservedEnergy) {
         if (spawn.room.name == waitRoomName)
             continue;
         let energy = spawn.room.energyAvailable - (reservedEnergy[spawn.room.name] || 0);
-        //console.log("getSpawnForCreate: " + need.roomName + " wants " + need.role + ", skipSpawnNames=" + JSON.stringify(global.cache.skipSpawnNames) + ":" + spawn.name + " minEnergy=" + need.minEnergy + ", energyAvailable=" + spawn.room.energyAvailable);
+        //console.log("getSpawnForCreate: " + need.roomName + " wants " + need.role + ", skipSpawnNames=" + JSON.stringify(global.cache.skipSpawnNames) + ":" + spawn.name + " minEnergy=" + need.minEnergy + ", energyAvailable=" + spawn.room.energyAvailable + ", wishEnergy=" + need.wishEnergy + ", energy=" + energy);
         if (
             energy >= need.minEnergy &&
             (
