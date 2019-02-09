@@ -390,7 +390,7 @@ Creep.prototype.findSource = function () {
     let minCost;
     let resultEnergyLeft;
     for(let target of targets) {
-        let placesLeft = (target.places || 0) - (global.cache.wantEnergy[target.id] ? global.cache.wantEnergy[target.id].creepsCount : 0);
+        let placesLeft = target.places - (global.cache.wantEnergy[target.id] ? global.cache.wantEnergy[target.id].creepsCount : 0);
         if (placesLeft <= 0 && !booking)
             continue;
         let range = this.pos.getRangeTo(target.pos.x, target.pos.y);
