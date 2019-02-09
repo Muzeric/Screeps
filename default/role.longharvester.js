@@ -60,11 +60,16 @@ var role = {
                 return;
             }
 
+            let futureEst = _.sum(creep.carry) > container.energyCapacity - container.energy ? true : false;
             let res = creep.transfer(container, RESOURCE_ENERGY);
-            if(res == ERR_NOT_IN_RANGE) 
+            if(res == ERR_NOT_IN_RANGE) {
                 creep.moveTo(container);
-            else if (res == ERR_FULL)
-                setTarget(creep);
+            } else if (res == ERR_FULL || res == OK && futureEst) {
+                if (setTarget(creep) == OK)
+                    creep.moveTo(Game.getObjectById(creep.memory.targetID));
+            } else {
+                creep.memory.targetID = null;
+            }
         }
 	},
 
