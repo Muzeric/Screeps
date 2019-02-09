@@ -475,7 +475,7 @@ function getNotMyRoomLimits (roomName, creepsCount, fcount) {
         "role" : "longbuilder",
         "count" : buildTicks && creepsCount["longharvester"] && !(memory.type == 'lair' && !antikeepersCount) ? 1 : 0,
         "priority" : 13,
-        "wishEnergy" : buildTicks > 15000 ? 1300 : 1000,
+        "wishEnergy" : buildTicks > 15000 ? 1500 : 1000,
         "range" : 2,
         "maxEnergy" : buildTicks > 15000 ? 2000 : 1000,
     },{
