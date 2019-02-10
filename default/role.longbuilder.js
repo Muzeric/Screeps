@@ -104,7 +104,7 @@ function getLongBuilderTargets(creep) {
 		let targetID;
 		for (let target of targets) {
 			let pos = new RoomPosition(target.pos.x, target.pos.y, target.pos.roomName);
-			let cost = (target.hits || 0) / 1000 + (target.progressTotal ? (100 - target.progress * 100 / target.progressTotal) : 0) + (creep.pos.getRangeTo(pos) || 0) + 50 * (global.cache.targets[target.id] || 0);
+			let cost = (target.hits || 0) / 1000 + (target.progressTotal ? (100 - target.progress * 100 / target.progressTotal)/20 : 0) + (creep.pos.getRangeTo(pos) || 0) + 50 * (global.cache.targets[target.id] || 0);
 			if ((minCost === undefined || cost < minCost) && Game.getObjectById(target.id)) {
 				targetID = target.id;
 				minCost = cost;
