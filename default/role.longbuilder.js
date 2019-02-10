@@ -20,11 +20,11 @@ var role = {
 
 	    if(creep.memory.building && creep.carry.energy == 0) {
         	creep.memory.building = false;
-            creep.memory.targetID = null;
 	    }
 	    if(!creep.memory.building && _.sum(creep.carry) == creep.carryCapacity) {
 	        creep.memory.building = true;
-	        creep.memory.energyID = null;
+			creep.memory.energyID = null;
+            creep.memory.targetID = null;
 		} 
 		
 		if(!creep.memory.targetID)
@@ -109,6 +109,8 @@ function getLongBuilderTargets(creep) {
 				targetID = target.id;
 				minCost = cost;
 			}
+			//if (creep.name == "longbuilder-74")
+			//    console.log(creep.name + ": targetID=" + target.id + ", cost=" + cost + ", range=" + creep.pos.getRangeTo(pos) + ", global=" + global.cache.targets[target.id] + ", targetID=" + targetID);
 		}
 		if (targetID) {
 			global.cache.targets[targetID] = (global.cache.targets[targetID] || 0) + 1;
