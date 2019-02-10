@@ -104,13 +104,13 @@ function getLongBuilderTargets(creep) {
 		let targetID;
 		for (let target of targets) {
 			let pos = new RoomPosition(target.pos.x, target.pos.y, target.pos.roomName);
-			let cost = (target.hits || 0) / 1000 + (creep.pos.getRangeTo(pos) || 0) + 50 * (global.cache.targets[target.id] || 0);
+			let cost = (target.hits || 0) / 1000 + (target.progressTotal ? (100 - target.progress * 100 / target.progressTotal) : 0) + (creep.pos.getRangeTo(pos) || 0) + 50 * (global.cache.targets[target.id] || 0);
 			if ((minCost === undefined || cost < minCost) && Game.getObjectById(target.id)) {
 				targetID = target.id;
 				minCost = cost;
 			}
 			//if (creep.name == "longbuilder-74")
-			//    console.log(creep.name + ": targetID=" + target.id + ", cost=" + cost + ", range=" + creep.pos.getRangeTo(pos) + ", global=" + global.cache.targets[target.id] + ", targetID=" + targetID);
+			//    console.log(creep.name + ": targetID=" + target.id + ", cost=" + cost + ", range=" + creep.pos.getRangeTo(pos) + ", progressEst=" + (target.progressTotal ? (100 - target.progress * 100 / target.progressTotal) : 0) + ", global=" + global.cache.targets[target.id] + ", targetID=" + targetID);
 		}
 		if (targetID) {
 			global.cache.targets[targetID] = (global.cache.targets[targetID] || 0) + 1;
