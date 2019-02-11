@@ -57,7 +57,7 @@ var role = {
 	            energy -= 50;
 	            fat -= 2;
 			}
-	        if(energy >= 50 && body.length < 50 && (!opts.controllered || wcount % 15 == 0)) {
+	        if(energy >= 50 && body.length < 50 && (!opts.controllered || wcount % 15 == 0 || energy < 100)) {
 	            body.push(CARRY);
 				energy -= 50;
 				fat++;
