@@ -615,7 +615,7 @@ function getRoomLimits (room, creepsCount, fcount) {
             "wishEnergy" : 850,
     },{
             role : "upgrader",
-            "count" : room.controller.level < 8 ? 10 : 1,
+            "count" : room.controller.level < 8 ? 5 : 1,
             "priority" : 4,
             "arg": {top: room.controller.level >= 8, controllered: controlleredContainer},
             "wishEnergy" : 1500,
