@@ -556,7 +556,7 @@ Room.prototype.updateStructures = function() {
         } else if (s.structureType == STRUCTURE_CONTROLLER) {
             if (s.my) {
                 memory.type = 'my';
-            } else if (s.reservation && s.reservation.username == 'Saint') {
+            } else if (s.reservation && s.reservation.username == LOGIN) {
                 memory.type = 'reserved';
                 memory.reserveEnd = Game.time + s.reservation.ticksToEnd;
             } else if (s.reservation || s.owner) {
@@ -569,6 +569,7 @@ Room.prototype.updateStructures = function() {
             elem = {
                 rangedPlaces : global.cache.utils.getRangedPlaces(null, s.pos, 1),
             };
+            elem.signed = (s.sign.username == LOGIN ? true : false);
         } else if (s.structureType == STRUCTURE_POWER_BANK) {
             memory.type = 'banked';
             elem = {

@@ -74,3 +74,5 @@ global.CREEP_WEIGHT = {
 };
 global.DISCLAIMER_CLAIM_COUNT = 19;
 global.AUTOMARKET_MIN_CREDITS = 1000000;
+global.LOGIN = "Saint";
+global.SIGN = "You can come and die if you want";
