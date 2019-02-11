@@ -39,7 +39,7 @@ var role = {
                 res = creep.reserveController(creep.room.controller);
             if (res < 0)
                 console.log(creep.name + ": reserve[claim]Controller with res=" + res);
-            if (!creep.memory.signed && creep.room.controller.sign.username != LOGIN) {
+            if (!creep.memory.signed && creep.room.controller.sign && creep.room.controller.sign.username != LOGIN) {
                 creep.signController(creep.room.controller, SIGN);
                 creep.memory.signed = true;
             }

@@ -569,7 +569,7 @@ Room.prototype.updateStructures = function() {
             elem = {
                 rangedPlaces : global.cache.utils.getRangedPlaces(null, s.pos, 1),
             };
-            elem.signed = (s.sign.username == LOGIN ? true : false);
+            elem.signed = (s.sign && s.sign.username == LOGIN ? true : false);
         } else if (s.structureType == STRUCTURE_POWER_BANK) {
             memory.type = 'banked';
             elem = {
