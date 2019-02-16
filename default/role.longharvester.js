@@ -50,6 +50,12 @@ var role = {
                 return;
             }
 
+            if (creep.memory.sleepTime > 0)  {
+                creep.say("SLP " + creep.memory.sleepTime);
+                creep.memory.sleepTime--;
+                return;
+            }
+
             if(!creep.memory.targetID)
                 setTarget(creep);
         
@@ -65,6 +71,10 @@ var role = {
             if(res == ERR_NOT_IN_RANGE) {
                 creep.moveTo(container);
             } else if (res == ERR_FULL || res == OK && futureEst) {
+                if (container.structureType == STRUCTURE_LINK && container.cooldown <= 2) {
+                    creep.memory.sleepTime = container.cooldown;
+                    return;
+                }
                 if (setTarget(creep) == OK)
                     creep.moveTo(Game.getObjectById(creep.memory.targetID));
             } else {
