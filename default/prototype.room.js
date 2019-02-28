@@ -278,7 +278,7 @@ Room.prototype.updateResources = function() {
             memory.structuresTime = 0;
             continue;
         }
-        if (s.structureType == STRUCTURE_SPAWN && !s.my) {
+        if ([STRUCTURE_SPAWN, STRUCTURE_NUKER].indexOf(s.structureType) !== -1 && !s.my) {
             continue;
         }
         elem.energy = "energy" in s ? s.energy : ("store" in s ? s.store[RESOURCE_ENERGY] : 0);
