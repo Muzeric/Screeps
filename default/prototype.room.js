@@ -613,7 +613,7 @@ Room.prototype.updateStructures = function() {
             else if ("storeCapacity" in s)
                 elem.energyCapacity = s.storeCapacity;
 
-            if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE, STRUCTURE_LINK].indexOf(s.structureType) !== -1) {
+            if (s.structureType == STRUCTURE_CONTAINER || [STRUCTURE_STORAGE, STRUCTURE_LINK].indexOf(s.structureType) !== -1 && s.my) {
                 elem.minersTo = _.some(Game.creeps, c => (c.memory.role == "longminer" || c.memory.role == "miner" || c.memory.role == "shortminer") && c.memory.cID == s.id);
                 elem.source = _.filter(memory.structures[STRUCTURE_SOURCE], sr => s.pos.inRangeTo(sr.pos, 2))[0];
                 if (elem.source) {
