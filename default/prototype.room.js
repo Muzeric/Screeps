@@ -774,7 +774,7 @@ Room.prototype.updateStructures = function() {
         memory.type = "central";
     }
 
-    if (memory.type != "hostiled" && this.canBuildContainers()) {
+    if (["my", "reserved", "lair"].indexOf(memory.type) !== -1 && this.canBuildContainers()) {
         for (let source of _.filter([].concat(memory.structures[STRUCTURE_SOURCE] || [], memory.structures[STRUCTURE_EXTRACTOR] || []), s => !s.pair && s.rangedPlaces.length)) {
             if (source.structureType == STRUCTURE_EXTRACTOR && !source.mineralAmount)
                 continue;
