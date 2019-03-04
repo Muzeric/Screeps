@@ -448,7 +448,7 @@ function getNotMyRoomLimits (roomName, creepsCount, fcount) {
         "range": 3,
     },{
         "role" : "longharvester",
-        "count" : fcount["Energy"] ? global.cache.utils.clamp(_.ceil(memory.energy / 10000), 0, 3) : 0,
+        "count" : fcount["Energy"] ? global.cache.utils.clamp(_.ceil(memory.energy / 10000), 1, 3) : 0,
         "arg" : {work: 0, attack: 0},
         "priority" : 10,
         "minEnergy" : 550,
