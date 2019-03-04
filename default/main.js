@@ -448,7 +448,7 @@ function getNotMyRoomLimits (roomName, creepsCount, fcount) {
         "range": 3,
     },{
         "role" : "longharvester",
-        "count" : fcount["Energy"] ? global.cache.utils.clamp(_.ceil((memory.energy || 0) / 10000), 1, 3) : 0,
+        "count" : fcount["Energy"] ? global.cache.utils.clamp(_.ceil((memory.energy || 0) / 10000), 1, 5) : 0,
         "arg" : {work: 0, attack: 0},
         "priority" : 10,
         "minEnergy" : 550,
@@ -457,7 +457,7 @@ function getNotMyRoomLimits (roomName, creepsCount, fcount) {
         "maxEnergy" : 3000,
     },{
         "role" : "longharvester",
-        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' || Memory.claimRoom == roomName ? 0 : needHarvester * sourcesForWork,
+        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' || Memory.claimRoom == roomName || fcount["Energy"] ? 0 : needHarvester * sourcesForWork,
         "arg" : {work: workerHarvester, attack: 1},
         "priority" : 10,
         "minEnergy" : 550,
@@ -474,7 +474,7 @@ function getNotMyRoomLimits (roomName, creepsCount, fcount) {
         "range" : 5,
     },{
         "role" : "longminer",
-        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' || Memory.claimRoom == roomName ? 0 : pairedSources,
+        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' || Memory.claimRoom == roomName || fcount["Energy"] ? 0 : pairedSources,
         "arg" : {long: 0, attack: 1},
         "priority" : 12,
         "wishEnergy" : 1060,
@@ -489,7 +489,7 @@ function getNotMyRoomLimits (roomName, creepsCount, fcount) {
         "maxEnergy" : buildTicks > 15000 ? 2000 : 1000,
     },{
         "role" : "longharvester",
-        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' || !needHarvester || Memory.claimRoom == roomName ? 0 : (creepsCount["longharvester"] || 0) + 1,
+        "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' || !needHarvester || Memory.claimRoom == roomName || fcount["Energy"] ? 0 : (creepsCount["longharvester"] || 0) + 1,
         "arg" : {work: workerHarvester, attack: 1},
         "priority" : 14,
         "minEnergy" : 550,
