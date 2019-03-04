@@ -400,7 +400,7 @@ function getNotMyRoomLimits (roomName, creepsCount, fcount) {
     let lastCPU = Game.cpu.getUsed();
     let memory = Memory.rooms[roomName] || {structures : {}};
     let room = Game.rooms[roomName];
-    if (!fcount["Antikeeper"] && !fcount["Source"] && !fcount["Controller"] && memory.type != "banked")
+    if (!fcount["Antikeeper"] && !fcount["Energy"] && !fcount["Controller"] && memory.type != "banked")
         return [];
     let buildTicks = room && room.getConstructions().length ? room.getBuilderTicks() : 0;
     let liteClaimer = memory.type == 'reserved' && memory.reserveEnd - Game.time > 3000 || Memory.claimRoom == roomName ? 1 : 0;
@@ -446,6 +446,15 @@ function getNotMyRoomLimits (roomName, creepsCount, fcount) {
         "wishEnergy" : 1500,
         "minEnergy" : 1500,
         "range": 3,
+    },{
+        "role" : "longharvester",
+        "count" : fcount["Energy"] ? global.cache.utils.clamp(_.ceil(memory.energy / 10000), 0, 3) : 0,
+        "arg" : {work: 0, attack: 0},
+        "priority" : 10,
+        "minEnergy" : 550,
+        "wishEnergy" : 1500,
+        "range" : 3,
+        "maxEnergy" : 3000,
     },{
         "role" : "longharvester",
         "count" : memory.type == 'lair' || memory.type == 'central' || memory.type == 'banked' || Memory.claimRoom == roomName ? 0 : needHarvester * sourcesForWork,
