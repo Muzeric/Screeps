@@ -776,7 +776,7 @@ Room.prototype.updateStructures = function() {
 
     if (["my", "reserved", "lair"].indexOf(memory.type) !== -1 && this.canBuildContainers()) {
         for (let source of _.filter([].concat(memory.structures[STRUCTURE_SOURCE] || [], memory.structures[STRUCTURE_EXTRACTOR] || []), s => !s.pair && s.rangedPlaces.length)) {
-            if (source.structureType == STRUCTURE_EXTRACTOR && !source.mineralAmount)
+            if (source.structureType == STRUCTURE_EXTRACTOR && (!source.mineralAmount || !source.my))
                 continue;
             let contPos;
             let maxPlaces = 0;
