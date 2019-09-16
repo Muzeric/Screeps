@@ -831,7 +831,7 @@ Room.prototype.updateStructures = function() {
     }
 
     if (memory.type == 'my') {
-        let contcont = _.find(memory.structures[STRUCTURE_CONTAINER], c => room.controller.pos.inRangeTo(c.pos, 3) && c.isActive());
+        let contcont = _.find(memory.structures[STRUCTURE_CONTAINER], c => room.controller.pos.inRangeTo(c.pos, 3));
         if (contcont) {
             contcont.controllered = 1;
             for (let rt in contcont.store) {
