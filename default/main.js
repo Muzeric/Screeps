@@ -764,7 +764,7 @@ function towerAction (room) {
     if (!towers.length)
         return;
     
-    let dstructs = room.find(FIND_STRUCTURES, {filter: s => s.structureType != STRUCTURE_ROAD && s.hits < 0.5*s.hitsMax && s.hits < REPAIR_TOWER_LIMIT});
+    let dstructs = room.find(FIND_STRUCTURES, {filter: s => s.structureType != STRUCTURE_ROAD && s.hits < 0.5*s.hitsMax && s.hits < REPAIR_TOWER_LIMIT && s.isActive});
 
     for(let tower of towers) {
         let target;

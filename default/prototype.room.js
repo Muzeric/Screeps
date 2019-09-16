@@ -595,6 +595,12 @@ Room.prototype.updateStructures = function() {
                 if (res == OK)
                     return;
             }
+
+            if ("my" in s && s.my && !s.isActive) {
+                console.log(room.name + ": " + s.structureType + " at " + s.pos.getKey() + " is not active");
+                costs.set(s.pos.x, s.pos.y, 0xff);
+                return;
+            }
             elem = {
                 places : global.cache.utils.getRangedPlaces(null, s.pos, 1).length,
                 hits : s.hits,
@@ -825,7 +831,7 @@ Room.prototype.updateStructures = function() {
     }
 
     if (memory.type == 'my') {
-        let contcont = _.find(memory.structures[STRUCTURE_CONTAINER], c => room.controller.pos.inRangeTo(c.pos, 3));
+        let contcont = _.find(memory.structures[STRUCTURE_CONTAINER], c => room.controller.pos.inRangeTo(c.pos, 3) && c.isActive);
         if (contcont) {
             contcont.controllered = 1;
             for (let rt in contcont.store) {

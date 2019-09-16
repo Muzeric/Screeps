@@ -14,7 +14,7 @@ var role = {
             creep.moveTo(flag, {ignoreHostiled: 1});
         } else {
             let target = Game.getObjectById(creep.memory.dismTargetID);
-            if (!target) {
+            if (!target || target.pos.roomName != creep.room.name) {
                 target = 
                 //Game.getObjectById(Memory.targets[creep.room.name]) ||
                 _.filter(flag.pos.lookFor(LOOK_STRUCTURES), s => s.structureType != "road")[0] ||

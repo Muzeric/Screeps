@@ -1,7 +1,7 @@
 const profiler = require('screeps-profiler');
 
 var queue = {
-    mainRoomName: Game.rooms["sim"] ? "sim" : "E27S15",
+    mainRoomName: Game.rooms["sim"] ? "sim" : "W4S22",
     transportReserved: {},
     indexByCreep: {},
 
