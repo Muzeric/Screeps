@@ -285,6 +285,8 @@ Room.prototype.updateResources = function() {
         memory.energy += elem.energy;
         if ([STRUCTURE_CONTAINER, STRUCTURE_STORAGE].indexOf(s.structureType) !== -1)
             memory.freeEnergy += elem.energy;
+        else if (elem.structureType == STRUCTURE_TERMINAL && elem.energy - global.MIN_TERMINAL_ENERGY > 0) 
+            memory.freeEnergy += elem.energy - global.MIN_TERMINAL_ENERGY;
         if ("store" in s) {
             elem.store = _.clone(s.store);
             for (let rt in s.store)
