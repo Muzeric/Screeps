@@ -377,6 +377,7 @@ Creep.prototype.findSource = function () {
         (memory.structures[STRUCTURE_CONTAINER] || []).concat( 
         (memory.structures[STRUCTURE_STORAGE] || []), 
         (memory.structures[STRUCTURE_SOURCE] || []),
+        (memory.structures[STRUCTURE_TERMINAL] || []),
         (memory.resources || []) ),
      t => t.energy);
 
@@ -403,6 +404,8 @@ Creep.prototype.findSource = function () {
                 continue;
             else
                 cpriority = 2;
+        } else if (target.structureType == STRUCTURE_TERMINAL && energyLeft < global.MIN_TERMINAL_ENERGY * 1.2) {
+            continue;
         } else if (energyLeft > 0 && "my" in target && !target.my) {
             cpriority = 2;
         } else if (target.structureType == STRUCTURE_CONTAINER) {
@@ -527,7 +530,7 @@ Creep.prototype.gotoSource = function(exceptStorage) {
     } else if (res == ERR_NOT_IN_RANGE) {
         return this.moveTo(source);
     } else if (res == ERR_NOT_ENOUGH_ENERGY) {
-        if ([STRUCTURE_EXTENSION, STRUCTURE_CONTAINER, STRUCTURE_TOWER].indexOf(source.structureType) !== -1 || source.deathTime)
+        if ([STRUCTURE_EXTENSION, STRUCTURE_CONTAINER, STRUCTURE_TOWER, STRUCTURE_TERMINAL].indexOf(source.structureType) !== -1 || source.deathTime)
             this.memory.energyID = null;
     } else if (res < 0) {
         console.log(this.name + " tried to get energy from " + this.memory.energyID + " with res = " + res);
