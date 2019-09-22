@@ -267,6 +267,7 @@ module.exports.loop = function () {
         global.cache.stat.updateRoom(roomName, 'cpu', Game.cpu.getUsed() - lastCPU);
     }
     global.cache.stat.addCPU("runLabs");
+    /*
     Memory.observeCache = Memory.observeCache || {};
     for (let roomName in Game.rooms) {
         if (global.cache.utils.isLowCPU(1, 1))
@@ -317,6 +318,7 @@ module.exports.loop = function () {
         }
     }   
     global.cache.stat.addCPU("observe");
+    */
     if (Game.time % PERIOD_AUTOMARKET == 0) {
         global.cache.utils.autoMarket({length:1, deals:1, type: "sell", really: 1});
         global.cache.utils.marketClear({really: 1});
