@@ -384,6 +384,11 @@ Room.prototype.linkAction = function () {
         }
     }
 
+    let contlink = this.getControlleredLink();
+    if (contlink && !link_to.cooldown && link_to.energyCapacity - space >= contlink.energyCapacity / 3 && contlink.energy <= contlink.energyCapacity / 3) {
+        link_to.transferEnergy(contlink);
+    }
+
     return OK;
 }
 
@@ -398,8 +403,16 @@ Room.prototype.getStoragedLink = function(ret) {
     return null;
 }
 
+Room.prototype.getControlleredLink = function() {
+    let link = _.filter(this.memory.structures[STRUCTURE_LINK], l => l.controllered)[0];
+    if (link)
+        return Game.getObjectById(link.id);
+    
+    return null;
+}
+
 Room.prototype.getUnStoragedLinks = function() {
-    return _.map( _.filter(this.memory.structures[STRUCTURE_LINK], l => !l.storaged), l => Game.getObjectById(l.id));
+    return _.map( _.filter(this.memory.structures[STRUCTURE_LINK], l => !l.storaged && !l.controllered), l => Game.getObjectById(l.id));
 }
 
 Room.prototype.getTowers = function() {
@@ -716,6 +729,7 @@ Room.prototype.updateStructures = function() {
     });
 
     let constructionsContainers = {};
+    let constructionsLinks = {};
     let constructionsRoads = {};
     let extensionConstructionCount = 0;
     let extractorConstructionCount = 0;
@@ -740,6 +754,8 @@ Room.prototype.updateStructures = function() {
                 extensionConstructionCount++;
             else if (s.structureType == STRUCTURE_EXTRACTOR)
                 extractorConstructionCount++;
+            else if (s.structureType == STRUCTURE_LINK)
+                constructionsLinks[s.pos.getKey()] = s.id;
         } else if (s.structureType == STRUCTURE_CONTAINER) {
             constructionsContainers[s.pos.getKey()] = s.id;
         }
@@ -833,6 +849,41 @@ Room.prototype.updateStructures = function() {
     }
 
     if (memory.type == 'my') {
+        let contlink = _.find(memory.structures[STRUCTURE_LINK], l => room.controller.pos.inRangeTo(l.pos, 3));
+        if (contlink) {
+            if (room.getStoragedLink()) {
+                contlink.controllered = 1;
+            } else {
+                console.log(this.name + ": controllered link without storaged link!");
+            }
+        } else {
+            let maxCount = CONTROLLER_STRUCTURES["link"][room.controller.level] || 0;
+            let curCount = (memory.structures[STRUCTURE_LINK] || []).length + _.keys(constructionsLinks).length;
+            if (curCount < maxCount) {
+                let places = global.cache.utils.getRangedPlaces(null, room.controller.pos, 2);
+                if (places.length) {
+                    let cache = {};
+                    let place = places.sort(function(a,b) {
+                        if (!(a in cache))
+                            cache[a.getKey()] = -1 * global.cache.utils.getRangedPlaces(null, a, 1).length;
+                        if (!(b in cache))
+                            cache[b.getKey()] = -1 * global.cache.utils.getRangedPlaces(null, b, 1).length;
+                        return cache[a.getKey()] - cache[b.getKey()];
+                    })[0];
+                    if (!(place.getKey() in constructionsLinks) && room.getStoragedLink()) {
+                        let res = this.createConstructionSite(place.x, place.y, STRUCTURE_LINK);
+                        console.log(this.name + ": BUILT (" + res + ") controlled link at " + place.x + "x" + place.y);
+                        if (res == OK) {
+                            memory.constructions++;
+                            contlink = 1;
+                        }
+                    } else if (place.getKey() in constructionsLinks) {
+                        contlink = 1;
+                    }
+                }
+            }
+        }
+
         let contcont = _.find(memory.structures[STRUCTURE_CONTAINER], c => room.controller.pos.inRangeTo(c.pos, 3));
         if (contcont) {
             contcont.controllered = 1;
@@ -843,7 +894,7 @@ Room.prototype.updateStructures = function() {
                 if (amount > 0 && this.storage)
                     global.cache.queueTransport.addRequest(contcont, this.storage, rt, amount);
             }
-        } else {
+        } else if (!contlink) {
             let places = global.cache.utils.getRangedPlaces(null, room.controller.pos, 2);
             if (places.length) {
                 let cache = {};
