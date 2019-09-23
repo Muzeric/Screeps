@@ -856,7 +856,11 @@ Room.prototype.updateStructures = function() {
         let contlink = _.find(memory.structures[STRUCTURE_LINK], l => room.controller.pos.inRangeTo(l.pos, 3));
         if (contlink) {
             if (room.getStoragedLink()) {
-                contlink.controllered = 1;
+                if (contlink.storaged) {
+                    console.log(this.name + ": controllered link is the same as storaged link!");
+                } else {
+                    contlink.controllered = 1;
+                }
             } else {
                 console.log(this.name + ": controllered link without storaged link!");
             }
