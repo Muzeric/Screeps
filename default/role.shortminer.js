@@ -25,20 +25,35 @@ var role = {
             }
             creep.memory.energyID = link.id;
             creep.memory.betweenPos = ret.object.betweenPos;
+            creep.memory.contlinkID = room.getControlleredLink(1);
         }
 
         let betweenPos = new RoomPosition(creep.memory.betweenPos.x, creep.memory.betweenPos.y, creep.memory.betweenPos.roomName);
         if (creep.pos.isEqualTo(betweenPos)) {
-            if (creep.carry.energy) {
-                creep.transfer(room.storage, RESOURCE_ENERGY);
-            } else {
-                let link = Game.getObjectById(creep.memory.energyID);
-                if (!link) {
-                    console.log(creep.name + ": can't load link " + creep.memory.energyID);
-                    return;
+            let link = Game.getObjectById(creep.memory.energyID);
+            if (!link) {
+                console.log(creep.name + ": can't load link " + creep.memory.energyID);
+                return;
+            }
+            let contlinkNeed = 0;
+            if (creep.memory.contlinkID) {
+                let contlink = Game.getObjectById(creep.memory.contlinkID);
+                if (contlink && contlink.energy <= contlink.energyCapacity / 3) {
+                    contlinkNeed = contlink.energyCapacity - contlink.energy - link.energy;
                 }
-                if (link.energy)
+            }
+            if (contlinkNeed > 0) {
+                if (creep.carry.energy >= contlinkNeed || _.sum(creep.carry) == creep.carryCapacity) {
+                    creep.transfer(link, RESOURCE_ENERGY, _.min([creep.carry.energy, contlinkNeed]));
+                } else {
+                    creep.withdraw(room.storage, RESOURCE_ENERGY);
+                }
+            } else {
+                if (creep.carry.energy) {
+                    creep.transfer(room.storage, RESOURCE_ENERGY);
+                } else if (link.energy) {
                     creep.withdraw(link, RESOURCE_ENERGY);
+                }
             }
         } else {
             creep.moveTo(betweenPos);
