@@ -13,7 +13,7 @@ var role = {
         
         let target = getTarget(creep, creep.carry.energy);
 	    if(!creep.memory.transfering) {
-            creep.findSourceAndGo(target && target.structureType == STRUCTURE_STORAGE);
+            creep.findSourceAndGo({exceptStorage: target && target.structureType == STRUCTURE_STORAGE});
             creep.memory.targetID = null;
         } else {
             if(!target)

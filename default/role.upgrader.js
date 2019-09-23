@@ -11,8 +11,23 @@ var role = {
 		if (creep.boost(WORK, "upgradeController") == OK)
 			return;
 
-		if (creep.carry.energy < creep.getActiveBodyparts(WORK)) {
-			let container = room.getControlleredContainer();
+		if (!creep.memory.startcheck) {
+			creep.memory.contlinkID = room.getControlleredLink(1);
+			creep.memory.contcontID = room.getControlleredContainer(1);
+			creep.memory.startcheck = 1;
+		}
+
+		if ((creep.memory.contlinkID || creep.memory.contcontID) && creep.carry.energy < creep.getActiveBodyparts(WORK)) {
+			let contlink = Game.getObjectById(creep.memory.contlinkID);
+			if (contlink && contlink.energy > 0 && creep.pos.isNearTo(contlink)) {
+				if (creep.withdraw(contlink, "energy") == OK) {
+					if(creep.upgradeController(room.controller) == ERR_NOT_IN_RANGE)
+						creep.moveTo(room.controller, {range: 2});
+					return;
+				}
+			}
+
+			let container = Game.getObjectById(creep.memory.contcontID);
 			if (container && container.store.energy >= 0 && creep.pos.isNearTo(container)) {
 				if (creep.withdraw(container, "energy") == OK) {
 					if(creep.upgradeController(room.controller) == ERR_NOT_IN_RANGE)
@@ -31,11 +46,11 @@ var role = {
 	    }
 	    
 	    if(!creep.memory.upgrading) {
+
 	        creep.findSourceAndGo();
         } else {
             if(creep.upgradeController(room.controller) == ERR_NOT_IN_RANGE) {
                 var res = creep.moveTo(room.controller, {range: 2});
-                //console.log(creep.name + " go res=" + res);
                 if(res == ERR_NO_PATH) {
                     creep.memory.errors++;
                 } else if (res == OK) {

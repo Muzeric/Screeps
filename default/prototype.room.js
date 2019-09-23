@@ -403,10 +403,10 @@ Room.prototype.getStoragedLink = function(ret) {
     return null;
 }
 
-Room.prototype.getControlleredLink = function() {
+Room.prototype.getControlleredLink = function(isid) {
     let link = _.filter(this.memory.structures[STRUCTURE_LINK], l => l.controllered)[0];
     if (link)
-        return Game.getObjectById(link.id);
+        return isid ? link.id : Game.getObjectById(link.id);
     
     return null;
 }
@@ -423,8 +423,8 @@ Room.prototype.getNuker = function() {
     return _.map( this.memory.structures[STRUCTURE_NUKER], t => Game.getObjectById(t.id) )[0];
 }
 
-Room.prototype.getControlleredContainer = function() {
-    return _.map( _.filter(this.memory.structures[STRUCTURE_CONTAINER], c => c.controllered), c => Game.getObjectById(c.id) )[0];
+Room.prototype.getControlleredContainer = function(isid) {
+    return _.map( _.filter(this.memory.structures[STRUCTURE_CONTAINER], c => c.controllered), c => isid ? c.id : Game.getObjectById(c.id) )[0];
 }
 
 Room.prototype.checkControlleredContainer = function() {

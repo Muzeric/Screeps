@@ -345,7 +345,7 @@ Creep.prototype.attackNearHostile = function(range, mark) {
     return OK;
 }
 
-Creep.prototype.findSourceAndGo = function (exceptStorage) {
+Creep.prototype.findSourceAndGo = function (options = {}) {
     if (this.room.memory.type == 'lair' && !this.goFromKeepers())
         return;
         
@@ -358,13 +358,13 @@ Creep.prototype.findSourceAndGo = function (exceptStorage) {
         (this.room.name == this.memory.roomName && !this.memory.energyID) ||
         (this.room.name != this.memory.roomName && !this.memory.energyID && !this.memory.bookedEnergyID)
     ) {
-        this.findSource();
+        this.findSource(options);
     }
 
-    this.gotoSource(exceptStorage);
+    this.gotoSource(options);
 }
 
-Creep.prototype.findSource = function () {
+Creep.prototype.findSource = function (options = {}) {
     let memory = Memory.rooms[this.memory.roomName];
     if (!memory) {
         console.log(this.name + ": findSource have no memory of " + this.memory.roomName);
@@ -378,6 +378,7 @@ Creep.prototype.findSource = function () {
         (memory.structures[STRUCTURE_STORAGE] || []), 
         (memory.structures[STRUCTURE_SOURCE] || []),
         (memory.structures[STRUCTURE_TERMINAL] || []),
+        (options.contlink ? _.filter((memory.structures[STRUCTURE_LINK] || []), l => l.controllered) : []),
         (memory.resources || []) ),
      t => t.energy);
 
@@ -463,7 +464,7 @@ Creep.prototype.findSource = function () {
     return OK;
 }
     
-Creep.prototype.gotoSource = function(exceptStorage) {
+Creep.prototype.gotoSource = function(options = {}) {
     let source;
     if (!this.memory.energyID && !this.memory.bookedEnergyID) {
         if (this.room.name == this.memory.roomName && !this.pos.isBorder())
@@ -518,7 +519,7 @@ Creep.prototype.gotoSource = function(exceptStorage) {
         if (_.sum(this.carry) != this.carry.energy && source.structureType == STRUCTURE_STORAGE) {
             res = this.transfer(source, _.filter(_.keys(this.carry), t => t != "energy")[0]);
         } else {
-            if (exceptStorage && source.structureType == STRUCTURE_STORAGE)
+            if (options.exceptStorage && source.structureType == STRUCTURE_STORAGE)
                 res = this.pos.isNearTo(source) ? OK : ERR_NOT_IN_RANGE;
             else
                 res = this.withdraw(source, RESOURCE_ENERGY);
