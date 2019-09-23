@@ -13,7 +13,7 @@ var role = {
 
 		if (creep.carry.energy < creep.getActiveBodyparts(WORK)) {
 			let container = room.getControlleredContainer();
-			if (container && container.store.energy >= creep.carryCapacity - _.sum(creep.carry) && creep.pos.isNearTo(container)) {
+			if (container && container.store.energy >= 0 && creep.pos.isNearTo(container)) {
 				if (creep.withdraw(container, "energy") == OK) {
 					if(creep.upgradeController(room.controller) == ERR_NOT_IN_RANGE)
 						creep.moveTo(room.controller, {range: 2});
