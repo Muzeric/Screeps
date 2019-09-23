@@ -385,7 +385,7 @@ Room.prototype.linkAction = function () {
     }
 
     let contlink = this.getControlleredLink();
-    if (contlink && !link_to.cooldown && link_to.energyCapacity - space >= contlink.energyCapacity / 3 && contlink.energy <= contlink.energyCapacity / 3) {
+    if (contlink && !link_to.cooldown && link_to.energyCapacity - space >= contlink.energyCapacity * 2 / 3 && contlink.energy <= contlink.energyCapacity / 3) {
         link_to.transferEnergy(contlink);
     }
 
