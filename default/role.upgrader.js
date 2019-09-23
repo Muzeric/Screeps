@@ -46,7 +46,7 @@ var role = {
 	    }
 	    
 	    if(!creep.memory.upgrading) {
-	        creep.findSourceAndGo();
+	        creep.findSourceAndGo({contlink: 1});
         } else {
             if(creep.upgradeController(room.controller) == ERR_NOT_IN_RANGE) {
                 var res = creep.moveTo(room.controller, {range: 2});
