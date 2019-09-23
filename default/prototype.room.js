@@ -431,6 +431,10 @@ Room.prototype.checkControlleredContainer = function() {
     return _.some(this.memory.structures[STRUCTURE_CONTAINER], c => c.controllered);
 }
 
+Room.prototype.checkControlleredLink = function() {
+    return _.some(this.memory.structures[STRUCTURE_LINK], l => l.controllered);
+}
+
 Room.prototype.getPairedContainer = function(pos) {
     let containers = _.filter( [].concat(
         (this.memory.structures[STRUCTURE_CONTAINER] || []),
