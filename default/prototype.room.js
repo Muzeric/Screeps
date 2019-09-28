@@ -376,18 +376,27 @@ Room.prototype.linkAction = function () {
     if (!link_to)
         return ERR_NOT_FOUND;
 
+    let contlink = this.getControlleredLink();
+    let clspace = 0;
+    if (contlink && contlink.energy <= contlink.energyCapacity / 3)
+        clspace = contlink.energyCapacity - contlink.energy;
+
     let space = link_to.energyCapacity - link_to.energy;
     for (let link_from of this.getUnStoragedLinks()) {
-        if (link_from && !link_from.cooldown && link_from.energy && link_from.energy <= space) {
-            space -= link_from.energy;
-            link_from.transferEnergy(link_to);
+        if (link_from && !link_from.cooldown && link_from.energy) {
+            if (link_from.energy <= clspace) { 
+                clspace -= link_from.energy;
+                link_from.transferEnergy(contlink);
+            } else if (link_from.energy <= space) {
+                space -= link_from.energy;
+                link_from.transferEnergy(link_to);
+            }
         }
     }
 
-    let contlink = this.getControlleredLink();
-    if (contlink && !link_to.cooldown && link_to.energyCapacity - space >= contlink.energyCapacity * 2 / 3 && contlink.energy <= contlink.energyCapacity / 3) {
+    
+    if (contlink && !link_to.cooldown && link_to.energyCapacity - space >= contlink.energyCapacity * 2 / 3 && clspace > contlink.energyCapacity / 3)
         link_to.transferEnergy(contlink);
-    }
 
     return OK;
 }

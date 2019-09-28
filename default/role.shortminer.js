@@ -38,7 +38,7 @@ var role = {
             let contlinkNeed = 0;
             if (creep.memory.contlinkID) {
                 let contlink = Game.getObjectById(creep.memory.contlinkID);
-                if (contlink && contlink.energy <= contlink.energyCapacity / 3) {
+                if (contlink && contlink.energy < contlink.energyCapacity / 3) {
                     contlinkNeed = contlink.energyCapacity - contlink.energy - link.energy;
                 }
             }
