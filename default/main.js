@@ -634,6 +634,7 @@ function getRoomLimits (room, creepsCount, fcount) {
                 "work" : 3*freeEnergyCount,
                 "carry" : 3*freeEnergyCount,
             },
+            "countName" : "upgrader-1",
     },{
             "role" : "builder",
             "count" : builderWorkCount ? (creepsCount["builder"] || 0) + 1 : 0,
@@ -653,6 +654,7 @@ function getRoomLimits (room, creepsCount, fcount) {
                 "work" : 3*freeEnergyCount,
                 "carry" : 3*freeEnergyCount,
             },
+            "countName" : "upgrader-2",
     },{
             "role" : "shortminer",
             "count" : storagedLink && unStoragedLinks ? 1 : 0,
