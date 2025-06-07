@@ -86,6 +86,20 @@ function getBuilderTargets (creep, room) {
         return null;
     let minCost;
     let targetID;
+    
+    // Сначала фильтруем цели, которые уже начаты (progress > 0)
+    let startedTargets = _.filter(targets, t => t.progress > 0);
+    if (startedTargets.length > 0) {
+        // Выбираем цель с наименьшим прогрессом среди начатых
+        let unfinishedTarget = _.min(startedTargets, t => t.progress);
+        if (unfinishedTarget) {
+            targetID = unfinishedTarget.id;
+            global.cache.targets[targetID] = (global.cache.targets[targetID] || 0) + 1;
+            return targetID;
+        }
+    }
+    
+    // Если нет начатых целей, используем стандартную логику выбора
     for (let target of targets) {
         let pos = new RoomPosition(target.pos.x, target.pos.y, target.pos.roomName);
         let creeps = global.cache.targets[target.id] || 0;
