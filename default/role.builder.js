@@ -90,8 +90,8 @@ function getBuilderTargets (creep, room) {
     // Сначала фильтруем цели, которые уже начаты (progress > 0)
     let startedTargets = _.filter(targets, t => t.progress > 0);
     if (startedTargets.length > 0) {
-        // Выбираем цель с наименьшим прогрессом среди начатых
-        let unfinishedTarget = _.min(startedTargets, t => t.progress);
+        // Выбираем цель с наибольшим прогрессом среди начатых
+        let unfinishedTarget = _.max(startedTargets, t => t.progress);
         if (unfinishedTarget) {
             targetID = unfinishedTarget.id;
             global.cache.targets[targetID] = (global.cache.targets[targetID] || 0) + 1;
