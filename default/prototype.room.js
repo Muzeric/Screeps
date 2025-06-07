@@ -912,21 +912,28 @@ Room.prototype.updateStructures = function() {
                     global.cache.queueTransport.addRequest(contcont, this.storage, rt, amount);
             }
         } else if (!contlink) {
-            let places = global.cache.utils.getRangedPlaces(null, room.controller.pos, 2);
-            if (places.length) {
-                let cache = {};
-                let place = places.sort(function(a,b) {
-                    if (!(a in cache))
-                        cache[a.getKey()] = -1 * global.cache.utils.getRangedPlaces(null, a, 1).length;
-                    if (!(b in cache))
-                        cache[b.getKey()] = -1 * global.cache.utils.getRangedPlaces(null, b, 1).length;
-                    return cache[a.getKey()] - cache[b.getKey()] || !room.storage || a.getRangeTo(room.storage) - b.getRangeTo(room.storage);
-                })[0];
-                if (!(place.getKey() in constructionsContainers) && this.canBuildContainers()) {
-                    let res = this.createConstructionSite(place.x, place.y, STRUCTURE_CONTAINER);
-                    console.log(this.name + ": BUILT (" + res + ") controlled container at " + place.x + "x" + place.y);
-                    if (res == OK)
-                        memory.constructions++;
+            // Проверяем, нет ли уже строящегося контейнера около контроллера
+            let hasContainerConstruction = _.some(memory.structures[FIND_MY_CONSTRUCTION_SITES] || [], 
+                s => s.constructionStructureType == STRUCTURE_CONTAINER && 
+                     room.controller.pos.inRangeTo(s.pos, 3));
+            
+            if (!hasContainerConstruction) {
+                let places = global.cache.utils.getRangedPlaces(null, room.controller.pos, 2);
+                if (places.length) {
+                    let cache = {};
+                    let place = places.sort(function(a,b) {
+                        if (!(a in cache))
+                            cache[a.getKey()] = -1 * global.cache.utils.getRangedPlaces(null, a, 1).length;
+                        if (!(b in cache))
+                            cache[b.getKey()] = -1 * global.cache.utils.getRangedPlaces(null, b, 1).length;
+                        return cache[a.getKey()] - cache[b.getKey()] || !room.storage || a.getRangeTo(room.storage) - b.getRangeTo(room.storage);
+                    })[0];
+                    if (!(place.getKey() in constructionsContainers) && this.canBuildContainers()) {
+                        let res = this.createConstructionSite(place.x, place.y, STRUCTURE_CONTAINER);
+                        console.log(this.name + ": BUILT (" + res + ") controlled container at " + place.x + "x" + place.y);
+                        if (res == OK)
+                            memory.constructions++;
+                    }
                 }
             }
         }
