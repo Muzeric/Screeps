@@ -500,10 +500,19 @@ Creep.prototype.gotoSource = function(options = {}) {
 
     if (this.memory.energyObj.buildContainerID && this.room.canBuildContainers()) {
         let container = Game.getObjectById(this.memory.energyObj.buildContainerID);
-        if (container && container.pos.roomName == this.room.name && this.pos.getRangeTo(container.pos) <= 3 && this.carry.energy >= this.getActiveBodyparts(WORK) * BUILD_POWER) {
-            let res = this.build(container);
-            //console.log(this.name + ": built container, energy=" + this.carry.energy + ", res=" + res);
-            return res;
+        if (container && container.pos.roomName == this.room.name && this.pos.getRangeTo(container.pos) <= 3) {
+            // Для харвестеров проверяем, что они уже пополнили все необходимые структуры
+            if (this.memory.role == 'harvester') {
+                // Если крип все еще в режиме переноса энергии, значит есть куда еще нести
+                if (this.memory.transfering) {
+                    return OK;
+                }
+            }
+            // Для всех остальных крипов и харвестеров после пополнения всех структур
+            if (this.carry.energy >= this.getActiveBodyparts(WORK) * BUILD_POWER) {
+                let res = this.build(container);
+                return res;
+            }
         }
     }
     
