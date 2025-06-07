@@ -107,10 +107,10 @@ function setTarget (creep, estEnergy) {
     creep.memory.targetID = null;
     let targets = _.filter(
         (memory.structures[STRUCTURE_EXTENSION] || []).concat( 
+        (memory.structures[STRUCTURE_SPAWN] || []),
         (memory.structures[STRUCTURE_LAB] || []), 
         (memory.structures[STRUCTURE_CONTAINER] || []), 
         (memory.structures[STRUCTURE_TOWER] || []),
-        (memory.structures[STRUCTURE_SPAWN] || []),
         (memory.structures[STRUCTURE_TERMINAL] || []),
         (memory.structures[STRUCTURE_STORAGE] || []),
         (memory.structures[STRUCTURE_NUKER] || []),
@@ -119,7 +119,6 @@ function setTarget (creep, estEnergy) {
     t => t.energy < t.energyCapacity && (!("my" in t) || t.my));
 
     if (!targets.length) {
-        //console.log(creep.name + ": no any container for energy");
         return ERR_NOT_FOUND;
     }
 
@@ -140,8 +139,10 @@ function setTarget (creep, estEnergy) {
             continue;
         else if (target.structureType == STRUCTURE_STORAGE)
             cpriority = -100;
-        else if (target.structureType == STRUCTURE_TOWER && target.energy < target.energyCapacity * 0.9)
+        else if (target.structureType == STRUCTURE_EXTENSION || target.structureType == STRUCTURE_SPAWN)
             cpriority = 100;
+        else if (target.structureType == STRUCTURE_TOWER && target.energy < target.energyCapacity * 0.9)
+            cpriority = 50;
         else if (target.structureType == STRUCTURE_TOWER && target.energy > target.energyCapacity * 0.9)
             cpriority = -30;
         else if (target.structureType == STRUCTURE_NUKER)
@@ -152,8 +153,6 @@ function setTarget (creep, estEnergy) {
             minTarget = target;
             minCost = cost;
         }
-        //if (creep.name == "harvester.0.999")
-        //   console.log(creep.name + " [" + creep.room.name + "] has target " + target.id + " in " + cpath + " with " + wantCarry + " wantCarry and " + wantEnergy + " wanted and cpriotiy=" + cpriority + " cost=" + cost + ", targetID=" + minTarget.id);
     }
     if (minTarget === undefined)
         return ERR_NOT_FOUND;
