@@ -16,8 +16,14 @@ var role = {
             creep.findSourceAndGo({exceptStorage: target && target.structureType == STRUCTURE_STORAGE});
             creep.memory.targetID = null;
         } else {
-            if(!target)
+            if(!target) {
+                // Если нет цели для сброса энергии, идем к спавну
+                let spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+                if(spawn) {
+                    creep.moveTo(spawn);
+                }
                 return;
+            }
             
             let tres = creep.transfer(target, RESOURCE_ENERGY);
             if (tres == ERR_NOT_IN_RANGE) {
