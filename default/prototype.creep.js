@@ -49,6 +49,9 @@ Creep.prototype.build = function () {
 
         global.cache.stat.updateRoom(this.room.name, 'build', -1 * _.min([can, got, was]));
         global.cache.stat.updateRole(this.memory.role, 'build', -1 * _.min([can, got, was]));
+        
+        // Добавляем визуальное сообщение при строительстве
+        this.say("bld");
     }
     return res;
 }
