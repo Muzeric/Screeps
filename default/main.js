@@ -576,7 +576,7 @@ function getRoomLimits (room, creepsCount, fcount) {
     let unminerSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => !s.minersFrom);
     let sources = (memory.structures[STRUCTURE_SOURCE] || []).length;
     let pairedSources = _.sum(memory.structures[STRUCTURE_SOURCE], s => s.pair);
-    let countHarvester = _.max([unminerSources, _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 15)]);
+    let countHarvester = _.max([unminerSources, _.ceil((memory.structures[STRUCTURE_EXTENSION] || []).length / 9)]);
     let storagedLink = _.sum(memory.structures[STRUCTURE_LINK], l => l.storaged);
     let unStoragedLinks = (room.getUnStoragedLinks() || []).length;
     let controlleredContainer = (room.checkControlleredContainer() || room.checkControlleredLink() ) && memory.freeEnergy > 2000;
