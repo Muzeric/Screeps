@@ -626,7 +626,7 @@ function getRoomLimits (room, creepsCount, fcount) {
             "wishEnergy" : 850,
     },{
             role : "upgrader",
-            "count" : room.controller.level < 8 ? 5 : 1,
+            "count" : room.controller.level < 8 ? 2 : 1,
             "priority" : 4,
             "arg": {top: room.controller.level >= 8, controllered: controlleredContainer},
             "wishEnergy" : 1500,
@@ -642,6 +642,16 @@ function getRoomLimits (room, creepsCount, fcount) {
             "maxEnergy" : builderWorkCount > 30 ? 5000 : 1500,
             "body" : {
                 "work" : builderWorkCount,
+            },
+    },{
+            role : "upgrader",
+            "count" : room.controller.level < 8 ? 5 : 1,
+            "priority" : 6,
+            "arg": {top: room.controller.level >= 8, controllered: controlleredContainer},
+            "wishEnergy" : 1500,
+            "body" : {
+                "work" : 3*freeEnergyCount,
+                "carry" : 3*freeEnergyCount,
             },
     },{
             "role" : "shortminer",
