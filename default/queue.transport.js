@@ -139,6 +139,7 @@ var queue = {
                 || "mineralType" in from && from.mineralType && from.mineralType != request.resourceType
                 || to.structureType == STRUCTURE_NUKER && request.resourceType == "G" && to.ghodium + request.amount > to.ghodiumCapacity
             ) {
+                console.log(`Request ${request.id} skipped: from=${from.id}(${from.store ? from.store[request.resourceType] : from.mineralAmount}), to=${to.id}(${to.store ? to.store[request.resourceType] : to.mineralAmount}), amount=${request.amount}`);
                 this.changeState(request.id, 1);
                 continue;
             }
