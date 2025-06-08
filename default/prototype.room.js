@@ -862,18 +862,12 @@ Room.prototype.updateStructures = function() {
     }
 
     if (memory.type == 'my') {
+        // Проверяем и создаем LINK около контроллера
         let contlink = _.find(memory.structures[STRUCTURE_LINK], l => room.controller.pos.inRangeTo(l.pos, 3));
-        if (contlink) {
-            if (room.getStoragedLink()) {
-                if (contlink.storaged) {
-                    console.log(this.name + ": controllered link is the same as storaged link!");
-                } else {
-                    contlink.controllered = 1;
-                }
-            } else {
-                console.log(this.name + ": controllered link without storaged link!");
-            }
-        } else {
+        let contlinkConstruction = _.find(memory.structures[FIND_MY_CONSTRUCTION_SITES] || [], 
+            s => s.constructionStructureType == STRUCTURE_LINK && room.controller.pos.inRangeTo(s.pos, 3));
+        
+        if (!contlink && !contlinkConstruction) {
             let maxCount = CONTROLLER_STRUCTURES["link"][room.controller.level] || 0;
             let curCount = (memory.structures[STRUCTURE_LINK] || []).length + _.keys(constructionsLinks).length;
             if (curCount < maxCount) {
@@ -887,7 +881,7 @@ Room.prototype.updateStructures = function() {
                             cache[b.getKey()] = -1 * global.cache.utils.getRangedPlaces(null, b, 1).length;
                         return cache[a.getKey()] - cache[b.getKey()];
                     })[0];
-                    if (!(place.getKey() in constructionsLinks) && room.getStoragedLink()) {
+                    if (!(place.getKey() in constructionsLinks)) {
                         let res = this.createConstructionSite(place.x, place.y, STRUCTURE_LINK);
                         console.log(this.name + ": BUILT (" + res + ") controlled link at " + place.x + "x" + place.y);
                         if (res == OK) {
@@ -899,40 +893,69 @@ Room.prototype.updateStructures = function() {
                     }
                 }
             }
+        } else if (contlink) {
+            contlink.controllered = 1;
         }
 
-        let contcont = _.find(memory.structures[STRUCTURE_CONTAINER], c => room.controller.pos.inRangeTo(c.pos, 3));
-        if (contcont) {
-            contcont.controllered = 1;
-            for (let rt in contcont.store) {
-                if (rt == "energy")
-                    continue;
-                let amount = global.cache.queueTransport.getStoreWithReserved(contcont, rt);
-                if (amount > 0 && this.storage)
-                    global.cache.queueTransport.addRequest(contcont, this.storage, rt, amount);
+        // Проверяем наличие STORAGE около контроллера
+        let storage = this.storage;
+        if (!storage && room.controller.level >= 4) {
+            let storagePlace = null;
+            if (contlink || contlinkConstruction) {
+                // Ищем место рядом с LINK для STORAGE
+                let linkPos = contlink ? contlink.pos : contlinkConstruction.pos;
+                if (linkPos) {
+                    let places = global.cache.utils.getRangedPlaces(null, linkPos, 1);
+                    if (places.length) {
+                        storagePlace = places[0];
+                    }
+                }
             }
-        } else if (!contlink) {
-            // Проверяем, нет ли уже строящегося контейнера около контроллера
-            let hasContainerConstruction = _.some(memory.structures[FIND_MY_CONSTRUCTION_SITES] || [], 
-                s => s.constructionStructureType == STRUCTURE_CONTAINER && 
-                     room.controller.pos.inRangeTo(s.pos, 3));
             
-            if (!hasContainerConstruction) {
-                let places = global.cache.utils.getRangedPlaces(null, room.controller.pos, 2);
-                if (places.length) {
-                    let cache = {};
-                    let place = places.sort(function(a,b) {
-                        if (!(a in cache))
-                            cache[a.getKey()] = -1 * global.cache.utils.getRangedPlaces(null, a, 1).length;
-                        if (!(b in cache))
-                            cache[b.getKey()] = -1 * global.cache.utils.getRangedPlaces(null, b, 1).length;
-                        return cache[a.getKey()] - cache[b.getKey()] || !room.storage || a.getRangeTo(room.storage) - b.getRangeTo(room.storage);
-                    })[0];
-                    if (!(place.getKey() in constructionsContainers) && this.canBuildContainers()) {
-                        let res = this.createConstructionSite(place.x, place.y, STRUCTURE_CONTAINER);
-                        console.log(this.name + ": BUILT (" + res + ") controlled container at " + place.x + "x" + place.y);
-                        if (res == OK)
-                            memory.constructions++;
+            if (storagePlace) {
+                let res = this.createConstructionSite(storagePlace.x, storagePlace.y, STRUCTURE_STORAGE);
+                console.log(this.name + ": BUILT (" + res + ") storage near controller at " + storagePlace.x + "x" + storagePlace.y);
+                if (res == OK) {
+                    memory.constructions++;
+                }
+            }
+        }
+
+        // Если есть STORAGE, удаляем CONTAINER около контроллера
+        if (storage) {
+            let contcont = _.find(memory.structures[STRUCTURE_CONTAINER], c => room.controller.pos.inRangeTo(c.pos, 3));
+            if (contcont) {
+                let container = Game.getObjectById(contcont.id);
+                if (container) {
+                    // Удаляем контейнер
+                    container.destroy();
+                    console.log(this.name + ": Removed container near controller as storage is built");
+                }
+            }
+        }
+
+        // Проверяем и создаем LINK'и около источников, если есть свободные слоты
+        if (contlink || contlinkConstruction) {
+            for (let source of memory.structures[STRUCTURE_SOURCE] || []) {
+                let sourceLink = _.find(memory.structures[STRUCTURE_LINK], l => source.pos.inRangeTo(l.pos, 2));
+                let sourceLinkConstruction = _.find(memory.structures[FIND_MY_CONSTRUCTION_SITES] || [], 
+                    s => s.constructionStructureType == STRUCTURE_LINK && source.pos.inRangeTo(s.pos, 2));
+                
+                if (!sourceLink && !sourceLinkConstruction) {
+                    let maxCount = CONTROLLER_STRUCTURES["link"][room.controller.level] || 0;
+                    let curCount = (memory.structures[STRUCTURE_LINK] || []).length + _.keys(constructionsLinks).length;
+                    if (curCount < maxCount) {
+                        let places = global.cache.utils.getRangedPlaces(null, source.pos, 2);
+                        if (places.length) {
+                            let place = places[0];
+                            if (!(place.getKey() in constructionsLinks)) {
+                                let res = this.createConstructionSite(place.x, place.y, STRUCTURE_LINK);
+                                console.log(this.name + ": BUILT (" + res + ") source link at " + place.x + "x" + place.y);
+                                if (res == OK) {
+                                    memory.constructions++;
+                                }
+                            }
+                        }
                     }
                 }
             }
