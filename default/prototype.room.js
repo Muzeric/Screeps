@@ -913,24 +913,65 @@ Room.prototype.updateStructures = function() {
 
         // Проверяем наличие STORAGE около контроллера
         let storage = this.storage;
-        if (!storage && room.controller.level >= 4) {
-            let storagePlace = null;
-            if (contlink || contlinkConstruction) {
-                // Ищем место рядом с LINK для STORAGE
-                let linkPos = contlink ? contlink.pos : contlinkConstruction.pos;
-                if (linkPos) {
-                    let places = global.cache.utils.getRangedPlaces(null, linkPos, 1);
-                    if (places.length) {
-                        storagePlace = places[0];
+        if (!storage) {
+            let maxCount = CONTROLLER_STRUCTURES["storage"][room.controller.level] || 0;
+            let curCount = (memory.structures[STRUCTURE_STORAGE] || []).length + _.keys(constructionsStorage).length;
+            if (curCount < maxCount) {
+                let places = global.cache.utils.getRangedPlaces(null, room.controller.pos, 2);
+                // Фильтруем занятые места, разрешая дороги
+                places = places.filter(place => {
+                    let structures = place.lookFor(LOOK_STRUCTURES);
+                    let constructionSites = place.lookFor(LOOK_CONSTRUCTION_SITES);
+                    // Проверяем, что нет структур кроме дорог
+                    let hasNonRoadStructures = structures.some(s => s.structureType !== STRUCTURE_ROAD);
+                    // Проверяем, что нет строящихся объектов кроме дорог
+                    let hasNonRoadConstruction = constructionSites.some(s => s.structureType !== STRUCTURE_ROAD);
+                    return !hasNonRoadStructures && !hasNonRoadConstruction;
+                });
+
+                if (places.length) {
+                    let cache = {};
+                    let place = places.sort(function(a,b) {
+                        if (!(a.getKey() in cache)) {
+                            // Считаем количество свободных мест для крипов в радиусе 1
+                            let freeSpaces = global.cache.utils.getRangedPlaces(null, a, 1).filter(p => {
+                                let structures = p.lookFor(LOOK_STRUCTURES);
+                                let constructionSites = p.lookFor(LOOK_CONSTRUCTION_SITES);
+                                // Проверяем, что нет структур кроме дорог
+                                let hasNonRoadStructures = structures.some(s => s.structureType !== STRUCTURE_ROAD);
+                                // Проверяем, что нет строящихся объектов кроме дорог
+                                let hasNonRoadConstruction = constructionSites.some(s => s.structureType !== STRUCTURE_ROAD);
+                                return !hasNonRoadStructures && !hasNonRoadConstruction;
+                            }).length;
+                            cache[a.getKey()] = -freeSpaces; // Минус, чтобы максимизировать количество свободных мест
+                        }
+                        if (!(b.getKey() in cache)) {
+                            let freeSpaces = global.cache.utils.getRangedPlaces(null, b, 1).filter(p => {
+                                let structures = p.lookFor(LOOK_STRUCTURES);
+                                let constructionSites = p.lookFor(LOOK_CONSTRUCTION_SITES);
+                                // Проверяем, что нет структур кроме дорог
+                                let hasNonRoadStructures = structures.some(s => s.structureType !== STRUCTURE_ROAD);
+                                // Проверяем, что нет строящихся объектов кроме дорог
+                                let hasNonRoadConstruction = constructionSites.some(s => s.structureType !== STRUCTURE_ROAD);
+                                return !hasNonRoadStructures && !hasNonRoadConstruction;
+                            }).length;
+                            cache[b.getKey()] = -freeSpaces;
+                        }
+                        return cache[a.getKey()] - cache[b.getKey()];
+                    })[0];
+
+                    if (!(place.getKey() in constructionsStorage)) {
+                        let res = this.createConstructionSite(place.x, place.y, STRUCTURE_STORAGE);
+                        console.log(this.name + ": BUILT (" + res + ") storage at " + place.x + "x" + place.y);
+                        if (res == OK) {
+                            memory.constructions++;
+                            storage = 1;
+                        }
+                    } else if (place.getKey() in constructionsStorage) {
+                        storage = 1;
                     }
-                }
-            }
-            
-            if (storagePlace) {
-                let res = this.createConstructionSite(storagePlace.x, storagePlace.y, STRUCTURE_STORAGE);
-                console.log(this.name + ": BUILT (" + res + ") storage near controller at " + storagePlace.x + "x" + storagePlace.y);
-                if (res == OK) {
-                    memory.constructions++;
+                } else {
+                    console.log(this.name + ": No free places for storage near controller");
                 }
             }
         }
