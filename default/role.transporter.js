@@ -47,7 +47,7 @@ var role = {
         }
         
         let stage = 1;
-        if (creep.carry[request.resourceType] >= 0)
+        if (creep.carry[request.resourceType] > 0)
             stage = 2;
         
         if (stage == 1) { // go to source and get res
