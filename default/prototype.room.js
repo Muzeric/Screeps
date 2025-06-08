@@ -744,6 +744,7 @@ Room.prototype.updateStructures = function() {
     let constructionsContainers = {};
     let constructionsLinks = {};
     let constructionsRoads = {};
+    let constructionsStorage = {};
     let extensionConstructionCount = 0;
     let extractorConstructionCount = 0;
     this.find(FIND_MY_CONSTRUCTION_SITES).forEach( function(s) {
@@ -769,6 +770,8 @@ Room.prototype.updateStructures = function() {
                 extractorConstructionCount++;
             else if (s.structureType == STRUCTURE_LINK)
                 constructionsLinks[s.pos.getKey()] = s.id;
+            else if (s.structureType == STRUCTURE_STORAGE)
+                constructionsStorage[s.pos.getKey()] = s.id;
         } else if (s.structureType == STRUCTURE_CONTAINER) {
             constructionsContainers[s.pos.getKey()] = s.id;
         }
