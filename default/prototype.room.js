@@ -872,6 +872,17 @@ Room.prototype.updateStructures = function() {
             let curCount = (memory.structures[STRUCTURE_LINK] || []).length + _.keys(constructionsLinks).length;
             if (curCount < maxCount) {
                 let places = global.cache.utils.getRangedPlaces(null, room.controller.pos, 2);
+                // Фильтруем занятые места, разрешая дороги
+                places = places.filter(place => {
+                    let structures = place.lookFor(LOOK_STRUCTURES);
+                    let constructionSites = place.lookFor(LOOK_CONSTRUCTION_SITES);
+                    // Проверяем, что нет структур кроме дорог
+                    let hasNonRoadStructures = structures.some(s => s.structureType !== STRUCTURE_ROAD);
+                    // Проверяем, что нет строящихся объектов кроме дорог
+                    let hasNonRoadConstruction = constructionSites.some(s => s.structureType !== STRUCTURE_ROAD);
+                    return !hasNonRoadStructures && !hasNonRoadConstruction;
+                });
+
                 if (places.length) {
                     let cache = {};
                     let place = places.sort(function(a,b) {
@@ -881,6 +892,7 @@ Room.prototype.updateStructures = function() {
                             cache[b.getKey()] = -1 * global.cache.utils.getRangedPlaces(null, b, 1).length;
                         return cache[a.getKey()] - cache[b.getKey()];
                     })[0];
+
                     if (!(place.getKey() in constructionsLinks)) {
                         let res = this.createConstructionSite(place.x, place.y, STRUCTURE_LINK);
                         console.log(this.name + ": BUILT (" + res + ") controlled link at " + place.x + "x" + place.y);
@@ -891,6 +903,8 @@ Room.prototype.updateStructures = function() {
                     } else if (place.getKey() in constructionsLinks) {
                         contlink = 1;
                     }
+                } else {
+                    console.log(this.name + ": No free places for link near controller");
                 }
             }
         } else if (contlink) {
